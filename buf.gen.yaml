@@ -1,0 +1,12 @@
+version: v1
+plugins:
+  - name: es
+    opt:
+      - target=ts
+      - import_extension=none
+    out: packages/cel-es-proto/src/gen
+  - name: connect-es
+    opt:
+      - target=ts
+      - import_extension=none
+    out: packages/cel-es-proto/src/gen
