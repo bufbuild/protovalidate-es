@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Any } from "@bufbuild/protobuf";
 
-import * as type from "./type";
-import { type CelVal } from "./value";
+import { CelType, NumType, type CelVal } from "./value";
 
 export class CelError {
   static invalidArgument(id: number, func: string, issue: string): CelError {
@@ -38,13 +37,13 @@ export class CelError {
   static badDuration(id: number, seconds: bigint, nanos: number): CelError {
     return new CelError(Number(id), "duration out of range");
   }
-  static badIndexAccess(id: number, type: type.CelType): CelError {
+  static badIndexAccess(id: number, type: CelType): CelError {
     return new CelError(
       Number(id),
       `index access not supported for ${type.fullname()}`
     );
   }
-  static badStringAccess(id: number, typ: type.CelType): CelError {
+  static badStringAccess(id: number, typ: CelType): CelError {
     return new CelError(
       Number(id),
       `${typ.fullname()} cannot be accessed by string`
@@ -84,14 +83,14 @@ export class CelError {
   static unsupportedKeyType(id: number): CelError {
     return new CelError(id, `unsupported key type`);
   }
-  static divisionByZero(id: number, type: type.NumType): CelError {
+  static divisionByZero(id: number, type: NumType): CelError {
     return new CelError(Number(id), `${type.name} divide by zero`);
   }
-  static moduloByZero(id: number, type: type.NumType): CelError {
+  static moduloByZero(id: number, type: NumType): CelError {
     return new CelError(Number(id), `${type.name} modulus by zero`);
   }
 
-  static overflow(id: number, op: string, type: type.CelType): CelError {
+  static overflow(id: number, op: string, type: CelType): CelError {
     return new CelError(
       Number(id),
       `${type.name} return error for overflow during ${op}`
@@ -100,7 +99,7 @@ export class CelError {
   public static overloadNotFound(
     id: number,
     name: string,
-    types: type.CelType[]
+    types: CelType[]
   ): CelError {
     return new CelError(
       id,

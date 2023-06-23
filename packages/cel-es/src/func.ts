@@ -1,10 +1,10 @@
 import { type Unwrapper } from "./value/adapter";
 import { CelError, CelUnknown } from "./value/error";
-import { CelType } from "./value/type";
+import { getCelType } from "./value/type";
 import {
   type CelResult,
   type CelVal,
-  getCelType,
+  CelType,
   unwrapResults,
 } from "./value/value";
 

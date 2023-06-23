@@ -12,7 +12,8 @@ import { type Unwrapper } from "../value/adapter";
 import { CelError, CelUnknown } from "../value/error";
 import { CelList } from "../value/list";
 import { CelMap } from "../value/map";
-import { type CelResult, type CelVal, getCelType } from "../value/value";
+import { type CelResult, type CelVal } from "../value/value";
+import { getCelType } from "../value/type";
 
 const notStrictlyFalse = Func.newVarArg(
   opc.NOT_STRICTLY_FALSE,

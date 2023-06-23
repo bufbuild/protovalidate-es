@@ -5,7 +5,7 @@ import * as olc from "../gen/dev/cel/expr/overload_const";
 import { CelError, CelUnknown } from "../value/error";
 import { CelUint } from "../value/scalar";
 import * as type from "../value/type";
-import { type CelResult, coerceToValues, getCelType } from "../value/value";
+import { type CelResult, coerceToValues } from "../value/value";
 import {
   isOverflowInt,
   isOverflowIntNum,
@@ -89,7 +89,7 @@ const durationToIntFunc = Func.unary(
 );
 
 const toIntFunc = Func.unary(INT, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.INT:
       return x;
     case type.UINT:
@@ -142,7 +142,7 @@ const strToUintOp: StrictUnaryOp = (id, x) => {
 };
 const strToUintFunc = Func.unary(UINT, [olc.STRING_TO_UINT], strToUintOp);
 const toUintFunc = Func.unary(UINT, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.UINT:
       return x;
     case type.INT:
@@ -187,7 +187,7 @@ const stringToDoubleFunc = Func.unary(
   stringToDoubleOp
 );
 const toDoubleFunc = Func.unary(DOUBLE, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.DOUBLE:
       return x;
     case type.INT:
@@ -210,7 +210,7 @@ const stringToBoolOp: StrictUnaryOp = (id, x) => {
 };
 const stringToBoolFunc = Func.unary(BOOL, [olc.STRING_TO_BOOL], stringToBoolOp);
 const toBoolFunc = Func.unary(BOOL, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.BOOL:
       return x;
     case type.STRING:
@@ -233,7 +233,7 @@ const stringToBytesFunc = Func.unary(
   stringToByesOp
 );
 const toBytesFunc = Func.unary(BYTES, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.BYTES:
       return x;
     case type.STRING:
@@ -316,7 +316,7 @@ const durationToStringOp: StrictUnaryOp = (id, x) => {
   if (x instanceof Duration) {
     return x.toJson() as string;
   }
-  return CelError.overloadNotFound(id, STRING, [getCelType(x)]);
+  return CelError.overloadNotFound(id, STRING, [type.getCelType(x)]);
 };
 const durationToStringFunc = Func.unary(
   STRING,
@@ -324,7 +324,7 @@ const durationToStringFunc = Func.unary(
   durationToStringOp
 );
 const toStrFunc = Func.unary(STRING, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.STRING:
       return x;
     case type.BOOL:
@@ -378,7 +378,7 @@ const intToTimestampFunc = Func.unary(
   intToTimestampOp
 );
 const toTimestampFunc = Func.unary(TIMESTAMP, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.TIMESTAMP:
       return x;
     case type.STRING:
@@ -468,7 +468,7 @@ const intToDurationFunc = Func.unary(
   intToDurationOp
 );
 const toDurationFunc = Func.unary(DURATION, [], (id, x) => {
-  switch (getCelType(x)) {
+  switch (type.getCelType(x)) {
     case type.DURATION:
       return x;
     case type.STRING:
@@ -488,7 +488,7 @@ const typeFunc = Func.newVarArg("type", [], (id, x) => {
   if (args.length !== 1) {
     return undefined;
   }
-  return getCelType(args[0]);
+  return type.getCelType(args[0]);
 });
 
 const toDynOp: StrictUnaryOp = (id, x) => {

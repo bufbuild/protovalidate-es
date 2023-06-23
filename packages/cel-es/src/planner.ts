@@ -38,7 +38,7 @@ import {
   coerceToNumber,
   coerceToString,
   coerceToValues,
-  getCelType,
+  CelType,
 } from "./value/value";
 
 export class Planner {
@@ -358,7 +358,7 @@ export interface InterpretableCall extends Interpretable {
 }
 
 export interface InterpretableCtor extends Interpretable {
-  type(): type.CelType;
+  type(): CelType;
   args(): Interpretable[];
 }
 
@@ -470,7 +470,7 @@ export class EvalCall implements Interpretable {
     return CelError.overloadNotFound(
       this.id,
       this.name,
-      vals.map((x) => getCelType(x))
+      vals.map((x) => type.getCelType(x))
     );
   }
 }
@@ -484,8 +484,8 @@ export class EvalObj implements InterpretableCtor {
     public optionals: boolean[] | undefined,
     public provider: CelValProvider
   ) {}
-  type(): type.CelType {
-    return this.provider.findType(this.typeName) as type.CelType;
+  type(): CelType {
+    return this.provider.findType(this.typeName) as CelType;
   }
   args(): Interpretable[] {
     return this.values;
@@ -568,11 +568,7 @@ export class EvalObj implements InterpretableCtor {
       }
     }
 
-    const celObj = new CelObject(
-      obj,
-      CEL_ADAPTER,
-      new type.CelType(this.typeName)
-    );
+    const celObj = new CelObject(obj, CEL_ADAPTER, new CelType(this.typeName));
     const result = this.provider.newValue(this.id, this.typeName, celObj);
     if (result === undefined) {
       return CelError.typeNotFound(this.id, this.typeName);
@@ -598,14 +594,14 @@ export class EvalList implements InterpretableCtor {
     } else if (first instanceof CelUnknown) {
       return first;
     }
-    let elemType = getCelType(first);
+    let elemType = type.getCelType(first);
     const elemVals: CelVal[] = [first];
     for (let i = 1; i < this.elems.length; i++) {
       const elemVal = this.elems[i].eval(ctx);
       if (elemVal instanceof CelError || elemVal instanceof CelUnknown) {
         return elemVal;
       }
-      if (elemType !== type.DYN && getCelType(elemVal) !== elemType) {
+      if (elemType !== type.DYN && type.getCelType(elemVal) !== elemType) {
         elemType = type.DYN;
       }
       elemVals.push(elemVal);
@@ -613,7 +609,7 @@ export class EvalList implements InterpretableCtor {
     return new CelList(elemVals, CEL_ADAPTER, new type.ListType(elemType));
   }
 
-  type(): type.CelType {
+  type(): CelType {
     return type.LIST;
   }
   args(): Interpretable[] {
@@ -629,7 +625,7 @@ export class EvalMap implements InterpretableCtor {
     _: boolean[] | undefined
   ) {}
 
-  type(): type.CelType {
+  type(): CelType {
     return type.DYN_MAP;
   }
   args(): Interpretable[] {
@@ -649,8 +645,8 @@ export class EvalMap implements InterpretableCtor {
     if (firstVal instanceof CelError || firstVal instanceof CelUnknown) {
       return firstVal;
     }
-    let keyType = getCelType(firstKey);
-    let valType = getCelType(firstVal);
+    let keyType = type.getCelType(firstKey);
+    let valType = type.getCelType(firstVal);
     if (typeof firstKey === "number" && !Number.isInteger(firstKey)) {
       return CelError.unsupportedKeyType(this.id);
     }
@@ -660,14 +656,14 @@ export class EvalMap implements InterpretableCtor {
       if (key instanceof CelError || key instanceof CelUnknown) {
         return key;
       }
-      if (keyType !== type.DYN && getCelType(key) !== keyType) {
+      if (keyType !== type.DYN && type.getCelType(key) !== keyType) {
         keyType = type.DYN;
       }
       const val = this.values[i].eval(ctx);
       if (val instanceof CelError || val instanceof CelUnknown) {
         return val;
       }
-      if (valType !== type.DYN && getCelType(val) !== valType) {
+      if (valType !== type.DYN && type.getCelType(val) !== valType) {
         valType = type.DYN;
       }
       if (entries.has(key)) {

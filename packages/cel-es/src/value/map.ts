@@ -1,7 +1,7 @@
 import { type CelValAdapter, type StructAccess } from "./adapter";
 import { CelUint } from "./scalar";
 import * as type from "./type";
-import { type CelResult, type CelVal, isCelWrap } from "./value";
+import { type CelResult, type CelVal, isCelWrap, CelType } from "./value";
 
 export class CelMap<K = unknown, V = unknown> implements StructAccess<CelVal> {
   public nativeKeyMap: Map<unknown, V>;
@@ -9,7 +9,7 @@ export class CelMap<K = unknown, V = unknown> implements StructAccess<CelVal> {
   constructor(
     public value: Map<K, V>,
     public readonly adapter: CelValAdapter,
-    public type_: type.CelType = type.DYN_MAP
+    public type_: CelType = type.DYN_MAP
   ) {
     this.nativeKeyMap = new Map();
     for (const [key, value] of this.value) {

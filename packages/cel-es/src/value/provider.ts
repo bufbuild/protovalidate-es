@@ -2,7 +2,7 @@ import { type CelValAdapter } from "./adapter";
 import { CelMap } from "./map";
 import { CelObject } from "./struct";
 import * as type from "./type";
-import { type CelResult } from "./value";
+import { CelType, type CelResult } from "./value";
 
 export interface CelValProvider {
   /** The adapter used to produce values from this provider. */
@@ -13,11 +13,11 @@ export interface CelValProvider {
     typeName: string,
     obj: CelObject | CelMap
   ): CelResult | undefined;
-  findType(candidate: string): type.CelType | undefined;
+  findType(candidate: string): CelType | undefined;
   findIdent(id: number, ident: string): CelResult | undefined;
 }
 
-export const WK_PROTO_TYPES = new Map<string, type.CelType>();
+export const WK_PROTO_TYPES = new Map<string, CelType>();
 WK_PROTO_TYPES.set("google.protobuf.Value", type.DYN);
 WK_PROTO_TYPES.set("google.protobuf.Struct", type.JSON_OBJ);
 WK_PROTO_TYPES.set("google.protobuf.ListValue", type.LIST);

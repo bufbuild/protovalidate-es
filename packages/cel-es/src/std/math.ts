@@ -13,7 +13,7 @@ import { CelError, CelUnknown } from "../value/error";
 import { CelList } from "../value/list";
 import { CelUint } from "../value/scalar";
 import * as type from "../value/type";
-import { type CelVal, getCelType } from "../value/value";
+import { type CelVal } from "../value/value";
 
 const MAX_INT = 9223372036854775807n;
 // eslint-disable-next-line @typescript-eslint/no-loss-of-precision
@@ -142,7 +142,7 @@ const addListOp: StrictOp = (id: number, args: CelVal[]) => {
   if (!(first instanceof CelList)) {
     return undefined;
   }
-  let listType = getCelType(first) as type.ListType;
+  let listType = type.getCelType(first) as type.ListType;
   const adapter = first.adapter;
   let values = first.value.slice();
   for (let i = 1; i < args.length; i++) {
@@ -150,7 +150,7 @@ const addListOp: StrictOp = (id: number, args: CelVal[]) => {
     if (!(arg instanceof CelList)) {
       return undefined;
     }
-    const argType = getCelType(arg) as type.ListType;
+    const argType = type.getCelType(arg) as type.ListType;
     if (
       listType.elemType !== type.DYN &&
       !listType.elemType.identical(argType.elemType)
@@ -229,7 +229,7 @@ const addTimeFunc = Func.newStrict(
 );
 
 const addFunc = Func.newStrict(opc.ADD, [], (id, args) => {
-  switch (getCelType(args[0])) {
+  switch (type.getCelType(args[0])) {
     case type.INT:
       return addIntOp(id, args);
     case type.UINT:
@@ -324,7 +324,7 @@ const subTimeFunc = Func.binary(
 );
 
 const subFunc = Func.binary(opc.SUBTRACT, [], (id, lhs, rhs) => {
-  switch (getCelType(lhs)) {
+  switch (type.getCelType(lhs)) {
     case type.INT:
       return subIntOp(id, lhs, rhs);
     case type.UINT:
@@ -394,7 +394,7 @@ const mulDoubleFunc = Func.newStrict(
 );
 
 const mulFunc = Func.newStrict(opc.MULTIPLY, [], (id, args) => {
-  switch (getCelType(args[0])) {
+  switch (type.getCelType(args[0])) {
     case type.INT:
       return mulIntOp(id, args);
     case type.UINT:
@@ -436,7 +436,7 @@ const divDoubleOp: StrictBinaryOp = (id, lhs, rhs) => {
 };
 const divDoubleFunc = Func.binary(opc.DIVIDE, [olc.DIVIDE_DOUBLE], divDoubleOp);
 const divFunc = Func.binary(opc.DIVIDE, [], (id, lhs, rhs) => {
-  switch (getCelType(lhs)) {
+  switch (type.getCelType(lhs)) {
     case type.INT:
       return divIntOp(id, lhs, rhs);
     case type.UINT:
@@ -469,7 +469,7 @@ const modUintOp: StrictBinaryOp = (id, lhs, rhs) => {
 };
 const modUintFunc = Func.binary(opc.MODULO, [olc.MODULO_UINT64], modUintOp);
 const modFunc = Func.binary(opc.MODULO, [], (id, lhs, rhs) => {
-  switch (getCelType(lhs)) {
+  switch (type.getCelType(lhs)) {
     case type.INT:
       return modIntOp(id, lhs, rhs);
     case type.UINT:
@@ -498,7 +498,7 @@ const negDoubleOp: StrictUnaryOp = (id, arg) => {
 };
 const negDoubleFunc = Func.unary(opc.NEGATE, [olc.NEGATE_DOUBLE], negDoubleOp);
 const negFunc = Func.unary(opc.NEGATE, [], (id, arg) => {
-  switch (getCelType(arg)) {
+  switch (type.getCelType(arg)) {
     case type.INT:
       return negIntOp(id, arg);
     case type.DOUBLE:

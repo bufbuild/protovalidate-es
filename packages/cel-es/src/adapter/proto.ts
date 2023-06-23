@@ -41,6 +41,7 @@ import {
   coerceToString,
   isCelMsg,
   isCelWrap,
+  CelType,
 } from "../value/value";
 import { CEL_ADAPTER, equalsStruct } from "./cel";
 import { NATIVE_ADAPTER } from "./native";
@@ -295,13 +296,13 @@ export class ProtoValAdapter implements CelValAdapter {
         return new CelList(
           value ?? [],
           this,
-          new type.ListType(new type.CelType(field.T.typeName))
+          new type.ListType(new CelType(field.T.typeName))
         );
       case "enum":
         return new CelList(
           value ?? [],
           this,
-          new type.ListType(new type.CelType(field.T.typeName))
+          new type.ListType(new CelType(field.T.typeName))
         );
       default:
         throw new Error("Method not implemented.");
@@ -514,7 +515,7 @@ export class ProtoValAdapter implements CelValAdapter {
 class ProtoMetadata {
   public readonly DEFAULT_PROTO: AnyMessage;
   public readonly DEFAULT_CEL: CelVal;
-  public readonly TYPE: type.CelType;
+  public readonly TYPE: CelType;
   NULL: ProtoNull;
 
   public readonly FIELDS: Map<string, FieldInfo>;
@@ -543,7 +544,7 @@ class ProtoMetadata {
           break;
       }
     } else {
-      this.TYPE = new type.CelType(messageType.typeName);
+      this.TYPE = new CelType(messageType.typeName);
       this.DEFAULT_CEL = new CelObject(this.DEFAULT_PROTO, adapter, this.TYPE);
     }
 
@@ -575,13 +576,13 @@ export class ProtoValProvider implements CelValProvider {
     return this.adapter.messageFromCel(id, messageType, obj);
   }
 
-  findType(candidate: string): type.CelType | undefined {
+  findType(candidate: string): CelType | undefined {
     const result = EMPTY_PROVIDER.findType(candidate);
     if (result !== undefined) {
       return result;
     }
     if (this.adapter.registry.findMessage(candidate) !== undefined) {
-      return new type.CelType(candidate);
+      return new CelType(candidate);
     }
     return undefined;
   }
@@ -603,7 +604,7 @@ export class ProtoValProvider implements CelValProvider {
   }
 }
 
-function getScalarType(K: ScalarType): type.CelType {
+function getScalarType(K: ScalarType): CelType {
   switch (K) {
     case ScalarType.BOOL:
       return type.BOOL;
@@ -636,14 +637,14 @@ function getType(
     | { readonly kind: "scalar"; readonly T: ScalarType }
     | { readonly kind: "enum"; readonly T: EnumType }
     | { readonly kind: "message"; readonly T: MessageType<AnyMessage> }
-): type.CelType {
+): CelType {
   switch (V.kind) {
     case "scalar":
       return getScalarType(V.T);
     case "enum":
-      return new type.CelType(V.T.typeName);
+      return new CelType(V.T.typeName);
     case "message":
-      return new type.CelType(V.T.typeName);
+      return new CelType(V.T.typeName);
     default:
       throw new Error("not implemented.");
   }

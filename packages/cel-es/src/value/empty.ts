@@ -23,6 +23,7 @@ import {
   coerceToBytes,
   coerceToNumber,
   coerceToString,
+  CelType,
 } from "./value";
 
 export const EMPTY_LIST = new CelList([], CEL_ADAPTER);
@@ -126,7 +127,7 @@ export class EmptyProvider implements CelValProvider {
     }
   }
 
-  findType(candidate: string): type.CelType | undefined {
+  findType(candidate: string): CelType | undefined {
     const jsonType = WK_PROTO_TYPES.get(candidate);
     if (jsonType !== undefined) {
       return jsonType;

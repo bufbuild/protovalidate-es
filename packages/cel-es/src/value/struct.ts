@@ -1,13 +1,12 @@
 import { type CelValAdapter, type StructAccess } from "./adapter";
 import { WK_PROTO_TYPES } from "./provider";
-import * as type from "./type";
-import { type CelResult, isCelVal } from "./value";
+import { type CelResult, isCelVal, CelType } from "./value";
 
 export class CelObject implements StructAccess<unknown> {
   constructor(
     public value: object,
     public readonly adapter: CelValAdapter,
-    public type_: type.CelType
+    public type_: CelType
   ) {
     if (WK_PROTO_TYPES.has(type_.name)) {
       throw new Error("Cannot wrap well known proto in CelObject");

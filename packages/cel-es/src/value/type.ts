@@ -1,79 +1,25 @@
 /* eslint-disable no-param-reassign */
-import { Duration, Message, Timestamp } from "@bufbuild/protobuf";
+import {
+  Any,
+  BoolValue,
+  BytesValue,
+  DoubleValue,
+  Duration,
+  Int64Value,
+  Message,
+  StringValue,
+  Timestamp,
+  UInt64Value,
+} from "@bufbuild/protobuf";
 
 import { CelError } from "./error";
-import { CelUint } from "./scalar";
-import { type CelVal } from "./value";
-
-/**
- * The base class for all Cel types.
- *
- * A type is also a value, and can be used as a value in expressions.
- *
- * Two types are equal if they have the same name, and identical if they have
- * the same fullname. For example, the type 'list(int)' is equal, but not
- * identical, to the type 'list(string)', as they both have the same name, 'list'.
- *
- * @abstract
- */
-export class CelType {
-  readonly fullname_: string | undefined;
-  constructor(readonly name: string, fullname?: string) {
-    if (fullname !== undefined) {
-      this.fullname_ = fullname;
-    }
-  }
-
-  fullname(): string {
-    return this.fullname_ === undefined ? this.name : this.fullname_;
-  }
-
-  identical(other: CelVal): boolean {
-    if (other instanceof CelType) {
-      return this.name === other.name && this.fullname_ === other.fullname_;
-    }
-    return false;
-  }
-
-  equals(other: CelVal): boolean {
-    if (other instanceof CelType) {
-      return this.name === other.name;
-    }
-    return false;
-  }
-
-  compare(other: CelVal): number | undefined {
-    if (!(other instanceof CelType)) {
-      return undefined;
-    }
-    if (this.name === other.name) {
-      return 0;
-    }
-    return this.name < other.name ? -1 : 1;
-  }
-}
-
-export class NumType extends CelType {}
+import { CelUint, ProtoNull } from "./scalar";
+import { type CelVal, CelType, ConcreteType, WrapperType } from "./value";
+import { CelList } from "./list";
+import { CelMap } from "./map";
+import { CelObject } from "./struct";
 
 export const DYN = new CelType("dyn");
-
-export class ConcreteType extends CelType {
-  constructor(name: string, public readonly EMPTY: CelVal) {
-    super(name);
-  }
-}
-
-export class WrapperType<T extends Message> extends CelType {
-  constructor(public wrapped: CelType) {
-    super(
-      "wrapper(" + wrapped.name + ")",
-      wrapped.fullname_ === undefined
-        ? undefined
-        : "wrapper(" + wrapped.fullname_ + ")"
-    );
-  }
-}
-
 export const NULL = new ConcreteType("null_type", null);
 export const BOOL = new ConcreteType("bool", false);
 export const WRAP_BOOL = new WrapperType(BOOL);
@@ -181,3 +127,58 @@ export class MapType extends CelType {
 
 export const DYN_MAP = new MapType(DYN, DYN);
 export const JSON_OBJ = new MapType(STRING, DYN);
+
+export function getCelType(val: CelVal): CelType {
+  switch (typeof val) {
+    case "boolean":
+      return BOOL;
+    case "bigint":
+      return INT;
+    case "number":
+      return DOUBLE;
+    case "string":
+      return STRING;
+    case "object":
+      if (val === null) {
+        return NULL;
+      } else if (val instanceof ProtoNull) {
+        return getCelType(val.defaultValue);
+      } else if (val instanceof Uint8Array) {
+        return BYTES;
+      } else if (val instanceof Message) {
+        if (val instanceof Duration) {
+          return DURATION;
+        } else if (val instanceof Timestamp) {
+          return TIMESTAMP;
+        } else if (val instanceof Any) {
+          return DYN;
+        } else if (val instanceof BoolValue) {
+          return WRAP_BOOL;
+        } else if (val instanceof UInt64Value) {
+          return WRAP_UINT;
+        } else if (val instanceof Int64Value) {
+          return WRAP_INT;
+        } else if (val instanceof DoubleValue) {
+          return WRAP_DOUBLE;
+        } else if (val instanceof StringValue) {
+          return WRAP_STRING;
+        } else if (val instanceof BytesValue) {
+          return WRAP_BYTES;
+        }
+      } else if (val instanceof CelList) {
+        return val.type_;
+      } else if (val instanceof CelUint) {
+        return UINT;
+      } else if (val instanceof CelMap) {
+        return val.type_;
+      } else if (val instanceof CelObject) {
+        return val.type_;
+      } else if (val instanceof CelType) {
+        return new TypeType(val);
+      }
+      break;
+    default:
+      break;
+  }
+  throw new Error("Unknown CelVal type");
+}

@@ -6,7 +6,8 @@ import { CelError, CelUnknown } from "./value/error";
 import { Namespace } from "./value/namespace";
 import { type CelValProvider } from "./value/provider";
 import { CelUint } from "./value/scalar";
-import { type CelResult, type CelVal, getCelType } from "./value/value";
+import { type CelResult, type CelVal } from "./value/value";
+import { getCelType } from "./value/type";
 
 export interface AttributeFactory {
   createAbsolute(id: number, names: string[]): NamespacedAttribute;

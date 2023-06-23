@@ -18,7 +18,73 @@ import { CelList } from "./list";
 import { CelMap } from "./map";
 import { CelUint, ProtoNull } from "./scalar";
 import { CelObject } from "./struct";
-import * as type from "./type";
+
+/**
+ * The base class for all Cel types.
+ *
+ * A type is also a value, and can be used as a value in expressions.
+ *
+ * Two types are equal if they have the same name, and identical if they have
+ * the same fullname. For example, the type 'list(int)' is equal, but not
+ * identical, to the type 'list(string)', as they both have the same name, 'list'.
+ *
+ * @abstract
+ */
+export class CelType {
+  readonly fullname_: string | undefined;
+  constructor(readonly name: string, fullname?: string) {
+    if (fullname !== undefined) {
+      this.fullname_ = fullname;
+    }
+  }
+
+  fullname(): string {
+    return this.fullname_ === undefined ? this.name : this.fullname_;
+  }
+
+  identical(other: CelVal): boolean {
+    if (other instanceof CelType) {
+      return this.name === other.name && this.fullname_ === other.fullname_;
+    }
+    return false;
+  }
+
+  equals(other: CelVal): boolean {
+    if (other instanceof CelType) {
+      return this.name === other.name;
+    }
+    return false;
+  }
+
+  compare(other: CelVal): number | undefined {
+    if (!(other instanceof CelType)) {
+      return undefined;
+    }
+    if (this.name === other.name) {
+      return 0;
+    }
+    return this.name < other.name ? -1 : 1;
+  }
+}
+
+export class NumType extends CelType {}
+
+export class ConcreteType extends CelType {
+  constructor(name: string, public readonly EMPTY: CelVal) {
+    super(name);
+  }
+}
+
+export class WrapperType<T extends Message> extends CelType {
+  constructor(public wrapped: CelType) {
+    super(
+      "wrapper(" + wrapped.name + ")",
+      wrapped.fullname_ === undefined
+        ? undefined
+        : "wrapper(" + wrapped.fullname_ + ")"
+    );
+  }
+}
 
 /** Cel Number types, which all existing on the same logical number line. */
 export type CelNum = bigint | CelUint | number;
@@ -80,7 +146,7 @@ export type CelVal =
   | CelList
   | CelMap
   | CelObject
-  | type.CelType;
+  | CelType;
 
 export function isCelVal(val: unknown): val is CelVal {
   return (
@@ -91,63 +157,8 @@ export function isCelVal(val: unknown): val is CelVal {
     val instanceof CelList ||
     val instanceof CelMap ||
     val instanceof CelObject ||
-    val instanceof type.CelType
+    val instanceof CelType
   );
-}
-
-export function getCelType(val: CelVal): type.CelType {
-  switch (typeof val) {
-    case "boolean":
-      return type.BOOL;
-    case "bigint":
-      return type.INT;
-    case "number":
-      return type.DOUBLE;
-    case "string":
-      return type.STRING;
-    case "object":
-      if (val === null) {
-        return type.NULL;
-      } else if (val instanceof ProtoNull) {
-        return getCelType(val.defaultValue);
-      } else if (val instanceof Uint8Array) {
-        return type.BYTES;
-      } else if (val instanceof Message) {
-        if (val instanceof Duration) {
-          return type.DURATION;
-        } else if (val instanceof Timestamp) {
-          return type.TIMESTAMP;
-        } else if (val instanceof Any) {
-          return type.DYN;
-        } else if (val instanceof BoolValue) {
-          return type.WRAP_BOOL;
-        } else if (val instanceof UInt64Value) {
-          return type.WRAP_UINT;
-        } else if (val instanceof Int64Value) {
-          return type.WRAP_INT;
-        } else if (val instanceof DoubleValue) {
-          return type.WRAP_DOUBLE;
-        } else if (val instanceof StringValue) {
-          return type.WRAP_STRING;
-        } else if (val instanceof BytesValue) {
-          return type.WRAP_BYTES;
-        }
-      } else if (val instanceof CelList) {
-        return val.type_;
-      } else if (val instanceof CelUint) {
-        return type.UINT;
-      } else if (val instanceof CelMap) {
-        return val.type_;
-      } else if (val instanceof CelObject) {
-        return val.type_;
-      } else if (val instanceof type.CelType) {
-        return new type.TypeType(val);
-      }
-      break;
-    default:
-      break;
-  }
-  throw new Error("Unknown CelVal type");
 }
 
 export type CelResult<T = CelVal> = T | CelError | CelUnknown;

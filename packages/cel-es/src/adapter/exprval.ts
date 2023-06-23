@@ -10,6 +10,7 @@ import * as type from "../value/type";
 import {
   CelResult,
   CelVal,
+  CelType,
   isCelResult,
   isCelVal,
   isCelWrap,
@@ -129,7 +130,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     return CelError.badStringAccess(id, this.valueToType(value));
   }
 
-  valueToType(value: value_pb.Value): type.CelType {
+  valueToType(value: value_pb.Value): CelType {
     switch (value.kind.case) {
       case "boolValue":
         return type.BOOL;
@@ -229,7 +230,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
       return new value_pb.Value({ kind: { case: "mapValue", value: map } });
     } else if (cel === null) {
       return new value_pb.Value({ kind: { case: "nullValue", value: 0 } });
-    } else if (cel instanceof type.CelType) {
+    } else if (cel instanceof CelType) {
       return new value_pb.Value({
         kind: { case: "typeValue", value: cel.name },
       });
@@ -297,7 +298,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
         return new CelMap(map, this);
       }
       case "typeValue":
-        return new type.CelType(val.kind.value);
+        return new CelType(val.kind.value);
     }
     throw new Error("unimplemented: " + val.kind.case);
   }

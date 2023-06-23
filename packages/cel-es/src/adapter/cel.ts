@@ -6,13 +6,13 @@ import { CelList } from "../value/list";
 import { CelMap } from "../value/map";
 import { CelUint, ProtoNull } from "../value/scalar";
 import { CelObject } from "../value/struct";
-import { CelType } from "../value/type";
 import {
   type CelResult,
   type CelVal,
   coerceToValues,
   isCelWrap,
   unwrapResults,
+  CelType,
 } from "../value/value";
 
 function compareBytes(lhs: Uint8Array, rhs: Uint8Array): number {
