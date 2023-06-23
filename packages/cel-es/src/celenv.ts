@@ -15,7 +15,7 @@ export interface CelParser {
 }
 
 export class CelEnv {
-  private readonly data: Record<string, CelResult> = {};
+  public readonly data: Record<string, CelResult> = {};
   private readonly ctx = new ObjectActivation(this.data, CEL_ADAPTER);
   private protoProvider: ProtoValProvider;
   private dispatcher: OrderedDispatcher;
@@ -78,12 +78,8 @@ export class CelEnv {
     return expr.eval(this.ctx);
   }
 
-  /** Parses, plans, evals, and converts the given expr into a native value. */
-  public run(expr: string): CelResult<unknown> {
-    const result = this.eval(this.plan(this.parse(expr)));
-    if (result instanceof CelError || result instanceof CelUnknown) {
-      return result;
-    }
-    return NATIVE_ADAPTER.fromCel(result);
+  /** Parses, plans, and evals the given expr. */
+  public run(expr: string): CelResult {
+    return this.eval(this.plan(this.parse(expr)));
   }
 }

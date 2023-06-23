@@ -14,3 +14,5 @@ export {
   CelObject,
 } from "./value/value";
 export { getCelType } from "./value/type";
+export { NATIVE_ADAPTER } from "./adapter/native";
+export { makeStringExtFuncRegistry } from "./ext/strings";

@@ -67,6 +67,95 @@ class ParseContext {
     return expr;
   }
 
+  parseStringLiteral(node: Parser.SyntaxNode): syntax_pb.Expr {
+    const expr = this.newExpr(node);
+    const kind = node.childForFieldName("kind");
+    let isBytes = false;
+    let isRaw = false;
+    if (kind !== null) {
+      const kindSet = new Set(kind.text.toLowerCase());
+      if (kindSet.has("b")) {
+        kindSet.delete("b");
+        isBytes = true;
+      }
+      if (kindSet.has("r")) {
+        kindSet.delete("r");
+        isRaw = true;
+      }
+      if (kindSet.size !== 0) {
+        throw new Error(`Unsupported string literal kind: ${kind.text}`);
+      }
+    }
+    const quoted = node.childForFieldName("quoted")!;
+    let value = quoted.text.slice(1, -1);
+    switch (quoted.type) {
+      case "triple_double_quote_string_literal":
+      case "triple_single_quoted_string_literall":
+        value = quoted.text.slice(2, -2);
+        break;
+    }
+    if (!isRaw) {
+      // Handle escape sequences.
+      value = value.replace(
+        /\\([0-7]{1,3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|.)/g,
+        (match, p1) => {
+          switch (p1[0]) {
+            case "0":
+              return String.fromCharCode(parseInt(p1, 8));
+            case "x":
+              return String.fromCharCode(parseInt(p1.slice(1), 16));
+            case "u":
+              return String.fromCharCode(parseInt(p1.slice(1), 16));
+            case "U":
+              return String.fromCodePoint(parseInt(p1.slice(1), 16));
+            default:
+              return p1;
+          }
+        }
+      );
+    }
+    if (isBytes) {
+      const bytes = new Uint8Array(value.length);
+      for (let i = 0; i < value.length; i++) {
+        bytes[i] = value.charCodeAt(i);
+      }
+      expr.exprKind = {
+        case: "constExpr",
+        value: new syntax_pb.Constant({
+          constantKind: {
+            case: "bytesValue",
+            value: bytes,
+          },
+        }),
+      };
+    } else {
+      expr.exprKind = {
+        case: "constExpr",
+        value: new syntax_pb.Constant({
+          constantKind: {
+            case: "stringValue",
+            value: value,
+          },
+        }),
+      };
+    }
+    return expr;
+  }
+
+  parseListExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
+    const expr = this.newExpr(node);
+    const listExpr = new syntax_pb.Expr_CreateList();
+    for (let i = 0; i < node.namedChildCount; i++) {
+      const child = node.namedChild(i)!;
+      listExpr.elements.push(this.parseExpr(child));
+    }
+    expr.exprKind = {
+      case: "listExpr",
+      value: listExpr,
+    };
+    return expr;
+  }
+
   parseExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
     switch (node.type) {
       case "binary_expression":
@@ -87,6 +176,8 @@ class ParseContext {
         return this.parseCallExpr(node);
       case "member_call_expression":
         return this.parseCallExpr(node);
+      case "list_expression":
+        return this.parseListExpr(node);
       case "int_literal": {
         const expr = this.newExpr(node);
         expr.exprKind = {
@@ -99,6 +190,9 @@ class ParseContext {
           }),
         };
         return expr;
+      }
+      case "string_literal": {
+        return this.parseStringLiteral(node);
       }
       default:
         throw new Error(`Unsupported node type: ${node.type}`);

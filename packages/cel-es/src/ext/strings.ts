@@ -2,12 +2,17 @@ import { Duration, Timestamp } from "@bufbuild/protobuf";
 
 import { CEL_ADAPTER } from "../adapter/cel";
 import { argsMatch, Func, FuncRegistry } from "../func";
-import { CelError, CelUnknown } from "../value/error";
-import { CelList } from "../value/list";
-import { CelMap } from "../value/map";
-import { CelUint } from "../value/scalar";
 import * as type from "../value/type";
-import { CelResult, CelVal } from "../value/value";
+import {
+  type CelResult,
+  type CelVal,
+  CelError,
+  CelUnknown,
+  CelList,
+  CelMap,
+  CelUint,
+  CelType,
+} from "../value/value";
 
 function toNum(number: unknown): number | undefined {
   switch (typeof number) {
@@ -21,7 +26,7 @@ function toNum(number: unknown): number | undefined {
 }
 
 // Checks that the args matched, followed by an optional int.
-function argsMatchInt(args: CelVal[], ...celTypes: type.CelType[]): boolean {
+function argsMatchInt(args: CelVal[], ...celTypes: CelType[]): boolean {
   return argsMatch(args, celTypes.length, ...celTypes, type.INT);
 }
 
@@ -502,7 +507,7 @@ export class Formatter {
       case "object":
         if (val === null) {
           return "null";
-        } else if (val instanceof type.CelType) {
+        } else if (val instanceof CelType) {
           return val.name;
         } else if (val instanceof CelUint) {
           return val.value.toString();
@@ -540,7 +545,7 @@ export class Formatter {
       case "object":
         if (val === null) {
           return "null";
-        } else if (val instanceof type.CelType) {
+        } else if (val instanceof CelType) {
           return val.name;
         } else if (val instanceof CelUint) {
           return val.value.toString();
@@ -699,5 +704,12 @@ export function addStringsExt(
   funcs.add(makeStringFormatFunc(formatter));
 }
 
-export const STRINGS_EXT_FUNCS = new FuncRegistry();
-addStringsExt(STRINGS_EXT_FUNCS);
+export function makeStringExtFuncRegistry(
+  locale: string | undefined = undefined
+): FuncRegistry {
+  const funcs = new FuncRegistry();
+  addStringsExt(funcs, new Formatter(locale));
+  return funcs;
+}
+
+export const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry();
