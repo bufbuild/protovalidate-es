@@ -19,17 +19,16 @@ import {
   type IMessageTypeRegistry,
 } from "@bufbuild/protobuf";
 
-import { type CelValAdapter, type StructAccess } from "../value/adapter";
 import { EMPTY_PROVIDER } from "../value/empty";
-import { CelList } from "../value/list";
-import { CelMap } from "../value/map";
 import { type CelValProvider } from "../value/provider";
-import { CelUint, ProtoNull } from "../value/scalar";
-import { CelObject } from "../value/struct";
 import * as type from "../value/type";
 import {
+  type CelValAdapter,
+  type StructAccess,
+  CelList,
   type CelResult,
   type CelVal,
+  CelMap,
   coerceToBigInt,
   coerceToBool,
   coerceToBytes,
@@ -40,6 +39,9 @@ import {
   CelType,
   CelError,
   CelUnknown,
+  CelObject,
+  CelUint,
+  ProtoNull,
 } from "../value/value";
 import { CEL_ADAPTER, equalsStruct } from "./cel";
 import { NATIVE_ADAPTER } from "./native";

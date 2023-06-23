@@ -1,15 +1,16 @@
 import { type Activation } from "./activation";
 import { CEL_ADAPTER } from "./adapter/cel";
 import { EvalAttr, type Interpretable } from "./planner";
-import { type RawResult, RawVal, type Unwrapper } from "./value/adapter";
+import { type RawResult, RawVal } from "./value/adapter";
 import { Namespace } from "./value/namespace";
 import { type CelValProvider } from "./value/provider";
-import { CelUint } from "./value/scalar";
 import {
+  CelUint,
   type CelResult,
   type CelVal,
   CelError,
   CelUnknown,
+  type Unwrapper,
 } from "./value/value";
 import { getCelType } from "./value/type";
 

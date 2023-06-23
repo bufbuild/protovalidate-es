@@ -7,82 +7,11 @@ import {
   Duration,
   Int64Value,
   Message,
+  type MessageType,
   StringValue,
   Timestamp,
   UInt64Value,
 } from "@bufbuild/protobuf";
-
-import { CelList } from "./list";
-import { CelMap } from "./map";
-import { CelUint, ProtoNull } from "./scalar";
-import { CelObject } from "./struct";
-
-/**
- * The base class for all Cel types.
- *
- * A type is also a value, and can be used as a value in expressions.
- *
- * Two types are equal if they have the same name, and identical if they have
- * the same fullname. For example, the type 'list(int)' is equal, but not
- * identical, to the type 'list(string)', as they both have the same name, 'list'.
- *
- * @abstract
- */
-export class CelType {
-  readonly fullname_: string | undefined;
-  constructor(readonly name: string, fullname?: string) {
-    if (fullname !== undefined) {
-      this.fullname_ = fullname;
-    }
-  }
-
-  fullname(): string {
-    return this.fullname_ === undefined ? this.name : this.fullname_;
-  }
-
-  identical(other: CelVal): boolean {
-    if (other instanceof CelType) {
-      return this.name === other.name && this.fullname_ === other.fullname_;
-    }
-    return false;
-  }
-
-  equals(other: CelVal): boolean {
-    if (other instanceof CelType) {
-      return this.name === other.name;
-    }
-    return false;
-  }
-
-  compare(other: CelVal): number | undefined {
-    if (!(other instanceof CelType)) {
-      return undefined;
-    }
-    if (this.name === other.name) {
-      return 0;
-    }
-    return this.name < other.name ? -1 : 1;
-  }
-}
-
-export class NumType extends CelType {}
-
-export class ConcreteType extends CelType {
-  constructor(name: string, public readonly EMPTY: CelVal) {
-    super(name);
-  }
-}
-
-export class WrapperType<T extends Message> extends CelType {
-  constructor(public wrapped: CelType) {
-    super(
-      "wrapper(" + wrapped.name + ")",
-      wrapped.fullname_ === undefined
-        ? undefined
-        : "wrapper(" + wrapped.fullname_ + ")"
-    );
-  }
-}
 
 /** Cel Number types, which all existing on the same logical number line. */
 export type CelNum = bigint | CelUint | number;
@@ -157,6 +86,256 @@ export function isCelVal(val: unknown): val is CelVal {
     val instanceof CelObject ||
     val instanceof CelType
   );
+}
+
+export interface Unwrapper<V = unknown> {
+  unwrap(val: V): V;
+}
+
+export interface CelValAdapter<V = unknown> extends Unwrapper<V> {
+  toCel(native: CelResult<V>): CelResult;
+  fromCel: (cel: CelVal) => CelResult<V>;
+
+  equals(lhs: V, rhs: V): CelResult<boolean>;
+  compare(lhs: V, rhs: V): CelResult<number> | undefined;
+
+  accessByName(id: number, obj: V, name: string): CelResult<V> | undefined;
+  accessByIndex(
+    id: number,
+    obj: V,
+    index: number | bigint
+  ): CelResult<V> | undefined;
+  getFields(value: object): string[];
+}
+
+export interface IterAccess {
+  getItems(): CelResult[];
+}
+
+export interface IndexAccess {
+  accessByIndex(id: number, index: number | bigint): CelResult | undefined;
+}
+
+export interface FieldAccess<K> {
+  getFields(): K[];
+  accessByName(id: number, name: K): CelResult | undefined;
+}
+
+export type ListAccess = IterAccess & IndexAccess;
+export type StructAccess<K = unknown> = IterAccess &
+  FieldAccess<K> &
+  IndexAccess;
+
+// proto3 has typed nulls.
+export class ProtoNull {
+  constructor(
+    public readonly messageType: MessageType,
+    public readonly defaultValue: CelVal,
+    public value: CelVal = null
+  ) {}
+}
+
+export class CelUint {
+  public static EMPTY: CelUint = new CelUint(BigInt(0));
+  public static ONE: CelUint = new CelUint(BigInt(1));
+  public static of(value: bigint): CelUint {
+    switch (value) {
+      case 0n:
+        return CelUint.EMPTY;
+      case 1n:
+        return CelUint.ONE;
+      default:
+        return new CelUint(value);
+    }
+  }
+  constructor(public readonly value: bigint) {}
+}
+
+export class CelList implements ListAccess {
+  constructor(
+    public value: unknown[],
+    public readonly adapter: CelValAdapter,
+    public readonly type_: CelType
+  ) {}
+
+  getItems(): CelResult[] {
+    const result: CelResult[] = [];
+    for (const item of this.value) {
+      result.push(this.adapter.toCel(item));
+    }
+    return result;
+  }
+
+  accessByIndex(id: number, index: number | bigint): CelResult {
+    const i = Number(index);
+    if (i < 0 || i >= this.value.length) {
+      return CelError.indexOutOfBounds(Number(id), i, this.value.length);
+    }
+    return this.adapter.toCel(this.value[i]);
+  }
+}
+
+export class CelMap<K = unknown, V = unknown> implements StructAccess<CelVal> {
+  public nativeKeyMap: Map<unknown, V>;
+
+  constructor(
+    public value: Map<K, V>,
+    public readonly adapter: CelValAdapter,
+    public type_: CelType
+  ) {
+    this.nativeKeyMap = new Map();
+    for (const [key, value] of this.value) {
+      const celKey = this.adapter.toCel(key);
+      if (typeof celKey === "string" || typeof celKey === "bigint") {
+        this.nativeKeyMap.set(celKey, value);
+      } else if (isCelWrap(celKey) || celKey instanceof CelUint) {
+        this.nativeKeyMap.set(celKey.value, value);
+      } else if (celKey instanceof Uint8Array) {
+        this.nativeKeyMap.set(celKey, value);
+      } else if (typeof celKey === "number" && Number.isInteger(celKey)) {
+        this.nativeKeyMap.set(BigInt(celKey), value);
+      } else if (typeof celKey === "boolean") {
+        this.nativeKeyMap.set(celKey ? 1n : 0n, value);
+      } else {
+        this.nativeKeyMap.set(key, value);
+      }
+    }
+  }
+
+  getItems(): CelResult[] {
+    const result: CelResult[] = [];
+    for (const [key] of this.value) {
+      result.push(this.adapter.toCel(key));
+    }
+    return result;
+  }
+
+  accessByIndex(id: number, index: number | bigint): CelResult | undefined {
+    let result = this.nativeKeyMap.get(index);
+    if (result === undefined) {
+      if (typeof index === "number" && Number.isInteger(index)) {
+        result = this.nativeKeyMap.get(BigInt(index));
+      }
+    }
+    if (result === undefined) {
+      return undefined;
+    }
+    return this.adapter.toCel(result);
+  }
+
+  accessByName(id: number, name: unknown): CelResult | undefined {
+    return this.adapter.toCel(this.nativeKeyMap.get(name));
+  }
+
+  getFields(): CelVal[] {
+    return [...this.value.keys()].map((k) => this.adapter.toCel(k) as CelVal);
+  }
+}
+
+export class CelObject implements StructAccess<unknown> {
+  constructor(
+    public value: object,
+    public readonly adapter: CelValAdapter,
+    public type_: CelType
+  ) {
+    if (isCelVal(value)) {
+      throw new Error("Cannot wrap CelVal in CelObject");
+    }
+  }
+
+  getItems(): CelResult[] {
+    const result: CelResult[] = [];
+    for (const item of Object.keys(this.value)) {
+      result.push(this.adapter.toCel(item));
+    }
+    return result;
+  }
+
+  getFields(): string[] {
+    return this.adapter.getFields(this.value);
+  }
+
+  accessByName(id: number, name: string): CelResult | undefined {
+    const result = this.adapter.accessByName(id, this.value, name);
+    if (result === undefined) {
+      return undefined;
+    }
+    return this.adapter.toCel(result);
+  }
+  accessByIndex(id: number, index: number | bigint): CelResult | undefined {
+    const result = this.adapter.accessByIndex(id, this.value, index);
+    if (result === undefined) {
+      return undefined;
+    }
+    return this.adapter.toCel(result);
+  }
+}
+
+/**
+ * The base class for all Cel types.
+ *
+ * A type is also a value, and can be used as a value in expressions.
+ *
+ * Two types are equal if they have the same name, and identical if they have
+ * the same fullname. For example, the type 'list(int)' is equal, but not
+ * identical, to the type 'list(string)', as they both have the same name, 'list'.
+ *
+ * @abstract
+ */
+export class CelType {
+  readonly fullname_: string | undefined;
+  constructor(readonly name: string, fullname?: string) {
+    if (fullname !== undefined) {
+      this.fullname_ = fullname;
+    }
+  }
+
+  fullname(): string {
+    return this.fullname_ === undefined ? this.name : this.fullname_;
+  }
+
+  identical(other: CelVal): boolean {
+    if (other instanceof CelType) {
+      return this.name === other.name && this.fullname_ === other.fullname_;
+    }
+    return false;
+  }
+
+  equals(other: CelVal): boolean {
+    if (other instanceof CelType) {
+      return this.name === other.name;
+    }
+    return false;
+  }
+
+  compare(other: CelVal): number | undefined {
+    if (!(other instanceof CelType)) {
+      return undefined;
+    }
+    if (this.name === other.name) {
+      return 0;
+    }
+    return this.name < other.name ? -1 : 1;
+  }
+}
+
+export class NumType extends CelType {}
+
+export class ConcreteType extends CelType {
+  constructor(name: string, public readonly EMPTY: CelVal) {
+    super(name);
+  }
+}
+
+export class WrapperType<T extends Message> extends CelType {
+  constructor(public wrapped: CelType) {
+    super(
+      "wrapper(" + wrapped.name + ")",
+      wrapped.fullname_ === undefined
+        ? undefined
+        : "wrapper(" + wrapped.fullname_ + ")"
+    );
+  }
 }
 
 export class CelError {

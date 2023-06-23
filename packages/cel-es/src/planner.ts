@@ -19,17 +19,15 @@ import { CEL_ADAPTER } from "./adapter/cel";
 import { type CallDispatch, type Dispatcher } from "./func";
 import * as opc from "./gen/dev/cel/expr/operator_const";
 import { syntax_pb } from "@bufbuild/cel-es-proto";
-import { type CelValAdapter, type RawResult, RawVal } from "./value/adapter";
+import { type RawResult, RawVal } from "./value/adapter";
 import { EMPTY_LIST, EMPTY_MAP, EMPTY_PROVIDER } from "./value/empty";
-import { CelError, CelUnknown } from "./value/value";
-import { CelList } from "./value/list";
-import { CelMap } from "./value/map";
+import { CelError, CelObject, CelUint, CelUnknown } from "./value/value";
 import { Namespace } from "./value/namespace";
 import { type CelValProvider } from "./value/provider";
-import { CelUint } from "./value/scalar";
-import { CelObject } from "./value/struct";
 import * as type from "./value/type";
 import {
+  CelList,
+  type CelValAdapter,
   type CelResult,
   type CelVal,
   coerceToBigInt,
@@ -39,6 +37,7 @@ import {
   coerceToString,
   coerceToValues,
   CelType,
+  CelMap,
 } from "./value/value";
 
 export class Planner {

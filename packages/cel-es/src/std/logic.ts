@@ -8,12 +8,12 @@ import {
 } from "../func";
 import * as opc from "../gen/dev/cel/expr/operator_const";
 import * as olc from "../gen/dev/cel/expr/overload_const";
-import { type Unwrapper } from "../value/adapter";
-import { CelList } from "../value/list";
-import { CelMap } from "../value/map";
 import {
+  type Unwrapper,
   type CelResult,
   type CelVal,
+  CelList,
+  CelMap,
   CelError,
   CelUnknown,
 } from "../value/value";

@@ -12,17 +12,18 @@ import {
   UInt64Value,
 } from "@bufbuild/protobuf";
 
-import { CelUint, ProtoNull } from "./scalar";
 import {
+  CelUint,
+  ProtoNull,
+  CelObject,
   type CelVal,
   CelType,
   ConcreteType,
   WrapperType,
   CelError,
+  CelList,
+  CelMap,
 } from "./value";
-import { CelList } from "./list";
-import { CelMap } from "./map";
-import { CelObject } from "./struct";
 
 export const DYN = new CelType("dyn");
 export const NULL = new ConcreteType("null_type", null);

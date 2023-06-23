@@ -7,9 +7,10 @@ export {
   isCelVal,
   CelError,
   CelUnknown,
+  CelList,
+  CelMap,
+  CelUint,
+  ProtoNull,
+  CelObject,
 } from "./value/value";
 export { getCelType } from "./value/type";
-export { CelList } from "./value/list";
-export { CelMap } from "./value/map";
-export { CelUint, ProtoNull } from "./value/scalar";
-export { CelObject } from "./value/struct";

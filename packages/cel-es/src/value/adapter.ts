@@ -1,42 +1,11 @@
-import { type CelResult, type CelVal, CelError, CelUnknown } from "./value";
-
-export interface Unwrapper<V = unknown> {
-  unwrap(val: V): V;
-}
-
-export interface CelValAdapter<V = unknown> extends Unwrapper<V> {
-  toCel(native: CelResult<V>): CelResult;
-  fromCel: (cel: CelVal) => CelResult<V>;
-
-  equals(lhs: V, rhs: V): CelResult<boolean>;
-  compare(lhs: V, rhs: V): CelResult<number> | undefined;
-
-  accessByName(id: number, obj: V, name: string): CelResult<V> | undefined;
-  accessByIndex(
-    id: number,
-    obj: V,
-    index: number | bigint
-  ): CelResult<V> | undefined;
-  getFields(value: object): string[];
-}
-
-export interface IterAccess {
-  getItems(): CelResult[];
-}
-
-export interface IndexAccess {
-  accessByIndex(id: number, index: number | bigint): CelResult | undefined;
-}
-
-export interface FieldAccess<K> {
-  getFields(): K[];
-  accessByName(id: number, name: K): CelResult | undefined;
-}
-
-export type ListAccess = IterAccess & IndexAccess;
-export type StructAccess<K = unknown> = IterAccess &
-  FieldAccess<K> &
-  IndexAccess;
+import {
+  type CelResult,
+  type CelVal,
+  CelError,
+  CelUnknown,
+  type CelValAdapter,
+  type Unwrapper,
+} from "./value";
 
 /** A value bundled with it's associated adapter. */
 export class RawVal<V = unknown> {

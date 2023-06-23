@@ -9,14 +9,15 @@ import {
 } from "@bufbuild/protobuf";
 
 import { CEL_ADAPTER } from "../adapter/cel";
-import { type CelValAdapter } from "./adapter";
-import { CelError, CelUnknown } from "./value";
-import { CelList } from "./list";
-import { CelMap } from "./map";
 import { type CelValProvider } from "./provider";
-import { CelObject } from "./struct";
 import * as type from "./type";
 import {
+  CelError,
+  CelUnknown,
+  type CelValAdapter,
+  CelList,
+  CelMap,
+  CelObject,
   type CelResult,
   coerceToBigInt,
   coerceToBool,
@@ -27,7 +28,7 @@ import {
 } from "./value";
 
 export const EMPTY_LIST = new CelList([], CEL_ADAPTER, type.LIST);
-export const EMPTY_MAP = new CelMap(new Map(), CEL_ADAPTER);
+export const EMPTY_MAP = new CelMap(new Map(), CEL_ADAPTER, type.DYN_MAP);
 
 export class EmptyProvider implements CelValProvider {
   public readonly adapter: CelValAdapter = CEL_ADAPTER;
