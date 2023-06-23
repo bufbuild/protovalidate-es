@@ -109,7 +109,9 @@ class ParseContext {
 export function parseTree(tree: Parser.Tree): syntax_pb.ParsedExpr {
   const ctx = new ParseContext();
   const expr = new syntax_pb.ParsedExpr();
-  expr.expr = ctx.parseExpr(tree.rootNode);
+  if (tree.rootNode.firstChild !== null) {
+    expr.expr = ctx.parseExpr(tree.rootNode.firstChild);
+  }
   expr.sourceInfo = ctx.sourceInfo;
   return expr;
 }
