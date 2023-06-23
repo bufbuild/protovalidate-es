@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@bufbuild/cel-es-proto": "^0.0.1",
+    "@bufbuild/cel-es": "^0.0.1",
     "web-tree-sitter": "^0.20.8"
   },
   "main": "./dist/cjs/index.js",

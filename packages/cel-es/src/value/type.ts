@@ -63,7 +63,7 @@ export class ConcreteType extends CelType {
   }
 }
 
-export class WrapperType<T extends Message<T>> extends CelType {
+export class WrapperType<T extends Message> extends CelType {
   constructor(public wrapped: CelType) {
     super(
       "wrapper(" + wrapped.name + ")",
