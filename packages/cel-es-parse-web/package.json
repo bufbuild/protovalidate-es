@@ -14,10 +14,12 @@
     "generate": "",
     "build": "npm run build:cjs && npm run build:esm+types",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
-    "build:esm+types": "tsc --project tsconfig.json --module ES2015 --verbatimModuleSyntax --outDir ./dist/esm --declaration --declarationDir ./dist/types && echo >./dist/esm/package.json '{\"type\":\"module\", \"sideEffects\":false}'"
+    "build:esm+types": "tsc --project tsconfig.json --module ES2015 --verbatimModuleSyntax --outDir ./dist/esm --declaration --declarationDir ./dist/types && echo >./dist/esm/package.json '{\"type\":\"module\", \"sideEffects\":false}'",
+    "run": "npm run build && node ./dist/cjs/index.js"
   },
   "dependencies": {
-    "@bufbuild/cel-es-proto": "^0.0.1"
+    "@bufbuild/cel-es-proto": "^0.0.1",
+    "web-tree-sitter": "^0.20.8"
   },
   "main": "./dist/cjs/index.js",
   "types": "./dist/types/index.d.ts",

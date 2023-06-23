@@ -1,3 +1,1 @@
-import { hello } from "@bufbuild/cel-es-proto";
-
-hello();
+export { parseTree } from "./parser";

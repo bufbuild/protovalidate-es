@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2020",
     "lib": [
       "ES2017",
       // DOM for the fetch and streams API
@@ -22,6 +22,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
+    "allowSyntheticDefaultImports": true,
 
     // We need node's module resolution, so we do not have to skip lib checks
     "moduleResolution": "Node",
