@@ -2,11 +2,15 @@ import { type Activation } from "./activation";
 import { CEL_ADAPTER } from "./adapter/cel";
 import { EvalAttr, type Interpretable } from "./planner";
 import { type RawResult, RawVal, type Unwrapper } from "./value/adapter";
-import { CelError, CelUnknown } from "./value/error";
 import { Namespace } from "./value/namespace";
 import { type CelValProvider } from "./value/provider";
 import { CelUint } from "./value/scalar";
-import { type CelResult, type CelVal } from "./value/value";
+import {
+  type CelResult,
+  type CelVal,
+  CelError,
+  CelUnknown,
+} from "./value/value";
 import { getCelType } from "./value/type";
 
 export interface AttributeFactory {

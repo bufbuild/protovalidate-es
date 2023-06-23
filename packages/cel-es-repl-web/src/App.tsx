@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.css'
 import Parser from 'web-tree-sitter';
 import { syntax_pb } from '@bufbuild/cel-es-proto';
+import { CelParser, CelEnv } from '@bufbuild/cel-es';
 
 await Parser.init();
 const parser = new Parser;
@@ -123,15 +124,15 @@ function parse(tree: Parser.Tree): syntax_pb.ParsedExpr {
   return parsedExpr;
 }
 
-// class TreeSitterCelParser implements CelParser {
-//   parse(input: string): syntax_pb.ParsedExpr {
-//     const tree = parser.parse(input);
-//     return parse(tree);
-//   }
-// }
+class TreeSitterCelParser implements CelParser {
+  parse(input: string): syntax_pb.ParsedExpr {
+    const tree = parser.parse(input);
+    return parse(tree);
+  }
+}
 
 function App() {
-  //const env = new CelEnv(new TreeSitterCelParser());
+  const env = new CelEnv(new TreeSitterCelParser());
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<
     {
@@ -143,7 +144,7 @@ function App() {
     <ol>
       {messages.map((msg, index) => (
         <li key={index}>
-          {`${msg.input} => ${parse(msg.output).toJsonString()}`}
+          {`${msg.input} => ${env.parse(msg.input).toJsonString()}`}
         </li>
       ))}
     </ol>

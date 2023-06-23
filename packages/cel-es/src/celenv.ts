@@ -1,5 +1,4 @@
 import { createRegistry, type IMessageTypeRegistry } from "@bufbuild/protobuf";
-import { type IEnumTypeRegistry } from "@bufbuild/protobuf/dist/types/type-registry";
 
 import { ObjectActivation } from "./activation";
 import { CEL_ADAPTER } from "./adapter/cel";
@@ -9,8 +8,7 @@ import { type Dispatcher, OrderedDispatcher } from "./func";
 import { checked_pb, syntax_pb } from "@bufbuild/cel-es-proto";
 import { type Interpretable, Planner } from "./planner";
 import { STD_FUNCS } from "./std/std";
-import { CelError, CelUnknown } from "./value/error";
-import { type CelResult, isCelVal } from "./value/value";
+import { type CelResult, isCelVal, CelError, CelUnknown } from "./value/value";
 
 export interface CelParser {
   parse(text: string): syntax_pb.ParsedExpr;
@@ -25,16 +23,14 @@ export class CelEnv {
 
   public constructor(
     private parser: CelParser,
-    registry: IMessageTypeRegistry & IEnumTypeRegistry = createRegistry()
+    registry: IMessageTypeRegistry = createRegistry()
   ) {
     this.protoProvider = new ProtoValProvider(new ProtoValAdapter(registry));
     this.dispatcher = new OrderedDispatcher([STD_FUNCS]);
     this.planner = new Planner(this.dispatcher, this.protoProvider);
   }
 
-  public setProtoRegistry(
-    registry: IMessageTypeRegistry & IEnumTypeRegistry
-  ): void {
+  public setProtoRegistry(registry: IMessageTypeRegistry): void {
     this.protoProvider.adapter = new ProtoValAdapter(registry);
   }
 

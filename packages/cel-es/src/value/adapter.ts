@@ -1,5 +1,4 @@
-import { CelError, CelUnknown } from "./error";
-import { type CelResult, type CelVal } from "./value";
+import { type CelResult, type CelVal, CelError, CelUnknown } from "./value";
 
 export interface Unwrapper<V = unknown> {
   unwrap(val: V): V;
@@ -82,3 +81,38 @@ export class RawVal<V = unknown> {
 }
 
 export type RawResult<V = unknown> = CelResult<RawVal<V>>;
+
+export function unwrapValues<V = CelVal>(
+  args: V[],
+  adapter: CelValAdapter<V>
+): V[] {
+  return args.map((arg) => {
+    return adapter.unwrap(arg);
+  });
+}
+
+export function unwrapResults<V = CelVal>(
+  args: CelResult<V>[],
+  unwrapper: Unwrapper
+) {
+  const unknowns: CelUnknown[] = [];
+  const errors: CelError[] = [];
+  const vals: V[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg instanceof CelUnknown) {
+      unknowns.push(arg);
+    } else if (arg instanceof CelError) {
+      errors.push(arg);
+    } else {
+      vals.push(unwrapper.unwrap(arg) as V);
+    }
+  }
+  if (unknowns.length > 0) {
+    return CelUnknown.merge(unknowns);
+  }
+  if (errors.length > 0) {
+    return CelError.merge(errors);
+  }
+  return vals;
+}

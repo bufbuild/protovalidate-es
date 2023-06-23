@@ -10,10 +10,10 @@ import {
 
 import { CEL_ADAPTER } from "../adapter/cel";
 import { type CelValAdapter } from "./adapter";
-import { CelError, CelUnknown } from "./error";
+import { CelError, CelUnknown } from "./value";
 import { CelList } from "./list";
 import { CelMap } from "./map";
-import { type CelValProvider, WK_PROTO_TYPES } from "./provider";
+import { type CelValProvider } from "./provider";
 import { CelObject } from "./struct";
 import * as type from "./type";
 import {
@@ -26,7 +26,7 @@ import {
   CelType,
 } from "./value";
 
-export const EMPTY_LIST = new CelList([], CEL_ADAPTER);
+export const EMPTY_LIST = new CelList([], CEL_ADAPTER, type.LIST);
 export const EMPTY_MAP = new CelMap(new Map(), CEL_ADAPTER);
 
 export class EmptyProvider implements CelValProvider {
@@ -128,7 +128,7 @@ export class EmptyProvider implements CelValProvider {
   }
 
   findType(candidate: string): CelType | undefined {
-    const jsonType = WK_PROTO_TYPES.get(candidate);
+    const jsonType = type.WK_PROTO_TYPES.get(candidate);
     if (jsonType !== undefined) {
       return jsonType;
     }

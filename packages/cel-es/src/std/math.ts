@@ -9,11 +9,10 @@ import {
 } from "../func";
 import * as opc from "../gen/dev/cel/expr/operator_const";
 import * as olc from "../gen/dev/cel/expr/overload_const";
-import { CelError, CelUnknown } from "../value/error";
 import { CelList } from "../value/list";
 import { CelUint } from "../value/scalar";
 import * as type from "../value/type";
-import { type CelVal } from "../value/value";
+import { type CelVal, CelError, CelUnknown } from "../value/value";
 
 const MAX_INT = 9223372036854775807n;
 // eslint-disable-next-line @typescript-eslint/no-loss-of-precision

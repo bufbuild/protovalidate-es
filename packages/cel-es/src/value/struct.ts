@@ -1,5 +1,5 @@
 import { type CelValAdapter, type StructAccess } from "./adapter";
-import { WK_PROTO_TYPES } from "./provider";
+import { WK_PROTO_TYPES } from "./type";
 import { type CelResult, isCelVal, CelType } from "./value";
 
 export class CelObject implements StructAccess<unknown> {

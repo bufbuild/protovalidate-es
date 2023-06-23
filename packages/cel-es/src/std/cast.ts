@@ -2,10 +2,14 @@ import { Duration, Timestamp } from "@bufbuild/protobuf";
 
 import { Func, FuncRegistry, identityOp, type StrictUnaryOp } from "../func";
 import * as olc from "../gen/dev/cel/expr/overload_const";
-import { CelError, CelUnknown } from "../value/error";
 import { CelUint } from "../value/scalar";
 import * as type from "../value/type";
-import { type CelResult, coerceToValues } from "../value/value";
+import {
+  type CelResult,
+  coerceToValues,
+  CelError,
+  CelUnknown,
+} from "../value/value";
 import {
   isOverflowInt,
   isOverflowIntNum,

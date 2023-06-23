@@ -21,11 +21,11 @@ import * as opc from "./gen/dev/cel/expr/operator_const";
 import { syntax_pb } from "@bufbuild/cel-es-proto";
 import { type CelValAdapter, type RawResult, RawVal } from "./value/adapter";
 import { EMPTY_LIST, EMPTY_MAP, EMPTY_PROVIDER } from "./value/empty";
-import { CelError, CelUnknown } from "./value/error";
+import { CelError, CelUnknown } from "./value/value";
 import { CelList } from "./value/list";
 import { CelMap } from "./value/map";
 import { Namespace } from "./value/namespace";
-import { type CelValProvider, WK_PROTO_TYPES } from "./value/provider";
+import { type CelValProvider } from "./value/provider";
 import { CelUint } from "./value/scalar";
 import { CelObject } from "./value/struct";
 import * as type from "./value/type";
@@ -502,7 +502,7 @@ export class EvalObj implements InterpretableCtor {
       }
       obj[this.fields[i]] = vals[i];
     }
-    if (WK_PROTO_TYPES.has(this.typeName)) {
+    if (type.WK_PROTO_TYPES.has(this.typeName)) {
       switch (this.typeName) {
         case "google.protobuf.Any": {
           const typeUrl = coerceToString(this.id, obj.type_url);

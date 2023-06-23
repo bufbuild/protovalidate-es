@@ -1,7 +1,10 @@
 import { Any, Duration, Message, Timestamp } from "@bufbuild/protobuf";
 
-import { type CelValAdapter, type FieldAccess } from "../value/adapter";
-import { CelError, CelUnknown } from "../value/error";
+import {
+  unwrapResults,
+  type CelValAdapter,
+  type FieldAccess,
+} from "../value/adapter";
 import { CelList } from "../value/list";
 import { CelMap } from "../value/map";
 import { CelUint, ProtoNull } from "../value/scalar";
@@ -11,8 +14,9 @@ import {
   type CelVal,
   coerceToValues,
   isCelWrap,
-  unwrapResults,
   CelType,
+  CelError,
+  CelUnknown,
 } from "../value/value";
 
 function compareBytes(lhs: Uint8Array, rhs: Uint8Array): number {

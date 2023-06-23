@@ -1,13 +1,12 @@
 import { isOverflowInt, isOverflowUint } from "../std/math";
 import { type CelValAdapter } from "../value/adapter";
 import { EMPTY_LIST, EMPTY_MAP } from "../value/empty";
-import { CelError, CelUnknown } from "../value/error";
 import { CelList } from "../value/list";
 import { CelMap } from "../value/map";
 import { CelUint } from "../value/scalar";
 import { CelObject } from "../value/struct";
 import * as type from "../value/type";
-import { type CelVal, isCelVal } from "../value/value";
+import { type CelVal, isCelVal, CelError, CelUnknown } from "../value/value";
 import { type CelResult, isCelResult } from "../value/value";
 import { CEL_ADAPTER } from "./cel";
 
@@ -42,7 +41,7 @@ export class NativeValAdapter implements CelValAdapter {
           if (val.length === 0) {
             return EMPTY_LIST;
           }
-          return new CelList(val, this);
+          return new CelList(val, this, type.LIST);
         } else if (val instanceof Map) {
           if (val.size === 0) {
             return EMPTY_MAP;

@@ -16,18 +16,14 @@ import {
   UInt32Value,
   UInt64Value,
   Value,
-} from "@bufbuild/protobuf";
-import {
-  type IEnumTypeRegistry,
   type IMessageTypeRegistry,
-} from "@bufbuild/protobuf/dist/types/type-registry";
+} from "@bufbuild/protobuf";
 
 import { type CelValAdapter, type StructAccess } from "../value/adapter";
 import { EMPTY_PROVIDER } from "../value/empty";
-import { CelError, CelUnknown } from "../value/error";
 import { CelList } from "../value/list";
 import { CelMap } from "../value/map";
-import { type CelValProvider, WK_PROTO_TYPES } from "../value/provider";
+import { type CelValProvider } from "../value/provider";
 import { CelUint, ProtoNull } from "../value/scalar";
 import { CelObject } from "../value/struct";
 import * as type from "../value/type";
@@ -42,6 +38,8 @@ import {
   isCelMsg,
   isCelWrap,
   CelType,
+  CelError,
+  CelUnknown,
 } from "../value/value";
 import { CEL_ADAPTER, equalsStruct } from "./cel";
 import { NATIVE_ADAPTER } from "./native";
@@ -57,9 +55,7 @@ export function isProtoMsg(val: unknown): val is Message {
 export class ProtoValAdapter implements CelValAdapter {
   private readonly metadataCache = new Map<MessageType, ProtoMetadata>();
 
-  constructor(
-    public readonly registry: IMessageTypeRegistry & IEnumTypeRegistry
-  ) {}
+  constructor(public readonly registry: IMessageTypeRegistry) {}
 
   unwrap(val: ProtoValue): ProtoValue {
     if (val instanceof Any) {
@@ -526,7 +522,7 @@ class ProtoMetadata {
     adapter: ProtoValAdapter
   ) {
     this.DEFAULT_PROTO = new messageType();
-    const wk_type = WK_PROTO_TYPES.get(messageType.typeName);
+    const wk_type = type.WK_PROTO_TYPES.get(messageType.typeName);
     if (wk_type !== undefined) {
       this.TYPE = wk_type;
       switch (messageType) {

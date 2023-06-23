@@ -12,9 +12,14 @@ import {
   UInt64Value,
 } from "@bufbuild/protobuf";
 
-import { CelError } from "./error";
 import { CelUint, ProtoNull } from "./scalar";
-import { type CelVal, CelType, ConcreteType, WrapperType } from "./value";
+import {
+  type CelVal,
+  CelType,
+  ConcreteType,
+  WrapperType,
+  CelError,
+} from "./value";
 import { CelList } from "./list";
 import { CelMap } from "./map";
 import { CelObject } from "./struct";
@@ -182,3 +187,21 @@ export function getCelType(val: CelVal): CelType {
   }
   throw new Error("Unknown CelVal type");
 }
+
+export const WK_PROTO_TYPES = new Map<string, CelType>();
+WK_PROTO_TYPES.set("google.protobuf.Value", DYN);
+WK_PROTO_TYPES.set("google.protobuf.Struct", JSON_OBJ);
+WK_PROTO_TYPES.set("google.protobuf.ListValue", LIST);
+WK_PROTO_TYPES.set("google.protobuf.NullValue", NULL);
+WK_PROTO_TYPES.set("google.protobuf.BoolValue", BOOL);
+WK_PROTO_TYPES.set("google.protobuf.UInt32Value", WRAP_UINT);
+WK_PROTO_TYPES.set("google.protobuf.UInt64Value", WRAP_UINT);
+WK_PROTO_TYPES.set("google.protobuf.Int32Value", WRAP_INT);
+WK_PROTO_TYPES.set("google.protobuf.Int64Value", WRAP_INT);
+WK_PROTO_TYPES.set("google.protobuf.FloatValue", WRAP_DOUBLE);
+WK_PROTO_TYPES.set("google.protobuf.DoubleValue", WRAP_DOUBLE);
+WK_PROTO_TYPES.set("google.protobuf.StringValue", WRAP_STRING);
+WK_PROTO_TYPES.set("google.protobuf.BytesValue", WRAP_BYTES);
+WK_PROTO_TYPES.set("google.protobuf.Timestamp", TIMESTAMP);
+WK_PROTO_TYPES.set("google.protobuf.Duration", DURATION);
+WK_PROTO_TYPES.set("google.protobuf.Any", DYN);

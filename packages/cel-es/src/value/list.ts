@@ -1,13 +1,11 @@
 import { type CelValAdapter, type IndexAccess } from "./adapter";
-import { CelError } from "./error";
-import * as type from "./type";
-import { CelType, type CelResult } from "./value";
+import { CelType, type CelResult, CelError } from "./value";
 
 export class CelList implements IndexAccess {
   constructor(
     public value: unknown[],
     public readonly adapter: CelValAdapter,
-    public readonly type_: CelType = type.LIST
+    public readonly type_: CelType
   ) {}
 
   getItems(): CelResult[] {

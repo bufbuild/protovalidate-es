@@ -3,7 +3,7 @@ import { utcToZonedTime } from "date-fns-tz";
 
 import { Func, FuncRegistry, type StrictOp, type StrictUnaryOp } from "../func";
 import * as olc from "../gen/dev/cel/expr/overload_const";
-import { CelError } from "../value/error";
+import { CelError } from "../value/value";
 
 type TimeFunc = (val: Date) => number;
 

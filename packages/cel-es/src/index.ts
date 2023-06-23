@@ -1,11 +1,12 @@
 export { type CelParser, CelEnv } from "./celenv";
-export { CelError, CelUnknown } from "./value/error";
 export {
   type CelResult,
   type CelVal,
   CelType,
   isCelResult,
   isCelVal,
+  CelError,
+  CelUnknown,
 } from "./value/value";
 export { getCelType } from "./value/type";
 export { CelList } from "./value/list";

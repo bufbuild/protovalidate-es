@@ -1,11 +1,11 @@
-import { type Unwrapper } from "./value/adapter";
-import { CelError, CelUnknown } from "./value/error";
+import { unwrapResults, type Unwrapper } from "./value/adapter";
 import { getCelType } from "./value/type";
 import {
   type CelResult,
   type CelVal,
   CelType,
-  unwrapResults,
+  CelError,
+  CelUnknown,
 } from "./value/value";
 
 export type ZeroOp = (id: number) => CelResult | undefined;
