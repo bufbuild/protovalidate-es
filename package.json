@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "build": "npm run build -ws",
+    "build": "npm run build -w packages/cel-es-proto && npm run build -w packages/cel-es && npm run build -w packages/cel-es-parse-web",
     "test": "jest"
   },
   "workspaces": [
