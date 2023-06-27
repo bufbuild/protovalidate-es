@@ -1,17 +1,21 @@
 import { createRegistry, type IMessageTypeRegistry } from "@bufbuild/protobuf";
 
+import {
+  Expr,
+  ParsedExpr,
+} from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
+import { CheckedExpr } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/checked_pb";
 import { ObjectActivation } from "./activation";
 import { CEL_ADAPTER } from "./adapter/cel";
 import { NATIVE_ADAPTER } from "./adapter/native";
 import { isProtoMsg, ProtoValAdapter, ProtoValProvider } from "./adapter/proto";
-import { type Dispatcher, OrderedDispatcher } from "./func";
-import { checked_pb, syntax_pb } from "@bufbuild/cel-es-proto";
-import { type Interpretable, Planner } from "./planner";
+import { OrderedDispatcher, type Dispatcher } from "./func";
+import { Planner, type Interpretable } from "./planner";
 import { STD_FUNCS } from "./std/std";
-import { type CelResult, isCelVal, CelError, CelUnknown } from "./value/value";
+import { CelError, CelUnknown, isCelVal, type CelResult } from "./value/value";
 
 export interface CelParser {
-  parse(text: string): syntax_pb.ParsedExpr;
+  parse(text: string): ParsedExpr;
 }
 
 export class CelEnv {
@@ -57,7 +61,7 @@ export class CelEnv {
     }
   }
 
-  public parse(expr: string): syntax_pb.ParsedExpr {
+  public parse(expr: string): ParsedExpr {
     if (this.parser === undefined) {
       throw new Error("parser not set");
     }
@@ -65,21 +69,17 @@ export class CelEnv {
   }
 
   public plan(
-    expr:
-      | syntax_pb.Expr
-      | syntax_pb.ParsedExpr
-      | checked_pb.CheckedExpr
-      | undefined
+    expr: Expr | ParsedExpr | CheckedExpr | undefined
   ): Interpretable {
-    let maybeExpr: syntax_pb.Expr | undefined = undefined;
-    if (expr instanceof checked_pb.CheckedExpr) {
+    let maybeExpr: Expr | undefined = undefined;
+    if (expr instanceof CheckedExpr) {
       maybeExpr = expr.expr;
-    } else if (expr instanceof syntax_pb.ParsedExpr) {
+    } else if (expr instanceof ParsedExpr) {
       maybeExpr = expr.expr;
     } else {
       maybeExpr = expr;
     }
-    return this.planner.plan(maybeExpr ?? new syntax_pb.Expr());
+    return this.planner.plan(maybeExpr ?? new Expr());
   }
 
   public eval(expr: Interpretable): CelResult {

@@ -18,7 +18,7 @@
     "build:esm+types": "tsc --project tsconfig.json --module ES2015 --verbatimModuleSyntax --outDir ./dist/esm --declaration --declarationDir ./dist/types && echo >./dist/esm/package.json '{\"type\":\"module\", \"sideEffects\":false}'"
   },
   "dependencies": {
-    "@bufbuild/cel-es-proto": "^0.0.1",
+    "@buf/alfus_cel.bufbuild_es": "^1.2.1-20230626203212-40a4ec79694c.1",
     "@bufbuild/cel-es-conformance": "^0.0.1",
     "@bufbuild/cel-es": "^0.0.1",
     "web-tree-sitter": "^0.20.8",

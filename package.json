@@ -5,7 +5,6 @@
     "test": "npm run test -ws --if-present"
   },
   "workspaces": [
-    "packages/cel-es-proto",
     "packages/cel-es",
     "packages/cel-es-conformance",
     "packages/cel-es-parse-antlr4",

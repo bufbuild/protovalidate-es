@@ -1,6 +1,5 @@
 import { Any, Duration, Timestamp } from "@bufbuild/protobuf";
 
-import { eval_pb, value_pb } from "@bufbuild/cel-es-proto";
 import {
   type CelValAdapter,
   CelError,
@@ -18,13 +17,15 @@ import {
   isCelWrap,
 } from "../value/value";
 import { CEL_ADAPTER } from "./cel";
+import { ExprValue } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/eval_pb";
+import {
+  Value,
+  ListValue,
+  MapValue,
+  MapValue_Entry,
+} from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/value_pb";
 
-type ExprType =
-  | eval_pb.ExprValue
-  | value_pb.Value
-  | value_pb.ListValue
-  | value_pb.MapValue
-  | CelVal;
+type ExprType = ExprValue | Value | ListValue | MapValue | CelVal;
 type ExprResult = CelResult<ExprType>;
 
 export class ExprValAdapter implements CelValAdapter<ExprType> {
@@ -42,17 +43,17 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   ): ExprResult | undefined {
     if (isCelVal(obj)) {
       return CEL_ADAPTER.accessByIndex(id, obj, index);
-    } else if (obj instanceof eval_pb.ExprValue) {
+    } else if (obj instanceof ExprValue) {
       switch (obj.kind.case) {
         case "value":
           return this.accessValueByIndex(id, obj.kind.value, index);
       }
       throw new Error("Method not implemented.");
-    } else if (obj instanceof value_pb.Value) {
+    } else if (obj instanceof Value) {
       return this.accessValueByIndex(id, obj, index);
-    } else if (obj instanceof value_pb.ListValue) {
+    } else if (obj instanceof ListValue) {
       return this.accessListByIndex(id, obj, index);
-    } else if (obj instanceof value_pb.MapValue) {
+    } else if (obj instanceof MapValue) {
       return this.accessMapByIndex(id, obj, index);
     }
     throw new Error("Method not implemented.");
@@ -64,7 +65,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
 
   accessMapByIndex(
     _id: number,
-    _obj: value_pb.MapValue,
+    _obj: MapValue,
     _index: number | bigint
   ): ExprResult | undefined {
     throw new Error("Method not implemented.");
@@ -72,7 +73,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
 
   accessListByIndex(
     _id: number,
-    obj: value_pb.ListValue,
+    obj: ListValue,
     index: number | bigint
   ): ExprResult | undefined {
     const i = Number(index);
@@ -82,11 +83,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     return obj.values[i];
   }
 
-  accessValueByIndex(
-    id: number,
-    value: value_pb.Value,
-    index: number | bigint
-  ) {
+  accessValueByIndex(id: number, value: Value, index: number | bigint) {
     switch (value.kind.case) {
       case "listValue":
         return this.accessListByIndex(id, value.kind.value, index);
@@ -103,7 +100,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   ): ExprResult | undefined {
     if (isCelVal(obj)) {
       return CEL_ADAPTER.accessByName(id, obj, name);
-    } else if (obj instanceof eval_pb.ExprValue) {
+    } else if (obj instanceof ExprValue) {
       switch (obj.kind.case) {
         case "value":
           return this.accessValueByName(id, obj.kind.value, name);
@@ -115,7 +112,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
 
   accessValueByName(
     id: number,
-    value: value_pb.Value,
+    value: Value,
     name: string
   ): ExprResult | undefined {
     switch (value.kind.case) {
@@ -132,7 +129,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     return CelError.badStringAccess(id, this.valueToType(value));
   }
 
-  valueToType(value: value_pb.Value): CelType {
+  valueToType(value: Value): CelType {
     switch (value.kind.case) {
       case "boolValue":
         return type.BOOL;
@@ -161,14 +158,14 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   toCel(native: ExprType): CelResult {
     if (isCelResult(native)) {
       return native;
-    } else if (native instanceof eval_pb.ExprValue) {
+    } else if (native instanceof ExprValue) {
       return this.exprResultToCel(native);
-    } else if (native instanceof value_pb.Value) {
+    } else if (native instanceof Value) {
       return this.valToCel(native);
-    } else if (native instanceof value_pb.ListValue) {
+    } else if (native instanceof ListValue) {
       return new CelList(native.values, this, type.LIST);
-    } else if (native instanceof value_pb.MapValue) {
-      const map = new Map<value_pb.Value, value_pb.Value>();
+    } else if (native instanceof MapValue) {
+      const map = new Map<Value, Value>();
       native.entries.forEach((entry) => {
         if (entry.key === undefined || entry.value === undefined) {
           throw new Error("Invalid map entry: " + entry);
@@ -181,8 +178,8 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("Unsupported type: " + native);
   }
 
-  fromCel(cel: CelVal): eval_pb.ExprValue {
-    return new eval_pb.ExprValue({
+  fromCel(cel: CelVal): ExprValue {
+    return new ExprValue({
       kind: {
         case: "value",
         value: this.celToValue(cel),
@@ -190,50 +187,50 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     });
   }
 
-  celToValue(cel: CelVal): value_pb.Value {
+  celToValue(cel: CelVal): Value {
     if (typeof cel === "boolean") {
-      return new value_pb.Value({ kind: { case: "boolValue", value: cel } });
+      return new Value({ kind: { case: "boolValue", value: cel } });
     } else if (typeof cel === "bigint") {
-      return new value_pb.Value({
+      return new Value({
         kind: { case: "int64Value", value: cel },
       });
     } else if (cel instanceof CelUint) {
-      return new value_pb.Value({
+      return new Value({
         kind: { case: "uint64Value", value: cel.value.valueOf() },
       });
     } else if (typeof cel === "number") {
-      return new value_pb.Value({
+      return new Value({
         kind: { case: "doubleValue", value: cel },
       });
     } else if (typeof cel === "string") {
-      return new value_pb.Value({
+      return new Value({
         kind: { case: "stringValue", value: cel },
       });
     } else if (cel instanceof Uint8Array) {
-      return new value_pb.Value({
+      return new Value({
         kind: { case: "bytesValue", value: cel },
       });
     } else if (cel instanceof CelList) {
-      const list = new value_pb.ListValue();
+      const list = new ListValue();
       cel
         .getItems()
         .forEach((val) => list.values.push(this.celToValue(val as CelVal)));
-      return new value_pb.Value({ kind: { case: "listValue", value: list } });
+      return new Value({ kind: { case: "listValue", value: list } });
     } else if (cel instanceof CelMap) {
-      const map = new value_pb.MapValue();
+      const map = new MapValue();
       cel.value.forEach((val, key) => {
         map.entries.push(
-          new value_pb.MapValue_Entry({
+          new MapValue_Entry({
             key: this.celToValue(key as CelVal),
             value: this.celToValue(val as CelVal),
           })
         );
       });
-      return new value_pb.Value({ kind: { case: "mapValue", value: map } });
+      return new Value({ kind: { case: "mapValue", value: map } });
     } else if (cel === null) {
-      return new value_pb.Value({ kind: { case: "nullValue", value: 0 } });
+      return new Value({ kind: { case: "nullValue", value: 0 } });
     } else if (cel instanceof CelType) {
-      return new value_pb.Value({
+      return new Value({
         kind: { case: "typeValue", value: cel.name },
       });
     }
@@ -241,8 +238,8 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("Unsupported type: " + cel.constructor.name);
   }
 
-  valueToExprVal(val: value_pb.Value): eval_pb.ExprValue {
-    return new eval_pb.ExprValue({
+  valueToExprVal(val: Value): ExprValue {
+    return new ExprValue({
       kind: {
         case: "value",
         value: val,
@@ -250,18 +247,18 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     });
   }
 
-  celToExprVal(cel: CelVal): eval_pb.ExprValue {
-    const val = new eval_pb.ExprValue();
+  celToExprVal(cel: CelVal): ExprValue {
+    const val = new ExprValue();
     if (cel === null) {
       val.kind = {
         case: "value",
-        value: new value_pb.Value({ kind: { case: "nullValue", value: 0 } }),
+        value: new Value({ kind: { case: "nullValue", value: 0 } }),
       };
     }
     return val;
   }
 
-  exprResultToCel(val: eval_pb.ExprValue): CelResult {
+  exprResultToCel(val: ExprValue): CelResult {
     switch (val.kind.case) {
       case "value":
         return this.valToCel(val.kind.value);
@@ -269,7 +266,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("unimplemented: " + val.kind.case);
   }
 
-  valToCel(val: value_pb.Value): CelVal {
+  valToCel(val: Value): CelVal {
     switch (val.kind.case) {
       case "nullValue":
         return null;
@@ -320,13 +317,10 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("unimplemented: " + value.typeUrl);
   }
 
-  equals(_lhs: eval_pb.ExprValue, _rhs: eval_pb.ExprValue): boolean {
+  equals(_lhs: ExprValue, _rhs: ExprValue): boolean {
     throw new Error("Method not implemented.");
   }
-  compare(
-    _lhs: eval_pb.ExprValue,
-    _rhs: eval_pb.ExprValue
-  ): number | undefined {
+  compare(_lhs: ExprValue, _rhs: ExprValue): number | undefined {
     throw new Error("Method not implemented.");
   }
 }

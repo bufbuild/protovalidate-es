@@ -1,4 +1,13 @@
 import {
+  Constant,
+  Expr,
+  Expr_Call,
+  Expr_Comprehension,
+  Expr_CreateList,
+  Expr_CreateStruct,
+  Expr_Select,
+} from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
+import {
   Any,
   BoolValue,
   BytesValue,
@@ -7,37 +16,38 @@ import {
   StringValue,
   UInt64Value,
 } from "@bufbuild/protobuf";
-
 import {
+  ConcreteAttributeFactory,
   type Access,
   type Attribute,
   type AttributeFactory,
-  ConcreteAttributeFactory,
 } from "./access";
-import { type Activation, VarActivation } from "./activation";
+import { VarActivation, type Activation } from "./activation";
 import { CEL_ADAPTER } from "./adapter/cel";
 import { type CallDispatch, type Dispatcher } from "./func";
 import * as opc from "./gen/dev/cel/expr/operator_const";
-import { syntax_pb } from "@bufbuild/cel-es-proto";
-import { type RawResult, RawVal } from "./value/adapter";
+import { RawVal, type RawResult } from "./value/adapter";
 import { EMPTY_LIST, EMPTY_MAP, EMPTY_PROVIDER } from "./value/empty";
-import { CelError, CelObject, CelUint, CelUnknown } from "./value/value";
 import { Namespace } from "./value/namespace";
 import { type CelValProvider } from "./value/provider";
 import * as type from "./value/type";
 import {
+  CelError,
   CelList,
-  type CelValAdapter,
-  type CelResult,
-  type CelVal,
+  CelMap,
+  CelObject,
+  CelType,
+  CelUint,
+  CelUnknown,
   coerceToBigInt,
   coerceToBool,
   coerceToBytes,
   coerceToNumber,
   coerceToString,
   coerceToValues,
-  CelType,
-  CelMap,
+  type CelResult,
+  type CelVal,
+  type CelValAdapter,
 } from "./value/value";
 
 export class Planner {
@@ -50,7 +60,7 @@ export class Planner {
     this.factory = new ConcreteAttributeFactory(this.provider, this.namespace);
   }
 
-  public plan(expr: syntax_pb.Expr): Interpretable {
+  public plan(expr: Expr): Interpretable {
     const id = Number(expr.id);
     switch (expr.exprKind.case) {
       case "identExpr":
@@ -75,10 +85,7 @@ export class Planner {
     }
   }
 
-  planComprehension(
-    id: number,
-    value: syntax_pb.Expr_Comprehension
-  ): Interpretable {
+  planComprehension(id: number, value: Expr_Comprehension): Interpretable {
     if (
       value.accuInit === undefined ||
       value.iterRange === undefined ||
@@ -106,7 +113,7 @@ export class Planner {
     );
   }
 
-  planSelect(id: number, expr: syntax_pb.Expr_Select): Interpretable {
+  planSelect(id: number, expr: Expr_Select): Interpretable {
     if (expr.operand === undefined) {
       throw new Error("invalid select");
     }
@@ -124,7 +131,7 @@ export class Planner {
     return attr;
   }
 
-  planCreateObj(id: number, expr: syntax_pb.Expr_CreateStruct): Interpretable {
+  planCreateObj(id: number, expr: Expr_CreateStruct): Interpretable {
     const typeName = this.resolveType(expr.messageName);
     if (typeName === undefined) {
       return new EvalError(id, "unknown type: " + expr.messageName);
@@ -157,10 +164,7 @@ export class Planner {
     return new EvalObj(id, typeName, keys, values, optionals, this.provider);
   }
 
-  planCreateStruct(
-    id: number,
-    expr: syntax_pb.Expr_CreateStruct
-  ): Interpretable {
+  planCreateStruct(id: number, expr: Expr_CreateStruct): Interpretable {
     if (expr.messageName !== "") {
       return this.planCreateObj(id, expr);
     }
@@ -192,7 +196,7 @@ export class Planner {
     return new EvalMap(id, keys, values, optionals);
   }
 
-  planCreateList(id: number, expr: syntax_pb.Expr_CreateList): Interpretable {
+  planCreateList(id: number, expr: Expr_CreateList): Interpretable {
     const optionals = undefined;
     if (expr.optionalIndices.length > 0) {
       // set optionals to an array of booleans the same length as the list
@@ -212,7 +216,7 @@ export class Planner {
     );
   }
 
-  private planCall(id: number, call: syntax_pb.Expr_Call): Interpretable {
+  private planCall(id: number, call: Expr_Call): Interpretable {
     // Check if the function is a qualified name.
     if (call.target !== undefined) {
       const qualName = toQualifiedName(call.target);
@@ -263,7 +267,7 @@ export class Planner {
 
   planCallConditional(
     id: number,
-    _call: syntax_pb.Expr_Call,
+    _call: Expr_Call,
     args: Interpretable[]
   ): Interpretable {
     const cond = args[0];
@@ -284,7 +288,7 @@ export class Planner {
   }
 
   planCallIndex(
-    _call: syntax_pb.Expr_Call,
+    _call: Expr_Call,
     args: Interpretable[],
     opt: boolean
   ): Interpretable {
@@ -304,7 +308,7 @@ export class Planner {
     return attr;
   }
 
-  private constVal(val: syntax_pb.Constant): CelVal {
+  private constVal(val: Constant): CelVal {
     switch (val.constantKind.case) {
       case "stringValue":
         return val.constantKind.value;
@@ -743,7 +747,7 @@ export class EvalFold implements Interpretable {
   }
 }
 
-function toQualifiedName(expr: syntax_pb.Expr): string | undefined {
+function toQualifiedName(expr: Expr): string | undefined {
   switch (expr.exprKind.case) {
     case "identExpr":
       return expr.exprKind.value.name;

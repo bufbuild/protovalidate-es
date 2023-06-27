@@ -1,6 +1,15 @@
-import { syntax_pb } from "@bufbuild/cel-es-proto";
 import Parser from "web-tree-sitter";
 import { type CelParser } from "@bufbuild/cel-es";
+import {
+  Constant,
+  Expr,
+  Expr_Call,
+  Expr_CreateList,
+  Expr_Ident,
+  Expr_Select,
+  ParsedExpr,
+  SourceInfo,
+} from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
 
 export class TreeSitterParser implements CelParser {
   private parser: Parser;
@@ -9,7 +18,7 @@ export class TreeSitterParser implements CelParser {
     this.parser = parser;
   }
 
-  parse(expr: string): syntax_pb.ParsedExpr {
+  parse(expr: string): ParsedExpr {
     const tree = this.parser.parse(expr);
     return parseTree(tree);
   }
@@ -17,14 +26,14 @@ export class TreeSitterParser implements CelParser {
 
 class ParseContext {
   prevId = 0;
-  readonly sourceInfo = new syntax_pb.SourceInfo();
+  readonly sourceInfo = new SourceInfo();
 
   nextId(): number {
     return ++this.prevId;
   }
 
-  newExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
-    const expr = new syntax_pb.Expr();
+  newExpr(node: Parser.SyntaxNode): Expr {
+    const expr = new Expr();
     expr.id = BigInt(this.nextId());
     this.sourceInfo.positions[String(expr.id)] = node.startIndex;
     return expr;
@@ -34,8 +43,8 @@ class ParseContext {
     return BigInt(node.text);
   }
 
-  parseBinaryExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
-    const callExpr = new syntax_pb.Expr_Call();
+  parseBinaryExpr(node: Parser.SyntaxNode): Expr {
+    const callExpr = new Expr_Call();
     const opNode = node.child(1)!;
     callExpr.function = `_${opNode.text}_`;
     callExpr.args.push(this.parseExpr(node.child(0)!));
@@ -48,8 +57,8 @@ class ParseContext {
     return expr;
   }
 
-  parseSelectExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
-    const selectExpr = new syntax_pb.Expr_Select();
+  parseSelectExpr(node: Parser.SyntaxNode): Expr {
+    const selectExpr = new Expr_Select();
     selectExpr.operand = this.parseExpr(node.child(0)!);
     selectExpr.field = node.child(2)!.text;
     const expr = this.newExpr(node.child(1)!);
@@ -60,8 +69,8 @@ class ParseContext {
     return expr;
   }
 
-  parseCallExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
-    const callExpr = new syntax_pb.Expr_Call();
+  parseCallExpr(node: Parser.SyntaxNode): Expr {
+    const callExpr = new Expr_Call();
     callExpr.function = node.childForFieldName("function")!.text;
     const expr = this.newExpr(node);
     const args = node.childForFieldName("arguments")!;
@@ -81,7 +90,7 @@ class ParseContext {
     return expr;
   }
 
-  parseStringLiteral(node: Parser.SyntaxNode): syntax_pb.Expr {
+  parseStringLiteral(node: Parser.SyntaxNode): Expr {
     const expr = this.newExpr(node);
     const kind = node.childForFieldName("kind");
     let isBytes = false;
@@ -135,7 +144,7 @@ class ParseContext {
       }
       expr.exprKind = {
         case: "constExpr",
-        value: new syntax_pb.Constant({
+        value: new Constant({
           constantKind: {
             case: "bytesValue",
             value: bytes,
@@ -145,7 +154,7 @@ class ParseContext {
     } else {
       expr.exprKind = {
         case: "constExpr",
-        value: new syntax_pb.Constant({
+        value: new Constant({
           constantKind: {
             case: "stringValue",
             value: value,
@@ -156,9 +165,9 @@ class ParseContext {
     return expr;
   }
 
-  parseListExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
+  parseListExpr(node: Parser.SyntaxNode): Expr {
     const expr = this.newExpr(node);
-    const listExpr = new syntax_pb.Expr_CreateList();
+    const listExpr = new Expr_CreateList();
     for (let i = 0; i < node.namedChildCount; i++) {
       const child = node.namedChild(i)!;
       listExpr.elements.push(this.parseExpr(child));
@@ -170,7 +179,7 @@ class ParseContext {
     return expr;
   }
 
-  parseExpr(node: Parser.SyntaxNode): syntax_pb.Expr {
+  parseExpr(node: Parser.SyntaxNode): Expr {
     switch (node.type) {
       case "binary_expression":
         return this.parseBinaryExpr(node);
@@ -180,7 +189,7 @@ class ParseContext {
         const expr = this.newExpr(node);
         expr.exprKind = {
           case: "identExpr",
-          value: new syntax_pb.Expr_Ident({
+          value: new Expr_Ident({
             name: node.text,
           }),
         };
@@ -196,7 +205,7 @@ class ParseContext {
         const expr = this.newExpr(node);
         expr.exprKind = {
           case: "constExpr",
-          value: new syntax_pb.Constant({
+          value: new Constant({
             constantKind: {
               case: "int64Value",
               value: this.parseIntLiteral(node),
@@ -214,9 +223,9 @@ class ParseContext {
   }
 }
 
-export function parseTree(tree: Parser.Tree): syntax_pb.ParsedExpr {
+export function parseTree(tree: Parser.Tree): ParsedExpr {
   const ctx = new ParseContext();
-  const expr = new syntax_pb.ParsedExpr();
+  const expr = new ParsedExpr();
   if (tree.rootNode.firstChild !== null) {
     expr.expr = ctx.parseExpr(tree.rootNode.firstChild);
   }
