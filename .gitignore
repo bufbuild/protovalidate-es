@@ -11,6 +11,7 @@ lerna-debug.log*
 /packages/*/dist
 node_modules
 *.local
+.antlr/
 
 # Editor directories and files
 .vscode/*

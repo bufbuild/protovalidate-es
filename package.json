@@ -8,6 +8,7 @@
     "packages/cel-es-proto",
     "packages/cel-es",
     "packages/cel-es-conformance",
+    "packages/cel-es-parse-antlr4",
     "packages/cel-es-parse-web",
     "packages/cel-es-repl-web"
   ],
