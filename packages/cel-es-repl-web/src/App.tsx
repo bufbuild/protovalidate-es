@@ -4,7 +4,6 @@ import { CelEnv, CelError, CelResult, CelUnknown, NATIVE_ADAPTER, makeStringExtF
 import { loadCelParser } from '@bufbuild/cel-es-parse-web';
 import { Timestamp } from '@bufbuild/protobuf'
 
-
 const APP_ENV = new CelEnv();
 APP_ENV.addFuncs(makeStringExtFuncRegistry());
 loadCelParser('tree-sitter-cel.wasm').then(parser => {
