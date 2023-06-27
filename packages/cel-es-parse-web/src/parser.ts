@@ -1,5 +1,19 @@
 import { syntax_pb } from "@bufbuild/cel-es-proto";
 import Parser from "web-tree-sitter";
+import { type CelParser } from "@bufbuild/cel-es";
+
+export class TreeSitterParser implements CelParser {
+  private parser: Parser;
+
+  constructor(parser: Parser) {
+    this.parser = parser;
+  }
+
+  parse(expr: string): syntax_pb.ParsedExpr {
+    const tree = this.parser.parse(expr);
+    return parseTree(tree);
+  }
+}
 
 class ParseContext {
   prevId = 0;

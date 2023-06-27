@@ -1,11 +1,15 @@
 {
   "private": true,
   "scripts": {
-    "build": "npm run build -w packages/cel-es-proto && npm run build -w packages/cel-es && npm run build -w packages/cel-es-parse-web",
+    "build": "npm run build -ws",
     "test": "npm run test -ws --if-present"
   },
   "workspaces": [
-    "packages/*"
+    "packages/cel-es-proto",
+    "packages/cel-es",
+    "packages/cel-es-conformance",
+    "packages/cel-es-parse-web",
+    "packages/cel-es-repl-web"
   ],
   "devDependencies": {
     "@bufbuild/buf": "^1.21.0-1",
