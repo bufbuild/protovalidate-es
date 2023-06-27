@@ -10,6 +10,7 @@
   },
   "sideEffects": false,
   "scripts": {
+    "test": "jest",
     "clean": "rm -rf ./dist/cjs/* ./dist/esm/* ./dist/types/*",
     "generate": "",
     "build": "npm run build:cjs && npm run build:esm+types",
@@ -19,7 +20,8 @@
   "dependencies": {
     "@bufbuild/cel-es-proto": "^0.0.1",
     "@bufbuild/protobuf": "^1.2.1",
-    "date-fns-tz": "^2.0.0"
+    "date-fns-tz": "^2.0.0",
+    "jest": "^29.5.0"
   },
   "main": "./dist/cjs/index.js",
   "types": "./dist/types/index.d.ts",
@@ -29,5 +31,9 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     }
+  },
+  "devDependencies": {
+    "esbuild": "^0.18.10",
+    "esbuild-jest": "^0.5.0"
   }
 }

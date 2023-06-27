@@ -1,11 +1,10 @@
+import { describe, test, expect } from "@jest/globals";
 import { CEL_ADAPTER } from "../adapter/cel";
 import { NATIVE_ADAPTER } from "../adapter/native";
 import { EMPTY_LIST, EMPTY_MAP } from "./empty";
-import { CelList } from "./list";
-import { CelMap } from "./map";
 import { Namespace } from "./namespace";
-import { CelUint } from "./scalar";
-import { CelVal } from "./value";
+import { CelList, CelMap, CelUint, type CelVal } from "./value";
+import * as type from "./type";
 
 describe("adapter tests", () => {
   test("main namespace", () => {
@@ -91,13 +90,15 @@ describe("adapter tests", () => {
     expect(NATIVE_ADAPTER.fromCel(EMPTY_LIST)).toStrictEqual([]);
 
     expect(NATIVE_ADAPTER.toCel([1, 2, 3])).toStrictEqual(
-      new CelList([1, 2, 3], NATIVE_ADAPTER)
+      new CelList([1, 2, 3], NATIVE_ADAPTER, type.LIST)
     );
     expect(
-      NATIVE_ADAPTER.fromCel(new CelList([1, 2, 3], NATIVE_ADAPTER))
+      NATIVE_ADAPTER.fromCel(new CelList([1, 2, 3], NATIVE_ADAPTER, type.LIST))
     ).toStrictEqual([1, 2, 3]);
     expect(
-      NATIVE_ADAPTER.fromCel(new CelList([1n, new CelUint(2n), 3], CEL_ADAPTER))
+      NATIVE_ADAPTER.fromCel(
+        new CelList([1n, new CelUint(2n), 3], CEL_ADAPTER, type.DYN_MAP)
+      )
     ).toStrictEqual([1n, 2n, 3]);
   });
 
@@ -111,7 +112,7 @@ describe("adapter tests", () => {
       ["c", 3],
     ]);
     expect(NATIVE_ADAPTER.toCel(testMap)).toStrictEqual(
-      new CelMap(testMap, NATIVE_ADAPTER)
+      new CelMap(testMap, NATIVE_ADAPTER, type.DYN_MAP)
     );
     expect(
       NATIVE_ADAPTER.fromCel(
@@ -121,7 +122,8 @@ describe("adapter tests", () => {
             ["b", new CelUint(2n)],
             ["c", 3],
           ]),
-          CEL_ADAPTER
+          CEL_ADAPTER,
+          type.DYN_MAP
         )
       )
     ).toStrictEqual(testMap);

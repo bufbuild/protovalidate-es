@@ -1,3 +1,4 @@
+import { describe, test, expect } from "@jest/globals";
 import { createRegistry } from "@bufbuild/protobuf";
 
 import { EmptyActivation, ObjectActivation } from "../activation";
@@ -5,16 +6,18 @@ import { CEL_ADAPTER } from "../adapter/cel";
 import { EXPR_VAL_ADAPTER } from "../adapter/exprval";
 import { NATIVE_ADAPTER } from "../adapter/native";
 import { ProtoValAdapter, ProtoValProvider } from "../adapter/proto";
-import { parseExpr } from "../cparse";
 import { FuncRegistry } from "../func";
-import { Expr } from "../gen/dev/cel/expr/syntax_pb";
+import { syntax_pb } from "@bufbuild/cel-es-proto";
 import { STRINGS_EXT_TEST } from "../gen/testdata/strings_const";
 import { Planner } from "../planner";
 import { STD_FUNCS } from "../std/std";
-import { CelError, CelUnknown } from "../value/error";
+import { CelError, CelUnknown, CelUint } from "../value/value";
 import { Namespace } from "../value/namespace";
-import { CelUint } from "../value/scalar";
 import { addStringsExt, Formatter } from "./strings";
+
+function parseExpr(text: string): syntax_pb.ParsedExpr {
+  throw new Error("Not implemented");
+}
 
 describe("Strings Ext Test", () => {
   const provider = new ProtoValProvider(new ProtoValAdapter(createRegistry()));
@@ -22,13 +25,13 @@ describe("Strings Ext Test", () => {
     STRINGS_EXT_TEST.section.forEach((section) => {
       describe(section.name, () => {
         section.test.forEach((tc) => {
-          it(tc.name === "" ? tc.expr : tc.name, () => {
+          test(tc.name === "" ? tc.expr : tc.name, () => {
             const extFuncs = new FuncRegistry(STD_FUNCS);
             addStringsExt(extFuncs);
             const namespace = new Namespace(tc.container);
             const planner = new Planner(extFuncs, provider, namespace);
             const parsed = parseExpr(tc.expr);
-            const plan = planner.plan(parsed.expr ?? new Expr());
+            const plan = planner.plan(parsed.expr ?? new syntax_pb.Expr());
             const ctx = new ObjectActivation(tc.bindings, EXPR_VAL_ADAPTER);
             const result = plan.eval(ctx);
             switch (tc.resultMatcher.case) {
@@ -682,7 +685,7 @@ describe("string.format", () => {
         "'" + tc.format + "'.format([" + (tc.formatArgs ?? "") + "])";
       test(`${input}`, () => {
         const parsed = parseExpr(input);
-        const plan = planner.plan(parsed.expr ?? new Expr());
+        const plan = planner.plan(parsed.expr ?? new syntax_pb.Expr());
         const ctx =
           tc.dynArgs === undefined
             ? new EmptyActivation()

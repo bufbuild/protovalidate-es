@@ -1,8 +1,9 @@
+import { describe, test, expect } from "@jest/globals"
 import { Duration } from "@bufbuild/protobuf";
 
 import { CEL_ADAPTER } from "../adapter/cel";
 import { NATIVE_ADAPTER } from "../adapter/native";
-import { CelUint } from "./scalar";
+import { CelUint } from "./value";
 import * as type from "./type";
 
 describe("scalar", () => {

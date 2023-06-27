@@ -1,15 +1,17 @@
 import { Any, Duration, Timestamp } from "@bufbuild/protobuf";
 
 import { eval_pb, value_pb } from "@bufbuild/cel-es-proto";
-import { CelValAdapter } from "../value/adapter";
-import { CelError } from "../value/error";
-import { CelList } from "../value/list";
-import { CelMap } from "../value/map";
-import { CelUint } from "../value/scalar";
+import {
+  type CelValAdapter,
+  CelError,
+  CelList,
+  CelMap,
+  CelUint,
+} from "../value/value";
 import * as type from "../value/type";
 import {
-  CelResult,
-  CelVal,
+  type CelResult,
+  type CelVal,
   CelType,
   isCelResult,
   isCelVal,
@@ -164,7 +166,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     } else if (native instanceof value_pb.Value) {
       return this.valToCel(native);
     } else if (native instanceof value_pb.ListValue) {
-      return new CelList(native.values, this);
+      return new CelList(native.values, this, type.LIST);
     } else if (native instanceof value_pb.MapValue) {
       const map = new Map<value_pb.Value, value_pb.Value>();
       native.entries.forEach((entry) => {
@@ -174,7 +176,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
         map.set(entry.key, entry.value);
       });
 
-      return new CelMap(map, this);
+      return new CelMap(map, this, type.DYN_MAP);
     }
     throw new Error("Unsupported type: " + native);
   }
@@ -284,7 +286,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
       case "stringValue":
         return val.kind.value;
       case "listValue":
-        return new CelList(val.kind.value.values, this);
+        return new CelList(val.kind.value.values, this, type.LIST);
       case "objectValue":
         return this.objectToCel(val.kind.value);
       case "mapValue": {
@@ -295,7 +297,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
           }
           map.set(this.valToCel(entry.key), entry.value);
         }
-        return new CelMap(map, this);
+        return new CelMap(map, this, type.DYN_MAP);
       }
       case "typeValue":
         return new CelType(val.kind.value);
