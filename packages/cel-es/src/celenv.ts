@@ -20,16 +20,21 @@ export class CelEnv {
   private protoProvider: ProtoValProvider;
   private dispatcher: OrderedDispatcher;
   private planner: Planner;
+  private parser: CelParser | undefined;
 
   public constructor(
-    private parser: CelParser,
+    parser: CelParser | undefined = undefined,
     registry: IMessageTypeRegistry = createRegistry()
   ) {
     this.protoProvider = new ProtoValProvider(new ProtoValAdapter(registry));
     this.dispatcher = new OrderedDispatcher([STD_FUNCS]);
     this.planner = new Planner(this.dispatcher, this.protoProvider);
+    this.parser = parser;
   }
 
+  public setParser(parser: CelParser): void {
+    this.parser = parser;
+  }
   public setProtoRegistry(registry: IMessageTypeRegistry): void {
     this.protoProvider.adapter = new ProtoValAdapter(registry);
   }
@@ -53,6 +58,9 @@ export class CelEnv {
   }
 
   public parse(expr: string): syntax_pb.ParsedExpr {
+    if (this.parser === undefined) {
+      throw new Error("parser not set");
+    }
     return this.parser.parse(expr);
   }
 

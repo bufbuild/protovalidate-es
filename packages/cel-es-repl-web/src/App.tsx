@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import './App.css'
-import Parser from 'web-tree-sitter';
 import { CelEnv, CelError, CelResult, CelUnknown, NATIVE_ADAPTER, makeStringExtFuncRegistry } from '@bufbuild/cel-es';
-import { newCelParser } from '@bufbuild/cel-es-parse-web';
+import { loadCelParser } from '@bufbuild/cel-es-parse-web';
 import { Timestamp } from '@bufbuild/protobuf'
 
-await Parser.init();
-const parser = new Parser;
-const CEL = await Parser.Language.load('tree-sitter-cel.wasm');
-parser.setLanguage(CEL);
-const CEL_PARSER = newCelParser(parser);
+
+const APP_ENV = new CelEnv();
+APP_ENV.addFuncs(makeStringExtFuncRegistry());
+loadCelParser('tree-sitter-cel.wasm').then(parser => {
+  APP_ENV.setParser(parser);
+});
 
 function processLet(env: CelEnv, args: string): CelResult {
   const [name, expr] = args.split('=');
@@ -50,8 +50,6 @@ function processInput(env: CelEnv, input: string): string {
   return String(NATIVE_ADAPTER.fromCel(result));
 }
 
-const APP_ENV = new CelEnv(CEL_PARSER);
-APP_ENV.addFuncs(makeStringExtFuncRegistry());
 
 function App() {
   const [inputValue, setInputValue] = useState("");
