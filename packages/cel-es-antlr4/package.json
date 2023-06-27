@@ -1,12 +1,12 @@
 {
-  "name": "@bufbuild/cel-es-parse-antlr4",
+  "name": "@bufbuild/cel-es-antlr4",
   "version": "0.0.1",
-  "description": "An antlr4 based parser for the CEL language",
+  "description": "An antlr4 based CEL language implementation",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/bufbuild/cel-es.git",
-    "directory": "packages/cel-es-parse-antlr4"
+    "directory": "packages/cel-es-antlr4"
   },
   "sideEffects": false,
   "scripts": {
@@ -14,7 +14,7 @@
     "generate": "antlr4ts -visitor CEL.g4 -o src/gen",
     "build": "npm run build:cjs && npm run build:esm+types",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
-    "build:esm+types": "tsc --project tsconfig.json --module ES2015 --verbatimModuleSyntax --outDir ./dist/esm --declaration --declarationDir ./dist/types && echo >./dist/esm/package.json '{\"type\":\"module\", \"sideEffects\":false}'",
+    "build:esm+types": "tsc --project tsconfig.json --module ES2015 --outDir ./dist/esm --declaration --declarationDir ./dist/types && echo >./dist/esm/package.json '{\"type\":\"module\", \"sideEffects\":false}'",
     "run": "npm run build && node ./dist/cjs/index.js"
   },
   "dependencies": {
