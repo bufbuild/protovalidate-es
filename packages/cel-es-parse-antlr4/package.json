@@ -11,7 +11,7 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rm -rf ./dist/cjs/* ./dist/esm/* ./dist/types/*",
-    "generate": "",
+    "generate": "antlr4ts -visitor CEL.g4 -o src/gen",
     "build": "npm run build:cjs && npm run build:esm+types",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm+types": "tsc --project tsconfig.json --module ES2015 --verbatimModuleSyntax --outDir ./dist/esm --declaration --declarationDir ./dist/types && echo >./dist/esm/package.json '{\"type\":\"module\", \"sideEffects\":false}'",
@@ -29,5 +29,9 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     }
+  },
+  "devDependencies": {
+    "antlr4ts": "^0.5.0-alpha.4",
+    "antlr4ts-cli": "^0.5.0-alpha.4"
   }
 }
