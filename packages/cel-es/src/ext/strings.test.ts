@@ -16,7 +16,7 @@ import { addStringsExt, Formatter } from "./strings";
 import {
   Expr,
   ParsedExpr,
-} from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
+} from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb.js";
 
 function parseExpr(text: string): ParsedExpr {
   throw new Error("Not implemented");
