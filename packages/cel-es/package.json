@@ -10,7 +10,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "clean": "rm -rf ./dist/cjs/* ./dist/esm/* ./dist/types/*",
     "generate": "",
     "build": "npm run build:cjs && npm run build:esm+types",
