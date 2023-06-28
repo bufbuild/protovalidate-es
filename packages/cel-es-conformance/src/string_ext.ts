@@ -1,5 +1,6 @@
-import { CelUint } from "@bufbuild/cel-es";
+import { CelUint, parseDuration } from "@bufbuild/cel-es";
 import { SimpleTestFile } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/conformance/simple_pb";
+import { Timestamp } from "@bufbuild/protobuf";
 
 export const STRINGS_FORMAT_TEST_CASES = [
   {
@@ -356,24 +357,24 @@ export const STRINGS_FORMAT_TEST_CASES = [
     },
     expectedOutput: "NaN: NaN, infinity: ∞",
   },
-  // {
-  //   name:       "dyntype support for timestamp",
-  //   format:     "dyntype timestamp: %s",
-  //   formatArgs: `dynTime`,
-  //   dynArgs: {
-  //     "dynTime": time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC),
-  //   },
-  //   expectedOutput:        "dyntype timestamp: 2009-11-10T23:00:00Z",
-  // },
-  // {
-  //   name:       "dyntype support for duration",
-  //   format:     "dyntype duration: %s",
-  //   formatArgs: `dynDuration`,
-  //   dynArgs: {
-  //     "dynDuration": mustParseDuration("2h25m47s"),
-  //   },
-  //   expectedOutput:        "dyntype duration: 8747s",
-  // },
+  {
+    name: "dyntype support for timestamp",
+    format: "dyntype timestamp: %s",
+    formatArgs: `dynTime`,
+    dynArgs: {
+      dynTime: Timestamp.fromJson("2009-11-10T23:00:00Z"),
+    },
+    expectedOutput: "dyntype timestamp: 2009-11-10T23:00:00Z",
+  },
+  {
+    name: "dyntype support for duration",
+    format: "dyntype duration: %s",
+    formatArgs: `dynDuration`,
+    dynArgs: {
+      dynDuration: parseDuration("2h25m47s"),
+    },
+    expectedOutput: "dyntype duration: 8747s",
+  },
   {
     name: "dyntype support for lists",
     format: "dyntype list: %s",
@@ -391,7 +392,7 @@ export const STRINGS_FORMAT_TEST_CASES = [
   //     dynMap: {
   //       strKey: "x",
   //       true: 42,
-  //       "6": mustParseDuration("7m2s"),
+  //       "6": parseDuration("7m2s"),
   //     },
   //   },
   //   expectedOutput: `dyntype map: {"strKey":"x", 6:duration("422s"), true:42}`,

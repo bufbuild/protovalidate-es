@@ -20,7 +20,6 @@ import {
   CelType,
   ConcreteType,
   WrapperType,
-  CelError,
   CelList,
   CelMap,
 } from "./value";
@@ -39,61 +38,8 @@ export const STRING = new ConcreteType("string", "");
 export const WRAP_STRING = new WrapperType(STRING);
 export const BYTES = new ConcreteType("bytes", new Uint8Array());
 export const WRAP_BYTES = new WrapperType(BYTES);
-
-class TimestampType extends CelType {
-  constructor() {
-    super("google.protobuf.Timestamp");
-  }
-
-  public from(
-    id: number,
-    seconds: bigint,
-    nanos: number
-  ): Timestamp | CelError {
-    if (nanos >= 1000000000) {
-      seconds += BigInt(nanos / 1000000000);
-      nanos = nanos % 1000000000;
-    } else if (nanos < 0) {
-      const negSeconds = Math.floor(-nanos / 1000000000);
-      seconds -= BigInt(negSeconds);
-      nanos = nanos + negSeconds * 1000000000;
-    }
-    if (seconds > 253402300799n || seconds < -62135596800n) {
-      return CelError.badTimestamp(id, seconds, nanos);
-    }
-    return new Timestamp({ seconds: seconds, nanos: nanos });
-  }
-}
-
-export const TIMESTAMP = new TimestampType();
-
-class DurationType extends CelType {
-  constructor() {
-    super("google.protobuf.Duration");
-  }
-  public from(id: number, seconds: bigint, nanos: number): Duration | CelError {
-    if (nanos >= 1000000000) {
-      seconds += BigInt(nanos / 1000000000);
-      nanos = nanos % 1000000000;
-    } else if (nanos < 0) {
-      const negSeconds = Math.ceil(-nanos / 1000000000);
-      seconds -= BigInt(negSeconds);
-      nanos = nanos + negSeconds * 1000000000;
-    }
-    // Must fit in 64 bits of nanoseconds for compatibility with golang
-    const totalNanos = seconds * 1000000000n + BigInt(nanos);
-    if (
-      totalNanos > 9223372036854775807n ||
-      totalNanos < -9223372036854775808n
-    ) {
-      return CelError.badDuration(id, seconds, nanos);
-    }
-
-    return new Duration({ seconds: seconds, nanos: nanos });
-  }
-}
-
-export const DURATION = new DurationType();
+export const TIMESTAMP = new CelType("google.protobuf.Timestamp");
+export const DURATION = new CelType("google.protobuf.Duration");
 
 export class TypeType extends CelType {
   constructor(readonly elemType: CelType | undefined) {

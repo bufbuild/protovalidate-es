@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2020",
-    "lib": ["ES2017"],
+    "lib": ["ES2017", "DOM"],
     "esModuleInterop": false,
     "forceConsistentCasingInFileNames": true,
     "strict": true,

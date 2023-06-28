@@ -16,6 +16,8 @@ import {
   CelUnknown,
   CelList,
   CelUint,
+  newDuration,
+  newTimestamp,
 } from "../value/value";
 
 const MAX_INT = 9223372036854775807n;
@@ -293,26 +295,14 @@ const subDoubleFunc = Func.binary(
 const subTimeOp: StrictBinaryOp = (id, lhs, rhs) => {
   if (lhs instanceof Timestamp) {
     if (rhs instanceof Timestamp) {
-      return type.DURATION.from(
-        id,
-        lhs.seconds - rhs.seconds,
-        lhs.nanos - rhs.nanos
-      );
+      return newDuration(id, lhs.seconds - rhs.seconds, lhs.nanos - rhs.nanos);
     } else if (rhs instanceof Duration) {
-      return type.TIMESTAMP.from(
-        id,
-        lhs.seconds - rhs.seconds,
-        lhs.nanos - rhs.nanos
-      );
+      return newTimestamp(id, lhs.seconds - rhs.seconds, lhs.nanos - rhs.nanos);
     } else {
       return undefined;
     }
   } else if (lhs instanceof Duration && rhs instanceof Duration) {
-    return type.DURATION.from(
-      id,
-      lhs.seconds - rhs.seconds,
-      lhs.nanos - rhs.nanos
-    );
+    return newDuration(id, lhs.seconds - rhs.seconds, lhs.nanos - rhs.nanos);
   }
   return undefined;
 };

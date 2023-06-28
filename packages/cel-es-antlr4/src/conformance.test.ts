@@ -1,5 +1,8 @@
-import { describe, test, expect } from "@jest/globals";
-import { STRINGS_EXT_TEST } from "@bufbuild/cel-es-conformance";
+import { describe, test, expect } from "vitest";
+import {
+  STRINGS_EXT_TEST,
+  STRINGS_FORMAT_TEST_CASES,
+} from "@bufbuild/cel-es-conformance";
 import { newCelEnv } from "./index";
 import {
   CelError,
@@ -8,7 +11,9 @@ import {
   ObjectActivation,
   CEL_ADAPTER,
   EXPR_VAL_ADAPTER,
+  NATIVE_ADAPTER,
 } from "@bufbuild/cel-es";
+
 describe("Strings Ext Test", () => {
   const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry();
   describe(STRINGS_EXT_TEST.name, () => {
@@ -18,7 +23,6 @@ describe("Strings Ext Test", () => {
           test(tc.name === "" ? tc.expr : tc.name, () => {
             const env = newCelEnv(tc.container);
             env.addFuncs(STRINGS_EXT_FUNCS);
-
             const parsed = env.parse(tc.expr);
             const plan = env.plan(parsed);
             const ctx = new ObjectActivation(tc.bindings, EXPR_VAL_ADAPTER);
@@ -54,6 +58,33 @@ describe("Strings Ext Test", () => {
             }
           });
         });
+      });
+    });
+  });
+});
+
+describe("string.format", () => {
+  STRINGS_FORMAT_TEST_CASES.forEach((tc) => {
+    describe(tc.name, () => {
+      const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry(tc.locale);
+      const env = newCelEnv();
+      env.addFuncs(STRINGS_EXT_FUNCS);
+      // Create the input expression from 'format'.format([formatArgs])
+      const input =
+        "'" + tc.format + "'.format([" + (tc.formatArgs ?? "") + "])";
+      test(`${input}`, () => {
+        const parsed = env.parse(input);
+        const plan = env.plan(parsed);
+        const ctx = new ObjectActivation(
+          tc.dynArgs === undefined ? {} : tc.dynArgs,
+          NATIVE_ADAPTER
+        );
+        const result = plan.eval(ctx);
+        if (tc.err) {
+          expect(result).toBeInstanceOf(CelError);
+        } else {
+          expect(result).toStrictEqual(tc.expectedOutput);
+        }
       });
     });
   });

@@ -1,10 +1,9 @@
-import { describe, test, expect } from "@jest/globals"
+import { describe, test, expect } from "@jest/globals";
 import { Duration } from "@bufbuild/protobuf";
 
 import { CEL_ADAPTER } from "../adapter/cel";
 import { NATIVE_ADAPTER } from "../adapter/native";
-import { CelUint } from "./value";
-import * as type from "./type";
+import { CelUint, newDuration } from "./value";
 
 describe("scalar", () => {
   test("bool", () => {
@@ -23,21 +22,21 @@ describe("scalar", () => {
   });
 
   test("duration", () => {
-    let actual = type.DURATION.from(0, 0n, -1);
+    let actual = newDuration(0, 0n, -1);
     expect(actual).toBeInstanceOf(Duration);
     if (actual instanceof Duration) {
       expect(actual.seconds).toBe(-1n);
       expect(actual.nanos).toBe(999999999);
     }
 
-    actual = type.DURATION.from(0, 0n, -999999999);
+    actual = newDuration(0, 0n, -999999999);
     expect(actual).toBeInstanceOf(Duration);
     if (actual instanceof Duration) {
       expect(actual.seconds).toBe(-1n);
       expect(actual.nanos).toBe(1);
     }
 
-    actual = type.DURATION.from(0, 0n, -1000000000);
+    actual = newDuration(0, 0n, -1000000000);
     expect(actual).toBeInstanceOf(Duration);
     if (actual instanceof Duration) {
       expect(actual.seconds).toBe(-1n);

@@ -21,6 +21,96 @@ export function isCelNum(val: unknown): val is CelNum {
   );
 }
 
+export function newTimestamp(
+  id: number,
+  seconds: bigint,
+  nanos: number
+): Timestamp | CelError {
+  if (nanos >= 1000000000) {
+    seconds += BigInt(nanos / 1000000000);
+    nanos = nanos % 1000000000;
+  } else if (nanos < 0) {
+    const negSeconds = Math.floor(-nanos / 1000000000);
+    seconds -= BigInt(negSeconds);
+    nanos = nanos + negSeconds * 1000000000;
+  }
+  if (seconds > 253402300799n || seconds < -62135596800n) {
+    return CelError.badTimestamp(id, seconds, nanos);
+  }
+  return new Timestamp({ seconds: seconds, nanos: nanos });
+}
+
+export function newDuration(
+  id: number,
+  seconds: bigint,
+  nanos: number
+): Duration | CelError {
+  if (nanos >= 1000000000) {
+    seconds += BigInt(nanos / 1000000000);
+    nanos = nanos % 1000000000;
+  } else if (nanos < 0) {
+    const negSeconds = Math.ceil(-nanos / 1000000000);
+    seconds -= BigInt(negSeconds);
+    nanos = nanos + negSeconds * 1000000000;
+  }
+  // Must fit in 64 bits of nanoseconds for compatibility with golang
+  const totalNanos = seconds * 1000000000n + BigInt(nanos);
+  if (totalNanos > 9223372036854775807n || totalNanos < -9223372036854775808n) {
+    return CelError.badDuration(id, seconds, nanos);
+  }
+
+  return new Duration({ seconds: seconds, nanos: nanos });
+}
+
+// A duration string is a possibly signed sequence of
+// decimal numbers, each with optional fraction and a unit suffix,
+// such as "300ms", "-1.5h" or "2h45m".
+// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
+export function parseDuration(id: number, str: string): Duration | CelError {
+  // The regex grouping the number and the unit is:
+  const re = /([-+]?(?:\d+|\d+\.\d*|\d*\.\d+))(ns|us|µs|ms|s|m|h)/;
+  // Loop over the string matching the regex.
+  let seconds = 0n;
+  let nanos = 0;
+  let remaining = str;
+  while (remaining.length > 0) {
+    const match = re.exec(remaining);
+    if (match === null) {
+      return CelError.badDurationStr(id, "invalid syntax");
+    }
+    const [, numStr, unit] = match;
+    const num = Number(numStr);
+    if (isNaN(num)) {
+      return CelError.badDurationStr(id, "invalid syntax");
+    }
+    switch (unit) {
+      case "ns":
+        nanos += num;
+        break;
+      case "us":
+      case "µs":
+        nanos += num * 1000;
+        break;
+      case "ms":
+        nanos += num * 1000000;
+        break;
+      case "s":
+        seconds += BigInt(num);
+        break;
+      case "m":
+        seconds += BigInt(num * 60);
+        break;
+      case "h":
+        seconds += BigInt(num * 3600);
+        break;
+      default:
+        return CelError.badDurationStr(id, "invalid syntax");
+    }
+    remaining = remaining.slice(match[0].length);
+  }
+  return newDuration(id, seconds, nanos);
+}
+
 /** Cel Primitive types, which are the basic types that can be stored in a CelVal.  */
 export type CelPrim = boolean | CelNum | string | Uint8Array;
 export function isCelPrim(val: unknown): val is CelPrim {
