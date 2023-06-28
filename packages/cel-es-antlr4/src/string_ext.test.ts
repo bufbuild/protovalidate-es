@@ -10,7 +10,7 @@ import {
   ObjectActivation,
   NATIVE_ADAPTER,
 } from "@bufbuild/cel-es";
-import { runSimpleTestFile } from "./testing";
+import { runSimpleTestFile } from "@bufbuild/cel-es-conformance";
 
 describe("Strings Ext Test", () => {
   runSimpleTestFile(CEL_PARSER, STRINGS_EXT_TEST);

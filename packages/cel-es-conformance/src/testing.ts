@@ -7,7 +7,7 @@ import {
   ObjectActivation,
   CEL_ADAPTER,
   EXPR_VAL_ADAPTER,
-  CelParser,
+  type CelParser,
 } from "@bufbuild/cel-es";
 import {
   SimpleTest,

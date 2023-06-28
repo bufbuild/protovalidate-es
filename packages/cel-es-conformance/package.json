@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@buf/alfus_cel.bufbuild_es": "^1.2.1-20230626203212-40a4ec79694c.1",
-    "@bufbuild/cel-es": "^0.0.1"
+    "@bufbuild/cel-es": "^0.0.1",
+    "vitest": "^0.32.2"
   },
   "main": "./dist/cjs/index.js",
   "types": "./dist/types/index.d.ts",
