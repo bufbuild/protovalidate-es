@@ -1,6 +1,8 @@
-import { type CelParser } from "@bufbuild/cel-es";
+import { type CelParser, CelEnv } from "@bufbuild/cel-es";
 import { Antrl4Parser } from "./parser";
 
-export function newCelParser(): CelParser {
-  return new Antrl4Parser();
+export const CEL_PARSER: CelParser = new Antrl4Parser();
+
+export function newCelEnv(namespace: string | undefined = undefined): CelEnv {
+  return new CelEnv(namespace, CEL_PARSER);
 }

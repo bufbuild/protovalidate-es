@@ -13,6 +13,7 @@ import { OrderedDispatcher, type Dispatcher } from "./func";
 import { Planner, type Interpretable } from "./planner";
 import { STD_FUNCS } from "./std/std";
 import { CelError, CelUnknown, isCelVal, type CelResult } from "./value/value";
+import { Namespace } from "./value/namespace";
 
 export interface CelParser {
   parse(text: string): ParsedExpr;
@@ -27,12 +28,17 @@ export class CelEnv {
   private parser: CelParser | undefined;
 
   public constructor(
+    namespace: string | undefined = undefined,
     parser: CelParser | undefined = undefined,
     registry: IMessageTypeRegistry = createRegistry()
   ) {
     this.protoProvider = new ProtoValProvider(new ProtoValAdapter(registry));
     this.dispatcher = new OrderedDispatcher([STD_FUNCS]);
-    this.planner = new Planner(this.dispatcher, this.protoProvider);
+    this.planner = new Planner(
+      this.dispatcher,
+      this.protoProvider,
+      namespace === undefined ? undefined : new Namespace(namespace)
+    );
     this.parser = parser;
   }
 
