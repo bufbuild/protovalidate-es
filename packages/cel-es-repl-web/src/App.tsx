@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './App.css'
 import { CelEnv, CelError, CelResult, CelUnknown, NATIVE_ADAPTER, makeStringExtFuncRegistry } from '@bufbuild/cel-es';
-import { loadCelParser } from '@bufbuild/cel-es-parse-web';
+import { loadCelParser } from '@bufbuild/cel-es-web';
 import { Timestamp } from '@bufbuild/protobuf'
 
 const APP_ENV = new CelEnv();

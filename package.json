@@ -8,7 +8,7 @@
     "packages/cel-es",
     "packages/cel-es-conformance",
     "packages/cel-es-antlr4",
-    "packages/cel-es-parse-web",
+    "packages/cel-es-web",
     "packages/cel-es-repl-web"
   ],
   "devDependencies": {
