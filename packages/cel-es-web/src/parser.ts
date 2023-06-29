@@ -5,11 +5,14 @@ import {
   Expr,
   Expr_Call,
   Expr_CreateList,
+  Expr_CreateStruct,
+  Expr_CreateStruct_Entry,
   Expr_Ident,
   Expr_Select,
   ParsedExpr,
   SourceInfo,
 } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
+import { NullValue } from "@bufbuild/protobuf";
 
 export class TreeSitterParser implements CelParser {
   private parser: Parser;
@@ -46,7 +49,11 @@ class ParseContext {
   parseBinaryExpr(node: Parser.SyntaxNode): Expr {
     const callExpr = new Expr_Call();
     const opNode = node.child(1)!;
-    callExpr.function = `_${opNode.text}_`;
+    if (opNode.type === "in") {
+      callExpr.function = "@in";
+    } else {
+      callExpr.function = `_${opNode.text}_`;
+    }
     callExpr.args.push(this.parseExpr(node.child(0)!));
     callExpr.args.push(this.parseExpr(node.child(2)!));
     const expr = this.newExpr(opNode);
@@ -201,6 +208,19 @@ class ParseContext {
         return this.parseCallExpr(node);
       case "list_expression":
         return this.parseListExpr(node);
+      case "float_literal": {
+        const expr = this.newExpr(node);
+        expr.exprKind = {
+          case: "constExpr",
+          value: new Constant({
+            constantKind: {
+              case: "doubleValue",
+              value: parseFloat(node.text),
+            },
+          }),
+        };
+        return expr;
+      }
       case "int_literal": {
         const expr = this.newExpr(node);
         expr.exprKind = {
@@ -214,12 +234,157 @@ class ParseContext {
         };
         return expr;
       }
+      case "uint_literal": {
+        const expr = this.newExpr(node);
+        expr.exprKind = {
+          case: "constExpr",
+          value: new Constant({
+            constantKind: {
+              case: "uint64Value",
+              value: this.parseIntLiteral(node.firstNamedChild!),
+            },
+          }),
+        };
+        return expr;
+      }
+      case "true": {
+        const expr = this.newExpr(node);
+        expr.exprKind = {
+          case: "constExpr",
+          value: new Constant({
+            constantKind: {
+              case: "boolValue",
+              value: true,
+            },
+          }),
+        };
+        return expr;
+      }
+      case "false": {
+        const expr = this.newExpr(node);
+        expr.exprKind = {
+          case: "constExpr",
+          value: new Constant({
+            constantKind: {
+              case: "boolValue",
+              value: false,
+            },
+          }),
+        };
+        return expr;
+      }
+      case "null": {
+        const expr = this.newExpr(node);
+        expr.exprKind = {
+          case: "constExpr",
+          value: new Constant({
+            constantKind: {
+              case: "nullValue",
+              value: NullValue.NULL_VALUE,
+            },
+          }),
+        };
+        return expr;
+      }
       case "string_literal": {
         return this.parseStringLiteral(node);
       }
+      case "unary_expression": {
+        const expr = this.newExpr(node);
+        const unaryExpr = new Expr_Call();
+        unaryExpr.function = node.childForFieldName("operator")!.text + "_";
+        unaryExpr.args.push(this.parseExpr(node.childForFieldName("operand")!));
+        expr.exprKind = {
+          case: "callExpr",
+          value: unaryExpr,
+        };
+        return expr;
+      }
+      case "map_expression":
+        return this.parseMapExpr(node);
+      case "struct_expression":
+        return this.parseStructExpr(node);
+      case "index_expression":
+        return this.parseIndexExpr(node);
+      case "parenthesized_expression":
+        return this.parseExpr(node.namedChild(0)!);
+      case "conditional_expression":
+        return this.parseConditionalExpr(node);
       default:
-        throw new Error(`Unsupported node type: ${node.type}`);
+        throw new Error(`Unsupported node type: ${node}`);
     }
+  }
+
+  parseConditionalExpr(node: Parser.SyntaxNode): Expr {
+    const expr = this.newExpr(node);
+    const conditionalExpr = new Expr_Call();
+    conditionalExpr.function = "_?_:_";
+    conditionalExpr.args = [
+      this.parseExpr(node.childForFieldName("condition")!),
+      this.parseExpr(node.childForFieldName("consequence")!),
+      this.parseExpr(node.childForFieldName("alternative")!),
+    ];
+    return expr;
+  }
+
+  parseIndexExpr(node: Parser.SyntaxNode): Expr {
+    const expr = this.newExpr(node);
+    const indexExpr = new Expr_Call();
+    indexExpr.function = "_[_]";
+    indexExpr.target = this.parseExpr(node.childForFieldName("operand")!);
+    return expr;
+  }
+
+  parseStructExpr(node: Parser.SyntaxNode): Expr {
+    const structExpr = new Expr_CreateStruct();
+    const fields = node.childForFieldName("fields");
+    structExpr.messageName = node.childForFieldName("type")!.text;
+    if (fields !== null) {
+      for (let i = 0; i < fields.namedChildCount; i++) {
+        const field = fields.namedChild(i)!;
+        const key = field.childForFieldName("key")!;
+        const value = field.childForFieldName("value")!;
+        structExpr.entries.push(
+          new Expr_CreateStruct_Entry({
+            keyKind: {
+              case: "fieldKey",
+              value: key.text,
+            },
+            value: this.parseExpr(value),
+          })
+        );
+      }
+    }
+    const expr = this.newExpr(node);
+    expr.exprKind = {
+      case: "structExpr",
+      value: structExpr,
+    };
+    return expr;
+  }
+
+  parseMapExpr(node: Parser.SyntaxNode): Expr {
+    const expr = this.newExpr(node);
+    const mapExpr = new Expr_CreateStruct();
+    for (let i = 0; i < node.namedChildCount; i++) {
+      const child = node.namedChild(i)!;
+      const key = this.parseExpr(child.childForFieldName("key")!);
+      const value = this.parseExpr(child.childForFieldName("value")!);
+      mapExpr.entries.push(
+        new Expr_CreateStruct_Entry({
+          keyKind: {
+            case: "mapKey",
+            value: key,
+          },
+          value: value,
+        })
+      );
+    }
+    expr.exprKind = {
+      case: "structExpr",
+      value: mapExpr,
+    };
+    return expr;
   }
 }
 
