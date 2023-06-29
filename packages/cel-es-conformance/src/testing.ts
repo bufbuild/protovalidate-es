@@ -14,11 +14,19 @@ import {
   SimpleTestFile,
   SimpleTestSection,
 } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/conformance/simple_pb";
+import { createRegistry } from "@bufbuild/protobuf";
+import * as test_all_types_pb2 from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/conformance/proto2/test_all_types_pb";
+import * as test_all_types_pb3 from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/conformance/proto3/test_all_types_pb";
+
+export const TEST_REGISTRY = createRegistry(
+  test_all_types_pb2.TestAllTypes,
+  test_all_types_pb3.TestAllTypes
+);
 
 const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry();
 
 export function runSimpleTestCase(celParser: CelParser, testCase: SimpleTest) {
-  const env = new CelEnv(testCase.container, celParser);
+  const env = new CelEnv(testCase.container, celParser, TEST_REGISTRY);
   env.addFuncs(STRINGS_EXT_FUNCS);
   const parsed = env.parse(testCase.expr);
   const plan = env.plan(parsed);
@@ -69,6 +77,9 @@ export function runSimpleTestFile(
   celParser: CelParser,
   testFile: SimpleTestFile
 ) {
+  if (testFile.section.length === 0) {
+    return;
+  }
   describe(testFile.name, () => {
     testFile.section.forEach((section) => {
       runSimpleTestSection(celParser, section);

@@ -1,0 +1,5 @@
+export const JSON = {
+  name: "dynamic",
+  description:
+    "Tests for 'dynamic' proto behavior, including JSON, wrapper, and Any messages.",
+};
