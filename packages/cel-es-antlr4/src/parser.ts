@@ -240,27 +240,19 @@ export class ExprVisitor
   }
 
   visitMemberCall(ctx: MemberCallContext): Expr {
-    const offset = ctx.getChild(1).accept(POS_VISITOR);
-    return this.builder.maybeExpand(
-      offset,
-      this.builder.newMemberCallExpr(
-        offset,
-        ctx.getChild(0).accept(this),
-        ctx._id.text ?? "?",
-        this.newArgs(ctx._args)
-      )
+    return this.builder.newMemberCallExpr(
+      ctx.getChild(1).accept(POS_VISITOR),
+      ctx.getChild(0).accept(this),
+      ctx._id.text ?? "?",
+      this.newArgs(ctx._args)
     );
   }
 
   visitCreateList(ctx: CreateListContext): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "listExpr",
-      value: new Expr_CreateList({
-        elements: this.newArgs(ctx._elems),
-      }),
-    };
-    return expr;
+    return this.builder.newListExpr(
+      ctx.start.startIndex,
+      this.newArgs(ctx._elems)
+    );
   }
 
   visitCreateStruct(ctx: CreateStructContext): Expr {
@@ -277,7 +269,6 @@ export class ExprVisitor
         );
       }
     }
-
     expr.exprKind = {
       case: "structExpr",
       value: new Expr_CreateStruct({

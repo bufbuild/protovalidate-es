@@ -1,16 +1,12 @@
-import Parser from "web-tree-sitter";
-import { type CelParser, ExprBuilder } from "@bufbuild/cel-es";
 import {
-  Constant,
   Expr,
-  Expr_Call,
   Expr_CreateList,
   Expr_CreateStruct,
-  Expr_CreateStruct_Entry,
-  Expr_Ident,
   ParsedExpr,
 } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
+import { ExprBuilder, type CelParser } from "@bufbuild/cel-es";
 import { NullValue } from "@bufbuild/protobuf";
+import Parser from "web-tree-sitter";
 
 export class TreeSitterParser implements CelParser {
   private parser: Parser;
@@ -32,11 +28,10 @@ class ParseContext extends ExprBuilder {
 
   parseBinaryExpr(node: Parser.SyntaxNode): Expr {
     const opNode = node.child(1)!;
-    const args = [
+    return this.newInfixExpr(opNode.startIndex, opNode.text, [
       this.parseExpr(node.child(0)!),
       this.parseExpr(node.child(2)!),
-    ];
-    return this.newInfixExpr(opNode.startIndex, opNode.text, args);
+    ]);
   }
 
   parseSelectExpr(node: Parser.SyntaxNode): Expr {
@@ -57,21 +52,15 @@ class ParseContext extends ExprBuilder {
     }
     const func = node.childForFieldName("function")!;
     const operand = node.childForFieldName("operand");
-    if (operand === null) {
-      if (func.text === "has" && args.length === 1) {
-        return this.expandHasMacro(func.startIndex, args[0]);
-      }
-      return this.newCallExpr(func.startIndex, func.text, args);
-    }
-    return this.maybeExpand(
-      node.child(0)!.startIndex,
-      this.newMemberCallExpr(
+    if (operand !== null) {
+      return this.newMemberCallExpr(
         node.child(0)!.startIndex,
         this.parseExpr(operand),
         func.text,
         args
-      )
-    );
+      );
+    }
+    return this.newCallExpr(func.startIndex, func.text, args);
   }
 
   parseStringLiteral(node: Parser.SyntaxNode): Expr {
@@ -107,7 +96,7 @@ class ParseContext extends ExprBuilder {
   }
 
   parseListExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.nextExpr(node);
+    const expr = this.nextExpr(node.startIndex);
     const listExpr = new Expr_CreateList();
     for (let i = 0; i < node.namedChildCount; i++) {
       const child = node.namedChild(i)!;
@@ -126,16 +115,8 @@ class ParseContext extends ExprBuilder {
         return this.parseBinaryExpr(node);
       case "select_expression":
         return this.parseSelectExpr(node);
-      case "identifier": {
-        const expr = this.nextExpr(node);
-        expr.exprKind = {
-          case: "identExpr",
-          value: new Expr_Ident({
-            name: node.text,
-          }),
-        };
-        return expr;
-      }
+      case "identifier":
+        return this.newIdentExpr(node.startIndex, node.text);
       case "call_expression":
         return this.parseCallExpr(node);
       case "member_call_expression":
@@ -143,97 +124,45 @@ class ParseContext extends ExprBuilder {
       case "list_expression":
         return this.parseListExpr(node);
       case "float_literal": {
-        const expr = this.nextExpr(node);
-        expr.exprKind = {
-          case: "constExpr",
-          value: new Constant({
-            constantKind: {
-              case: "doubleValue",
-              value: parseFloat(node.text),
-            },
-          }),
-        };
-        return expr;
+        return this.newConstExpr(node.startIndex, {
+          case: "doubleValue",
+          value: parseFloat(node.text),
+        });
       }
-      case "int_literal": {
-        const expr = this.nextExpr(node);
-        expr.exprKind = {
-          case: "constExpr",
-          value: new Constant({
-            constantKind: {
-              case: "int64Value",
-              value: this.parseIntLiteral(node),
-            },
-          }),
-        };
-        return expr;
-      }
-      case "uint_literal": {
-        const expr = this.nextExpr(node);
-        expr.exprKind = {
-          case: "constExpr",
-          value: new Constant({
-            constantKind: {
-              case: "uint64Value",
-              value: this.parseIntLiteral(node.firstNamedChild!),
-            },
-          }),
-        };
-        return expr;
-      }
-      case "true": {
-        const expr = this.nextExpr(node);
-        expr.exprKind = {
-          case: "constExpr",
-          value: new Constant({
-            constantKind: {
-              case: "boolValue",
-              value: true,
-            },
-          }),
-        };
-        return expr;
-      }
-      case "false": {
-        const expr = this.nextExpr(node);
-        expr.exprKind = {
-          case: "constExpr",
-          value: new Constant({
-            constantKind: {
-              case: "boolValue",
-              value: false,
-            },
-          }),
-        };
-        return expr;
-      }
-      case "null": {
-        const expr = this.nextExpr(node);
-        expr.exprKind = {
-          case: "constExpr",
-          value: new Constant({
-            constantKind: {
-              case: "nullValue",
-              value: NullValue.NULL_VALUE,
-            },
-          }),
-        };
-        return expr;
-      }
+      case "int_literal":
+        return this.newConstExpr(node.startIndex, {
+          case: "int64Value",
+          value: this.parseIntLiteral(node),
+        });
+      case "uint_literal":
+        return this.newConstExpr(node.startIndex, {
+          case: "uint64Value",
+          value: this.parseIntLiteral(node.firstNamedChild!),
+        });
+      case "true":
+        return this.newConstExpr(node.startIndex, {
+          case: "boolValue",
+          value: true,
+        });
+      case "false":
+        return this.newConstExpr(node.startIndex, {
+          case: "boolValue",
+          value: false,
+        });
+      case "null":
+        return this.newConstExpr(node.startIndex, {
+          case: "nullValue",
+          value: NullValue.NULL_VALUE,
+        });
       case "string_literal": {
         return this.parseStringLiteral(node);
       }
-      case "unary_expression": {
-        const expr = this.nextExpr(node);
-        const unaryExpr = new Expr_Call();
-        unaryExpr.function = node.childForFieldName("operator")!.text + "_";
-        unaryExpr.args.push(this.parseExpr(node.childForFieldName("operand")!));
-        expr.exprKind = {
-          case: "callExpr",
-          value: unaryExpr,
-        };
-        return expr;
-      }
+      case "unary_expression":
+        return this.newCallExpr(
+          node.startIndex,
+          node.childForFieldName("operator")!.text + "_",
+          [this.parseExpr(node.childForFieldName("operand")!)]
+        );
       case "map_expression":
         return this.parseMapExpr(node);
       case "struct_expression":
@@ -250,32 +179,20 @@ class ParseContext extends ExprBuilder {
   }
 
   parseConditionalExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.nextExpr(node);
-    const conditionalExpr = new Expr_Call();
-    conditionalExpr.function = "_?_:_";
-    conditionalExpr.args = [
+    return this.newCallExpr(node.startIndex, "_?_:_", [
       this.parseExpr(node.childForFieldName("condition")!),
       this.parseExpr(node.childForFieldName("consequence")!),
       this.parseExpr(node.childForFieldName("alternative")!),
-    ];
-    expr.exprKind = {
-      case: "callExpr",
-      value: conditionalExpr,
-    };
-    return expr;
+    ]);
   }
 
   parseIndexExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.nextExpr(node);
-    const indexExpr = new Expr_Call();
-    indexExpr.function = "_[_]";
-    indexExpr.target = this.parseExpr(node.childForFieldName("operand")!);
-    indexExpr.args = [this.parseExpr(node.childForFieldName("index")!)];
-    expr.exprKind = {
-      case: "callExpr",
-      value: indexExpr,
-    };
-    return expr;
+    return this.newMemberCallExpr(
+      node.startIndex,
+      this.parseExpr(node.childForFieldName("operand")!),
+      "_[_]",
+      [this.parseExpr(node.childForFieldName("index")!)]
+    );
   }
 
   parseStructExpr(node: Parser.SyntaxNode): Expr {
@@ -288,17 +205,11 @@ class ParseContext extends ExprBuilder {
         const key = field.childForFieldName("key")!;
         const value = field.childForFieldName("value")!;
         structExpr.entries.push(
-          new Expr_CreateStruct_Entry({
-            keyKind: {
-              case: "fieldKey",
-              value: key.text,
-            },
-            value: this.parseExpr(value),
-          })
+          this.newStructEntry(key.startIndex, key.text, this.parseExpr(value))
         );
       }
     }
-    const expr = this.nextExpr(node);
+    const expr = this.nextExpr(node.startIndex);
     expr.exprKind = {
       case: "structExpr",
       value: structExpr,
@@ -307,21 +218,13 @@ class ParseContext extends ExprBuilder {
   }
 
   parseMapExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.nextExpr(node);
+    const expr = this.nextExpr(node.startIndex);
     const mapExpr = new Expr_CreateStruct();
     for (let i = 0; i < node.namedChildCount; i++) {
       const child = node.namedChild(i)!;
       const key = this.parseExpr(child.childForFieldName("key")!);
       const value = this.parseExpr(child.childForFieldName("value")!);
-      mapExpr.entries.push(
-        new Expr_CreateStruct_Entry({
-          keyKind: {
-            case: "mapKey",
-            value: key,
-          },
-          value: value,
-        })
-      );
+      mapExpr.entries.push(this.newMapEntry(child.startIndex, key, value));
     }
     expr.exprKind = {
       case: "structExpr",

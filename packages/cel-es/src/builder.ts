@@ -33,6 +33,13 @@ export class ExprBuilder {
   }
 
   public newCallExpr(offset: number, functionName: string, args: Expr[]): Expr {
+    if (
+      functionName === "has" &&
+      args.length === 1 &&
+      args[0].exprKind?.case === "selectExpr"
+    ) {
+      return this.expandHasMacro(offset, args[0]);
+    }
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "callExpr",
@@ -59,7 +66,7 @@ export class ExprBuilder {
         args: args,
       }),
     };
-    return expr;
+    return this.maybeExpand(offset, expr);
   }
 
   public newStringExpr(offset: number, rawValue: string, raw: boolean): Expr {
