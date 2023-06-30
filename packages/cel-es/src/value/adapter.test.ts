@@ -1,4 +1,4 @@
-import { describe, test, expect } from "@jest/globals";
+import { describe, test, expect } from "vitest";
 import { CEL_ADAPTER } from "../adapter/cel";
 import { NATIVE_ADAPTER } from "../adapter/native";
 import { EMPTY_LIST, EMPTY_MAP } from "./empty";
