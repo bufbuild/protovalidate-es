@@ -19,6 +19,7 @@ export { CEL_ADAPTER } from "./adapter/cel";
 export { EXPR_VAL_ADAPTER } from "./adapter/exprval";
 export { ObjectActivation } from "./activation";
 export { makeStringExtFuncRegistry } from "./ext/strings";
+export { ExprBuilder } from "./builder";
 
 import { Duration, Timestamp } from "@bufbuild/protobuf";
 import {

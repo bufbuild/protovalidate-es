@@ -1,5 +1,5 @@
 import Parser from "web-tree-sitter";
-import { type CelParser } from "@bufbuild/cel-es";
+import { type CelParser, ExprBuilder } from "@bufbuild/cel-es";
 import {
   Constant,
   Expr,
@@ -8,9 +8,7 @@ import {
   Expr_CreateStruct,
   Expr_CreateStruct_Entry,
   Expr_Ident,
-  Expr_Select,
   ParsedExpr,
-  SourceInfo,
 } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
 import { NullValue } from "@bufbuild/protobuf";
 
@@ -27,78 +25,56 @@ export class TreeSitterParser implements CelParser {
   }
 }
 
-class ParseContext {
-  prevId = 0;
-  readonly sourceInfo = new SourceInfo();
-
-  nextId(): number {
-    return ++this.prevId;
-  }
-
-  newExpr(node: Parser.SyntaxNode): Expr {
-    const expr = new Expr();
-    expr.id = BigInt(this.nextId());
-    this.sourceInfo.positions[String(expr.id)] = node.startIndex;
-    return expr;
-  }
-
+class ParseContext extends ExprBuilder {
   parseIntLiteral(node: Parser.SyntaxNode): bigint {
     return BigInt(node.text);
   }
 
   parseBinaryExpr(node: Parser.SyntaxNode): Expr {
-    const callExpr = new Expr_Call();
     const opNode = node.child(1)!;
-    if (opNode.type === "in") {
-      callExpr.function = "@in";
-    } else {
-      callExpr.function = `_${opNode.text}_`;
-    }
-    callExpr.args.push(this.parseExpr(node.child(0)!));
-    callExpr.args.push(this.parseExpr(node.child(2)!));
-    const expr = this.newExpr(opNode);
-    expr.exprKind = {
-      case: "callExpr",
-      value: callExpr,
-    };
-    return expr;
+    const args = [
+      this.parseExpr(node.child(0)!),
+      this.parseExpr(node.child(2)!),
+    ];
+    return this.newInfixExpr(opNode.startIndex, opNode.text, args);
   }
 
   parseSelectExpr(node: Parser.SyntaxNode): Expr {
-    const selectExpr = new Expr_Select();
-    selectExpr.operand = this.parseExpr(node.child(0)!);
-    selectExpr.field = node.child(2)!.text;
-    const expr = this.newExpr(node.child(1)!);
-    expr.exprKind = {
-      case: "selectExpr",
-      value: selectExpr,
-    };
-    return expr;
+    return this.newSelectExpr(
+      node.child(1)!.startIndex,
+      this.parseExpr(node.child(0)!),
+      node.child(2)!.text
+    );
   }
 
   parseCallExpr(node: Parser.SyntaxNode): Expr {
-    const callExpr = new Expr_Call();
-    callExpr.function = node.childForFieldName("function")!.text;
-    const expr = this.newExpr(node);
-    const args = node.childForFieldName("arguments")!;
-    for (let i = 0; i < args.namedChildCount; i++) {
-      const arg = args.namedChild(i)!;
+    const argNodes = node.childForFieldName("arguments")!;
+    const args = [];
+    for (let i = 0; i < argNodes.namedChildCount; i++) {
+      const arg = argNodes.namedChild(i)!;
       const argExpr = this.parseExpr(arg);
-      callExpr.args.push(argExpr);
+      args.push(argExpr);
     }
+    const func = node.childForFieldName("function")!;
     const operand = node.childForFieldName("operand");
-    if (operand !== null) {
-      callExpr.target = this.parseExpr(operand);
+    if (operand === null) {
+      if (func.text === "has" && args.length === 1) {
+        return this.expandHasMacro(func.startIndex, args[0]);
+      }
+      return this.newCallExpr(func.startIndex, func.text, args);
     }
-    expr.exprKind = {
-      case: "callExpr",
-      value: callExpr,
-    };
-    return expr;
+    return this.maybeExpand(
+      node.child(0)!.startIndex,
+      this.newMemberCallExpr(
+        node.child(0)!.startIndex,
+        this.parseExpr(operand),
+        func.text,
+        args
+      )
+    );
   }
 
   parseStringLiteral(node: Parser.SyntaxNode): Expr {
-    const expr = this.newExpr(node);
     const kind = node.childForFieldName("kind");
     let isBytes = false;
     let isRaw = false;
@@ -121,59 +97,17 @@ class ParseContext {
     switch (quoted.type) {
       case "triple_double_quote_string_literal":
       case "triple_single_quoted_string_literall":
-        value = quoted.text.slice(2, -2);
+        value = quoted.text.slice(3, -3);
         break;
     }
-    if (!isRaw) {
-      // Handle escape sequences.
-      value = value.replace(
-        /\\([0-7]{1,3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|.)/g,
-        (match, p1) => {
-          switch (p1[0]) {
-            case "0":
-              return String.fromCharCode(parseInt(p1, 8));
-            case "x":
-              return String.fromCharCode(parseInt(p1.slice(1), 16));
-            case "u":
-              return String.fromCharCode(parseInt(p1.slice(1), 16));
-            case "U":
-              return String.fromCodePoint(parseInt(p1.slice(1), 16));
-            default:
-              return p1;
-          }
-        }
-      );
-    }
     if (isBytes) {
-      const bytes = new Uint8Array(value.length);
-      for (let i = 0; i < value.length; i++) {
-        bytes[i] = value.charCodeAt(i);
-      }
-      expr.exprKind = {
-        case: "constExpr",
-        value: new Constant({
-          constantKind: {
-            case: "bytesValue",
-            value: bytes,
-          },
-        }),
-      };
-    } else {
-      expr.exprKind = {
-        case: "constExpr",
-        value: new Constant({
-          constantKind: {
-            case: "stringValue",
-            value: value,
-          },
-        }),
-      };
+      return this.newBytesExpr(node.startIndex, value, isRaw);
     }
-    return expr;
+    return this.newStringExpr(node.startIndex, value, isRaw);
   }
 
   parseListExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.newExpr(node);
+    const expr = this.nextExpr(node);
     const listExpr = new Expr_CreateList();
     for (let i = 0; i < node.namedChildCount; i++) {
       const child = node.namedChild(i)!;
@@ -193,7 +127,7 @@ class ParseContext {
       case "select_expression":
         return this.parseSelectExpr(node);
       case "identifier": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         expr.exprKind = {
           case: "identExpr",
           value: new Expr_Ident({
@@ -209,7 +143,7 @@ class ParseContext {
       case "list_expression":
         return this.parseListExpr(node);
       case "float_literal": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         expr.exprKind = {
           case: "constExpr",
           value: new Constant({
@@ -222,7 +156,7 @@ class ParseContext {
         return expr;
       }
       case "int_literal": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         expr.exprKind = {
           case: "constExpr",
           value: new Constant({
@@ -235,7 +169,7 @@ class ParseContext {
         return expr;
       }
       case "uint_literal": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         expr.exprKind = {
           case: "constExpr",
           value: new Constant({
@@ -248,7 +182,7 @@ class ParseContext {
         return expr;
       }
       case "true": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         expr.exprKind = {
           case: "constExpr",
           value: new Constant({
@@ -261,7 +195,7 @@ class ParseContext {
         return expr;
       }
       case "false": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         expr.exprKind = {
           case: "constExpr",
           value: new Constant({
@@ -274,7 +208,7 @@ class ParseContext {
         return expr;
       }
       case "null": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         expr.exprKind = {
           case: "constExpr",
           value: new Constant({
@@ -290,7 +224,7 @@ class ParseContext {
         return this.parseStringLiteral(node);
       }
       case "unary_expression": {
-        const expr = this.newExpr(node);
+        const expr = this.nextExpr(node);
         const unaryExpr = new Expr_Call();
         unaryExpr.function = node.childForFieldName("operator")!.text + "_";
         unaryExpr.args.push(this.parseExpr(node.childForFieldName("operand")!));
@@ -316,7 +250,7 @@ class ParseContext {
   }
 
   parseConditionalExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.newExpr(node);
+    const expr = this.nextExpr(node);
     const conditionalExpr = new Expr_Call();
     conditionalExpr.function = "_?_:_";
     conditionalExpr.args = [
@@ -324,14 +258,23 @@ class ParseContext {
       this.parseExpr(node.childForFieldName("consequence")!),
       this.parseExpr(node.childForFieldName("alternative")!),
     ];
+    expr.exprKind = {
+      case: "callExpr",
+      value: conditionalExpr,
+    };
     return expr;
   }
 
   parseIndexExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.newExpr(node);
+    const expr = this.nextExpr(node);
     const indexExpr = new Expr_Call();
     indexExpr.function = "_[_]";
     indexExpr.target = this.parseExpr(node.childForFieldName("operand")!);
+    indexExpr.args = [this.parseExpr(node.childForFieldName("index")!)];
+    expr.exprKind = {
+      case: "callExpr",
+      value: indexExpr,
+    };
     return expr;
   }
 
@@ -355,7 +298,7 @@ class ParseContext {
         );
       }
     }
-    const expr = this.newExpr(node);
+    const expr = this.nextExpr(node);
     expr.exprKind = {
       case: "structExpr",
       value: structExpr,
@@ -364,7 +307,7 @@ class ParseContext {
   }
 
   parseMapExpr(node: Parser.SyntaxNode): Expr {
-    const expr = this.newExpr(node);
+    const expr = this.nextExpr(node);
     const mapExpr = new Expr_CreateStruct();
     for (let i = 0; i < node.namedChildCount; i++) {
       const child = node.namedChild(i)!;

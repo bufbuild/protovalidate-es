@@ -1,19 +1,12 @@
-import { type CelParser } from "@bufbuild/cel-es";
-
+import { type CelParser, ExprBuilder } from "@bufbuild/cel-es";
 import { CharStreams, CommonTokenStream, ParserRuleContext } from "antlr4ts";
 import { AbstractParseTreeVisitor } from "antlr4ts/tree/AbstractParseTreeVisitor";
 import { TerminalNode } from "antlr4ts/tree/TerminalNode";
-
 import {
-  Constant,
   Expr,
-  Expr_Call,
-  Expr_Comprehension,
   Expr_CreateList,
   Expr_CreateStruct,
   Expr_CreateStruct_Entry,
-  Expr_Ident,
-  Expr_Select,
   ParsedExpr,
   SourceInfo,
 } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
@@ -65,15 +58,17 @@ export class ExprVisitor
   extends AbstractParseTreeVisitor<Expr>
   implements CELVisitor<Expr>
 {
-  private prevId = 0n;
-  public sourceInfo: SourceInfo = new SourceInfo();
+  private builder = new ExprBuilder();
+
+  public getSourceInfo(): SourceInfo {
+    return this.builder.sourceInfo;
+  }
 
   private nextExpr(pos: ParserRuleContext | number): Expr {
-    const expr = new Expr();
-    expr.id = ++this.prevId;
-    this.sourceInfo.positions[expr.id.toString()] =
-      pos instanceof ParserRuleContext ? pos.start.startIndex : pos;
-    return expr;
+    if (pos instanceof ParserRuleContext) {
+      pos = pos.start.startIndex;
+    }
+    return this.builder.nextExpr(pos);
   }
 
   defaultResult() {
@@ -84,7 +79,7 @@ export class ExprVisitor
     if (ctx._e1 === undefined || ctx._e2 === undefined) {
       return ctx._e.accept(this);
     }
-    return this.newCallExpr(ctx, "_?_:_", [
+    return this.builder.newCallExpr(ctx.start.startIndex, "_?_:_", [
       ctx._e.accept(this),
       ctx._e1.accept(this),
       ctx._e2.accept(this),
@@ -97,204 +92,33 @@ export class ExprVisitor
 
   visitString(ctx: StringContext): Expr {
     // unescape the string.
-    let raw_value = ctx.text;
+    let rawValue = ctx.text;
     let raw = false;
-    if (raw_value.startsWith("R") || raw_value.startsWith("r")) {
+    if (rawValue.startsWith("R") || rawValue.startsWith("r")) {
       raw = true;
-      raw_value = raw_value.substring(1);
+      rawValue = rawValue.substring(1);
     }
-    if (raw_value.startsWith("'''") || raw_value.startsWith('"""')) {
-      raw_value = raw_value.substring(3, raw_value.length - 3);
-    } else if (raw_value.startsWith("'") || raw_value.startsWith('"')) {
-      raw_value = raw_value.substring(1, raw_value.length - 1);
+    if (rawValue.startsWith("'''") || rawValue.startsWith('"""')) {
+      rawValue = rawValue.substring(3, rawValue.length - 3);
+    } else if (rawValue.startsWith("'") || rawValue.startsWith('"')) {
+      rawValue = rawValue.substring(1, rawValue.length - 1);
     }
-    if (raw) {
-      return this.newConstExpr(ctx, {
-        case: "stringValue",
-        value: raw_value,
-      });
-    }
-
-    let value = "";
-    let i = 0;
-    while (i < raw_value.length) {
-      let c = raw_value[i];
-      if (c === "\\") {
-        i++;
-        c = raw_value[i];
-        if (c === "x" || c === "X") {
-          i++;
-          const hex = raw_value.substring(i, i + 2);
-          value += String.fromCodePoint(parseInt(hex, 16));
-          i += 2;
-        } else if (c === "u") {
-          i++;
-          const hex = raw_value.substring(i, i + 4);
-          value += String.fromCodePoint(parseInt(hex, 16));
-          i += 4;
-        } else if (c === "U") {
-          i++;
-          value += String.fromCodePoint(
-            parseInt(raw_value.substring(i, i + 8), 16)
-          );
-          i += 8;
-        } else if (c === "a") {
-          value += "\x07";
-          i++;
-        } else if (c === "b") {
-          value += "\b";
-          i++;
-        } else if (c === "f") {
-          value += "\f";
-          i++;
-        } else if (c === "n") {
-          value += "\n";
-          i++;
-        } else if (c === "r") {
-          value += "\r";
-          i++;
-        } else if (c === "t") {
-          value += "\t";
-          i++;
-        } else if (c === "v") {
-          value += "\v";
-          i++;
-        } else if (c === "\\") {
-          value += "\\";
-          i++;
-        } else {
-          // check if its a digit
-          if (c >= "0" && c <= "7") {
-            const oct = raw_value.substring(i, i + 3);
-            value += String.fromCodePoint(parseInt(oct, 8));
-            i += 3;
-          } else {
-            value += c;
-            i++;
-          }
-        }
-      } else {
-        value += c;
-        i++;
-      }
-    }
-
-    return this.newConstExpr(ctx, {
-      case: "stringValue",
-      value: value,
-    });
+    return this.builder.newStringExpr(ctx.start.startIndex, rawValue, raw);
   }
 
   visitBytes(ctx: BytesContext): Expr {
-    let raw_value = ctx.text.substring(1);
+    let rawValue = ctx.text.substring(1);
     let raw = false;
-    if (raw_value.startsWith("R") || raw_value.startsWith("r")) {
+    if (rawValue.startsWith("R") || rawValue.startsWith("r")) {
       raw = true;
-      raw_value = raw_value.substring(1);
+      rawValue = rawValue.substring(1);
     }
-    if (raw_value.startsWith("'''") || raw_value.startsWith('"""')) {
-      raw_value = raw_value.substring(3, raw_value.length - 3);
-    } else if (raw_value.startsWith("'") || raw_value.startsWith('"')) {
-      raw_value = raw_value.substring(1, raw_value.length - 1);
+    if (rawValue.startsWith("'''") || rawValue.startsWith('"""')) {
+      rawValue = rawValue.substring(3, rawValue.length - 3);
+    } else if (rawValue.startsWith("'") || rawValue.startsWith('"')) {
+      rawValue = rawValue.substring(1, rawValue.length - 1);
     }
-    if (raw_value.length === 0) {
-      return this.newConstExpr(ctx, {
-        case: "bytesValue",
-        value: Buffer.of(),
-      });
-    }
-    const raw_bytes = new TextEncoder().encode(raw_value);
-    if (raw) {
-      return this.newConstExpr(ctx, {
-        case: "bytesValue",
-        value: raw_bytes,
-      });
-    }
-
-    const buffer = Buffer.alloc(raw_bytes.length);
-    const decoder = new TextDecoder();
-    let i = 0;
-    let j = 0;
-    while (i < raw_bytes.length) {
-      let c = raw_bytes[i];
-      if (c === 92) {
-        i++;
-        c = raw_bytes[i];
-        if (c === 120 || c === 88) {
-          i++;
-          const hex = raw_bytes.subarray(i, i + 2);
-          buffer[j] = parseInt(decoder.decode(hex), 16);
-          j++;
-          i += 2;
-        } else if (c === 117) {
-          i++;
-          const hex = raw_bytes.subarray(i, i + 4);
-          buffer[j] = parseInt(decoder.decode(hex), 16);
-          j++;
-          i += 4;
-        } else if (c === 85) {
-          i++;
-          const hex = raw_bytes.subarray(i, i + 8);
-          buffer[j] = parseInt(decoder.decode(hex), 16);
-          j++;
-          i += 8;
-        } else if (c === 97) {
-          i++;
-          buffer[j] = 0x07;
-          j++;
-        } else if (c === 98) {
-          i++;
-          buffer[j] = 0x08;
-          j++;
-        } else if (c === 102) {
-          i++;
-          buffer[j] = 0x0c;
-          j++;
-        } else if (c === 110) {
-          i++;
-          buffer[j] = 0x0a;
-          j++;
-        } else if (c === 114) {
-          i++;
-          buffer[j] = 0x0d;
-          j++;
-        } else if (c === 116) {
-          i++;
-          buffer[j] = 0x09;
-          j++;
-        } else if (c === 118) {
-          i++;
-          buffer[j] = 0x0b;
-          j++;
-        } else if (c === 92) {
-          i++;
-          buffer[j] = 0x5c;
-          j++;
-        } else {
-          // check if its a digit
-          if (c >= 48 && c <= 55) {
-            const oct = raw_bytes.subarray(i, i + 3);
-            buffer[j] = parseInt(decoder.decode(oct), 8);
-            j++;
-            i += 3;
-          } else {
-            buffer[j] = c;
-            j++;
-            i++;
-          }
-        }
-      } else {
-        buffer[j] = c;
-        j++;
-        i++;
-      }
-    }
-
-    // Resize the result to the actual length.
-    return this.newConstExpr(ctx, {
-      case: "bytesValue",
-      value: buffer.subarray(0, j),
-    });
+    return this.builder.newBytesExpr(ctx.start.startIndex, rawValue, raw);
   }
 
   visitConditionalOr(ctx: ConditionalOrContext): Expr {
@@ -314,7 +138,7 @@ export class ExprVisitor
   }
 
   visitNull(ctx: NullContext): Expr {
-    return this.newConstExpr(ctx, {
+    return this.builder.newConstExpr(ctx.start.startIndex, {
       case: "nullValue",
       value: 0,
     });
@@ -326,35 +150,35 @@ export class ExprVisitor
       minus = true;
       txt = txt.substring(1);
     }
-    return this.newConstExpr(ctx, {
+    return this.builder.newConstExpr(ctx.start.startIndex, {
       case: "int64Value",
       value: minus ? -BigInt(txt) : BigInt(txt),
     });
   }
 
   visitUint(ctx: UintContext): Expr {
-    return this.newConstExpr(ctx, {
+    return this.builder.newConstExpr(ctx.start.startIndex, {
       case: "uint64Value",
       value: BigInt(ctx.text.substring(0, ctx.text.length - 1)),
     });
   }
 
   visitDouble(ctx: DoubleContext): Expr {
-    return this.newConstExpr(ctx, {
+    return this.builder.newConstExpr(ctx.start.startIndex, {
       case: "doubleValue",
       value: parseFloat(ctx.text),
     });
   }
 
   visitBoolFalse(ctx: BoolFalseContext): Expr {
-    return this.newConstExpr(ctx, {
+    return this.builder.newConstExpr(ctx.start.startIndex, {
       case: "boolValue",
       value: false,
     });
   }
 
   visitBoolTrue(ctx: BoolTrueContext): Expr {
-    return this.newConstExpr(ctx, {
+    return this.builder.newConstExpr(ctx.start.startIndex, {
       case: "boolValue",
       value: true,
     });
@@ -365,7 +189,7 @@ export class ExprVisitor
     if (ctx._ops.length % 2 === 0) {
       return arg;
     }
-    return this.newCallExpr(ctx, "!_", [arg]);
+    return this.builder.newCallExpr(ctx.start.startIndex, "!_", [arg]);
   }
 
   visitNegate(ctx: NegateContext): Expr {
@@ -373,7 +197,7 @@ export class ExprVisitor
     if (ctx._ops.length % 2 === 0) {
       return arg;
     }
-    return this.newCallExpr(ctx, "-_", [arg]);
+    return this.builder.newCallExpr(ctx.start.startIndex, "-_", [arg]);
   }
 
   visitIdentOrGlobalCall(ctx: IdentOrGlobalCallContext): Expr {
@@ -383,215 +207,48 @@ export class ExprVisitor
     }
     if (ctx.LPAREN()) {
       if (ctx._args.childCount === 1 && name === "has") {
-        return this.expandHasMacro(ctx, ctx._args.getChild(0).accept(this));
+        return this.builder.expandHasMacro(
+          ctx.start.startIndex,
+          ctx._args.getChild(0).accept(this)
+        );
       }
-      return this.newCallExpr(ctx, name, this.newArgs(ctx._args));
+      return this.builder.newCallExpr(
+        ctx.start.startIndex,
+        name,
+        this.newArgs(ctx._args)
+      );
     }
 
     // Ident
-    return this.newIdentExpr(ctx, name);
+    return this.builder.newIdentExpr(ctx.start.startIndex, name);
   }
 
   visitSelect(ctx: SelectContext): Expr {
-    const expr = this.nextExpr(ctx.getChild(1).accept(POS_VISITOR));
-    expr.exprKind = {
-      case: "selectExpr",
-      value: new Expr_Select({
-        operand: ctx.getChild(0).accept(this),
-        field: ctx.getChild(2).text,
-      }),
-    };
-    return expr;
+    return this.builder.newSelectExpr(
+      ctx.getChild(1).accept(POS_VISITOR),
+      ctx.getChild(0).accept(this),
+      ctx.getChild(2).text
+    );
   }
 
   visitIndex(ctx: IndexContext): Expr {
-    return this.newCallExpr(ctx, "_[_]", [
+    return this.builder.newIndexExpr(
+      ctx.start.startIndex,
       ctx.getChild(0).accept(this),
-      ctx._index.accept(this),
-    ]);
-  }
-
-  expandHasMacro(ctx: ParserRuleContext, target: Expr): Expr {
-    if (target.exprKind.case !== "selectExpr") {
-      return this.newCallExpr(ctx, "has", [target]);
-    }
-
-    target.exprKind.value.testOnly = true;
-    return target;
-  }
-
-  expandExistsMacro(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    x: string,
-    test: Expr
-  ): Expr {
-    return this.newBoolMacro(
-      ctx,
-      target,
-      x,
-      false,
-      this.newCallExpr(ctx, "_||_", [
-        this.newIdentExpr(ctx, "__result__"),
-        test,
-      ]),
-      this.newCallExpr(ctx, "@not_strictly_false", [
-        this.newCallExpr(ctx, "!_", [this.newIdentExpr(ctx, "__result__")]),
-      ])
+      ctx._index.accept(this)
     );
-  }
-
-  expandAllMacro(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    x: string,
-    test: Expr
-  ): Expr {
-    return this.newBoolMacro(
-      ctx,
-      target,
-      x,
-      true,
-      this.newCallExpr(ctx, "_&&_", [
-        this.newIdentExpr(ctx, "__result__"),
-        test,
-      ]),
-      this.newCallExpr(ctx, "@not_strictly_false", [
-        this.newIdentExpr(ctx, "__result__"),
-      ])
-    );
-  }
-
-  expandMapMacro(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    x: string,
-    step: Expr
-  ): Expr {
-    return this.newListMacro(
-      ctx,
-      target,
-      x,
-      this.newCallExpr(ctx, "_+_", [
-        this.newIdentExpr(ctx, "__result__"),
-        this.newListExpr(ctx, [step]),
-      ])
-    );
-  }
-
-  expandFilterMacro(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    x: string,
-    step: Expr
-  ): Expr {
-    return this.newListMacro(
-      ctx,
-      target,
-      x,
-      this.newCallExpr(ctx, "_?_:_", [
-        step,
-        this.newCallExpr(ctx, "_+_", [
-          this.newIdentExpr(ctx, "__result__"),
-          this.newListExpr(ctx, [this.newIdentExpr(ctx, x)]),
-        ]),
-        this.newIdentExpr(ctx, "__result__"),
-      ])
-    );
-  }
-
-  expandExistsOne(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    x: string,
-    step: Expr
-  ): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "comprehensionExpr",
-      value: new Expr_Comprehension({
-        accuVar: "__result__",
-        accuInit: this.newConstExpr(ctx, {
-          case: "int64Value",
-          value: BigInt(0),
-        }),
-        iterVar: x,
-        iterRange: target,
-        loopCondition: this.newConstExpr(ctx, {
-          case: "boolValue",
-          value: true,
-        }),
-        loopStep: this.newCallExpr(ctx, "_?_:_", [
-          step,
-          this.newCallExpr(ctx, "_+_", [
-            this.newIdentExpr(ctx, "__result__"),
-            this.newConstExpr(ctx, {
-              case: "int64Value",
-              value: BigInt(1),
-            }),
-          ]),
-          this.newIdentExpr(ctx, "__result__"),
-        ]),
-        result: this.newCallExpr(ctx, "_==_", [
-          this.newIdentExpr(ctx, "__result__"),
-          this.newConstExpr(ctx, {
-            case: "int64Value",
-            value: BigInt(1),
-          }),
-        ]),
-      }),
-    };
-    return expr;
   }
 
   visitMemberCall(ctx: MemberCallContext): Expr {
-    // Check for macros.
-    if (ctx._id.text === "exists" && ctx._args.childCount === 3) {
-      return this.expandExistsMacro(
-        ctx.getChild(1).accept(POS_VISITOR),
+    const offset = ctx.getChild(1).accept(POS_VISITOR);
+    return this.builder.maybeExpand(
+      offset,
+      this.builder.newMemberCallExpr(
+        offset,
         ctx.getChild(0).accept(this),
-        ctx._args.getChild(0).text,
-        ctx._args.getChild(2).accept(this)
-      );
-    }
-    if (ctx._id.text === "all" && ctx._args.childCount === 3) {
-      return this.expandAllMacro(
-        ctx.getChild(1).accept(POS_VISITOR),
-        ctx.getChild(0).accept(this),
-        ctx._args.getChild(0).text,
-        ctx._args.getChild(2).accept(this)
-      );
-    }
-    if (ctx._id.text === "map" && ctx._args.childCount === 3) {
-      return this.expandMapMacro(
-        ctx.getChild(1).accept(POS_VISITOR),
-        ctx.getChild(0).accept(this),
-        ctx._args.getChild(0).text,
-        ctx._args.getChild(2).accept(this)
-      );
-    }
-    if (ctx._id.text === "filter" && ctx._args.childCount === 3) {
-      return this.expandFilterMacro(
-        ctx.getChild(1).accept(POS_VISITOR),
-        ctx.getChild(0).accept(this),
-        ctx._args.getChild(0).text,
-        ctx._args.getChild(2).accept(this)
-      );
-    }
-    if (ctx._id.text === "exists_one" && ctx._args.childCount === 3) {
-      return this.expandExistsOne(
-        ctx.getChild(1).accept(POS_VISITOR),
-        ctx.getChild(0).accept(this),
-        ctx._args.getChild(0).text,
-        ctx._args.getChild(2).accept(this)
-      );
-    }
-
-    return this.newMemberCallExpr(
-      ctx.getChild(1).accept(POS_VISITOR),
-      ctx.getChild(0).accept(this),
-      ctx._id.text ?? "?",
-      this.newArgs(ctx._args)
+        ctx._id.text ?? "?",
+        this.newArgs(ctx._args)
+      )
     );
   }
 
@@ -611,17 +268,12 @@ export class ExprVisitor
     const entries: Expr_CreateStruct_Entry[] = [];
     if (ctx._entries) {
       for (let i = 0; i < ctx._entries._keys.length; i++) {
-        const key = ctx._entries._keys[i];
-        const value = ctx._entries._values[i];
         entries.push(
-          new Expr_CreateStruct_Entry({
-            id: ++this.prevId,
-            keyKind: {
-              case: "mapKey",
-              value: key.accept(this),
-            },
-            value: value?.accept(this),
-          })
+          this.builder.newMapEntry(
+            ctx._entries._keys[i].start.startIndex,
+            ctx._entries._keys[i].accept(this),
+            ctx._entries._values[i].accept(this)
+          )
         );
       }
     }
@@ -647,14 +299,11 @@ export class ExprVisitor
         const field = ctx._entries._fields[i];
         const value = ctx._entries._values[i];
         entries.push(
-          new Expr_CreateStruct_Entry({
-            id: ++this.prevId,
-            keyKind: {
-              case: "fieldKey",
-              value: field.text,
-            },
-            value: value.accept(this),
-          })
+          this.builder.newStructEntry(
+            field.start.startIndex,
+            field.text,
+            value.accept(this)
+          )
         );
       }
     }
@@ -669,29 +318,6 @@ export class ExprVisitor
     return expr;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proto type system too complex
-  private newConstExpr(
-    ctx: ParserRuleContext | number,
-    constantKind: any
-  ): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "constExpr",
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      value: new Constant({ constantKind: constantKind }),
-    };
-    return expr;
-  }
-
-  newIdentExpr(ctx: ParserRuleContext | number, name: string): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "identExpr",
-      value: new Expr_Ident({ name: name }),
-    };
-    return expr;
-  }
-
   private newArgs(ctx?: ParserRuleContext): Expr[] {
     const args: Expr[] = [];
     if (ctx) {
@@ -702,7 +328,7 @@ export class ExprVisitor
     return args;
   }
 
-  private newInfixExpr(ctx: ParserRuleContext, func = ""): Expr {
+  private newInfixExpr(ctx: ParserRuleContext): Expr {
     if (ctx.childCount === 1) {
       return ctx.getChild(0).accept(this);
     }
@@ -711,113 +337,8 @@ export class ExprVisitor
       args.push(ctx.getChild(i).accept(this));
     }
     const op = ctx.getChild(1);
-    let name = func;
-    if (name === "") {
-      if (op.text === "in") {
-        name = "@in";
-      } else {
-        name = "_" + op.text + "_";
-      }
-    }
     const loc = op.accept(POS_VISITOR);
-    return this.newCallExpr(loc, name, args);
-  }
-
-  newCallExpr(
-    ctx: ParserRuleContext | number,
-    functionName: string,
-    args: Expr[]
-  ): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "callExpr",
-      value: new Expr_Call({
-        function: functionName,
-        args: args,
-      }),
-    };
-    return expr;
-  }
-
-  newMemberCallExpr(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    functionName: string,
-    args: Expr[]
-  ): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "callExpr",
-      value: new Expr_Call({
-        function: functionName,
-        target: target,
-        args: args,
-      }),
-    };
-    return expr;
-  }
-
-  newListExpr(ctx: ParserRuleContext | number, elements: Expr[]): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "listExpr",
-      value: new Expr_CreateList({
-        elements: elements,
-      }),
-    };
-    return expr;
-  }
-
-  newBoolMacro(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    x: string,
-    init: boolean,
-    step: Expr,
-    cond: Expr
-  ) {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "comprehensionExpr",
-      value: new Expr_Comprehension({
-        accuVar: "__result__",
-        accuInit: this.newConstExpr(ctx, {
-          case: "boolValue",
-          value: init,
-        }),
-        iterVar: x,
-        iterRange: target,
-        loopStep: step,
-        loopCondition: cond,
-        result: this.newIdentExpr(ctx, "__result__"),
-      }),
-    };
-    return expr;
-  }
-
-  newListMacro(
-    ctx: ParserRuleContext | number,
-    target: Expr,
-    x: string,
-    step: Expr
-  ): Expr {
-    const expr = this.nextExpr(ctx);
-    expr.exprKind = {
-      case: "comprehensionExpr",
-      value: new Expr_Comprehension({
-        accuVar: "__result__",
-        accuInit: this.newListExpr(ctx, []),
-        iterVar: x,
-        iterRange: target,
-        loopCondition: this.newConstExpr(ctx, {
-          case: "boolValue",
-          value: true,
-        }),
-        loopStep: step,
-        result: this.newIdentExpr(ctx, "__result__"),
-      }),
-    };
-    return expr;
+    return this.builder.newInfixExpr(loc, op.text, args);
   }
 }
 
@@ -834,7 +355,7 @@ export function parseExpr(input: string): ParsedExpr {
   const visitor = new ExprVisitor();
   const result = new ParsedExpr();
   result.expr = tree.accept(visitor);
-  result.sourceInfo = visitor.sourceInfo;
+  result.sourceInfo = visitor.getSourceInfo();
 
   // find all the new line offsets
   for (let i = 0; i < input.length; i++) {
