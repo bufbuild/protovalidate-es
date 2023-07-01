@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "build": "npm run build -ws",
-    "test": "npm run test -ws --if-present"
+    "test": "npx vitest run"
   },
   "workspaces": [
     "packages/cel-es",

@@ -85,7 +85,7 @@ class ParseContext extends ExprBuilder {
     let value = quoted.text.slice(1, -1);
     switch (quoted.type) {
       case "triple_double_quote_string_literal":
-      case "triple_single_quoted_string_literall":
+      case "triple_single_quoted_string_literal":
         value = quoted.text.slice(3, -3);
         break;
     }
