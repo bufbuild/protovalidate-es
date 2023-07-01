@@ -1,8 +1,9 @@
 #root {
-  max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  width: 100%;
+  min-width: 120px;
 }
 
 .logo {
@@ -39,4 +40,88 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/*
+App fills the entire page.
+App-header is a header with a title above App-body which fills the rest of the
+page.
+App-body contains three text areas: A large App-input-textarea on the left,
+and two smaller, App-env-textarea and App-output-text-areas, split vertically,
+on the right.
+*/
+
+.App {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.App-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.App-title {
+  font-size: 2rem;
+  font-weight: 500;
+  color: #646cff;
+}
+
+.App-body {
+  display: flex;
+  flex-direction: row;
+  flex-grow: 1;
+  padding: 1rem;
+  width: 100%;
+}
+
+.App-left {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1rem;
+}
+
+.App-input-textarea {
+  flex-grow: 1;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: monospace;
+  border: 1px solid #646cff;
+  border-radius: 0.5rem;
+  resize: none;
+  overflow: auto;
+}
+
+.App-right {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1rem;
+}
+
+.App-env-textarea {
+  flex-grow: 1;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: monospace;
+  border: 1px solid #646cff;
+  border-radius: 0.5rem;
+  resize: none;
+  overflow: auto;
+}
+
+.App-output-textarea {
+  flex-grow: 1;
+  padding: 1rem;
+  font-size: 1rem;
+  font-family: monospace;
+  border: 1px solid #646cff;
+  border-radius: 0.5rem;
+  resize: none;
+  overflow: auto;
 }

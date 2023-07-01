@@ -14,15 +14,16 @@
     "packages/*"
   ],
   "dependencies": {
-    "@bufbuild/buf": "^1.21.0-1",
-    "@bufbuild/connect": "^0.10.1",
-    "@bufbuild/connect-web": "^0.10.1",
     "@buf/alfus_cel.bufbuild_es": "^1.2.1-20230626203212-40a4ec79694c.1",
+    "@bufbuild/buf": "^1.21.0-1",
     "@bufbuild/cel-es": "^0.0.1",
     "@bufbuild/cel-es-web": "^0.0.1",
+    "@bufbuild/connect": "^0.10.1",
+    "@bufbuild/connect-web": "^0.10.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "web-tree-sitter": "^0.20.8"
+    "web-tree-sitter": "^0.20.8",
+    "yaml": "^2.3.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.37",

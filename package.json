@@ -2,7 +2,8 @@
   "private": true,
   "scripts": {
     "build": "npm run build -ws",
-    "test": "npx vitest run"
+    "test": "npx vitest run",
+    "web-repl": "npm run dev -w cel-es-repl-web"
   },
   "workspaces": [
     "packages/cel-es",
