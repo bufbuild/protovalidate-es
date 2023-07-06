@@ -1,6 +1,5 @@
 import { describe, test, expect } from "vitest";
 import {
-  CelEnv,
   CelError,
   CelUnknown,
   makeStringExtFuncRegistry,
@@ -8,6 +7,7 @@ import {
   CEL_ADAPTER,
   EXPR_VAL_ADAPTER,
   type CelParser,
+  CelPlanner,
 } from "@bufbuild/cel-es";
 import {
   SimpleTest,
@@ -26,10 +26,10 @@ export const TEST_REGISTRY = createRegistry(
 const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry();
 
 export function runSimpleTestCase(celParser: CelParser, testCase: SimpleTest) {
-  const env = new CelEnv(testCase.container, celParser, TEST_REGISTRY);
-  env.addFuncs(STRINGS_EXT_FUNCS);
-  const parsed = env.parse(testCase.expr);
-  const plan = env.plan(parsed);
+  const planner = new CelPlanner(testCase.container, TEST_REGISTRY);
+  planner.addFuncs(STRINGS_EXT_FUNCS);
+  const parsed = celParser.parse(testCase.expr);
+  const plan = planner.plan(parsed);
   const ctx = new ObjectActivation(testCase.bindings, EXPR_VAL_ADAPTER);
   const result = plan.eval(ctx);
   switch (testCase.resultMatcher.case) {

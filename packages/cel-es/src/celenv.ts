@@ -15,10 +15,21 @@ import { STD_FUNCS } from "./std/std";
 import { CelError, CelUnknown, isCelVal, type CelResult } from "./value/value";
 import { Namespace } from "./value/namespace";
 
+/**
+ * A CEL parser interface
+ *
+ * CelParsers are responsible for parsing CEL expressions into a ParsedExpr
+ * and are implemented differently depending on the environment.
+ */
 export interface CelParser {
   parse(text: string): ParsedExpr;
 }
 
+/**
+ * A CEL planner
+ *
+ * CelPlanners are responsible for planning CEL expressions into an Interpretable
+ */
 export class CelPlanner {
   private protoProvider: ProtoValProvider;
   private dispatcher: OrderedDispatcher;
@@ -64,6 +75,14 @@ export class CelPlanner {
   }
 }
 
+/**
+ * A CEL environment binds together a CEL parser, planner and memory.
+ *
+ * This environment stores data in a name -> CelResult Record.
+ *
+ * 'set' is provided as a helper function that supports CEL values, protobufr
+ * messages and native values.
+ */
 export class CelEnv {
   public readonly data: Record<string, CelResult> = {};
   private readonly ctx = new ObjectActivation(this.data, CEL_ADAPTER);
@@ -72,41 +91,9 @@ export class CelEnv {
 
   public constructor(
     namespace: string | undefined = undefined,
-    parser: CelParser | undefined = undefined,
     registry: IMessageTypeRegistry = createRegistry()
   ) {
     this.planner = new CelPlanner(namespace, registry);
-    this.parser = parser;
-  }
-
-  public setParser(parser: CelParser): void {
-    this.parser = parser;
-  }
-
-  public setPlanner(planner: CelPlanner): void {
-    this.planner = planner;
-  }
-
-  public setProtoRegistry(registry: IMessageTypeRegistry): void {
-    this.planner.setProtoRegistry(registry);
-  }
-
-  public addFuncs(funcs: Dispatcher): void {
-    this.planner.addFuncs(funcs);
-  }
-
-  public set(name: string, value: unknown): void {
-    if (
-      isCelVal(value) ||
-      value instanceof CelError ||
-      value instanceof CelUnknown
-    ) {
-      this.data[name] = value;
-    } else if (isProtoMsg(value)) {
-      this.data[name] = this.planner.getAdapter().toCel(value);
-    } else {
-      this.data[name] = NATIVE_ADAPTER.toCel(value);
-    }
   }
 
   public parse(expr: string): ParsedExpr {
@@ -129,5 +116,35 @@ export class CelEnv {
   /** Parses, plans, and evals the given expr. */
   public run(expr: string): CelResult {
     return this.eval(this.plan(this.parse(expr)));
+  }
+
+  public set(name: string, value: unknown): void {
+    if (
+      isCelVal(value) ||
+      value instanceof CelError ||
+      value instanceof CelUnknown
+    ) {
+      this.data[name] = value;
+    } else if (isProtoMsg(value)) {
+      this.data[name] = this.planner.getAdapter().toCel(value);
+    } else {
+      this.data[name] = NATIVE_ADAPTER.toCel(value);
+    }
+  }
+
+  public setParser(parser: CelParser): void {
+    this.parser = parser;
+  }
+
+  public setPlanner(planner: CelPlanner): void {
+    this.planner = planner;
+  }
+
+  public setProtoRegistry(registry: IMessageTypeRegistry): void {
+    this.planner.setProtoRegistry(registry);
+  }
+
+  public addFuncs(funcs: Dispatcher): void {
+    this.planner.addFuncs(funcs);
   }
 }

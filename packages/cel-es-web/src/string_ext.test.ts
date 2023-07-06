@@ -5,7 +5,7 @@ import {
 } from "@bufbuild/cel-es-conformance";
 import { loadCelParser } from "./index";
 import {
-  CelEnv,
+  CelPlanner,
   CelError,
   makeStringExtFuncRegistry,
   ObjectActivation,
@@ -23,14 +23,15 @@ describe("string.format", () => {
   STRINGS_FORMAT_TEST_CASES.forEach((tc) => {
     describe(tc.name, () => {
       const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry(tc.locale);
-      const env = new CelEnv("", CEL_PARSER);
-      env.addFuncs(STRINGS_EXT_FUNCS);
+      const planner = new CelPlanner();
+      planner.addFuncs(STRINGS_EXT_FUNCS);
+
       // Create the input expression from 'format'.format([formatArgs])
       const input =
         "'" + tc.format + "'.format([" + (tc.formatArgs ?? "") + "])";
       test(`${input}`, () => {
-        const parsed = env.parse(input);
-        const plan = env.plan(parsed);
+        const parsed = CEL_PARSER.parse(input);
+        const plan = planner.plan(parsed);
         const ctx = new ObjectActivation(
           tc.dynArgs === undefined ? {} : tc.dynArgs,
           NATIVE_ADAPTER
