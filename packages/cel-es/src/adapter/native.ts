@@ -11,6 +11,7 @@ import {
   CelList,
   CelObject,
   CelUint,
+  CelErrors,
 } from "../value/value";
 import { type CelResult, isCelResult } from "../value/value";
 import { CEL_ADAPTER } from "./cel";
@@ -29,7 +30,7 @@ export class NativeValAdapter implements CelValAdapter {
         } else if (!isOverflowUint(val)) {
           return new CelUint(val);
         } else {
-          return CelError.overflow(0, "bigint to cel", type.INT);
+          return CelErrors.overflow(0, "bigint to cel", type.INT);
         }
       case "number":
         return val;

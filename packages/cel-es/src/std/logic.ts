@@ -16,6 +16,7 @@ import {
   CelMap,
   CelError,
   CelUnknown,
+  CelErrors,
 } from "../value/value";
 import { getCelType } from "../value/type";
 
@@ -37,7 +38,7 @@ const notFunc = Func.unary(opc.LOGICAL_NOT, [olc.LOGICAL_NOT], (id, x) => {
   } else if (x === false) {
     return true;
   }
-  return CelError.overloadNotFound(Number(id), opc.LOGICAL_NOT, [
+  return CelErrors.overloadNotFound(Number(id), opc.LOGICAL_NOT, [
     getCelType(x),
   ]);
 });
@@ -67,7 +68,7 @@ const andFunc = Func.newVarArg(
     } else if (unknowns.length > 0) {
       return CelUnknown.merge(unknowns);
     } else if (errors.length > 0) {
-      return CelError.merge(errors);
+      return CelErrors.merge(errors);
     }
     return undefined;
   }
@@ -98,7 +99,7 @@ const orFunc = Func.newVarArg(
     } else if (unknowns.length > 0) {
       return CelUnknown.merge(unknowns);
     } else if (errors.length > 0) {
-      return CelError.merge(errors);
+      return CelErrors.merge(errors);
     }
     return undefined;
   }

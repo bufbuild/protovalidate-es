@@ -35,7 +35,7 @@ export function newTimestamp(
     nanos = nanos + negSeconds * 1000000000;
   }
   if (seconds > 253402300799n || seconds < -62135596800n) {
-    return CelError.badTimestamp(id, seconds, nanos);
+    return CelErrors.badTimestamp(id, seconds, nanos);
   }
   return new Timestamp({ seconds: seconds, nanos: nanos });
 }
@@ -56,7 +56,7 @@ export function newDuration(
   // Must fit in 64 bits of nanoseconds for compatibility with golang
   const totalNanos = seconds * 1000000000n + BigInt(nanos);
   if (totalNanos > 9223372036854775807n || totalNanos < -9223372036854775808n) {
-    return CelError.badDuration(id, seconds, nanos);
+    return CelErrors.badDuration(id, seconds, nanos);
   }
 
   return new Duration({ seconds: seconds, nanos: nanos });
@@ -76,12 +76,12 @@ export function parseDuration(id: number, str: string): Duration | CelError {
   while (remaining.length > 0) {
     const match = re.exec(remaining);
     if (match === null) {
-      return CelError.badDurationStr(id, "invalid syntax");
+      return CelErrors.badDurationStr(id, "invalid syntax");
     }
     const [, numStr, unit] = match;
     const num = Number(numStr);
     if (isNaN(num)) {
-      return CelError.badDurationStr(id, "invalid syntax");
+      return CelErrors.badDurationStr(id, "invalid syntax");
     }
     switch (unit) {
       case "ns":
@@ -104,7 +104,7 @@ export function parseDuration(id: number, str: string): Duration | CelError {
         seconds += BigInt(num * 3600);
         break;
       default:
-        return CelError.badDurationStr(id, "invalid syntax");
+        return CelErrors.badDurationStr(id, "invalid syntax");
     }
     remaining = remaining.slice(match[0].length);
   }
@@ -259,7 +259,7 @@ export class CelList implements ListAccess {
   accessByIndex(id: number, index: number | bigint): CelResult {
     const i = Number(index);
     if (i < 0 || i >= this.value.length) {
-      return CelError.indexOutOfBounds(Number(id), i, this.value.length);
+      return CelErrors.indexOutOfBounds(Number(id), i, this.value.length);
     }
     return this.adapter.toCel(this.value[i]);
   }
@@ -429,6 +429,160 @@ export class WrapperType<T extends Message> extends CelType {
 }
 
 export class CelError {
+  public additional?: CelError[];
+  constructor(public id: number, public message: string) {}
+
+  public add(additional: CelError) {
+    if (this.additional === undefined) {
+      this.additional = [];
+    }
+    this.additional.push(additional);
+  }
+}
+
+export class CelUnknown {
+  constructor(public ids: bigint[]) {}
+
+  public static merge(unknowns: CelUnknown[]): CelUnknown {
+    if (unknowns.length === 0) {
+      return new CelUnknown([]);
+    }
+    if (unknowns.length === 1) {
+      return unknowns[0];
+    }
+    let ids: bigint[] = [];
+    for (const unknown of unknowns) {
+      ids = ids.concat(unknown.ids);
+    }
+    return new CelUnknown(ids);
+  }
+}
+
+export type CelResult<T = CelVal> = T | CelError | CelUnknown;
+
+export function isCelResult(val: unknown): val is CelResult {
+  return isCelVal(val) || val instanceof CelError || val instanceof CelUnknown;
+}
+
+export function coerceToBool(
+  id: number,
+  val: CelResult | undefined
+): CelResult<boolean> {
+  if (val instanceof CelError || val instanceof CelUnknown) {
+    return val;
+  }
+  if (
+    val === undefined ||
+    (typeof val === "boolean" && val === false) ||
+    (typeof val === "number" && val === 0) ||
+    (typeof val === "bigint" && val === 0n) ||
+    (val instanceof CelUint && val.value === 0n)
+  ) {
+    return false;
+  }
+  return true;
+}
+
+export function coerceToBigInt(
+  id: number,
+  val: CelResult | undefined
+): CelResult<bigint> {
+  if (val instanceof CelError || val instanceof CelUnknown) {
+    return val;
+  } else if (val === undefined || val === null || val instanceof ProtoNull) {
+    return 0n;
+  } else if (isCelWrap(val) || val instanceof CelUint) {
+    val = val.value;
+  }
+  if (typeof val === "bigint") {
+    return val;
+  } else if (typeof val === "number") {
+    return BigInt(val);
+  }
+  return CelErrors.typeMismatch(id, "integer", val);
+}
+
+export function coerceToNumber(
+  id: number,
+  val: CelResult | undefined
+): CelResult<number> {
+  if (val instanceof CelError || val instanceof CelUnknown) {
+    return val;
+  } else if (val === undefined || val === null || val instanceof ProtoNull) {
+    return 0;
+  } else if (isCelWrap(val) || val instanceof CelUint) {
+    val = val.value;
+  }
+  if (typeof val === "bigint") {
+    return Number(val);
+  } else if (typeof val === "number") {
+    return val;
+  }
+  return CelErrors.typeMismatch(id, "number", val);
+}
+
+export function coerceToString(
+  id: number,
+  val: CelResult | undefined
+): CelResult<string> {
+  if (val instanceof CelError || val instanceof CelUnknown) {
+    return val;
+  } else if (val === undefined || val === null || val instanceof ProtoNull) {
+    return "";
+  } else if (isCelWrap(val) || val instanceof CelUint) {
+    val = val.value;
+  }
+  if (typeof val === "string") {
+    return val;
+  }
+  return CelErrors.typeMismatch(id, "string", val);
+}
+
+export function coerceToBytes(
+  id: number,
+  val: CelResult | undefined
+): CelResult<Uint8Array> {
+  if (val instanceof CelError || val instanceof CelUnknown) {
+    return val;
+  } else if (val === undefined || val === null || val instanceof ProtoNull) {
+    return new Uint8Array();
+  } else if (isCelWrap(val) || val instanceof CelUint) {
+    val = val.value;
+  }
+  if (val instanceof Uint8Array) {
+    return val;
+  }
+  return CelErrors.typeMismatch(id, "bytes", val);
+}
+
+export function coerceToValues(args: CelResult[]): CelResult<CelVal[]> {
+  const unknowns: CelUnknown[] = [];
+  const errors: CelError[] = [];
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg instanceof CelUnknown) {
+      unknowns.push(arg);
+    } else if (arg instanceof CelError) {
+      errors.push(arg);
+    }
+  }
+  if (unknowns.length > 0) {
+    return CelUnknown.merge(unknowns);
+  }
+  if (errors.length > 0) {
+    return CelErrors.merge(errors);
+  }
+  return args as CelVal[];
+}
+
+export class CelErrors {
+  static merge(errors: CelError[]): CelError {
+    for (let i = 1; i < errors.length; i++) {
+      errors[0].add(errors[i]);
+    }
+    return errors[0];
+  }
+
   static invalidArgument(id: number, func: string, issue: string): CelError {
     return new CelError(id, `invalid argument to function ${func}: ${issue}`);
   }
@@ -521,7 +675,7 @@ export class CelError {
       `${type.name} return error for overflow during ${op}`
     );
   }
-  public static overloadNotFound(
+  static overloadNotFound(
     id: number,
     name: string,
     types: CelType[]
@@ -533,156 +687,4 @@ export class CelError {
         .join(", ")})'`
     );
   }
-
-  static merge(errors: CelError[]): CelError {
-    for (let i = 1; i < errors.length; i++) {
-      errors[0].add(errors[i]);
-    }
-    return errors[0];
-  }
-
-  public additional?: CelError[];
-  constructor(public id: number, public message: string) {}
-
-  public add(additional: CelError) {
-    if (this.additional === undefined) {
-      this.additional = [];
-    }
-    this.additional.push(additional);
-  }
-}
-
-export class CelUnknown {
-  constructor(public ids: bigint[]) {}
-
-  public static merge(unknowns: CelUnknown[]): CelUnknown {
-    if (unknowns.length === 0) {
-      return new CelUnknown([]);
-    }
-    if (unknowns.length === 1) {
-      return unknowns[0];
-    }
-    let ids: bigint[] = [];
-    for (const unknown of unknowns) {
-      ids = ids.concat(unknown.ids);
-    }
-    return new CelUnknown(ids);
-  }
-}
-
-export type CelResult<T = CelVal> = T | CelError | CelUnknown;
-
-export function isCelResult(val: unknown): val is CelResult {
-  return isCelVal(val) || val instanceof CelError || val instanceof CelUnknown;
-}
-
-export function coerceToBool(
-  id: number,
-  val: CelResult | undefined
-): CelResult<boolean> {
-  if (val instanceof CelError || val instanceof CelUnknown) {
-    return val;
-  }
-  if (
-    val === undefined ||
-    (typeof val === "boolean" && val === false) ||
-    (typeof val === "number" && val === 0) ||
-    (typeof val === "bigint" && val === 0n) ||
-    (val instanceof CelUint && val.value === 0n)
-  ) {
-    return false;
-  }
-  return true;
-}
-
-export function coerceToBigInt(
-  id: number,
-  val: CelResult | undefined
-): CelResult<bigint> {
-  if (val instanceof CelError || val instanceof CelUnknown) {
-    return val;
-  } else if (val === undefined || val === null || val instanceof ProtoNull) {
-    return 0n;
-  } else if (isCelWrap(val) || val instanceof CelUint) {
-    val = val.value;
-  }
-  if (typeof val === "bigint") {
-    return val;
-  } else if (typeof val === "number") {
-    return BigInt(val);
-  }
-  return CelError.typeMismatch(id, "integer", val);
-}
-
-export function coerceToNumber(
-  id: number,
-  val: CelResult | undefined
-): CelResult<number> {
-  if (val instanceof CelError || val instanceof CelUnknown) {
-    return val;
-  } else if (val === undefined || val === null || val instanceof ProtoNull) {
-    return 0;
-  } else if (isCelWrap(val) || val instanceof CelUint) {
-    val = val.value;
-  }
-  if (typeof val === "bigint") {
-    return Number(val);
-  } else if (typeof val === "number") {
-    return val;
-  }
-  return CelError.typeMismatch(id, "number", val);
-}
-
-export function coerceToString(
-  id: number,
-  val: CelResult | undefined
-): CelResult<string> {
-  if (val instanceof CelError || val instanceof CelUnknown) {
-    return val;
-  } else if (val === undefined || val === null || val instanceof ProtoNull) {
-    return "";
-  } else if (isCelWrap(val) || val instanceof CelUint) {
-    val = val.value;
-  }
-  if (typeof val === "string") {
-    return val;
-  }
-  return CelError.typeMismatch(id, "string", val);
-}
-
-export function coerceToBytes(
-  id: number,
-  val: CelResult | undefined
-): CelResult<Uint8Array> {
-  if (val instanceof CelError || val instanceof CelUnknown) {
-    return val;
-  } else if (val === undefined || val === null || val instanceof ProtoNull) {
-    return new Uint8Array();
-  } else if (isCelWrap(val) || val instanceof CelUint) {
-    val = val.value;
-  }
-  if (val instanceof Uint8Array) {
-    return val;
-  }
-  return CelError.typeMismatch(id, "bytes", val);
-}
-
-export function coerceToValues(args: CelResult[]): CelResult<CelVal[]> {
-  const unknowns: CelUnknown[] = [];
-  const errors: CelError[] = [];
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg instanceof CelUnknown) {
-      unknowns.push(arg);
-    } else if (arg instanceof CelError) {
-      errors.push(arg);
-    }
-  }
-  if (unknowns.length > 0) {
-    return CelUnknown.merge(unknowns);
-  }
-  if (errors.length > 0) {
-    return CelError.merge(errors);
-  }
-  return args as CelVal[];
 }

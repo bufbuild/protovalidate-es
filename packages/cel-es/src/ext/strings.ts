@@ -12,6 +12,7 @@ import {
   CelMap,
   CelUint,
   CelType,
+  CelErrors,
 } from "../value/value";
 
 function toNum(number: unknown): number | undefined {
@@ -42,7 +43,7 @@ const charAtFunc = Func.binary(
     }
     const i = Number(index);
     if (i < 0 || i > str.length) {
-      return CelError.indexOutOfBounds(id, i, str.length);
+      return CelErrors.indexOutOfBounds(id, i, str.length);
     }
     return str.charAt(i);
   }
@@ -59,7 +60,7 @@ const indexOfFunc = Func.newStrict(
     const substr = args[1] as string;
     const start = toNum(args[2]);
     if (start !== undefined && (start < 0 || start >= str.length)) {
-      return CelError.indexOutOfBounds(id, start, str.length);
+      return CelErrors.indexOutOfBounds(id, start, str.length);
     }
     return str.indexOf(substr, start);
   }
@@ -76,7 +77,7 @@ const lastIndexOfFunc = Func.newStrict(
     const substr = args[1] as string;
     const start = toNum(args[2]);
     if (start !== undefined && (start < 0 || start >= str.length)) {
-      return CelError.indexOutOfBounds(id, start, str.length);
+      return CelErrors.indexOutOfBounds(id, start, str.length);
     }
     return str.lastIndexOf(substr, start);
   }
@@ -181,20 +182,20 @@ const substringFunc = Func.newStrict(
     if (end === undefined) {
       const i = Number(start);
       if (i < 0 || i > str.length) {
-        return CelError.indexOutOfBounds(id, i, str.length);
+        return CelErrors.indexOutOfBounds(id, i, str.length);
       }
       return str.substring(i);
     }
     const i = Number(start);
     const j = Number(end);
     if (i < 0 || i > str.length) {
-      return CelError.indexOutOfBounds(id, i, str.length);
+      return CelErrors.indexOutOfBounds(id, i, str.length);
     }
     if (j < 0 || j > str.length) {
-      return CelError.indexOutOfBounds(id, j, str.length);
+      return CelErrors.indexOutOfBounds(id, j, str.length);
     }
     if (i > j) {
-      return CelError.invalidArgument(id, "substring", "start > end");
+      return CelErrors.invalidArgument(id, "substring", "start > end");
     }
     return str.substring(Number(start), Number(end));
   }
@@ -240,7 +241,7 @@ const joinFunc = Func.newStrict(
     let result = "";
     for (let i = 0; i < items.length; i++) {
       if (typeof items[i] !== "string") {
-        return CelError.invalidArgument(
+        return CelErrors.invalidArgument(
           id,
           "join",
           "list contains non-string value"
@@ -300,7 +301,7 @@ export class Formatter {
       case "NaN":
         return "NaN";
       default:
-        return CelError.invalidArgument(
+        return CelErrors.invalidArgument(
           id,
           "format",
           "invalid floating point value"
@@ -334,7 +335,7 @@ export class Formatter {
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
-    return CelError.invalidArgument(
+    return CelErrors.invalidArgument(
       id,
       "format",
       "invalid floating point value"
@@ -360,7 +361,7 @@ export class Formatter {
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
-    return CelError.invalidArgument(
+    return CelErrors.invalidArgument(
       id,
       "format",
       "invalid floating point value"
@@ -377,7 +378,7 @@ export class Formatter {
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
-    return CelError.invalidArgument(id, "format", "invalid integer value");
+    return CelErrors.invalidArgument(id, "format", "invalid integer value");
   }
 
   public formatOctal(id: number, val: CelResult): CelResult<string> {
@@ -388,7 +389,7 @@ export class Formatter {
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
-    return CelError.invalidArgument(id, "format", "invalid integer value");
+    return CelErrors.invalidArgument(id, "format", "invalid integer value");
   }
 
   public formatDecimal(id: number, val: CelResult): CelResult<string> {
@@ -399,7 +400,7 @@ export class Formatter {
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
-    return CelError.invalidArgument(id, "format", "invalid integer value");
+    return CelErrors.invalidArgument(id, "format", "invalid integer value");
   }
 
   public formatHexString(id: number, val: string): string {
@@ -431,7 +432,7 @@ export class Formatter {
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
-    return CelError.invalidArgument(id, "format", "invalid integer value");
+    return CelErrors.invalidArgument(id, "format", "invalid integer value");
   }
 
   public formatHeX(id: number, val: CelResult): CelResult<string> {
@@ -446,7 +447,7 @@ export class Formatter {
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
-    return CelError.invalidArgument(id, "format", "invalid integer value");
+    return CelErrors.invalidArgument(id, "format", "invalid integer value");
   }
 
   public formatList(id: number, val: CelList): CelResult<string> {
@@ -529,7 +530,7 @@ export class Formatter {
       default:
         break;
     }
-    return CelError.invalidArgument(id, "format", "invalid value");
+    return CelErrors.invalidArgument(id, "format", "invalid value");
   }
 
   public formatString(id: number, val: CelResult): CelResult<string> {
@@ -566,7 +567,7 @@ export class Formatter {
       default:
         break;
     }
-    return CelError.invalidArgument(id, "format", "invalid string value");
+    return CelErrors.invalidArgument(id, "format", "invalid string value");
   }
 
   public format(id: number, format: string, args: CelList): CelResult<string> {
@@ -577,7 +578,7 @@ export class Formatter {
     while (i < format.length) {
       if (format.charAt(i) === "%") {
         if (i + 1 >= format.length) {
-          return CelError.invalidArgument(
+          return CelErrors.invalidArgument(
             id,
             "format",
             "invalid format string"
@@ -602,7 +603,7 @@ export class Formatter {
             i++;
           }
           if (i >= format.length) {
-            return CelError.invalidArgument(
+            return CelErrors.invalidArgument(
               id,
               "format",
               "invalid format string"
@@ -612,7 +613,7 @@ export class Formatter {
           i++;
         }
         if (j >= items.length) {
-          return CelError.invalidArgument(
+          return CelErrors.invalidArgument(
             id,
             "format",
             "too few arguments for format string"
@@ -646,7 +647,7 @@ export class Formatter {
             str = this.formatOctal(id, val);
             break;
           default:
-            return CelError.invalidArgument(
+            return CelErrors.invalidArgument(
               id,
               "format",
               "invalid format string"
@@ -662,7 +663,7 @@ export class Formatter {
       }
     }
     if (j < items.length) {
-      return CelError.invalidArgument(
+      return CelErrors.invalidArgument(
         id,
         "format",
         "too many arguments for format string"

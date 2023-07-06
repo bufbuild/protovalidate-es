@@ -42,6 +42,7 @@ import {
   CelObject,
   CelUint,
   ProtoNull,
+  CelErrors,
 } from "../value/value";
 import { CEL_ADAPTER, equalsStruct } from "./cel";
 import { NATIVE_ADAPTER } from "./native";
@@ -170,7 +171,7 @@ export class ProtoValAdapter implements CelValAdapter {
       const fields = this.getMetadata(obj.getType()).FIELDS;
       const field = fields.get(name);
       if (field === undefined) {
-        return CelError.fieldNotFound(id, name, fields.keys());
+        return CelErrors.fieldNotFound(id, name, fields.keys());
       }
       let result: ProtoResult | undefined;
       if (field.oneof !== undefined) {
@@ -429,7 +430,7 @@ export class ProtoValAdapter implements CelValAdapter {
     for (const key of keys) {
       const field = fields.get(key as string);
       if (field === undefined) {
-        return CelError.fieldNotFound(id, key, Array.from(fields.keys()));
+        return CelErrors.fieldNotFound(id, key, Array.from(fields.keys()));
       }
       const val = obj.accessByName(id, key);
       if (val === undefined) {
@@ -555,7 +556,7 @@ class ProtoMetadata {
   }
 }
 
-export class ProtoValProvider implements CelValProvider {
+export class ProtoValProvider implements CelValProvider<ProtoValue> {
   constructor(public adapter: ProtoValAdapter) {}
 
   newValue(

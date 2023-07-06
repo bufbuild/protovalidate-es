@@ -9,6 +9,7 @@ import {
   CelUnknown,
   CelUint,
   parseDuration,
+  CelErrors,
 } from "../value/value";
 import {
   isOverflowInt,
@@ -33,7 +34,7 @@ const uintToIntOp: StrictUnaryOp = (id, x) => {
   if (x instanceof CelUint) {
     const val = x.value.valueOf();
     if (isOverflowInt(val)) {
-      return CelError.overflow(id, INT, type.INT);
+      return CelErrors.overflow(id, INT, type.INT);
     }
     return x.value;
   }
@@ -43,7 +44,7 @@ const uintToIntFunc = Func.unary(INT, [olc.UINT_TO_INT], uintToIntOp);
 const dblToIntOp: StrictUnaryOp = (id, x) => {
   if (typeof x === "number") {
     if (isOverflowIntNum(x)) {
-      return CelError.overflow(id, INT, type.INT);
+      return CelErrors.overflow(id, INT, type.INT);
     }
     return BigInt(Math.trunc(x));
   }
@@ -54,7 +55,7 @@ const strToIntOp: StrictUnaryOp = (id, x) => {
   if (typeof x === "string") {
     const val = BigInt(x);
     if (isOverflowInt(val)) {
-      return CelError.overflow(id, INT, type.INT);
+      return CelErrors.overflow(id, INT, type.INT);
     }
     return val;
   }
@@ -65,7 +66,7 @@ const timestampToIntOp: StrictUnaryOp = (id, x) => {
   if (x instanceof Timestamp) {
     const val = x.seconds;
     if (isOverflowInt(val)) {
-      return CelError.overflow(id, INT, type.INT);
+      return CelErrors.overflow(id, INT, type.INT);
     }
     return BigInt(val);
   }
@@ -80,7 +81,7 @@ const durationToIntOp: StrictUnaryOp = (id, x) => {
   if (x instanceof Duration) {
     const val = x.seconds;
     if (isOverflowInt(val)) {
-      return CelError.overflow(id, INT, type.INT);
+      return CelErrors.overflow(id, INT, type.INT);
     }
     return BigInt(val);
   }
@@ -115,7 +116,7 @@ const uintToUint = Func.unary(UINT, [olc.UINT_TO_UINT], identityOp);
 const intToUintOp: StrictUnaryOp = (id, x) => {
   if (typeof x === "bigint") {
     if (isOverflowUint(x)) {
-      return CelError.overflow(id, UINT, type.UINT);
+      return CelErrors.overflow(id, UINT, type.UINT);
     }
     return new CelUint(x);
   }
@@ -126,7 +127,7 @@ const intToUintFunc = Func.unary(UINT, [olc.INT_TO_UINT], intToUintOp);
 const dblToUintOp: StrictUnaryOp = (id, x) => {
   if (typeof x === "number") {
     if (isOverflowUintNum(x)) {
-      return CelError.overflow(id, UINT, type.UINT);
+      return CelErrors.overflow(id, UINT, type.UINT);
     }
     // Return the floor of the number.
     return new CelUint(BigInt(Math.trunc(x)));
@@ -138,7 +139,7 @@ const strToUintOp: StrictUnaryOp = (id, x) => {
   if (typeof x === "string") {
     const val = BigInt(x);
     if (isOverflowUint(val)) {
-      return CelError.overflow(id, UINT, type.UINT);
+      return CelErrors.overflow(id, UINT, type.UINT);
     }
     return new CelUint(val);
   }
@@ -295,7 +296,7 @@ const bytesToStringOp: StrictUnaryOp = (id, x) => {
       const result = coder.decode(x);
       return result;
     } catch (e) {
-      return CelError.badStringBytes(id, String(e));
+      return CelErrors.badStringBytes(id, String(e));
     }
   }
   return undefined;
@@ -320,7 +321,7 @@ const durationToStringOp: StrictUnaryOp = (id, x) => {
   if (x instanceof Duration) {
     return x.toJson() as string;
   }
-  return CelError.overloadNotFound(id, STRING, [type.getCelType(x)]);
+  return CelErrors.overloadNotFound(id, STRING, [type.getCelType(x)]);
 };
 const durationToStringFunc = Func.unary(
   STRING,
@@ -360,7 +361,7 @@ const stringToTimestampOp: StrictUnaryOp = (id, x) => {
     try {
       return Timestamp.fromJson(x);
     } catch (e) {
-      return CelError.badTimeStr(id, String(e));
+      return CelErrors.badTimeStr(id, String(e));
     }
   }
   return undefined;

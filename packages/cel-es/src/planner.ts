@@ -48,6 +48,7 @@ import {
   type CelResult,
   type CelVal,
   type CelValAdapter,
+  CelErrors,
 } from "./value/value";
 
 export class Planner {
@@ -85,7 +86,10 @@ export class Planner {
     }
   }
 
-  planComprehension(id: number, value: Expr_Comprehension): Interpretable {
+  private planComprehension(
+    id: number,
+    value: Expr_Comprehension
+  ): Interpretable {
     if (
       value.accuInit === undefined ||
       value.iterRange === undefined ||
@@ -113,7 +117,7 @@ export class Planner {
     );
   }
 
-  planSelect(id: number, expr: Expr_Select): Interpretable {
+  private planSelect(id: number, expr: Expr_Select): Interpretable {
     if (expr.operand === undefined) {
       throw new Error("invalid select");
     }
@@ -131,7 +135,7 @@ export class Planner {
     return attr;
   }
 
-  planCreateObj(id: number, expr: Expr_CreateStruct): Interpretable {
+  private planCreateObj(id: number, expr: Expr_CreateStruct): Interpretable {
     const typeName = this.resolveType(expr.messageName);
     if (typeName === undefined) {
       return new EvalError(id, "unknown type: " + expr.messageName);
@@ -164,7 +168,7 @@ export class Planner {
     return new EvalObj(id, typeName, keys, values, optionals, this.provider);
   }
 
-  planCreateStruct(id: number, expr: Expr_CreateStruct): Interpretable {
+  private planCreateStruct(id: number, expr: Expr_CreateStruct): Interpretable {
     if (expr.messageName !== "") {
       return this.planCreateObj(id, expr);
     }
@@ -196,7 +200,7 @@ export class Planner {
     return new EvalMap(id, keys, values, optionals);
   }
 
-  planCreateList(id: number, expr: Expr_CreateList): Interpretable {
+  private planCreateList(id: number, expr: Expr_CreateList): Interpretable {
     const optionals = undefined;
     if (expr.optionalIndices.length > 0) {
       // set optionals to an array of booleans the same length as the list
@@ -265,7 +269,7 @@ export class Planner {
     );
   }
 
-  planCallConditional(
+  private planCallConditional(
     id: number,
     _call: Expr_Call,
     args: Interpretable[]
@@ -287,7 +291,7 @@ export class Planner {
     );
   }
 
-  planCallIndex(
+  private planCallIndex(
     _call: Expr_Call,
     args: Interpretable[],
     opt: boolean
@@ -429,7 +433,7 @@ export class EvalAttr implements Attribute, Interpretable {
   eval(ctx: Activation) {
     const val = this.attr.resolve(ctx);
     if (val === undefined) {
-      return CelError.unresolvedAttr(this.id);
+      return CelErrors.unresolvedAttr(this.id);
     } else if (val instanceof CelError || val instanceof CelUnknown) {
       return val;
     }
@@ -458,7 +462,7 @@ export class EvalCall implements Interpretable {
 
   public eval(ctx: Activation): CelResult {
     if (this.call === undefined) {
-      return CelError.funcNotFound(this.id, this.name);
+      return CelErrors.funcNotFound(this.id, this.name);
     }
     const argVals = this.args.map((x) => x.eval(ctx));
     const result = this.call.dispatch(this.id, argVals, this.adapter);
@@ -470,7 +474,7 @@ export class EvalCall implements Interpretable {
     if (vals instanceof CelError || vals instanceof CelUnknown) {
       return vals;
     }
-    return CelError.overloadNotFound(
+    return CelErrors.overloadNotFound(
       this.id,
       this.name,
       vals.map((x) => type.getCelType(x))
@@ -501,7 +505,7 @@ export class EvalObj implements InterpretableCtor {
     const obj: { [key: string]: CelVal } = {};
     for (let i = 0; i < vals.length; i++) {
       if (obj[this.fields[i]] !== undefined) {
-        return CelError.mapKeyConflict(this.id, this.fields[i]);
+        return CelErrors.mapKeyConflict(this.id, this.fields[i]);
       }
       obj[this.fields[i]] = vals[i];
     }
@@ -574,7 +578,7 @@ export class EvalObj implements InterpretableCtor {
     const celObj = new CelObject(obj, CEL_ADAPTER, new CelType(this.typeName));
     const result = this.provider.newValue(this.id, this.typeName, celObj);
     if (result === undefined) {
-      return CelError.typeNotFound(this.id, this.typeName);
+      return CelErrors.typeNotFound(this.id, this.typeName);
     }
     return result;
   }
@@ -651,7 +655,7 @@ export class EvalMap implements InterpretableCtor {
     let keyType = type.getCelType(firstKey);
     let valType = type.getCelType(firstVal);
     if (typeof firstKey === "number" && !Number.isInteger(firstKey)) {
-      return CelError.unsupportedKeyType(this.id);
+      return CelErrors.unsupportedKeyType(this.id);
     }
     entries.set(firstKey, firstVal);
     for (let i = 1; i < this.keys.length; i++) {
@@ -670,9 +674,9 @@ export class EvalMap implements InterpretableCtor {
         valType = type.DYN;
       }
       if (entries.has(key)) {
-        return CelError.mapKeyConflict(this.id, key);
+        return CelErrors.mapKeyConflict(this.id, key);
       } else if (typeof key === "number" && !Number.isInteger(key)) {
-        return CelError.unsupportedKeyType(this.id);
+        return CelErrors.unsupportedKeyType(this.id);
       }
       entries.set(key, val);
     }
@@ -719,7 +723,7 @@ export class EvalFold implements Interpretable {
     ) {
       items = iterRange.getItems();
     } else {
-      return CelError.typeMismatch(this.id, "iterable", iterRange);
+      return CelErrors.typeMismatch(this.id, "iterable", iterRange);
     }
 
     // Fold the items.

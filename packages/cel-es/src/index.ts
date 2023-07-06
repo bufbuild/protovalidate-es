@@ -1,4 +1,4 @@
-export { type CelParser, CelEnv } from "./celenv";
+export { type CelParser, CelPlanner, CelEnv } from "./celenv";
 export {
   type CelResult,
   type CelVal,

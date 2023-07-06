@@ -11,6 +11,7 @@ import {
   CelError,
   CelUnknown,
   type Unwrapper,
+  CelErrors,
 } from "./value/value";
 import { getCelType } from "./value/type";
 
@@ -214,7 +215,7 @@ class ConditionalAttr implements Attribute {
     } else if (cond instanceof CelError || cond instanceof CelUnknown) {
       return cond;
     }
-    return CelError.overloadNotFound(this.id, "_?_:_", [getCelType(cond)]);
+    return CelErrors.overloadNotFound(this.id, "_?_:_", [getCelType(cond)]);
   }
 }
 
@@ -328,7 +329,7 @@ class StringAccess implements Access {
   access<T>(_vars: Activation, obj: RawVal<T>): RawResult<T> | undefined {
     const val = obj.adapter.accessByName(this.id, obj.value, this.name);
     if (val === undefined && !this.optional) {
-      return CelError.fieldNotFound(this.id, this.name);
+      return CelErrors.fieldNotFound(this.id, this.name);
     }
     return RawVal.if(obj.adapter, val);
   }
@@ -340,7 +341,7 @@ class StringAccess implements Access {
   ): RawResult | undefined {
     const val = obj.adapter.accessByName(this.id, obj.value, this.name);
     if (val === undefined && !this.optional && !presenceOnly) {
-      return CelError.fieldNotFound(this.id, this.name);
+      return CelErrors.fieldNotFound(this.id, this.name);
     }
     return RawVal.if(obj.adapter, val);
   }
@@ -364,7 +365,7 @@ class NumAccess implements Access {
     }
     const raw = obj.adapter.accessByIndex(this.id, obj.value, this.index);
     if (raw === undefined && !this.optional) {
-      return CelError.indexOutOfBounds(this.id, this.index, -1);
+      return CelErrors.indexOutOfBounds(this.id, this.index, -1);
     }
     return RawVal.if(obj.adapter, raw);
   }
@@ -376,7 +377,7 @@ class NumAccess implements Access {
   ): RawResult | undefined {
     const raw = obj.adapter.accessByIndex(this.id, obj.value, this.index);
     if (raw === undefined && !this.optional) {
-      return CelError.indexOutOfBounds(this.id, this.index, -1);
+      return CelErrors.indexOutOfBounds(this.id, this.index, -1);
     }
     return RawVal.if(obj.adapter, raw);
   }
@@ -396,7 +397,7 @@ class IntAccess implements Access {
     }
     const raw = obj.adapter.accessByIndex(this.id, obj.value, this.index);
     if (raw === undefined && !this.optional) {
-      return CelError.indexOutOfBounds(this.id, Number(this.index), -1);
+      return CelErrors.indexOutOfBounds(this.id, Number(this.index), -1);
     }
     return RawVal.if(obj.adapter, raw);
   }
@@ -408,7 +409,7 @@ class IntAccess implements Access {
   ): RawResult | undefined {
     const raw = obj.adapter.accessByIndex(this.id, obj.value, this.index);
     if (raw === undefined && !this.optional) {
-      return CelError.indexOutOfBounds(this.id, Number(this.index), -1);
+      return CelErrors.indexOutOfBounds(this.id, Number(this.index), -1);
     }
     return RawVal.if(obj.adapter, raw);
   }
@@ -541,6 +542,6 @@ export class ConcreteAttributeFactory implements AttributeFactory {
       default:
         break;
     }
-    return new ErrorAttr(id, CelError.unsupportedKeyType(id), opt);
+    return new ErrorAttr(id, CelErrors.unsupportedKeyType(id), opt);
   }
 }

@@ -19,17 +19,13 @@ export interface CelParser {
   parse(text: string): ParsedExpr;
 }
 
-export class CelEnv {
-  public readonly data: Record<string, CelResult> = {};
-  private readonly ctx = new ObjectActivation(this.data, CEL_ADAPTER);
+export class CelPlanner {
   private protoProvider: ProtoValProvider;
   private dispatcher: OrderedDispatcher;
   private planner: Planner;
-  private parser: CelParser | undefined;
 
   public constructor(
     namespace: string | undefined = undefined,
-    parser: CelParser | undefined = undefined,
     registry: IMessageTypeRegistry = createRegistry()
   ) {
     this.protoProvider = new ProtoValProvider(new ProtoValAdapter(registry));
@@ -39,18 +35,64 @@ export class CelEnv {
       this.protoProvider,
       namespace === undefined ? undefined : new Namespace(namespace)
     );
+  }
+
+  public plan(
+    expr: Expr | ParsedExpr | CheckedExpr | undefined
+  ): Interpretable {
+    let maybeExpr: Expr | undefined = undefined;
+    if (expr instanceof CheckedExpr) {
+      maybeExpr = expr.expr;
+    } else if (expr instanceof ParsedExpr) {
+      maybeExpr = expr.expr;
+    } else {
+      maybeExpr = expr;
+    }
+    return this.planner.plan(maybeExpr ?? new Expr());
+  }
+
+  public addFuncs(funcs: Dispatcher): void {
+    this.dispatcher.add(funcs);
+  }
+
+  public setProtoRegistry(registry: IMessageTypeRegistry): void {
+    this.protoProvider.adapter = new ProtoValAdapter(registry);
+  }
+
+  getAdapter(): ProtoValAdapter {
+    return this.protoProvider.adapter;
+  }
+}
+
+export class CelEnv {
+  public readonly data: Record<string, CelResult> = {};
+  private readonly ctx = new ObjectActivation(this.data, CEL_ADAPTER);
+  private planner: CelPlanner;
+  private parser: CelParser | undefined;
+
+  public constructor(
+    namespace: string | undefined = undefined,
+    parser: CelParser | undefined = undefined,
+    registry: IMessageTypeRegistry = createRegistry()
+  ) {
+    this.planner = new CelPlanner(namespace, registry);
     this.parser = parser;
   }
 
   public setParser(parser: CelParser): void {
     this.parser = parser;
   }
+
+  public setPlanner(planner: CelPlanner): void {
+    this.planner = planner;
+  }
+
   public setProtoRegistry(registry: IMessageTypeRegistry): void {
-    this.protoProvider.adapter = new ProtoValAdapter(registry);
+    this.planner.setProtoRegistry(registry);
   }
 
   public addFuncs(funcs: Dispatcher): void {
-    this.dispatcher.add(funcs);
+    this.planner.addFuncs(funcs);
   }
 
   public set(name: string, value: unknown): void {
@@ -61,7 +103,7 @@ export class CelEnv {
     ) {
       this.data[name] = value;
     } else if (isProtoMsg(value)) {
-      this.data[name] = this.protoProvider.adapter.toCel(value);
+      this.data[name] = this.planner.getAdapter().toCel(value);
     } else {
       this.data[name] = NATIVE_ADAPTER.toCel(value);
     }
@@ -77,15 +119,7 @@ export class CelEnv {
   public plan(
     expr: Expr | ParsedExpr | CheckedExpr | undefined
   ): Interpretable {
-    let maybeExpr: Expr | undefined = undefined;
-    if (expr instanceof CheckedExpr) {
-      maybeExpr = expr.expr;
-    } else if (expr instanceof ParsedExpr) {
-      maybeExpr = expr.expr;
-    } else {
-      maybeExpr = expr;
-    }
-    return this.planner.plan(maybeExpr ?? new Expr());
+    return this.planner.plan(expr);
   }
 
   public eval(expr: Interpretable): CelResult {

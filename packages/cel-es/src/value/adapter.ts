@@ -5,6 +5,7 @@ import {
   CelUnknown,
   type CelValAdapter,
   type Unwrapper,
+  CelErrors,
 } from "./value";
 
 /** A value bundled with it's associated adapter. */
@@ -81,7 +82,7 @@ export function unwrapResults<V = CelVal>(
     return CelUnknown.merge(unknowns);
   }
   if (errors.length > 0) {
-    return CelError.merge(errors);
+    return CelErrors.merge(errors);
   }
   return vals;
 }

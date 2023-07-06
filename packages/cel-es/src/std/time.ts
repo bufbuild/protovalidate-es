@@ -3,7 +3,7 @@ import { utcToZonedTime } from "date-fns-tz";
 
 import { Func, FuncRegistry, type StrictOp, type StrictUnaryOp } from "../func";
 import * as olc from "../gen/dev/cel/expr/overload_const";
-import { CelError } from "../value/value";
+import { CelErrors } from "../value/value";
 
 type TimeFunc = (val: Date) => number;
 
@@ -23,7 +23,7 @@ function makeTimeOp(op: string, t: TimeFunc): StrictOp {
         // Try with a leading '+' as a workaround for date-fns-tz bug.
         val = utcToZonedTime(args[0].toDate(), "+" + args[1]);
         if (isNaN(val.getTime())) {
-          return CelError.invalidTz(id, args[1]);
+          return CelErrors.invalidTz(id, args[1]);
         }
       }
     } else {

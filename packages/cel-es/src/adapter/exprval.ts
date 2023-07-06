@@ -1,29 +1,27 @@
 import { Any, Duration, Timestamp } from "@bufbuild/protobuf";
 
-import {
-  type CelValAdapter,
-  CelError,
-  CelList,
-  CelMap,
-  CelUint,
-} from "../value/value";
-import * as type from "../value/type";
-import {
-  type CelResult,
-  type CelVal,
-  CelType,
-  isCelResult,
-  isCelVal,
-  isCelWrap,
-} from "../value/value";
-import { CEL_ADAPTER } from "./cel";
 import { ExprValue } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/eval_pb";
 import {
-  Value,
   ListValue,
   MapValue,
   MapValue_Entry,
+  Value,
 } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/value_pb";
+import * as type from "../value/type";
+import {
+  CelErrors,
+  CelList,
+  CelMap,
+  CelType,
+  CelUint,
+  isCelResult,
+  isCelVal,
+  isCelWrap,
+  type CelResult,
+  type CelVal,
+  type CelValAdapter,
+} from "../value/value";
+import { CEL_ADAPTER } from "./cel";
 
 type ExprType = ExprValue | Value | ListValue | MapValue | CelVal;
 type ExprResult = CelResult<ExprType>;
@@ -90,7 +88,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
       case "mapValue":
         return this.accessMapByIndex(id, value.kind.value, index);
     }
-    return CelError.badIndexAccess(id, this.valueToType(value));
+    return CelErrors.badIndexAccess(id, this.valueToType(value));
   }
 
   accessByName(
@@ -126,7 +124,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
         }
         return undefined;
     }
-    return CelError.badStringAccess(id, this.valueToType(value));
+    return CelErrors.badStringAccess(id, this.valueToType(value));
   }
 
   valueToType(value: Value): CelType {

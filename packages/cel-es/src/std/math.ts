@@ -18,6 +18,7 @@ import {
   CelUint,
   newDuration,
   newTimestamp,
+  CelErrors,
 } from "../value/value";
 
 const MAX_INT = 9223372036854775807n;
@@ -70,7 +71,7 @@ const addIntOp: StrictOp = (id, args) => {
     }
     sum += arg;
     if (isOverflowInt(sum)) {
-      return CelError.overflow(id, opc.ADD, type.INT);
+      return CelErrors.overflow(id, opc.ADD, type.INT);
     }
   }
   return sum;
@@ -86,7 +87,7 @@ const addUintOp: StrictOp = (id, args) => {
     }
     sum += arg.value.valueOf();
     if (isOverflowUint(sum)) {
-      return CelError.overflow(id, opc.ADD, type.UINT);
+      return CelErrors.overflow(id, opc.ADD, type.UINT);
     }
   }
   return new CelUint(sum);
@@ -210,12 +211,12 @@ function sumTimeOp(id: number, times: CelVal[]) {
   switch (tsCount) {
     case 0:
       if (seconds > 315576000000 || seconds < -315576000000) {
-        return CelError.overflow(id, opc.ADD, type.DURATION);
+        return CelErrors.overflow(id, opc.ADD, type.DURATION);
       }
       return new Duration({ seconds: seconds, nanos: nanos });
     case 1:
       if (seconds > 253402300799 || seconds < -62135596800) {
-        return CelError.overflow(id, opc.ADD, type.TIMESTAMP);
+        return CelErrors.overflow(id, opc.ADD, type.TIMESTAMP);
       }
       return new Timestamp({ seconds: seconds, nanos: nanos });
     default:
@@ -262,7 +263,7 @@ const subIntOp: StrictBinaryOp = (id, lhs, rhs) => {
   if (typeof lhs === "bigint" && typeof rhs === "bigint") {
     const val = lhs - rhs;
     if (isOverflowInt(val)) {
-      return CelError.overflow(id, opc.SUBTRACT, type.INT);
+      return CelErrors.overflow(id, opc.SUBTRACT, type.INT);
     }
     return val;
   }
@@ -274,7 +275,7 @@ const subUintOp: StrictBinaryOp = (id, lhs, rhs) => {
   if (lhs instanceof CelUint && rhs instanceof CelUint) {
     const val = lhs.value.valueOf() - rhs.value.valueOf();
     if (isOverflowUint(val)) {
-      return CelError.overflow(id, opc.SUBTRACT, type.UINT);
+      return CelErrors.overflow(id, opc.SUBTRACT, type.UINT);
     }
     return new CelUint(val);
   }
@@ -342,7 +343,7 @@ const mulIntOp: StrictOp = (id, args) => {
     }
     product *= arg;
     if (isOverflowInt(product)) {
-      return CelError.overflow(id, opc.MULTIPLY, type.INT);
+      return CelErrors.overflow(id, opc.MULTIPLY, type.INT);
     }
   }
   return product;
@@ -358,7 +359,7 @@ const mulUintOp: StrictOp = (id, args) => {
     }
     product *= arg.value.valueOf();
     if (isOverflowUint(product)) {
-      return CelError.overflow(id, opc.MULTIPLY, type.UINT);
+      return CelErrors.overflow(id, opc.MULTIPLY, type.UINT);
     }
   }
   return new CelUint(product);
@@ -402,9 +403,9 @@ const mulFunc = Func.newStrict(opc.MULTIPLY, [], (id, args) => {
 const divIntOp: StrictBinaryOp = (id, lhs, rhs) => {
   if (typeof lhs === "bigint" && typeof rhs === "bigint") {
     if (rhs === 0n) {
-      return CelError.divisionByZero(id, type.INT);
+      return CelErrors.divisionByZero(id, type.INT);
     } else if (rhs === -1n && lhs === -(2n ** 63n)) {
-      return CelError.overflow(id, opc.DIVIDE, type.INT);
+      return CelErrors.overflow(id, opc.DIVIDE, type.INT);
     }
     return lhs / rhs;
   }
@@ -414,7 +415,7 @@ const divIntFunc = Func.binary(opc.DIVIDE, [olc.DIVIDE_INT64], divIntOp);
 const divUintOp: StrictBinaryOp = (id, lhs, rhs) => {
   if (lhs instanceof CelUint && rhs instanceof CelUint) {
     if (rhs.value.valueOf() === 0n) {
-      return CelError.divisionByZero(id, type.UINT);
+      return CelErrors.divisionByZero(id, type.UINT);
     }
     return new CelUint(lhs.value.valueOf() / rhs.value.valueOf());
   }
@@ -444,7 +445,7 @@ const divFunc = Func.binary(opc.DIVIDE, [], (id, lhs, rhs) => {
 const modIntOp: StrictBinaryOp = (id, lhs, rhs) => {
   if (typeof lhs === "bigint" && typeof rhs === "bigint") {
     if (rhs === 0n) {
-      return CelError.moduloByZero(id, type.INT);
+      return CelErrors.moduloByZero(id, type.INT);
     }
     return lhs % rhs;
   }
@@ -454,7 +455,7 @@ const modIntFunc = Func.binary(opc.MODULO, [olc.MODULO_INT64], modIntOp);
 const modUintOp: StrictBinaryOp = (id, lhs, rhs) => {
   if (lhs instanceof CelUint && rhs instanceof CelUint) {
     if (rhs.value.valueOf() === 0n) {
-      return CelError.moduloByZero(id, type.UINT);
+      return CelErrors.moduloByZero(id, type.UINT);
     }
     return new CelUint(lhs.value.valueOf() % rhs.value.valueOf());
   }
@@ -476,7 +477,7 @@ const negIntOp: StrictUnaryOp = (id, arg) => {
   if (typeof arg === "bigint") {
     const val = -arg;
     if (isOverflowInt(val)) {
-      return CelError.overflow(id, opc.NEGATE, type.INT);
+      return CelErrors.overflow(id, opc.NEGATE, type.INT);
     }
     return val;
   }
