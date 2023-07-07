@@ -125,3 +125,44 @@ on the right.
   resize: none;
   overflow: auto;
 }
+
+.App-highlight {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 1rem;
+  white-space: pre-wrap;
+  border: 1px solid #646cff;
+  border-radius: 0.5rem;
+  overflow: auto;
+  text-align: left;
+  background-color: #282a36;
+  color: #f8f8f2;
+  font: 1rem monospace;
+}
+
+.highlight-property {
+  color: #ff79c6;
+}
+.highlight-type {
+  color: #bd93f9;
+}
+.highlight-string {
+  color: #8cf5b4;
+}
+.highlight-comment {
+  color: #6272a4;
+}
+.highlight-function {
+  color: #fab48c;
+}
+
+.highlight-keyword {
+  color: #ff79c6;
+}
+.highlight-operator {
+  color: #bd93f9;
+}
+.highlight-number {
+  color: #50c7fa;
+}

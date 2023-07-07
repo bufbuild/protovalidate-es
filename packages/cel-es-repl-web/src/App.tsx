@@ -8,13 +8,15 @@ import {
   NATIVE_ADAPTER,
   makeStringExtFuncRegistry,
 } from "@bufbuild/cel-es";
-import { loadCelParser } from "@bufbuild/cel-es-web";
+import { TreeSitterParser, loadCelParser } from "@bufbuild/cel-es-web";
 import { Timestamp } from "@bufbuild/protobuf";
 import yaml from "yaml";
 
 const APP_ENV = new CelEnv();
+let PARSER: TreeSitterParser | undefined = undefined;
 APP_ENV.addFuncs(makeStringExtFuncRegistry());
 loadCelParser("tree-sitter-cel.wasm").then((parser) => {
+  PARSER = parser;
   APP_ENV.setParser(parser);
 });
 
@@ -61,6 +63,47 @@ function processInput(env: CelEnv, input: string, data: string): string {
   });
 }
 
+function highlightText(input: string): JSX.Element {
+  const highlights = PARSER?.highlight(input) ?? [];
+  // A list of (offset, tag) pairs.
+  const elems: [number, string][] = [];
+  const ends: number[] = [];
+  let lastStart = -1;
+  for (const highlight of highlights) {
+    if (highlight.end <= lastStart) {
+      continue;
+    }
+    const text = `<span class="highlight-${highlight.type}">`;
+    if (highlight.start === lastStart) {
+      // Prepend to the last element.
+      const last = elems[elems.length - 1];
+      last[1] = text + last[1];
+    } else {
+      lastStart = highlight.start;
+      // Close any tags that have ended.
+      while (ends.length > 0 && ends[0] <= lastStart) {
+        elems.push([ends.shift()!, "</span>"]);
+      }
+      // Start a new element.
+      elems.push([lastStart, text]);
+    }
+    ends.push(highlight.end);
+    ends.sort((a, b) => a - b);
+  }
+  while (ends.length > 0) {
+    elems.push([ends.shift()!, "</span>"]);
+  }
+  let result = "";
+  let last = 0;
+  for (const [offset, tag] of elems) {
+    result += input.slice(last, offset);
+    result += tag;
+    last = offset;
+  }
+  result += input.slice(last);
+  return <div dangerouslySetInnerHTML={{ __html: result }} />;
+}
+
 function App() {
   const [inputExpr, setInputExpr] = useState("");
   const [inputEnv, setInputEnv] = useState("");
@@ -81,6 +124,7 @@ function App() {
                 setOutputValue(processInput(APP_ENV, e.target.value, inputEnv));
               }}
             />
+            <div className="App-highlight">{highlightText(inputExpr)}</div>
           </div>
           <div className="App-right">
             <textarea

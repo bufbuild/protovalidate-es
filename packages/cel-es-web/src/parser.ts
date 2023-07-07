@@ -7,6 +7,7 @@ import {
 import { ExprBuilder, type CelParser } from "@bufbuild/cel-es";
 import { NullValue } from "@bufbuild/protobuf";
 import Parser from "web-tree-sitter";
+import { highlightCel, Highlight } from "./highlight";
 
 export class TreeSitterParser implements CelParser {
   private parser: Parser;
@@ -18,6 +19,10 @@ export class TreeSitterParser implements CelParser {
   parse(expr: string): ParsedExpr {
     const tree = this.parser.parse(expr);
     return parseTree(tree);
+  }
+
+  highlight(expr: string): Highlight[] {
+    return highlightCel(expr, this.parser);
   }
 }
 
