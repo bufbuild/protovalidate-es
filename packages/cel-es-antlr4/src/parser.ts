@@ -4,7 +4,6 @@ import { AbstractParseTreeVisitor } from "antlr4ts/tree/AbstractParseTreeVisitor
 import { TerminalNode } from "antlr4ts/tree/TerminalNode";
 import {
   Expr,
-  Expr_CreateList,
   Expr_CreateStruct,
   Expr_CreateStruct_Entry,
   ParsedExpr,

@@ -4,13 +4,16 @@ import {
   Constant,
   Expr_Comprehension,
   Expr_CreateList,
+  Expr_CreateStruct,
   Expr_CreateStruct_Entry,
   Expr_Ident,
   Expr_Select,
   SourceInfo,
 } from "@buf/alfus_cel.bufbuild_es/dev/cel/expr/syntax_pb";
 
-export class ExprBuilder {
+const encoder = new TextEncoder();
+
+export default class ExprBuilder {
   private prevId = 0n;
   public sourceInfo: SourceInfo = new SourceInfo();
 
@@ -21,13 +24,14 @@ export class ExprBuilder {
     return expr;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proto type system too complex
-  public newConstExpr(offset: number, constantKind: any): Expr {
+  public newConstExpr(
+    offset: number,
+    constantKind: Constant["constantKind"]
+  ): Expr {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "constExpr",
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      value: new Constant({ constantKind: constantKind }),
+      value: new Constant({ constantKind }),
     };
     return expr;
   }
@@ -69,182 +73,66 @@ export class ExprBuilder {
     return this.maybeExpand(offset, expr);
   }
 
-  public newStringExpr(offset: number, rawValue: string, raw: boolean): Expr {
-    if (raw) {
-      return this.newConstExpr(offset, {
-        case: "stringValue",
-        value: rawValue,
-      });
-    }
-
-    let value = "";
-    let i = 0;
-    while (i < rawValue.length) {
-      let c = rawValue[i];
-      if (c === "\\") {
-        i++;
-        c = rawValue[i];
-        if (c === "x" || c === "X") {
-          i++;
-          const hex = rawValue.substring(i, i + 2);
-          value += String.fromCodePoint(parseInt(hex, 16));
-          i += 2;
-        } else if (c === "u") {
-          i++;
-          const hex = rawValue.substring(i, i + 4);
-          value += String.fromCodePoint(parseInt(hex, 16));
-          i += 4;
-        } else if (c === "U") {
-          i++;
-          value += String.fromCodePoint(
-            parseInt(rawValue.substring(i, i + 8), 16)
-          );
-          i += 8;
-        } else if (c === "a") {
-          value += "\x07";
-          i++;
-        } else if (c === "b") {
-          value += "\b";
-          i++;
-        } else if (c === "f") {
-          value += "\f";
-          i++;
-        } else if (c === "n") {
-          value += "\n";
-          i++;
-        } else if (c === "r") {
-          value += "\r";
-          i++;
-        } else if (c === "t") {
-          value += "\t";
-          i++;
-        } else if (c === "v") {
-          value += "\v";
-          i++;
-        } else if (c === "\\") {
-          value += "\\";
-          i++;
-        } else {
-          // check if its a digit
-          if (c >= "0" && c <= "7") {
-            const oct = rawValue.substring(i, i + 3);
-            value += String.fromCodePoint(parseInt(oct, 8));
-            i += 3;
-          } else {
-            value += c;
-            i++;
-          }
-        }
-      } else {
-        value += c;
-        i++;
-      }
-    }
-
+  public newStringExpr(offset: number, sequence: (string | number[])[]): Expr {
     return this.newConstExpr(offset, {
       case: "stringValue",
-      value: value,
+      value: sequence.reduce((string: string, chunk: string | number[]) => {
+        if (typeof chunk !== "string") {
+          return string + String.fromCodePoint(...chunk);
+        }
+
+        return string + chunk;
+      }, ""),
     });
   }
 
-  public newBytesExpr(offset: number, rawValue: string, raw: boolean): Expr {
-    if (rawValue.length === 0) {
-      return this.newConstExpr(offset, {
-        case: "bytesValue",
-        value: Buffer.of(),
-      });
-    }
-    const raw_bytes = new TextEncoder().encode(rawValue);
-    if (raw) {
-      return this.newConstExpr(offset, {
-        case: "bytesValue",
-        value: raw_bytes,
-      });
-    }
-
-    const buffer = Buffer.alloc(raw_bytes.length);
-    const decoder = new TextDecoder();
-    let i = 0;
-    let j = 0;
-    while (i < raw_bytes.length) {
-      let c = raw_bytes[i];
-      if (c === 92) {
-        i++;
-        c = raw_bytes[i];
-        if (c === 120 || c === 88) {
-          i++;
-          const hex = raw_bytes.subarray(i, i + 2);
-          buffer[j] = parseInt(decoder.decode(hex), 16);
-          j++;
-          i += 2;
-        } else if (c === 117) {
-          i++;
-          const hex = raw_bytes.subarray(i, i + 4);
-          buffer[j] = parseInt(decoder.decode(hex), 16);
-          j++;
-          i += 4;
-        } else if (c === 85) {
-          i++;
-          const hex = raw_bytes.subarray(i, i + 8);
-          buffer[j] = parseInt(decoder.decode(hex), 16);
-          j++;
-          i += 8;
-        } else if (c === 97) {
-          i++;
-          buffer[j] = 0x07;
-          j++;
-        } else if (c === 98) {
-          i++;
-          buffer[j] = 0x08;
-          j++;
-        } else if (c === 102) {
-          i++;
-          buffer[j] = 0x0c;
-          j++;
-        } else if (c === 110) {
-          i++;
-          buffer[j] = 0x0a;
-          j++;
-        } else if (c === 114) {
-          i++;
-          buffer[j] = 0x0d;
-          j++;
-        } else if (c === 116) {
-          i++;
-          buffer[j] = 0x09;
-          j++;
-        } else if (c === 118) {
-          i++;
-          buffer[j] = 0x0b;
-          j++;
-        } else if (c === 92) {
-          i++;
-          buffer[j] = 0x5c;
-          j++;
-        } else {
-          // check if its a digit
-          if (c >= 48 && c <= 55) {
-            const oct = raw_bytes.subarray(i, i + 3);
-            buffer[j] = parseInt(decoder.decode(oct), 8);
-            j++;
-            i += 3;
-          } else {
-            buffer[j] = c;
-            j++;
-            i++;
-          }
-        }
-      } else {
-        buffer[j] = c;
-        j++;
-        i++;
-      }
-    }
-
-    // Resize the result to the actual length.
+  public newBytesExpr(offset: number, sequence: (string | number[])[]): Expr {
     return this.newConstExpr(offset, {
       case: "bytesValue",
-      value: buffer.subarray(0, j),
+      value: new Uint8Array(
+        sequence.reduce((bytes: number[], chunk: string | number[]) => {
+          if (typeof chunk === "string") {
+            return [...bytes, ...encoder.encode(chunk)];
+          }
+
+          return [...bytes, ...chunk];
+        }, [])
+      ),
+    });
+  }
+
+  public newBoolExpr(offset: number, keyword: "true" | "false"): Expr {
+    return this.newConstExpr(offset, {
+      case: "boolValue",
+      value: keyword === "true",
+    });
+  }
+
+  public newInt64Expr(offset: number, digits: string) {
+    return this.newConstExpr(offset, {
+      case: "int64Value",
+      value: digits[0] === "-" ? -BigInt(digits.slice(1)) : BigInt(digits),
+    });
+  }
+
+  public newUnsignedInt64Expr(offset: number, digits: string) {
+    return this.newConstExpr(offset, {
+      case: "uint64Value",
+      value: BigInt(digits),
+    });
+  }
+
+  public newDoubleExpr(offset: number, digits: string) {
+    return this.newConstExpr(offset, {
+      case: "doubleValue",
+      value: parseFloat(digits),
+    });
+  }
+
+  public newNullExpr(offset: number) {
+    return this.newConstExpr(offset, {
+      case: "nullValue",
+      value: 0,
     });
   }
 
@@ -516,6 +404,24 @@ export class ExprBuilder {
       },
       value: value,
     });
+  }
+
+  public newStructExpr(
+    offset: number,
+    entries: Expr_CreateStruct_Entry[],
+    messageName?: string
+  ): Expr {
+    const expr = this.nextExpr(offset);
+    expr.exprKind = {
+      case: "structExpr",
+      value: new Expr_CreateStruct({ entries }),
+    };
+
+    if (messageName !== undefined) {
+      expr.exprKind.value.messageName = messageName;
+    }
+
+    return expr;
   }
 
   public newStructEntry(

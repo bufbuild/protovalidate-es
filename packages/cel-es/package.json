@@ -12,7 +12,7 @@
   "scripts": {
     "test": "vitest run",
     "clean": "rm -rf ./dist/cjs/* ./dist/esm/* ./dist/types/*",
-    "generate": "",
+    "generate": "peggy -o src/grammar.js src/grammar.peggy",
     "build": "npm run build:cjs && npm run build:esm+types",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm+types": "tsc --project tsconfig.json --module ES2015 --verbatimModuleSyntax --outDir ./dist/esm --declaration --declarationDir ./dist/types && echo >./dist/esm/package.json '{\"type\":\"module\", \"sideEffects\":false}'"
@@ -32,6 +32,7 @@
     }
   },
   "devDependencies": {
-    "vitest": "^0.32.2"
+    "vitest": "^0.32.2",
+    "peggy": "^4.0.2"
   }
 }
