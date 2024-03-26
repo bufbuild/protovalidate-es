@@ -28,6 +28,7 @@ import {
   newTimestamp as _newTimestamp,
   parseDuration as _parseDuration,
 } from "./value/value";
+import { PeggyParser } from "./parser";
 
 function throwIfError<T>(result: CelError | T): T {
   if (result instanceof CelError) {
@@ -47,3 +48,5 @@ export function parseDuration(duration: string): Duration {
 export function newTimestamp(seconds: bigint, nanos: number): Timestamp {
   return throwIfError(_newTimestamp(0, seconds, nanos));
 }
+
+export const CEL_PARSER = new PeggyParser();
