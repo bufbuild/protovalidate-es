@@ -1,0 +1,37 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      timezone: UTC
+      time: "07:00"
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      timezone: UTC
+      time: "07:00"
+    open-pull-requests-limit: 50
+    groups:
+      mostly-harmless:
+        patterns:
+          - "typescript"
+          - "tsx"
+          - "@bufbuild/buf"
+          - "@bufbuild/license-header"
+          - "fflate"
+          - "@arethetypeswrong/cli"
+          - "@types/node"
+      needs-format:
+        patterns:
+          - "prettier"
+      needs-generate:
+        patterns:
+          - "@bufbuild/protobuf"
+          - "@bufbuild/protoc-gen-es"
+      eslint:
+        patterns:
+          - "*eslint*"
