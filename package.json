@@ -9,6 +9,7 @@
     "packages/cel-peggy",
     "packages/cel-antlr"
   ],
+  "type": "module",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.16.4",
     "@bufbuild/buf": "^1.47.2",
