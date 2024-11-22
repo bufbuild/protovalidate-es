@@ -1,0 +1,11 @@
+# buf.gen.yaml
+version: v2
+clean: true
+plugins:
+  - local: protoc-gen-es
+    out: src/pb
+    include_imports: true
+    opt:
+      - target=ts
+      - import_extension=.js
+      - ts_nocheck=false
