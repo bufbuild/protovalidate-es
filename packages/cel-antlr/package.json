@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "^1.10.0",
-    "peggy": "^4.0.2"
+    "peggy": "^4.2.0"
   },
   "files": [
     "dist/**"

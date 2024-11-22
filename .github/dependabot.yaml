@@ -32,6 +32,7 @@ updates:
         patterns:
           - "@bufbuild/protobuf"
           - "@bufbuild/protoc-gen-es"
+          - "peggy*"
       eslint:
         patterns:
           - "*eslint*"
