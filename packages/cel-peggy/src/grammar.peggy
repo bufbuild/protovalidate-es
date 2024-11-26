@@ -1,6 +1,6 @@
 {{
 import { ExprBuilder } from "./builder.js";
-import { ParsedExpr } from "./pb/cel/expr/syntax_pb.js";
+import { ParsedExpr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
 const builder = new ExprBuilder();
 }}
 

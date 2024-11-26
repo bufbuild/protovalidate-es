@@ -10,7 +10,7 @@ import {
   NATIVE_ADAPTER,
   ObjectActivation,
 } from "../index.js";
-import { Expr } from "../pb/cel/expr/syntax_pb.js";
+import { Expr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
 import { EmptyActivation } from "../activation.js";
 import * as assert from "node:assert/strict";
 import { Timestamp } from "@bufbuild/protobuf";

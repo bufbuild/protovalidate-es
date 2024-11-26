@@ -1,0 +1,126 @@
+{
+  "name": "@bufbuild/cel-spec",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "scripts": {
+    "fetch-proto": "node scripts/fetch-proto.js",
+    "fetch-testdata": "node scripts/fetch-testdata.js",
+    "update-exports": "node scripts/update-exports.js",
+    "generate": "buf generate",
+    "prebuild": "rm -rf ./dist/*",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
+    "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
+    "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen'",
+    "lint": "eslint .",
+    "attw": "attw --pack"
+  },
+  "upstreamCelSpecRef": "v0.18.0",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./testdata/registry.js": {
+      "import": "./dist/esm/testdata/registry.js",
+      "require": "./dist/cjs/testdata/registry.js"
+    },
+    "./testdata/simple.js": {
+      "import": "./dist/esm/testdata/simple.js",
+      "require": "./dist/cjs/testdata/simple.js"
+    },
+    "./cel/expr/checked_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/checked_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/checked_pb.js"
+    },
+    "./cel/expr/eval_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/eval_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/eval_pb.js"
+    },
+    "./cel/expr/explain_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/explain_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/explain_pb.js"
+    },
+    "./cel/expr/syntax_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/syntax_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/syntax_pb.js"
+    },
+    "./cel/expr/value_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/value_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/value_pb.js"
+    },
+    "./google/rpc/status_pb.js": {
+      "import": "./dist/esm/gen/google/rpc/status_pb.js",
+      "require": "./dist/cjs/gen/google/rpc/status_pb.js"
+    },
+    "./cel/expr/conformance/conformance_service_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/conformance/conformance_service_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/conformance/conformance_service_pb.js"
+    },
+    "./cel/expr/conformance/proto2/test_all_types_extensions_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/conformance/proto2/test_all_types_extensions_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/conformance/proto2/test_all_types_extensions_pb.js"
+    },
+    "./cel/expr/conformance/proto2/test_all_types_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/conformance/proto2/test_all_types_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/conformance/proto2/test_all_types_pb.js"
+    },
+    "./cel/expr/conformance/proto3/test_all_types_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/conformance/proto3/test_all_types_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/conformance/proto3/test_all_types_pb.js"
+    },
+    "./cel/expr/conformance/test/simple_pb.js": {
+      "import": "./dist/esm/gen/cel/expr/conformance/test/simple_pb.js",
+      "require": "./dist/cjs/gen/cel/expr/conformance/test/simple_pb.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "testdata/registry.js": [
+        "./dist/cjs/testdata/registry.d.ts"
+      ],
+      "testdata/simple.js": [
+        "./dist/cjs/testdata/simple.d.ts"
+      ],
+      "cel/expr/checked_pb.js": [
+        "./dist/cjs/gen/cel/expr/checked_pb.d.ts"
+      ],
+      "cel/expr/eval_pb.js": [
+        "./dist/cjs/gen/cel/expr/eval_pb.d.ts"
+      ],
+      "cel/expr/explain_pb.js": [
+        "./dist/cjs/gen/cel/expr/explain_pb.d.ts"
+      ],
+      "cel/expr/syntax_pb.js": [
+        "./dist/cjs/gen/cel/expr/syntax_pb.d.ts"
+      ],
+      "cel/expr/value_pb.js": [
+        "./dist/cjs/gen/cel/expr/value_pb.d.ts"
+      ],
+      "google/rpc/status_pb.js": [
+        "./dist/cjs/gen/google/rpc/status_pb.d.ts"
+      ],
+      "cel/expr/conformance/conformance_service_pb.js": [
+        "./dist/cjs/gen/cel/expr/conformance/conformance_service_pb.d.ts"
+      ],
+      "cel/expr/conformance/proto2/test_all_types_extensions_pb.js": [
+        "./dist/cjs/gen/cel/expr/conformance/proto2/test_all_types_extensions_pb.d.ts"
+      ],
+      "cel/expr/conformance/proto2/test_all_types_pb.js": [
+        "./dist/cjs/gen/cel/expr/conformance/proto2/test_all_types_pb.d.ts"
+      ],
+      "cel/expr/conformance/proto3/test_all_types_pb.js": [
+        "./dist/cjs/gen/cel/expr/conformance/proto3/test_all_types_pb.d.ts"
+      ],
+      "cel/expr/conformance/test/simple_pb.js": [
+        "./dist/cjs/gen/cel/expr/conformance/test/simple_pb.d.ts"
+      ]
+    }
+  },
+  "devDependencies": {
+    "@bufbuild/protoc-gen-es": "^1.10.0",
+    "@types/node": "^22.9.1",
+    "fflate": "^0.8.2"
+  },
+  "peerDependencies": {
+    "@bufbuild/protobuf": "^1.10.0"
+  }
+}

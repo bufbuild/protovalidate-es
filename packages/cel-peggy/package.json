@@ -9,16 +9,14 @@
     "directory": "packages/cel-es"
   },
   "scripts": {
-    "generate": "npm run generate:proto && npm run generate:peggy",
-    "generate:proto": "buf generate buf.build/alfus/cel:85a8766c403344b78b1f3fd16e4d1f39",
-    "generate:peggy": "peggy -o src/grammar.js src/grammar.peggy",
+    "generate": "peggy -o src/grammar.js src/grammar.peggy",
     "test": "npx tsx --test ./src/*.test.ts ./src/*/*.test.ts",
     "postgenerate": "node scripts/peggy2ts.js src/grammar.js",
     "prebuild": "rm -rf ./dist/*",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
-    "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen' '!src/pb' '!src/grammar.ts'",
+    "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen' '!src/grammar.ts'",
     "lint": "eslint .",
     "attw": "attw --pack"
   },
@@ -32,12 +30,14 @@
       "require": "./dist/cjs/index.js"
     }
   },
+  "peerDependencies": {
+    "@bufbuild/protobuf": "^1.10.0"
+  },
   "dependencies": {
-    "@bufbuild/protobuf": "^1.10.0",
+    "@bufbuild/cel-spec": "0.0.1",
     "date-fns-tz": "^2.0.0"
   },
   "devDependencies": {
-    "@bufbuild/protoc-gen-es": "^1.10.0",
     "peggy": "^4.2.0"
   },
   "files": [

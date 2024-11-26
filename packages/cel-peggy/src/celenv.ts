@@ -4,8 +4,8 @@ import {
   isMessage,
 } from "@bufbuild/protobuf";
 
-import { Expr, ParsedExpr } from "./pb/cel/expr/syntax_pb.js";
-import { CheckedExpr } from "./pb/cel/expr/checked_pb.js";
+import { Expr, ParsedExpr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import { CheckedExpr } from "@bufbuild/cel-spec/cel/expr/checked_pb.js";
 import { ObjectActivation } from "./activation.js";
 import { CEL_ADAPTER } from "./adapter/cel.js";
 import { NATIVE_ADAPTER } from "./adapter/native.js";

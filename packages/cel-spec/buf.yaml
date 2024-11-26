@@ -1,0 +1,14 @@
+version: v2
+# The cel-spec protos are available on the BSR: https://buf.build/google/cel-spec/
+#
+# We do not use it, because we also rely on the conformance test data of the
+# upstream repository (tests/simple/testdata). The BSR module does not have the
+# full history, only tags.
+#
+# Instead, we fetch both the protos and the test data from the upstream repository
+# (scripts/fetch-proto.js, scripts/fetch-testdata.js), which allows us to fetch
+# both from arbitrary git references.
+modules:
+  - path: proto
+deps:
+  - buf.build/googleapis/googleapis

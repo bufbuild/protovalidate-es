@@ -1,12 +1,12 @@
 import { Any, Duration, isMessage, Timestamp } from "@bufbuild/protobuf";
 
-import { ExprValue } from "../pb/cel/expr/eval_pb.js";
+import { ExprValue } from "@bufbuild/cel-spec/cel/expr/eval_pb.js";
 import {
   ListValue,
   MapValue,
   MapValue_Entry,
   Value,
-} from "../pb/cel/expr/value_pb.js";
+} from "@bufbuild/cel-spec/cel/expr/value_pb.js";
 import * as type from "../value/type.js";
 import {
   CelErrors,

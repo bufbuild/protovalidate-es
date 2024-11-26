@@ -8,7 +8,7 @@ import {
   Expr_Ident,
   Expr_Select,
   SourceInfo,
-} from "./pb/cel/expr/syntax_pb.js";
+} from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
 
 export class ExprBuilder {
   private prevId = 0n;

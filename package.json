@@ -2,10 +2,11 @@
   "private": true,
   "scripts": {
     "clean": "git clean -Xdf",
-    "all": "npm run -ws --if-present generate && npm run -ws --if-present build && npm run -ws --if-present format && npm run -ws --if-present test && npm run -ws --if-present attw",
+    "all": "npm run -ws --if-present fetch-proto && npm run -ws --if-present fetch-testdata && npm run -ws --if-present generate && npm run -ws --if-present format && npm run -ws --if-present build && npm run -ws --if-present update-exports && npm run -ws --if-present test && npm run -ws --if-present attw",
     "format": "prettier --write --ignore-unknown '.' '!packages'"
   },
   "workspaces": [
+    "packages/cel-spec",
     "packages/cel-peggy",
     "packages/cel-antlr"
   ],
