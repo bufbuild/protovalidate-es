@@ -1,5 +1,4 @@
-import pkg from "../package.json" with { type: "json" };
-import { extractFiles, fetchRepository } from "./common.js";
+import { extractFiles, fetchRepository, readPackageJson } from "./common.js";
 import { spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 
@@ -9,17 +8,10 @@ import { writeFileSync } from "node:fs";
  * on the directory "proto" to contain the corresponding Protobuf files.
  */
 
-if (
-  typeof pkg.upstreamCelSpecRef !== "string" ||
-  pkg.upstreamCelSpecRef.length === 0
-) {
-  throw new Error(
-    "Missing 'upstreamCelSpecRef' in package.json. It can point to a commit, branch, or tag of github.com/google/cel-spec",
-  );
-}
+const { upstreamCelSpecRef } = readPackageJson("package.json");
 
 // Fetch github.com/google/cel-spec
-const archive = await fetchRepository(pkg.upstreamCelSpecRef);
+const archive = await fetchRepository(upstreamCelSpecRef);
 // Extract testdata/simple/*.textproto
 const testdataTextProto = extractFiles(
   archive,
@@ -34,7 +26,7 @@ const testdataJson = convertTestDataToJson(
 // Write as JSON array to a TypeScript file
 writeFileSync(
   "src/testdata-json.ts",
-  `// Generated from github.com/google/cel-spec ${pkg.upstreamCelSpecRef} by scripts/fetch-testdata.json
+  `// Generated from github.com/google/cel-spec ${upstreamCelSpecRef} by scripts/fetch-testdata.json
 import type { JsonObject } from "@bufbuild/protobuf";
 
 export const testdataJson: JsonObject[] = ${JSON.stringify(testdataJson, null, 2)};`,

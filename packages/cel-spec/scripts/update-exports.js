@@ -1,4 +1,5 @@
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
+import { readPackageJson, writePackageJson } from "./common.js";
 
 /*
  * Read all files in src, and update the "exports" in package.json.
@@ -25,7 +26,7 @@ for (const sourceFile of sourceFiles) {
   typesVersions["*"][`${external}.js`] = [`./dist/cjs/${internal}.d.ts`];
 }
 
-const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+const pkg = readPackageJson("package.json");
 pkg.exports = exports;
 pkg.typesVersions = typesVersions;
-writeFileSync("package.json", JSON.stringify(pkg, null, 2));
+writePackageJson("package.json", pkg);

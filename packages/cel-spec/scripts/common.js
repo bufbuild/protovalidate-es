@@ -1,6 +1,43 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join as joinPath } from "node:path";
 import { unzipSync } from "fflate";
+
+/**
+ * @param {string} path
+ * @return {{upstreamCelSpecRef: string, [k:string]: unknown; }}
+ */
+export function readPackageJson(path) {
+  const data = readFileSync("package.json", "utf8");
+  const pkg = JSON.parse(data);
+  if (typeof pkg !== "object" || pkg === null) {
+    throw new Error(`Failed to parse ${path}`);
+  }
+  if (
+    !("upstreamCelSpecRef" in pkg) ||
+    typeof pkg.upstreamCelSpecRef !== "string" ||
+    pkg.upstreamCelSpecRef.length === 0
+  ) {
+    throw new Error(
+      `Missing 'upstreamCelSpecRef' in ${path}. It can point to a commit, branch, or tag of github.com/google/cel-spec`,
+    );
+  }
+  return pkg;
+}
+
+/**
+ * @param {string} path
+ * @param {unknown} pkg
+ */
+export function writePackageJson(path, pkg) {
+  const data = JSON.stringify(pkg, null, 2) + "\n";
+  writeFileSync(path, data);
+}
 
 /**
  * @param {string} upstreamCelSpecRef
