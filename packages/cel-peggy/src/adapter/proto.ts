@@ -57,7 +57,7 @@ export function isProtoMsg(val: unknown): val is Message {
 
 /** Extends the Cel type system to include arbitrary protobuf messages. */
 export class ProtoValAdapter implements CelValAdapter {
-  private readonly metadataCache = new Map<MessageType, ProtoMetadata>();
+  private readonly metadataCache = new Map<string, ProtoMetadata>();
 
   constructor(public readonly registry: IMessageTypeRegistry) {}
 
@@ -74,11 +74,15 @@ export class ProtoValAdapter implements CelValAdapter {
     return val;
   }
 
-  public getMetadata(messageType: MessageType) {
-    let metadata = this.metadataCache.get(messageType);
+  public getMetadata(messageTypeName: string) {
+    const messageSchema = this.registry.findMessage(messageTypeName);
+    if (!messageSchema) {
+      throw new Error(`Message ${messageTypeName} not found in registry`);
+    }
+    let metadata = this.metadataCache.get(messageTypeName);
     if (metadata === undefined) {
-      metadata = new ProtoMetadata(messageType, this);
-      this.metadataCache.set(messageType, metadata);
+      metadata = new ProtoMetadata(messageSchema, this);
+      this.metadataCache.set(messageTypeName, metadata);
     }
     return metadata;
   }
@@ -88,23 +92,34 @@ export class ProtoValAdapter implements CelValAdapter {
       if (!isMessage(rhs)) {
         return false;
       }
-      if (lhs.getType() !== rhs.getType()) {
+      if (lhs.getType().typeName !== rhs.getType().typeName) {
         return false;
       }
-      return this.equalsMsg(0, lhs, rhs);
+      const messageTypeName = lhs.getType().typeName;
+      const messageSchema = this.registry.findMessage(messageTypeName);
+      if (!messageSchema) {
+        throw new Error(`Message ${messageTypeName} not found in registry`);
+      }
+      return this.equalsMsg(0, messageSchema, lhs, rhs);
     } else if (isProtoMsg(rhs)) {
       return false;
     }
     return CEL_ADAPTER.equals(lhs, rhs);
   }
 
-  equalsMsg(id: number, a: Message, b: Message): CelResult<boolean> {
+  private equalsMsg<T extends Message<T>>(
+    id: number,
+    messageSchema: MessageType<T>,
+    a: T,
+    b: T,
+  ): CelResult<boolean> {
     if (a === b) {
       return true;
     }
     if (!a || !b) {
       return false;
     }
+    // TODO(tstamm) we're working on messages here, why do we need toCel?
     const celA = this.toCel(a);
     const celB = this.toCel(b);
     if (isMessage(celA, Any)) {
@@ -120,10 +135,10 @@ export class ProtoValAdapter implements CelValAdapter {
         this,
         celA,
         celB,
-        this.getMetadata(a.getType()).FIELD_NAMES,
+        this.getMetadata(a.getType().typeName).FIELD_NAMES,
       );
     }
-    return a.equals(b);
+    return messageSchema.equals(a, b);
   }
 
   compare(lhs: ProtoValue, rhs: ProtoValue): CelResult<number> | undefined {
@@ -135,26 +150,26 @@ export class ProtoValAdapter implements CelValAdapter {
 
   toCel(native: ProtoValue): CelResult {
     if (isProtoMsg(native) && !isCelMsg(native)) {
-      switch (native.getType()) {
-        case UInt32Value:
-          return new UInt64Value({
-            value: BigInt((native as UInt32Value).value),
-          });
-        case Int32Value:
-          return new Int64Value({
-            value: BigInt((native as Int32Value).value),
-          });
-        case FloatValue:
-          return new DoubleValue({
-            value: (native as FloatValue).value,
-          });
-        default:
-          return new CelObject(
-            native,
-            this,
-            this.getMetadata(native.getType()).TYPE,
-          );
+      if (isMessage(native, UInt32Value)) {
+        return new UInt64Value({
+          value: BigInt(native.value),
+        });
       }
+      if (isMessage(native, Int32Value)) {
+        return new Int64Value({
+          value: BigInt(native.value),
+        });
+      }
+      if (isMessage(native, FloatValue)) {
+        return new DoubleValue({
+          value: native.value,
+        });
+      }
+      return new CelObject(
+        native,
+        this,
+        this.getMetadata(native.getType().typeName).TYPE,
+      );
     }
     return CEL_ADAPTER.toCel(native);
   }
@@ -169,7 +184,7 @@ export class ProtoValAdapter implements CelValAdapter {
     name: string,
   ): ProtoResult | undefined {
     if (isProtoMsg(obj)) {
-      const fields = this.getMetadata(obj.getType()).FIELDS;
+      const fields = this.getMetadata(obj.getType().typeName).FIELDS;
       const field = fields.get(name);
       if (field === undefined) {
         return CelErrors.fieldNotFound(id, name, fields.keys());
@@ -190,7 +205,7 @@ export class ProtoValAdapter implements CelValAdapter {
 
   getFields(value: object): string[] {
     if (isProtoMsg(value)) {
-      return this.getMetadata(value.getType()).FIELD_NAMES;
+      return this.getMetadata(value.getType().typeName).FIELD_NAMES;
     }
     return CEL_ADAPTER.getFields(value);
   }
@@ -233,7 +248,7 @@ export class ProtoValAdapter implements CelValAdapter {
         return value;
       case "message":
         if (value === undefined) {
-          return this.getMetadata(field.T).NULL;
+          return this.getMetadata(field.T.typeName).NULL;
         } else if (isMessage(value)) {
           return value;
         } else if (value instanceof CelObject) {
@@ -250,7 +265,7 @@ export class ProtoValAdapter implements CelValAdapter {
         throw new Error("Unexpected field kind");
     }
   }
-  accessProtoRepeatedField(
+  private accessProtoRepeatedField(
     field: FieldInfo,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- proto type system too complex
     value: any[] | undefined,
@@ -315,67 +330,67 @@ export class ProtoValAdapter implements CelValAdapter {
       return val;
     }
 
-    switch (mtype) {
-      case Any:
-      case Value:
+    switch (mtype.typeName) {
+      case Any.typeName:
+      case Value.typeName:
         return val;
-      case BoolValue: {
+      case BoolValue.typeName: {
         const cval = coerceToBool(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new BoolValue({ value: cval });
       }
-      case UInt32Value: {
+      case UInt32Value.typeName: {
         const cval = coerceToNumber(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new UInt32Value({ value: cval });
       }
-      case UInt64Value: {
+      case UInt64Value.typeName: {
         const cval = coerceToBigInt(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new UInt64Value({ value: cval.valueOf() });
       }
-      case Int32Value: {
+      case Int32Value.typeName: {
         const cval = coerceToNumber(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new Int32Value({ value: cval });
       }
-      case Int64Value: {
+      case Int64Value.typeName: {
         const cval = coerceToBigInt(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new Int64Value({ value: cval.valueOf() });
       }
-      case FloatValue: {
+      case FloatValue.typeName: {
         const cval = coerceToNumber(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new FloatValue({ value: cval });
       }
-      case DoubleValue: {
+      case DoubleValue.typeName: {
         const cval = coerceToNumber(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new DoubleValue({ value: cval });
       }
-      case StringValue: {
+      case StringValue.typeName: {
         const cval = coerceToString(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
         }
         return new StringValue({ value: cval });
       }
-      case BytesValue: {
+      case BytesValue.typeName: {
         const cval = coerceToBytes(id, val);
         if (cval instanceof CelError || cval instanceof CelUnknown) {
           return cval;
@@ -394,7 +409,8 @@ export class ProtoValAdapter implements CelValAdapter {
     throw new Error("not implemented.");
   }
 
-  valueFromCel(_id: number, celVal: CelVal): CelResult<CelObject> {
+  // @ts-expect-error unused
+  private valueFromCel(_id: number, celVal: CelVal): CelResult<CelObject> {
     const val = new Value();
     switch (typeof celVal) {
       case "boolean":
@@ -420,12 +436,12 @@ export class ProtoValAdapter implements CelValAdapter {
     return new CelObject(val, this, type.DYN);
   }
 
-  messageFromStruct(
+  private messageFromStruct(
     id: number,
     mtype: MessageType,
     obj: StructAccess,
   ): CelResult {
-    const fields = this.getMetadata(mtype).FIELDS;
+    const fields = this.getMetadata(mtype.typeName).FIELDS;
     const result = new mtype();
     const keys = obj.getFields();
     for (const key of keys) {
@@ -451,10 +467,14 @@ export class ProtoValAdapter implements CelValAdapter {
     if (isCelMsg(result)) {
       return result;
     }
-    return new CelObject(result, this, this.getMetadata(result.getType()).TYPE);
+    return new CelObject(
+      result,
+      this,
+      this.getMetadata(result.getType().typeName).TYPE,
+    );
   }
 
-  valueFromRepeated(
+  private valueFromRepeated(
     _id: number,
     _field: FieldInfo,
     val: CelResult,
@@ -473,7 +493,7 @@ export class ProtoValAdapter implements CelValAdapter {
     throw new Error("Method not implemented.");
   }
 
-  valueFromSingle(id: number, field: FieldInfo, val: CelVal): unknown {
+  private valueFromSingle(id: number, field: FieldInfo, val: CelVal): unknown {
     switch (field.kind) {
       case "scalar":
         return NATIVE_ADAPTER.fromCel(val);
@@ -488,7 +508,7 @@ export class ProtoValAdapter implements CelValAdapter {
     }
   }
 
-  mapFromCel(id: number, field: FieldInfo, val: CelVal): object {
+  private mapFromCel(id: number, field: FieldInfo, val: CelVal): object {
     if (field.kind !== "map") {
       throw new Error("unexpected field kind: " + field.kind);
     }
@@ -529,14 +549,14 @@ class ProtoMetadata {
     const wk_type = type.WK_PROTO_TYPES.get(messageType.typeName);
     if (wk_type !== undefined) {
       this.TYPE = wk_type;
-      switch (messageType) {
-        case FloatValue:
+      switch (messageType.typeName) {
+        case FloatValue.typeName:
           this.DEFAULT_CEL = new DoubleValue();
           break;
-        case UInt32Value:
+        case UInt32Value.typeName:
           this.DEFAULT_CEL = new UInt64Value();
           break;
-        case Int32Value:
+        case Int32Value.typeName:
           this.DEFAULT_CEL = new Int64Value();
           break;
         default:
@@ -548,7 +568,7 @@ class ProtoMetadata {
       this.DEFAULT_CEL = new CelObject(this.DEFAULT_PROTO, adapter, this.TYPE);
     }
 
-    this.NULL = new ProtoNull(messageType, this.DEFAULT_CEL);
+    this.NULL = new ProtoNull(messageType.typeName, this.DEFAULT_CEL);
     this.FIELD_NAMES = messageType.fields.list().map((f) => f.name);
     this.FIELDS = new Map();
     for (const field of messageType.fields.list()) {
@@ -596,10 +616,17 @@ export class ProtoValProvider implements CelValProvider<ProtoValue> {
     if (message === undefined) {
       return any;
     }
+    const messageSchema = this.adapter.registry.findMessage(
+      message.getType().typeName,
+    );
+    if (!messageSchema) {
+      // should never enter
+      return any;
+    }
     return new CelObject(
       message,
       this.adapter,
-      this.adapter.getMetadata(message.getType()).TYPE,
+      this.adapter.getMetadata(messageSchema.typeName).TYPE,
     );
   }
 }

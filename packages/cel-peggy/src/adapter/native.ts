@@ -16,7 +16,7 @@ import {
 import { type CelResult, isCelResult } from "../value/value.js";
 import { CEL_ADAPTER } from "./cel.js";
 
-export class NativeValAdapter implements CelValAdapter {
+class NativeValAdapter implements CelValAdapter {
   unwrap(val: CelVal): CelVal {
     return CEL_ADAPTER.unwrap(val);
   }

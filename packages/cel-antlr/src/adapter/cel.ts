@@ -53,7 +53,7 @@ export class CelAdapter implements CelValAdapter<CelVal> {
       return lhs instanceof ProtoNull;
     } else if (lhs instanceof ProtoNull) {
       if (rhs instanceof ProtoNull) {
-        return lhs.messageType === rhs.messageType;
+        return lhs.messageTypeName === rhs.messageTypeName;
       }
       return false;
     }
@@ -101,6 +101,10 @@ export class CelAdapter implements CelValAdapter<CelVal> {
       } else if (lhs instanceof Uint8Array && rhs instanceof Uint8Array) {
         return compareBytes(lhs, rhs) === 0;
       } else if (isMessage(lhs) && isMessage(rhs)) {
+        // TODO(tstamm) will need registry to check equality for protobuf messages efficiently
+        // - class CelAdapter is only used through singleton CEL_ADAPTER
+        // - const CEL_ADAPTER is widely used
+
         // TODO(afuller): Figure out why this is needed.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-argument
         return lhs.getType() === rhs.getType() && lhs.equals(rhs as any);
@@ -109,7 +113,7 @@ export class CelAdapter implements CelValAdapter<CelVal> {
     return false;
   }
 
-  equalsObject(id: number, lhs: CelObject, rhs: CelObject) {
+  private equalsObject(id: number, lhs: CelObject, rhs: CelObject) {
     if (!lhs.type_.equals(rhs.type_)) {
       return false;
     }

@@ -3,9 +3,13 @@ import {
   BoolValue,
   BytesValue,
   DoubleValue,
+  FloatValue,
+  Int32Value,
   Int64Value,
   StringValue,
+  UInt32Value,
   UInt64Value,
+  Value,
 } from "@bufbuild/protobuf";
 
 import { CEL_ADAPTER } from "../adapter/cel.js";
@@ -30,7 +34,7 @@ import {
 export const EMPTY_LIST = new CelList([], CEL_ADAPTER, type.LIST);
 export const EMPTY_MAP = new CelMap(new Map(), CEL_ADAPTER, type.DYN_MAP);
 
-export class EmptyProvider implements CelValProvider {
+class EmptyProvider implements CelValProvider {
   public readonly adapter: CelValAdapter = CEL_ADAPTER;
 
   newValue(
@@ -39,52 +43,52 @@ export class EmptyProvider implements CelValProvider {
     obj: CelObject | CelMap,
   ): CelResult | undefined {
     switch (typeName) {
-      case "google.protobuf.BoolValue": {
+      case BoolValue.typeName: {
         const val = coerceToBool(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
         return new BoolValue({ value: val });
       }
-      case "google.protobuf.UInt32Value":
-      case "google.protobuf.UInt64Value": {
+      case UInt32Value.typeName:
+      case UInt64Value.typeName: {
         const val = coerceToBigInt(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
         return new UInt64Value({ value: val.valueOf() });
       }
-      case "google.protobuf.Int32Value":
-      case "google.protobuf.Int64Value": {
+      case Int32Value.typeName:
+      case Int64Value.typeName: {
         const val = coerceToBigInt(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
         return new Int64Value({ value: val.valueOf() });
       }
-      case "google.protobuf.FloatValue":
-      case "google.protobuf.DoubleValue": {
+      case FloatValue.typeName:
+      case DoubleValue.typeName: {
         const val = coerceToNumber(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
         return new DoubleValue({ value: val });
       }
-      case "google.protobuf.StringValue": {
+      case StringValue.typeName: {
         const val = coerceToString(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
         return new StringValue({ value: val });
       }
-      case "google.protobuf.BytesValue": {
+      case BytesValue.typeName: {
         const val = coerceToBytes(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
         return new BytesValue({ value: val });
       }
-      case "google.protobuf.Value":
+      case Value.typeName:
         if (obj instanceof CelObject) {
           for (const key in obj.getFields()) {
             switch (key) {

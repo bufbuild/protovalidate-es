@@ -7,7 +7,6 @@ import {
   Int64Value,
   isMessage,
   Message,
-  type MessageType,
   StringValue,
   Timestamp,
   UInt64Value,
@@ -219,7 +218,7 @@ export type StructAccess<K = unknown> = IterAccess &
 // proto3 has typed nulls.
 export class ProtoNull {
   constructor(
-    public readonly messageType: MessageType,
+    public readonly messageTypeName: string,
     public readonly defaultValue: CelVal,
     public value: CelVal = null,
   ) {}
