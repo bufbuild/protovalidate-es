@@ -15,22 +15,52 @@ env:
   DO_NOT_TRACK: 1
 
 jobs:
-  all:
+  tasks:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [20.x, 22.x]
-    name: "Node.js ${{ matrix.node-version }}"
+        task:
+          - format
+          - attw
+          - build
+        include:
+          - task: format
+            diff-check: true
+    name: ${{ matrix.task }}
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - uses: actions/checkout@v4
+          node-version-file: .nvmrc
+          cache: "npm"
       - uses: actions/cache@v4
         with:
           path: .turbo
-          key: protobuf-es/test/${{ github.sha }}
-          restore-keys: protobuf-es/test
+          key: ${{ runner.os }}/${{ matrix.task }}/${{ github.sha }}
+          restore-keys: ${{ runner.os }}/${{ matrix.task }}
       - run: npm ci
-      - run: npm run all
-      - run: node scripts/gh-diffcheck.js
+      - run: npx turbo run ${{ matrix.task }}
+      - name: Check changed files
+        if: ${{ matrix.diff-check }}
+        run: node scripts/gh-diffcheck.js
+  test:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20.x, 22.x]
+    name: "test on Node.js ${{ matrix.node-version }}"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "npm"
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}/test/${{ github.sha }}
+          restore-keys: ${{ runner.os }}/test
+      - run: npm ci
+      - run: npx turbo run test

@@ -26,7 +26,7 @@ const testdataJson = convertTestDataToJson(
 // Write as JSON array to a TypeScript file
 writeFileSync(
   "src/testdata-json.ts",
-  `// Generated from github.com/google/cel-spec ${upstreamCelSpecRef} by scripts/fetch-testdata.json
+  `// Generated from github.com/google/cel-spec ${upstreamCelSpecRef} by scripts/fetch-testdata.js
 import type { JsonObject } from "@bufbuild/protobuf";
 
 export const testdataJson: JsonObject[] = ${JSON.stringify(testdataJson, null, 2)};`,

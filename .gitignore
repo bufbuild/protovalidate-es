@@ -12,6 +12,7 @@ lerna-debug.log*
 node_modules
 *.local
 .antlr/
+.turbo
 
 # Editor directories and files
 .vscode/*

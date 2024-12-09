@@ -1,0 +1,30 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "fetch-proto": {
+      "inputs": ["scripts/fetch-proto.js", "package.json"],
+      "outputs": ["proto/**"],
+      "dependsOn": []
+    },
+    "fetch-testdata": {
+      "inputs": ["scripts/fetch-testdata.js", "package.json"],
+      "outputs": ["src/testdata-json.ts"],
+      "dependsOn": []
+    },
+    "update-exports": {
+      "dependsOn": ["generate"],
+      "inputs": ["src/**"],
+      "outputs": ["package.json"]
+    },
+    "generate": {
+      "dependsOn": ["fetch-proto"],
+      "inputs": ["proto/**", "buf.gen.yaml", "buf.lock", "buf.yaml"],
+      "outputs": ["src/gen/**"]
+    },
+    "build": {
+      "dependsOn": ["^build", "generate", "fetch-testdata", "update-exports"],
+      "outputs": ["dist/**"]
+    }
+  }
+}
