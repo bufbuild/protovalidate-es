@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { CEL_ADAPTER } from "../adapter/cel.js";
 import {
   Func,
   FuncRegistry,
@@ -9,7 +7,6 @@ import {
 import * as opc from "../gen/dev/cel/expr/operator_const.js";
 import * as olc from "../gen/dev/cel/expr/overload_const.js";
 import {
-  type Unwrapper,
   type CelResult,
   type CelVal,
   CelList,
@@ -17,41 +14,54 @@ import {
   CelError,
   CelUnknown,
   CelErrors,
+  isCelWrap,
 } from "../value/value.js";
 import { getCelType } from "../value/type.js";
+import { CEL_ADAPTER } from "../adapter/cel.js";
 
 const notStrictlyFalse = Func.newVarArg(
   opc.NOT_STRICTLY_FALSE,
   [olc.NOT_STRICTLY_FALSE],
-  (id, args, unwrap) => {
-    const x = unwrap.unwrap(args[0]);
-    if (x === false) {
+  (_id: number, args: CelResult[]) => {
+    const raw = args[0];
+    if (raw instanceof CelUnknown || raw instanceof CelError) {
+      // TODO(tstamm) this doesn't look right, investigate
+      return true;
+    }
+    const val = CEL_ADAPTER.unwrap(raw);
+    if (val === false) {
       return false;
     }
     return true;
   },
 );
 
-const notFunc = Func.unary(opc.LOGICAL_NOT, [olc.LOGICAL_NOT], (id, x) => {
-  if (x === true) {
-    return false;
-  } else if (x === false) {
-    return true;
-  }
-  return CelErrors.overloadNotFound(Number(id), opc.LOGICAL_NOT, [
-    getCelType(x),
-  ]);
-});
+const notFunc = Func.unary(
+  opc.LOGICAL_NOT,
+  [olc.LOGICAL_NOT],
+  (id: number, x: CelVal) => {
+    if (x === true) {
+      return false;
+    } else if (x === false) {
+      return true;
+    }
+    return CelErrors.overloadNotFound(id, opc.LOGICAL_NOT, [getCelType(x)]);
+  },
+);
 
 const andFunc = Func.newVarArg(
   opc.LOGICAL_AND,
   [olc.LOGICAL_AND],
-  (id: number, args: CelResult[], unwrap: Unwrapper) => {
+  (_id: number, args: CelResult[]) => {
     let allBools = true;
     const unknowns: CelUnknown[] = [];
     const errors: CelError[] = [];
     for (let i = 0; i < args.length; i++) {
-      const arg = unwrap.unwrap(args[i]);
+      let arg = args[i];
+      if (isCelWrap(arg)) {
+        // TODO(tstamm) fix types or investigate extracting into standalone fn
+        arg = CEL_ADAPTER.unwrap(arg);
+      }
       if (typeof arg === "boolean") {
         if (!arg) return false; // short-circuit
       } else {
@@ -77,12 +87,16 @@ const andFunc = Func.newVarArg(
 const orFunc = Func.newVarArg(
   opc.LOGICAL_OR,
   [olc.LOGICAL_OR],
-  (id: number, args: CelResult[], unwrap: Unwrapper) => {
+  (_id: number, args: CelResult[]) => {
     let allBools = true;
     const unknowns: CelUnknown[] = [];
     const errors: CelError[] = [];
     for (let i = 0; i < args.length; i++) {
-      const arg = unwrap.unwrap(args[i]);
+      let arg = args[i];
+      if (isCelWrap(arg)) {
+        // TODO(tstamm) fix types or investigate extracting into standalone fn
+        arg = CEL_ADAPTER.unwrap(arg);
+      }
       if (typeof arg === "boolean") {
         if (arg) return true; // short-circuit
       } else {
@@ -105,17 +119,25 @@ const orFunc = Func.newVarArg(
   },
 );
 
-const eqFunc = Func.binary(opc.EQUALS, [olc.EQUALS], (id, x, y) => {
-  return CEL_ADAPTER.equals(x, y);
-});
+const eqFunc = Func.binary(
+  opc.EQUALS,
+  [olc.EQUALS],
+  (_id: number, lhs: CelVal, rhs: CelVal) => {
+    return CEL_ADAPTER.equals(lhs, rhs);
+  },
+);
 
-const neFunc = Func.binary(opc.NOT_EQUALS, [olc.NOT_EQUALS], (id, x, y) => {
-  const eq = CEL_ADAPTER.equals(x, y);
-  if (eq instanceof CelError || eq instanceof CelUnknown) {
-    return eq;
-  }
-  return !eq;
-});
+const neFunc = Func.binary(
+  opc.NOT_EQUALS,
+  [olc.NOT_EQUALS],
+  (_id: number, lhs: CelVal, rhs: CelVal) => {
+    const eq = CEL_ADAPTER.equals(lhs, rhs);
+    if (eq instanceof CelError || eq instanceof CelUnknown) {
+      return eq;
+    }
+    return !eq;
+  },
+);
 
 const ltFunc = Func.binary(
   opc.LESS,
@@ -135,8 +157,8 @@ const ltFunc = Func.binary(
     olc.LESS_UINT64_DOUBLE,
     olc.LESS_UINT64_INT64,
   ],
-  (id, x, y) => {
-    const cmp = CEL_ADAPTER.compare(x, y);
+  (_id: number, lhs: CelVal, rhs: CelVal) => {
+    const cmp = CEL_ADAPTER.compare(lhs, rhs);
     if (
       cmp instanceof CelError ||
       cmp instanceof CelUnknown ||
@@ -166,8 +188,8 @@ const leFunc = Func.binary(
     olc.LESS_EQUALS_UINT64_DOUBLE,
     olc.LESS_EQUALS_UINT64_INT64,
   ],
-  (id, x, y) => {
-    const cmp = CEL_ADAPTER.compare(x, y);
+  (_id: number, lhs: CelVal, rhs: CelVal) => {
+    const cmp = CEL_ADAPTER.compare(lhs, rhs);
     if (
       cmp instanceof CelError ||
       cmp instanceof CelUnknown ||
@@ -197,8 +219,8 @@ const gtFunc = Func.binary(
     olc.GREATER_UINT64_DOUBLE,
     olc.GREATER_UINT64_INT64,
   ],
-  (id, x, y) => {
-    const cmp = CEL_ADAPTER.compare(x, y);
+  (_id: number, lhs: CelVal, rhs: CelVal) => {
+    const cmp = CEL_ADAPTER.compare(lhs, rhs);
     if (
       cmp instanceof CelError ||
       cmp instanceof CelUnknown ||
@@ -228,8 +250,8 @@ const geFunc = Func.binary(
     olc.GREATER_EQUALS_UINT64_DOUBLE,
     olc.GREATER_EQUALS_UINT64_INT64,
   ],
-  (id, x, y) => {
-    const cmp = CEL_ADAPTER.compare(x, y);
+  (_id: number, lhs: CelVal, rhs: CelVal) => {
+    const cmp = CEL_ADAPTER.compare(lhs, rhs);
     if (
       cmp instanceof CelError ||
       cmp instanceof CelUnknown ||
@@ -241,7 +263,11 @@ const geFunc = Func.binary(
   },
 );
 
-const containsStringOp: StrictBinaryOp = (id, x, y) => {
+const containsStringOp: StrictBinaryOp = (
+  _id: number,
+  x: CelVal,
+  y: CelVal,
+) => {
   if (typeof x === "string" && typeof y === "string") {
     return x.includes(y);
   }
@@ -252,14 +278,22 @@ const containsStringFunc = Func.binary(
   [olc.CONTAINS_STRING],
   containsStringOp,
 );
-const containsFunc = Func.binary(olc.CONTAINS, [], (id, x, y) => {
-  if (typeof x === "string") {
-    return containsStringOp(id, x, y);
-  }
-  return undefined;
-});
+const containsFunc = Func.binary(
+  olc.CONTAINS,
+  [],
+  (id: number, x: CelVal, y: CelVal) => {
+    if (typeof x === "string") {
+      return containsStringOp(id, x, y);
+    }
+    return undefined;
+  },
+);
 
-const endsWithStringOp: StrictBinaryOp = (id, x, y) => {
+const endsWithStringOp: StrictBinaryOp = (
+  _id: number,
+  x: CelVal,
+  y: CelVal,
+) => {
   if (typeof x === "string" && typeof y === "string") {
     return x.endsWith(y);
   }
@@ -270,14 +304,18 @@ const endsWithStringFunc = Func.binary(
   [olc.ENDS_WITH_STRING],
   endsWithStringOp,
 );
-const endsWithFunc = Func.binary(olc.ENDS_WITH, [], (id, x, y) => {
-  if (typeof x === "string") {
-    return endsWithStringOp(id, x, y);
-  }
-  return undefined;
-});
+const endsWithFunc = Func.binary(
+  olc.ENDS_WITH,
+  [],
+  (id: number, x: CelVal, y: CelVal) => {
+    if (typeof x === "string") {
+      return endsWithStringOp(id, x, y);
+    }
+    return undefined;
+  },
+);
 
-const startsWithOp: StrictBinaryOp = (id, x, y) => {
+const startsWithOp: StrictBinaryOp = (_id: number, x: CelVal, y: CelVal) => {
   if (typeof x === "string" && typeof y === "string") {
     return x.startsWith(y);
   }
@@ -288,14 +326,18 @@ const startsWithStringFunc = Func.binary(
   [olc.STARTS_WITH_STRING],
   startsWithOp,
 );
-const startsWithFunc = Func.binary(olc.STARTS_WITH, [], (id, x, y) => {
-  if (typeof x === "string") {
-    return startsWithOp(id, x, y);
-  }
-  return undefined;
-});
+const startsWithFunc = Func.binary(
+  olc.STARTS_WITH,
+  [],
+  (id: number, x: CelVal, y: CelVal) => {
+    if (typeof x === "string") {
+      return startsWithOp(id, x, y);
+    }
+    return undefined;
+  },
+);
 
-const matchesStringOp: StrictBinaryOp = (id, x, y) => {
+const matchesStringOp: StrictBinaryOp = (_id: number, x: CelVal, y: CelVal) => {
   if (typeof x === "string" && typeof y === "string") {
     const re = new RegExp(y);
     return re.test(x);
@@ -307,14 +349,18 @@ const matchesStringFunc = Func.binary(
   [olc.MATCHES_STRING],
   matchesStringOp,
 );
-const matchesFunc = Func.binary(olc.MATCHES, [], (id, x, y) => {
-  if (typeof x === "string") {
-    return matchesStringOp(id, x, y);
-  }
-  return undefined;
-});
+const matchesFunc = Func.binary(
+  olc.MATCHES,
+  [],
+  (id: number, x: CelVal, y: CelVal) => {
+    if (typeof x === "string") {
+      return matchesStringOp(id, x, y);
+    }
+    return undefined;
+  },
+);
 
-const sizeStringOp: StrictUnaryOp = (id: number, x: CelVal) => {
+const sizeStringOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (typeof x === "string") {
     return BigInt(x.length);
   }
@@ -325,7 +371,7 @@ const sizeStringFunc = Func.unary(
   [olc.SIZE_STRING, olc.SIZE_STRING_INST],
   sizeStringOp,
 );
-const SizeBytesOp: StrictUnaryOp = (id: number, x: CelVal) => {
+const sizeBytesOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (x instanceof Uint8Array) {
     return BigInt(x.length);
   }
@@ -334,9 +380,9 @@ const SizeBytesOp: StrictUnaryOp = (id: number, x: CelVal) => {
 const sizeBytesFunc = Func.unary(
   olc.SIZE,
   [olc.SIZE_BYTES, olc.SIZE_BYTES_INST],
-  SizeBytesOp,
+  sizeBytesOp,
 );
-const sizeListOp: StrictUnaryOp = (id: number, x: CelVal) => {
+const sizeListOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (x instanceof CelList) {
     return BigInt(x.value.length);
   }
@@ -347,7 +393,7 @@ const sizeListFunc = Func.unary(
   [olc.SIZE_LIST, olc.SIZE_LIST_INST],
   sizeListOp,
 );
-const sizeMapOp: StrictUnaryOp = (id: number, x: CelVal) => {
+const sizeMapOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (x instanceof CelMap) {
     return BigInt(x.value.size);
   }
@@ -359,12 +405,12 @@ const sizeMapFunc = Func.unary(
   sizeMapOp,
 );
 
-const sizeFunc = Func.unary(olc.SIZE, [], (id, x) => {
+const sizeFunc = Func.unary(olc.SIZE, [], (id: number, x: CelVal) => {
   if (typeof x === "string") {
     return sizeStringOp(id, x);
   }
   if (x instanceof Uint8Array) {
-    return SizeBytesOp(id, x);
+    return sizeBytesOp(id, x);
   }
   if (x instanceof CelList) {
     return sizeListOp(id, x);
@@ -375,7 +421,7 @@ const sizeFunc = Func.unary(olc.SIZE, [], (id, x) => {
   return undefined;
 });
 
-const inListOp: StrictBinaryOp = (id, x, y) => {
+const inListOp: StrictBinaryOp = (_id: number, x: CelVal, y: CelVal) => {
   if (y instanceof CelList) {
     const val = y.adapter.fromCel(x);
     for (let i = 0; i < y.value.length; i++) {
@@ -388,7 +434,7 @@ const inListOp: StrictBinaryOp = (id, x, y) => {
   return undefined;
 };
 const inListFunc = Func.binary(opc.IN, [olc.IN_LIST], inListOp);
-const inMapOp: StrictBinaryOp = (id, x, y) => {
+const inMapOp: StrictBinaryOp = (_id: number, x: CelVal, y: CelVal) => {
   if (y instanceof CelMap) {
     const val = y.adapter.fromCel(x);
     for (const [k, _] of y.value) {
@@ -401,7 +447,7 @@ const inMapOp: StrictBinaryOp = (id, x, y) => {
   return undefined;
 };
 const inMapFunc = Func.binary(opc.IN, [olc.IN_MAP], inMapOp);
-const inFunc = Func.binary(opc.IN, [], (id, x, y) => {
+const inFunc = Func.binary(opc.IN, [], (id: number, x: CelVal, y: CelVal) => {
   if (y instanceof CelList) {
     return inListOp(id, x, y);
   }

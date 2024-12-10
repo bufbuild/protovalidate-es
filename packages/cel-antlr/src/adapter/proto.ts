@@ -45,7 +45,7 @@ import {
   ProtoNull,
   CelErrors,
 } from "../value/value.js";
-import { CEL_ADAPTER, equalsStruct } from "./cel.js";
+import { CEL_ADAPTER } from "./cel.js";
 import { NATIVE_ADAPTER } from "./native.js";
 
 type ProtoValue = CelVal | Message;
@@ -62,12 +62,6 @@ export class ProtoValAdapter implements CelValAdapter {
   constructor(public readonly registry: IMessageTypeRegistry) {}
 
   unwrap(val: ProtoValue): ProtoValue {
-    if (isMessage(val, Any)) {
-      const real = val.unpack(this.registry);
-      if (real !== undefined) {
-        val = real;
-      }
-    }
     if (isCelWrap(val)) {
       return CEL_ADAPTER.unwrap(val);
     }
@@ -100,45 +94,12 @@ export class ProtoValAdapter implements CelValAdapter {
       if (!messageSchema) {
         throw new Error(`Message ${messageTypeName} not found in registry`);
       }
-      return this.equalsMsg(0, messageSchema, lhs, rhs);
+      // TODO(tstamm) for equality following the CEL-spec, use protobuf-es v2.2.3 options, see https://github.com/bufbuild/protobuf-es/pull/1029
+      return messageSchema.equals(lhs, rhs);
     } else if (isProtoMsg(rhs)) {
       return false;
     }
     return CEL_ADAPTER.equals(lhs, rhs);
-  }
-
-  private equalsMsg<T extends Message<T>>(
-    id: number,
-    messageSchema: MessageType<T>,
-    a: T,
-    b: T,
-  ): CelResult<boolean> {
-    if (a === b) {
-      return true;
-    }
-    if (!a || !b) {
-      return false;
-    }
-    // TODO(tstamm) we're working on messages here, why do we need toCel?
-    const celA = this.toCel(a);
-    const celB = this.toCel(b);
-    if (isMessage(celA, Any)) {
-      throw new Error("unimplemented");
-    }
-    if (isMessage(celB, Any)) {
-      throw new Error("unimplemented");
-    }
-
-    if (celA instanceof CelObject && celB instanceof CelObject) {
-      return equalsStruct(
-        id,
-        this,
-        celA,
-        celB,
-        this.getMetadata(a.getType().typeName).FIELD_NAMES,
-      );
-    }
-    return messageSchema.equals(a, b);
   }
 
   compare(lhs: ProtoValue, rhs: ProtoValue): CelResult<number> | undefined {
@@ -149,6 +110,22 @@ export class ProtoValAdapter implements CelValAdapter {
   }
 
   toCel(native: ProtoValue): CelResult {
+    if (isMessage(native, Any)) {
+      if (native.typeUrl === "") {
+        // TODO(tstamm) defer unpacking so we can provide an id
+        return new CelError(-1, `Unpack Any failed: invalid empty type_url`);
+      }
+      const unpacked = native.unpack(this.registry);
+      if (!unpacked) {
+        // TODO(tstamm) defer unpacking so we can provide an id
+        return new CelError(
+          -1,
+          `Unpack Any failed: type_url ${native.typeUrl} not in registry`,
+        );
+      }
+      return this.toCel(unpacked);
+    }
+
     if (isProtoMsg(native) && !isCelMsg(native)) {
       if (isMessage(native, UInt32Value)) {
         return new UInt64Value({
@@ -609,25 +586,6 @@ export class ProtoValProvider implements CelValProvider<ProtoValue> {
 
   findIdent(id: number, ident: string): CelResult | undefined {
     return EMPTY_PROVIDER.findIdent(id, ident);
-  }
-
-  unpackAny(_id: number, any: Any): CelResult {
-    const message = any.unpack(this.adapter.registry);
-    if (message === undefined) {
-      return any;
-    }
-    const messageSchema = this.adapter.registry.findMessage(
-      message.getType().typeName,
-    );
-    if (!messageSchema) {
-      // should never enter
-      return any;
-    }
-    return new CelObject(
-      message,
-      this.adapter,
-      this.adapter.getMetadata(messageSchema.typeName).TYPE,
-    );
   }
 }
 

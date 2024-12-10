@@ -1,5 +1,4 @@
 import {
-  Any,
   BoolValue,
   BytesValue,
   DoubleValue,
@@ -138,10 +137,6 @@ class EmptyProvider implements CelValProvider {
       return jsonType;
     }
     return undefined;
-  }
-
-  unpackAny(_id: number, any: Any): CelResult {
-    return any;
   }
 }
 

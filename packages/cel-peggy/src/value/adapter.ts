@@ -78,6 +78,7 @@ export function unwrapResults<V = CelVal>(
     } else if (arg instanceof CelError) {
       errors.push(arg);
     } else {
+      // TODO(tstamm) fix types or investigate extracting into standalone fn
       vals.push(unwrapper.unwrap(arg) as V);
     }
   }

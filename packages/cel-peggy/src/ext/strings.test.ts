@@ -28,7 +28,7 @@ type StringFormatTestCase = {
   err?: string;
 };
 
-// TODO don't skip these, and find source of truth
+// TODO find source of truth
 // Also see:
 // https://github.com/bufbuild/cel-es/blob/main/packages/cel/src/ext/strings.test.ts
 // https://github.com/bufbuild/cel-es-parse/blob/main/packages/cel-es-antlr4/src/string_ext.test.ts

@@ -183,7 +183,7 @@ export interface Unwrapper<V = unknown> {
 
 export interface CelValAdapter<V = unknown> extends Unwrapper<V> {
   toCel(native: CelResult<V>): CelResult;
-  fromCel: (cel: CelVal) => CelResult<V>;
+  fromCel(cel: CelVal): CelResult<V>;
 
   equals(lhs: V, rhs: V): CelResult<boolean>;
   compare(lhs: V, rhs: V): CelResult<number> | undefined;
@@ -220,7 +220,7 @@ export class ProtoNull {
   constructor(
     public readonly messageTypeName: string,
     public readonly defaultValue: CelVal,
-    public value: CelVal = null,
+    public readonly value: CelVal = null,
   ) {}
 }
 
@@ -242,7 +242,7 @@ export class CelUint {
 
 export class CelList implements ListAccess {
   constructor(
-    public value: unknown[],
+    public readonly value: readonly unknown[],
     public readonly adapter: CelValAdapter,
     public readonly type_: CelType,
   ) {}
@@ -265,30 +265,31 @@ export class CelList implements ListAccess {
 }
 
 export class CelMap<K = unknown, V = unknown> implements StructAccess<CelVal> {
-  public nativeKeyMap: Map<unknown, V>;
+  public readonly nativeKeyMap: ReadonlyMap<unknown, V>;
 
   constructor(
-    public value: Map<K, V>,
+    public readonly value: ReadonlyMap<K, V>,
     public readonly adapter: CelValAdapter,
-    public type_: CelType,
+    public readonly type_: CelType,
   ) {
-    this.nativeKeyMap = new Map();
+    const nativeKeys = new Map<unknown, V>();
     for (const [key, value] of this.value) {
       const celKey = this.adapter.toCel(key);
       if (typeof celKey === "string" || typeof celKey === "bigint") {
-        this.nativeKeyMap.set(celKey, value);
+        nativeKeys.set(celKey, value);
       } else if (isCelWrap(celKey) || celKey instanceof CelUint) {
-        this.nativeKeyMap.set(celKey.value, value);
+        nativeKeys.set(celKey.value, value);
       } else if (celKey instanceof Uint8Array) {
-        this.nativeKeyMap.set(celKey, value);
+        nativeKeys.set(celKey, value);
       } else if (typeof celKey === "number" && Number.isInteger(celKey)) {
-        this.nativeKeyMap.set(BigInt(celKey), value);
+        nativeKeys.set(BigInt(celKey), value);
       } else if (typeof celKey === "boolean") {
-        this.nativeKeyMap.set(celKey ? 1n : 0n, value);
+        nativeKeys.set(celKey ? 1n : 0n, value);
       } else {
-        this.nativeKeyMap.set(key, value);
+        nativeKeys.set(key, value);
       }
     }
+    this.nativeKeyMap = nativeKeys;
   }
 
   getItems(): CelResult[] {
@@ -323,9 +324,9 @@ export class CelMap<K = unknown, V = unknown> implements StructAccess<CelVal> {
 
 export class CelObject implements StructAccess<unknown> {
   constructor(
-    public value: object,
+    public readonly value: object,
     public readonly adapter: CelValAdapter,
-    public type_: CelType,
+    public readonly type_: CelType,
   ) {
     if (isCelVal(value)) {
       throw new Error("Cannot wrap CelVal in CelObject");
@@ -423,7 +424,7 @@ export class ConcreteType extends CelType {
 }
 
 export class WrapperType<_T extends Message> extends CelType {
-  constructor(public wrapped: CelType) {
+  constructor(public readonly wrapped: CelType) {
     super(
       "wrapper(" + wrapped.name + ")",
       wrapped.fullname_ === undefined
@@ -436,8 +437,8 @@ export class WrapperType<_T extends Message> extends CelType {
 export class CelError {
   public additional?: CelError[];
   constructor(
-    public id: number,
-    public message: string,
+    public readonly id: number,
+    public readonly message: string,
   ) {}
 
   public add(additional: CelError) {
@@ -449,7 +450,7 @@ export class CelError {
 }
 
 export class CelUnknown {
-  constructor(public ids: bigint[]) {}
+  constructor(public readonly ids: readonly bigint[]) {}
 
   public static merge(unknowns: CelUnknown[]): CelUnknown {
     if (unknowns.length === 0) {

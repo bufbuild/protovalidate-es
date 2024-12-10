@@ -52,7 +52,7 @@ const charAtFunc = Func.binary(
 const indexOfFunc = Func.newStrict(
   "indexOf",
   ["string_index_of_string", "string_index_of_string_int"],
-  (id: number, args) => {
+  (id: number, args: CelVal[]) => {
     if (!argsMatchInt(args, type.STRING, type.STRING)) {
       return undefined;
     }
@@ -69,7 +69,7 @@ const indexOfFunc = Func.newStrict(
 const lastIndexOfFunc = Func.newStrict(
   "lastIndexOf",
   ["string_last_index_of_string", "string_last_index_of_string_int"],
-  (id: number, args) => {
+  (id: number, args: CelVal[]) => {
     if (!argsMatchInt(args, type.STRING, type.STRING)) {
       return undefined;
     }
@@ -127,7 +127,7 @@ const upperAsciiFunc = Func.unary(
 const replaceFunc = Func.newStrict(
   "replace",
   ["string_replace_string_string", "string_replace_string_string_int"],
-  (_id: number, args) => {
+  (_id: number, args: CelVal[]) => {
     if (!argsMatchInt(args, type.STRING, type.STRING, type.STRING)) {
       return undefined;
     }
@@ -155,7 +155,7 @@ const replaceFunc = Func.newStrict(
 const splitFunc = Func.newStrict(
   "split",
   ["string_split_string", "string_split_string_int"],
-  (_idid: number, args: CelVal[]) => {
+  (_id: number, args: CelVal[]) => {
     if (!argsMatchInt(args, type.STRING, type.STRING)) {
       return undefined;
     }

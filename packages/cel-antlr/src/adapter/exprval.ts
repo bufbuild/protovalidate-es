@@ -61,7 +61,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("Method not implemented.");
   }
 
-  accessMapByIndex(
+  private accessMapByIndex(
     _id: number,
     _obj: MapValue,
     _index: number | bigint,
@@ -69,7 +69,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("Method not implemented.");
   }
 
-  accessListByIndex(
+  private accessListByIndex(
     _id: number,
     obj: ListValue,
     index: number | bigint,
@@ -81,7 +81,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     return obj.values[i];
   }
 
-  accessValueByIndex(id: number, value: Value, index: number | bigint) {
+  private accessValueByIndex(id: number, value: Value, index: number | bigint) {
     switch (value.kind.case) {
       case "listValue":
         return this.accessListByIndex(id, value.kind.value, index);
@@ -108,7 +108,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("Method not implemented.");
   }
 
-  accessValueByName(
+  private accessValueByName(
     id: number,
     value: Value,
     name: string,
@@ -127,7 +127,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     return CelErrors.badStringAccess(id, this.valueToType(value));
   }
 
-  valueToType(value: Value): CelType {
+  private valueToType(value: Value): CelType {
     switch (value.kind.case) {
       case "boolValue":
         return type.BOOL;
@@ -256,7 +256,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     return val;
   }
 
-  exprResultToCel(val: ExprValue): CelResult {
+  private exprResultToCel(val: ExprValue): CelResult {
     switch (val.kind.case) {
       case "value":
         return this.valToCel(val.kind.value);
@@ -299,7 +299,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     }
     throw new Error("unimplemented: " + val.kind.case);
   }
-  objectToCel(value: Any): CelVal {
+  private objectToCel(value: Any): CelVal {
     switch (value.typeUrl) {
       case "type.googleapis.com/google.protobuf.Duration": {
         const val = new Duration();

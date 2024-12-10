@@ -11,7 +11,6 @@ import {
 
 export type ZeroOp = (id: number) => CelResult | undefined;
 export type UnaryOp = (id: number, arg: CelResult) => CelResult | undefined;
-export type UnaryOpT<T> = (id: number, arg: T) => CelResult | undefined;
 export type StrictUnaryOp = (id: number, arg: CelVal) => CelResult | undefined;
 export type BinaryOp = (
   id: number,
@@ -24,18 +23,15 @@ export type StrictBinaryOp = (
   rhs: CelVal,
 ) => CelResult | undefined;
 export type StrictOp = (id: number, args: CelVal[]) => CelResult | undefined;
-export type ResultOp = (
-  id: number,
-  args: CelResult[],
-  unwrap: Unwrapper,
-) => CelResult | undefined;
+export type ResultOp = (id: number, args: CelResult[]) => CelResult | undefined;
 
-export enum DispatchType {
+enum DispatchType {
   Result = 0, // Args can be CelResults
   Strict = 1, // All args must be unwrapped CelVals
 }
 
-export const identityOp: UnaryOp = (_id: number, arg: CelResult) => arg;
+export const identityStrictOp: StrictUnaryOp = (_id: number, arg: CelResult) =>
+  arg;
 
 export interface CallDispatch {
   dispatch(
@@ -64,7 +60,7 @@ export class Func implements CallDispatch {
     unwrap: Unwrapper,
   ): CelResult | undefined {
     if (this.call.type === DispatchType.Result) {
-      return this.call.op(id, args, unwrap);
+      return this.call.op(id, args);
     }
 
     const vals = unwrapResults(args, unwrap);
@@ -75,7 +71,15 @@ export class Func implements CallDispatch {
   }
 
   public static zero(func: string, overload: string, op: ZeroOp) {
-    return new Func(func, [overload], { type: DispatchType.Result, op: op });
+    return new Func(func, [overload], {
+      type: DispatchType.Result,
+      op: (id: number, args: CelResult[]) => {
+        if (args.length !== 0) {
+          return undefined;
+        }
+        return op(id);
+      },
+    });
   }
 
   public static unary(func: string, overloads: string[], op: StrictUnaryOp) {
