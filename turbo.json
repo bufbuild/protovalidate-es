@@ -10,7 +10,7 @@
       "outputs": ["src/gen/**"]
     },
     "test": {
-      "dependsOn": ["build"],
+      "dependsOn": ["^build"],
       "cache": false
     },
     "format": {},

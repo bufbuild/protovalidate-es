@@ -1,5 +1,9 @@
-/src
-/*.json
-/dist/**/*.test.js
-/dist/**/*.test.d.ts
-/scripts/*
+src
+scripts
+tsconfig.json
+tsconfig.*.json
+turbo.json
+dist/**/*.test.js
+dist/**/*.test.d.ts
+dist/*/testing.js
+dist/*/testing.d.ts
