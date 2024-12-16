@@ -1,8 +1,6 @@
 import {
   CEL_ADAPTER,
-  CEL_PARSER,
   CelError,
-  type CelParser,
   CelPlanner,
   CelUnknown,
   EXPR_VAL_ADAPTER,
@@ -17,6 +15,7 @@ import type {
 import type { Registry } from "@bufbuild/protobuf";
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
+import { parse } from "./parser.js";
 
 const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry();
 
@@ -37,7 +36,7 @@ export async function testSimpleTestFile(
         for (const simpleTest of section.test) {
           const skip = shouldSkip?.(simpleTestFile, section, simpleTest);
           await t.test(name(simpleTest), { skip }, () => {
-            runSimpleTestCase(CEL_PARSER, simpleTest, registry);
+            runSimpleTestCase(simpleTest, registry);
           });
         }
       });
@@ -115,14 +114,10 @@ function name(obj: { name: string; description: string }): string {
   return obj.description;
 }
 
-function runSimpleTestCase(
-  celParser: CelParser,
-  testCase: SimpleTest,
-  registry: Registry,
-) {
+function runSimpleTestCase(testCase: SimpleTest, registry: Registry) {
   const planner = new CelPlanner(testCase.container, registry);
   planner.addFuncs(STRINGS_EXT_FUNCS);
-  const parsed = celParser.parse(testCase.expr);
+  const parsed = parse(testCase.expr);
   const plan = planner.plan(parsed);
   const ctx = new ObjectActivation(testCase.bindings, EXPR_VAL_ADAPTER);
   const result = plan.eval(ctx);

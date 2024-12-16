@@ -6,12 +6,12 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/bufbuild/cel-es.git",
-    "directory": "packages/cel-es"
+    "directory": "packages/cel-peggy"
   },
   "scripts": {
-    "generate": "peggy -o src/grammar.js src/grammar.peggy",
+    "generate": "peggy cel.peggy --format bare --extra-options '{\"typescript\":true}' --plugin peggy-ts -o ./src/parser.ts",
+    "postgenerate": "prettier src/parser.ts --write && git apply parser.patch",
     "test": "npx tsx --test ./src/*.test.ts ./src/*/*.test.ts",
-    "postgenerate": "node scripts/peggy2ts.js src/grammar.js",
     "prebuild": "rm -rf ./dist/*",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
@@ -38,6 +38,7 @@
     "date-fns-tz": "^2.0.0"
   },
   "devDependencies": {
-    "peggy": "^4.2.0"
+    "peggy": "^4.0.3",
+    "peggy-ts": "github:hudlow/peggy-ts"
   }
 }

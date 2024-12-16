@@ -1,21 +1,20 @@
 import { suite, test } from "node:test";
-import { create, fromJson } from "@bufbuild/protobuf";
+import { fromJson } from "@bufbuild/protobuf";
 import { FuncRegistry } from "../func.js";
 import { STD_FUNCS } from "../std/std.js";
 import { addStringsExt, Formatter } from "./strings.js";
 import { Planner } from "../planner.js";
 import {
-  CEL_PARSER,
   CelError,
   CelUint,
   NATIVE_ADAPTER,
   ObjectActivation,
 } from "../index.js";
-import { ExprSchema } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
 import { EmptyActivation } from "../activation.js";
 import * as assert from "node:assert/strict";
 import { TimestampSchema } from "@bufbuild/protobuf/wkt";
 import { parseDuration } from "../value/value.js";
+import { parse } from "../parser.js";
 
 type StringFormatTestCase = {
   name: string;
@@ -636,8 +635,7 @@ const STRINGS_FORMAT_TEST_CASES: StringFormatTestCase[] = [
 
 void suite("string.format", () => {
   for (const tc of STRINGS_FORMAT_TEST_CASES) {
-    // TODO
-    void test(tc.name, { skip: "broken" }, () => {
+    void test(tc.name, () => {
       const extFuncs = new FuncRegistry(STD_FUNCS);
       addStringsExt(
         extFuncs,
@@ -648,8 +646,8 @@ void suite("string.format", () => {
       // const input =
       //   "'" + tc.format + "'.format([" + (tc.formatArgs ?? "") + "])";
       const input = `'${tc.format}'.format([${tc.formatArgs ?? ""}])`;
-      const parsed = CEL_PARSER.parse(input);
-      const plan = planner.plan(parsed.expr ?? create(ExprSchema));
+      const parsed = parse(input);
+      const plan = planner.plan(parsed);
       const ctx =
         tc.dynArgs === undefined
           ? new EmptyActivation()
