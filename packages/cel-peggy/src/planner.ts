@@ -1,4 +1,4 @@
-import {
+import type {
   Constant,
   Expr,
   Expr_Call,
@@ -7,15 +7,18 @@ import {
   Expr_CreateStruct,
   Expr_Select,
 } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import { create } from "@bufbuild/protobuf";
+
 import {
-  Any,
-  BoolValue,
-  BytesValue,
-  DoubleValue,
-  Int64Value,
-  StringValue,
-  UInt64Value,
-} from "@bufbuild/protobuf";
+  AnySchema,
+  BoolValueSchema,
+  BytesValueSchema,
+  DoubleValueSchema,
+  Int64ValueSchema,
+  StringValueSchema,
+  UInt64ValueSchema,
+} from "@bufbuild/protobuf/wkt";
+
 import {
   ConcreteAttributeFactory,
   type Access,
@@ -123,7 +126,6 @@ export class Planner {
     }
     const operand = this.plan(expr.operand);
     const attr = this.relativeAttr(id, operand, false);
-
     const acc = this.factory.newAccess(id, expr.field, false);
     if (acc instanceof CelError) {
       throw new Error(`invalid select: ${acc.message}`);
@@ -384,13 +386,7 @@ export class EvalHas implements Interpretable {
     } else if (raw instanceof CelError || raw instanceof CelUnknown) {
       return raw;
     }
-    const out = this.access.accessIfPresent(ctx, raw, true);
-    if (out === undefined) {
-      return false;
-    } else if (out instanceof CelError || out instanceof CelUnknown) {
-      return out;
-    }
-    return true;
+    return this.access.isPresent(ctx, raw);
   }
 }
 
@@ -425,6 +421,10 @@ export class EvalAttr implements Attribute, Interpretable {
   }
   access(vars: Activation, obj: RawVal): RawResult | undefined {
     return this.attr.access(vars, obj);
+  }
+
+  isPresent(vars: Activation, obj: RawVal): CelResult<boolean> {
+    return this.attr.isPresent(vars, obj);
   }
 
   accessIfPresent(
@@ -529,14 +529,14 @@ export class EvalObj implements InterpretableCtor {
           if (value instanceof CelError || value instanceof CelUnknown) {
             return value;
           }
-          return new Any({ typeUrl: typeUrl, value: value });
+          return create(AnySchema, { typeUrl: typeUrl, value: value });
         }
         case "google.protobuf.BoolValue": {
           const val = coerceToBool(this.id, obj.value);
           if (val instanceof CelError || val instanceof CelUnknown) {
             return val;
           }
-          return new BoolValue({ value: val });
+          return create(BoolValueSchema, { value: val });
         }
         case "google.protobuf.UInt32Value":
         case "google.protobuf.UInt64Value": {
@@ -544,7 +544,7 @@ export class EvalObj implements InterpretableCtor {
           if (val instanceof CelError || val instanceof CelUnknown) {
             return val;
           }
-          return new UInt64Value({ value: val.valueOf() });
+          return create(UInt64ValueSchema, { value: val.valueOf() });
         }
         case "google.protobuf.Int32Value":
         case "google.protobuf.Int64Value": {
@@ -552,7 +552,7 @@ export class EvalObj implements InterpretableCtor {
           if (val instanceof CelError || val instanceof CelUnknown) {
             return val;
           }
-          return new Int64Value({ value: val.valueOf() });
+          return create(Int64ValueSchema, { value: val.valueOf() });
         }
         case "google.protobuf.FloatValue":
         case "google.protobuf.DoubleValue": {
@@ -560,21 +560,21 @@ export class EvalObj implements InterpretableCtor {
           if (val instanceof CelError || val instanceof CelUnknown) {
             return val;
           }
-          return new DoubleValue({ value: val });
+          return create(DoubleValueSchema, { value: val });
         }
         case "google.protobuf.StringValue": {
           const val = coerceToString(this.id, obj.value);
           if (val instanceof CelError || val instanceof CelUnknown) {
             return val;
           }
-          return new StringValue({ value: val });
+          return create(StringValueSchema, { value: val });
         }
         case "google.protobuf.BytesValue": {
           const val = coerceToBytes(this.id, obj.value);
           if (val instanceof CelError || val instanceof CelUnknown) {
             return val;
           }
-          return new BytesValue({ value: val });
+          return create(BytesValueSchema, { value: val });
         }
         case "google.protobuf.Value": {
           return null;

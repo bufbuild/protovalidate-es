@@ -1,21 +1,26 @@
 import {
-  Expr,
-  Expr_Call,
-  Constant,
-  Expr_Comprehension,
-  Expr_CreateList,
-  Expr_CreateStruct_Entry,
-  Expr_Ident,
-  Expr_Select,
-  SourceInfo,
+  ExprSchema,
+  Expr_CallSchema,
+  ConstantSchema,
+  Expr_ComprehensionSchema,
+  Expr_CreateListSchema,
+  Expr_CreateStruct_EntrySchema,
+  Expr_IdentSchema,
+  Expr_SelectSchema,
+  SourceInfoSchema,
 } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+
+import { create } from "@bufbuild/protobuf";
+import type { Expr_CreateStruct_Entry } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import type { Expr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import type { SourceInfo } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
 
 export class ExprBuilder {
   private prevId = 0n;
-  public sourceInfo: SourceInfo = new SourceInfo();
+  public sourceInfo: SourceInfo = create(SourceInfoSchema);
 
   public nextExpr(offset: number): Expr {
-    const expr = new Expr();
+    const expr = create(ExprSchema);
     expr.id = ++this.prevId;
     this.sourceInfo.positions[expr.id.toString()] = offset;
     return expr;
@@ -27,7 +32,7 @@ export class ExprBuilder {
     expr.exprKind = {
       case: "constExpr",
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      value: new Constant({ constantKind: constantKind }),
+      value: create(ConstantSchema, { constantKind: constantKind }),
     };
     return expr;
   }
@@ -43,7 +48,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "callExpr",
-      value: new Expr_Call({
+      value: create(Expr_CallSchema, {
         function: functionName,
         args: args,
       }),
@@ -60,7 +65,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "callExpr",
-      value: new Expr_Call({
+      value: create(Expr_CallSchema, {
         function: functionName,
         target: target,
         args: args,
@@ -252,7 +257,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "identExpr",
-      value: new Expr_Ident({ name: name }),
+      value: create(Expr_IdentSchema, { name: name }),
     };
     return expr;
   }
@@ -270,7 +275,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "selectExpr",
-      value: new Expr_Select({
+      value: create(Expr_SelectSchema, {
         operand: operand,
         field: field,
       }),
@@ -295,7 +300,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "listExpr",
-      value: new Expr_CreateList({
+      value: create(Expr_CreateListSchema, {
         elements: elements,
       }),
     };
@@ -313,7 +318,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "comprehensionExpr",
-      value: new Expr_Comprehension({
+      value: create(Expr_ComprehensionSchema, {
         accuVar: "__result__",
         accuInit: this.newConstExpr(offset, {
           case: "boolValue",
@@ -333,7 +338,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "comprehensionExpr",
-      value: new Expr_Comprehension({
+      value: create(Expr_ComprehensionSchema, {
         accuVar: "__result__",
         accuInit: this.newListExpr(offset, []),
         iterVar: x,
@@ -415,7 +420,7 @@ export class ExprBuilder {
     const expr = this.nextExpr(offset);
     expr.exprKind = {
       case: "comprehensionExpr",
-      value: new Expr_Comprehension({
+      value: create(Expr_ComprehensionSchema, {
         accuVar: "__result__",
         accuInit: this.newConstExpr(offset, {
           case: "int64Value",
@@ -508,7 +513,7 @@ export class ExprBuilder {
   ): Expr_CreateStruct_Entry {
     const id = ++this.prevId;
     this.sourceInfo.positions[id.toString()] = offset;
-    return new Expr_CreateStruct_Entry({
+    return create(Expr_CreateStruct_EntrySchema, {
       id: id,
       keyKind: {
         case: "mapKey",
@@ -525,7 +530,7 @@ export class ExprBuilder {
   ): Expr_CreateStruct_Entry {
     const id = ++this.prevId;
     this.sourceInfo.positions[id.toString()] = offset;
-    return new Expr_CreateStruct_Entry({
+    return create(Expr_CreateStruct_EntrySchema, {
       id: id,
       keyKind: {
         case: "fieldKey",

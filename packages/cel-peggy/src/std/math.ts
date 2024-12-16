@@ -1,4 +1,5 @@
-import { Duration, isMessage, Timestamp } from "@bufbuild/protobuf";
+import { isMessage, create } from "@bufbuild/protobuf";
+import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
 
 import {
   Func,
@@ -192,11 +193,11 @@ function sumTimeOp(id: number, times: CelVal[]) {
   let nanos = 0;
   for (let i = 0; i < times.length; i++) {
     const time = times[i];
-    if (isMessage(time, Timestamp)) {
+    if (isMessage(time, TimestampSchema)) {
       tsCount++;
       seconds += time.seconds;
       nanos += time.nanos;
-    } else if (isMessage(time, Duration)) {
+    } else if (isMessage(time, DurationSchema)) {
       seconds += time.seconds;
       nanos += time.nanos;
     } else {
@@ -213,12 +214,12 @@ function sumTimeOp(id: number, times: CelVal[]) {
       if (seconds > 315576000000 || seconds < -315576000000) {
         return CelErrors.overflow(id, opc.ADD, type.DURATION);
       }
-      return new Duration({ seconds: seconds, nanos: nanos });
+      return create(DurationSchema, { seconds: seconds, nanos: nanos });
     case 1:
       if (seconds > 253402300799 || seconds < -62135596800) {
         return CelErrors.overflow(id, opc.ADD, type.TIMESTAMP);
       }
-      return new Timestamp({ seconds: seconds, nanos: nanos });
+      return create(TimestampSchema, { seconds: seconds, nanos: nanos });
     default:
       return undefined;
   }
@@ -294,15 +295,15 @@ const subDoubleFunc = Func.binary(
   subDoubleOp,
 );
 const subTimeOp: StrictBinaryOp = (id: number, lhs: CelVal, rhs: CelVal) => {
-  if (isMessage(lhs, Timestamp)) {
-    if (isMessage(rhs, Timestamp)) {
+  if (isMessage(lhs, TimestampSchema)) {
+    if (isMessage(rhs, TimestampSchema)) {
       return newDuration(id, lhs.seconds - rhs.seconds, lhs.nanos - rhs.nanos);
-    } else if (isMessage(rhs, Duration)) {
+    } else if (isMessage(rhs, DurationSchema)) {
       return newTimestamp(id, lhs.seconds - rhs.seconds, lhs.nanos - rhs.nanos);
     } else {
       return undefined;
     }
-  } else if (isMessage(lhs, Duration) && isMessage(rhs, Duration)) {
+  } else if (isMessage(lhs, DurationSchema) && isMessage(rhs, DurationSchema)) {
     return newDuration(id, lhs.seconds - rhs.seconds, lhs.nanos - rhs.nanos);
   }
   return undefined;

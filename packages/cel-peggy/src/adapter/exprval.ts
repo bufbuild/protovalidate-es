@@ -1,12 +1,21 @@
-import { Any, Duration, isMessage, Timestamp } from "@bufbuild/protobuf";
-
-import { ExprValue } from "@bufbuild/cel-spec/cel/expr/eval_pb.js";
+import { isMessage, create } from "@bufbuild/protobuf";
 import {
-  ListValue,
-  MapValue,
-  MapValue_Entry,
-  Value,
+  type Any,
+  anyUnpack,
+  DurationSchema,
+  TimestampSchema,
+} from "@bufbuild/protobuf/wkt";
+import { ExprValueSchema } from "@bufbuild/cel-spec/cel/expr/eval_pb.js";
+import type { ExprValue } from "@bufbuild/cel-spec/cel/expr/eval_pb.js";
+import {
+  ListValueSchema,
+  MapValueSchema,
+  MapValue_EntrySchema,
+  ValueSchema,
 } from "@bufbuild/cel-spec/cel/expr/value_pb.js";
+import type { MapValue } from "@bufbuild/cel-spec/cel/expr/value_pb.js";
+import type { ListValue } from "@bufbuild/cel-spec/cel/expr/value_pb.js";
+import type { Value } from "@bufbuild/cel-spec/cel/expr/value_pb.js";
 import * as type from "../value/type.js";
 import {
   CelErrors,
@@ -20,6 +29,8 @@ import {
   type CelResult,
   type CelVal,
   type CelValAdapter,
+  CelError,
+  CelUnknown,
 } from "../value/value.js";
 import { CEL_ADAPTER } from "./cel.js";
 
@@ -41,17 +52,17 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   ): ExprResult | undefined {
     if (isCelVal(obj)) {
       return CEL_ADAPTER.accessByIndex(id, obj, index);
-    } else if (isMessage(obj, ExprValue)) {
+    } else if (isMessage(obj, ExprValueSchema)) {
       switch (obj.kind.case) {
         case "value":
           return this.accessValueByIndex(id, obj.kind.value, index);
       }
       throw new Error("Method not implemented.");
-    } else if (isMessage(obj, Value)) {
+    } else if (isMessage(obj, ValueSchema)) {
       return this.accessValueByIndex(id, obj, index);
-    } else if (isMessage(obj, ListValue)) {
+    } else if (isMessage(obj, ListValueSchema)) {
       return this.accessListByIndex(id, obj, index);
-    } else if (isMessage(obj, MapValue)) {
+    } else if (isMessage(obj, MapValueSchema)) {
       return this.accessMapByIndex(id, obj, index);
     }
     throw new Error("Method not implemented.");
@@ -91,6 +102,14 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     return CelErrors.badIndexAccess(id, this.valueToType(value));
   }
 
+  isSetByName(
+    id: number,
+    obj: ExprType,
+    name: string,
+  ): boolean | CelError | CelUnknown {
+    return this.accessByName(id, obj, name) !== undefined;
+  }
+
   accessByName(
     id: number,
     obj: ExprType,
@@ -98,7 +117,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   ): ExprResult | undefined {
     if (isCelVal(obj)) {
       return CEL_ADAPTER.accessByName(id, obj, name);
-    } else if (isMessage(obj, ExprValue)) {
+    } else if (isMessage(obj, ExprValueSchema)) {
       switch (obj.kind.case) {
         case "value":
           return this.accessValueByName(id, obj.kind.value, name);
@@ -156,13 +175,13 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   toCel(native: ExprType): CelResult {
     if (isCelResult(native)) {
       return native;
-    } else if (isMessage(native, ExprValue)) {
+    } else if (isMessage(native, ExprValueSchema)) {
       return this.exprResultToCel(native);
-    } else if (isMessage(native, Value)) {
+    } else if (isMessage(native, ValueSchema)) {
       return this.valToCel(native);
-    } else if (isMessage(native, ListValue)) {
+    } else if (isMessage(native, ListValueSchema)) {
       return new CelList(native.values, this, type.LIST);
-    } else if (isMessage(native, MapValue)) {
+    } else if (isMessage(native, MapValueSchema)) {
       const map = new Map<Value, Value>();
       native.entries.forEach((entry) => {
         if (entry.key === undefined || entry.value === undefined) {
@@ -177,7 +196,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   }
 
   fromCel(cel: CelVal): ExprValue {
-    return new ExprValue({
+    return create(ExprValueSchema, {
       kind: {
         case: "value",
         value: this.celToValue(cel),
@@ -187,48 +206,48 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
 
   celToValue(cel: CelVal): Value {
     if (typeof cel === "boolean") {
-      return new Value({ kind: { case: "boolValue", value: cel } });
+      return create(ValueSchema, { kind: { case: "boolValue", value: cel } });
     } else if (typeof cel === "bigint") {
-      return new Value({
+      return create(ValueSchema, {
         kind: { case: "int64Value", value: cel },
       });
     } else if (cel instanceof CelUint) {
-      return new Value({
+      return create(ValueSchema, {
         kind: { case: "uint64Value", value: cel.value.valueOf() },
       });
     } else if (typeof cel === "number") {
-      return new Value({
+      return create(ValueSchema, {
         kind: { case: "doubleValue", value: cel },
       });
     } else if (typeof cel === "string") {
-      return new Value({
+      return create(ValueSchema, {
         kind: { case: "stringValue", value: cel },
       });
     } else if (cel instanceof Uint8Array) {
-      return new Value({
+      return create(ValueSchema, {
         kind: { case: "bytesValue", value: cel },
       });
     } else if (cel instanceof CelList) {
-      const list = new ListValue();
+      const list = create(ListValueSchema);
       cel
         .getItems()
         .forEach((val) => list.values.push(this.celToValue(val as CelVal)));
-      return new Value({ kind: { case: "listValue", value: list } });
+      return create(ValueSchema, { kind: { case: "listValue", value: list } });
     } else if (cel instanceof CelMap) {
-      const map = new MapValue();
+      const map = create(MapValueSchema);
       cel.value.forEach((val, key) => {
         map.entries.push(
-          new MapValue_Entry({
+          create(MapValue_EntrySchema, {
             key: this.celToValue(key as CelVal),
             value: this.celToValue(val as CelVal),
           }),
         );
       });
-      return new Value({ kind: { case: "mapValue", value: map } });
+      return create(ValueSchema, { kind: { case: "mapValue", value: map } });
     } else if (cel === null) {
-      return new Value({ kind: { case: "nullValue", value: 0 } });
+      return create(ValueSchema, { kind: { case: "nullValue", value: 0 } });
     } else if (cel instanceof CelType) {
-      return new Value({
+      return create(ValueSchema, {
         kind: { case: "typeValue", value: cel.name },
       });
     }
@@ -237,7 +256,7 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   }
 
   valueToExprVal(val: Value): ExprValue {
-    return new ExprValue({
+    return create(ExprValueSchema, {
       kind: {
         case: "value",
         value: val,
@@ -246,11 +265,11 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
   }
 
   celToExprVal(cel: CelVal): ExprValue {
-    const val = new ExprValue();
+    const val = create(ExprValueSchema);
     if (cel === null) {
       val.kind = {
         case: "value",
-        value: new Value({ kind: { case: "nullValue", value: 0 } }),
+        value: create(ValueSchema, { kind: { case: "nullValue", value: 0 } }),
       };
     }
     return val;
@@ -300,17 +319,13 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
     throw new Error("unimplemented: " + val.kind.case);
   }
   private objectToCel(value: Any): CelVal {
-    switch (value.typeUrl) {
-      case "type.googleapis.com/google.protobuf.Duration": {
-        const val = new Duration();
-        value.unpackTo(val);
-        return val;
-      }
-      case "type.googleapis.com/google.protobuf.Timestamp": {
-        const ts = new Timestamp();
-        value.unpackTo(ts);
-        return ts;
-      }
+    const duration = anyUnpack(value, DurationSchema);
+    if (duration !== undefined) {
+      return duration;
+    }
+    const ts = anyUnpack(value, TimestampSchema);
+    if (ts !== undefined) {
+      return ts;
     }
     throw new Error("unimplemented: " + value.typeUrl);
   }

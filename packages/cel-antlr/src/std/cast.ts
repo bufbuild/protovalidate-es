@@ -1,4 +1,9 @@
-import { Duration, isMessage, Timestamp } from "@bufbuild/protobuf";
+import { isMessage, create, fromJson, toJson } from "@bufbuild/protobuf";
+import {
+  DurationSchema,
+  timestampFromMs,
+  TimestampSchema,
+} from "@bufbuild/protobuf/wkt";
 
 import {
   Func,
@@ -70,7 +75,7 @@ const strToIntOp: StrictUnaryOp = (id: number, x: CelVal) => {
 };
 const strToIntFunc = Func.unary(INT, [olc.STRING_TO_INT], strToIntOp);
 const timestampToIntOp: StrictUnaryOp = (id: number, x: CelVal) => {
-  if (isMessage(x, Timestamp)) {
+  if (isMessage(x, TimestampSchema)) {
     const val = x.seconds;
     if (isOverflowInt(val)) {
       return CelErrors.overflow(id, INT, type.INT);
@@ -85,7 +90,7 @@ const timestampToIntFunc = Func.unary(
   timestampToIntOp,
 );
 const durationToIntOp: StrictUnaryOp = (id: number, x: CelVal) => {
-  if (isMessage(x, Duration)) {
+  if (isMessage(x, DurationSchema)) {
     const val = x.seconds;
     if (isOverflowInt(val)) {
       return CelErrors.overflow(id, INT, type.INT);
@@ -220,7 +225,20 @@ const toDoubleFunc = Func.unary(DOUBLE, [], (id: number, x: CelVal) => {
 const boolToBool = Func.unary(BOOL, [olc.BOOL_TO_BOOL], identityStrictOp);
 const stringToBoolOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (typeof x === "string") {
-    return x === "true";
+    switch (x) {
+      case "true":
+      case "True":
+      case "TRUE":
+      case "t":
+      case "1":
+        return true;
+      case "false":
+      case "False":
+      case "FALSE":
+      case "f":
+      case "0":
+        return false;
+    }
   }
   return undefined;
 };
@@ -322,8 +340,8 @@ const bytesToStringFunc = Func.unary(
   bytesToStringOp,
 );
 const timestampToStringOp: StrictUnaryOp = (_id: number, x: CelVal) => {
-  if (isMessage(x, Timestamp)) {
-    return x.toJson() as string;
+  if (isMessage(x, TimestampSchema)) {
+    return toJson(TimestampSchema, x);
   }
   return undefined;
 };
@@ -333,8 +351,8 @@ const timestampToStringFunc = Func.unary(
   timestampToStringOp,
 );
 const durationToStringOp: StrictUnaryOp = (id: number, x: CelVal) => {
-  if (isMessage(x, Duration)) {
-    return x.toJson() as string;
+  if (isMessage(x, DurationSchema)) {
+    return toJson(DurationSchema, x);
   }
   return CelErrors.overloadNotFound(id, STRING, [type.getCelType(x)]);
 };
@@ -374,7 +392,7 @@ const timestampToTimestamp = Func.unary(
 const stringToTimestampOp: StrictUnaryOp = (id: number, x: CelVal) => {
   if (typeof x === "string") {
     try {
-      return Timestamp.fromJson(x);
+      return fromJson(TimestampSchema, x);
     } catch (e) {
       return CelErrors.badTimeStr(id, String(e));
     }
@@ -388,7 +406,7 @@ const stringToTimestampFunc = Func.unary(
 );
 const intToTimestampOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (typeof x === "bigint") {
-    return Timestamp.fromDate(new Date(Number(x)));
+    return timestampFromMs(Number(x));
   }
   return undefined;
 };
@@ -429,7 +447,7 @@ const stringToDurationFunc = Func.unary(
 );
 const intToDurationOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (typeof x === "bigint") {
-    return new Duration({ seconds: x });
+    return create(DurationSchema, { seconds: x });
   }
   return undefined;
 };

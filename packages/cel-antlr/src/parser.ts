@@ -1,13 +1,18 @@
 import { CharStreams, CommonTokenStream, ParserRuleContext } from "antlr4ts";
+import { create } from "@bufbuild/protobuf";
 import { AbstractParseTreeVisitor } from "antlr4ts/tree/AbstractParseTreeVisitor.js";
 import { TerminalNode } from "antlr4ts/tree/TerminalNode.js";
+
 import {
-  Expr,
-  Expr_CreateStruct,
-  Expr_CreateStruct_Entry,
-  ParsedExpr,
-  SourceInfo,
+  ExprSchema,
+  Expr_CreateStructSchema,
+  type Expr_CreateStruct_Entry,
+  ParsedExprSchema,
+  type SourceInfo,
 } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+
+import type { ParsedExpr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import type { Expr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
 import { CELLexer } from "./gen/CELLexer.js";
 import {
   BoolFalseContext,
@@ -72,7 +77,7 @@ export class ExprVisitor
   }
 
   defaultResult() {
-    return new Expr();
+    return create(ExprSchema);
   }
 
   visitExpr(ctx: ExprContext): Expr {
@@ -271,7 +276,7 @@ export class ExprVisitor
     }
     expr.exprKind = {
       case: "structExpr",
-      value: new Expr_CreateStruct({
+      value: create(Expr_CreateStructSchema, {
         entries: entries,
       }),
     };
@@ -301,7 +306,7 @@ export class ExprVisitor
     const expr = this.nextExpr(ctx);
     expr.exprKind = {
       case: "structExpr",
-      value: new Expr_CreateStruct({
+      value: create(Expr_CreateStructSchema, {
         messageName: messageName,
         entries: entries,
       }),
@@ -344,7 +349,7 @@ export function parseExpr(input: string): ParsedExpr {
 
   // Visit the tree
   const visitor = new ExprVisitor();
-  const result = new ParsedExpr();
+  const result = create(ParsedExprSchema);
   result.expr = tree.accept(visitor);
   result.sourceInfo = visitor.getSourceInfo();
 

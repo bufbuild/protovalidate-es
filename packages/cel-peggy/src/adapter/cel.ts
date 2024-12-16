@@ -1,4 +1,9 @@
-import { Any, Duration, isMessage, Timestamp } from "@bufbuild/protobuf";
+import { isMessage } from "@bufbuild/protobuf";
+import {
+  AnySchema,
+  DurationSchema,
+  TimestampSchema,
+} from "@bufbuild/protobuf/wkt";
 
 import { unwrapResults } from "../value/adapter.js";
 import {
@@ -102,33 +107,26 @@ export class CelAdapter implements CelValAdapter<CelVal> {
       } else if (lhs instanceof Uint8Array && rhs instanceof Uint8Array) {
         return compareBytes(lhs, rhs) === 0;
       } else if (isCelMsg(lhs) && isCelMsg(rhs)) {
-        if (lhs.getType().typeName !== rhs.getType().typeName) {
+        if (lhs.$typeName !== rhs.$typeName) {
           return false;
         }
-        switch (lhs.getType().typeName) {
+        switch (lhs.$typeName) {
           case "google.protobuf.StringValue":
           case "google.protobuf.BoolValue":
           case "google.protobuf.UInt64Value":
           case "google.protobuf.Int64Value":
           case "google.protobuf.DoubleValue":
-            return (
-              (lhs as { value: unknown }).value ===
-              (rhs as { value: unknown }).value
-            );
+            return lhs.value === (rhs as { value: unknown }).value;
           case "google.protobuf.BytesValue":
             return (
-              compareBytes(
-                (lhs as { value: Uint8Array }).value,
-                (rhs as { value: Uint8Array }).value,
-              ) === 0
+              compareBytes(lhs.value, (rhs as { value: Uint8Array }).value) ===
+              0
             );
           case "google.protobuf.Timestamp":
           case "google.protobuf.Duration":
             return (
-              (lhs as { seconds: unknown }).seconds ==
-                (rhs as { seconds: unknown }).seconds &&
-              (lhs as { nanos: unknown }).nanos ==
-                (rhs as { nanos: unknown }).nanos
+              lhs.seconds == (rhs as { seconds: unknown }).seconds &&
+              lhs.nanos == (rhs as { nanos: unknown }).nanos
             );
           case "google.protobuf.Any":
             // Any is automatically unpacked to a CelObject by ProtoValAdapter.
@@ -187,13 +185,19 @@ export class CelAdapter implements CelValAdapter<CelVal> {
       return compareBytes(lhs, rhs);
     } else if (typeof lhs === "string" && typeof rhs === "string") {
       return lhs < rhs ? -1 : lhs > rhs ? 1 : 0;
-    } else if (isMessage(lhs, Duration) && isMessage(rhs, Duration)) {
+    } else if (
+      isMessage(lhs, DurationSchema) &&
+      isMessage(rhs, DurationSchema)
+    ) {
       const cmp = lhs.seconds - rhs.seconds;
       if (cmp == 0n) {
         return lhs.nanos - rhs.nanos;
       }
       return cmp < 0n ? -1 : 1;
-    } else if (isMessage(lhs, Timestamp) && isMessage(rhs, Timestamp)) {
+    } else if (
+      isMessage(lhs, TimestampSchema) &&
+      isMessage(rhs, TimestampSchema)
+    ) {
       const cmp = lhs.seconds - rhs.seconds;
       if (cmp == 0n) {
         return lhs.nanos - rhs.nanos;
@@ -207,17 +211,45 @@ export class CelAdapter implements CelValAdapter<CelVal> {
     return Object.keys(obj);
   }
 
+  isSetByName(
+    id: number,
+    obj: CelVal,
+    name: string,
+  ): boolean | CelError | CelUnknown {
+    if (obj === null) {
+      return false;
+    }
+    if (obj instanceof CelMap || obj instanceof CelObject) {
+      return obj.isSetByName(id, name);
+    }
+    if (obj instanceof ProtoNull) {
+      return false;
+    }
+    if (obj.constructor.name === "Object") {
+      // TODO(tstamm) fix access to properties from object prototype
+      return obj[name as keyof typeof obj] !== undefined;
+    }
+    return false;
+  }
+
   accessByName(id: number, obj: CelVal, name: string): CelResult | undefined {
-    if (isMessage(obj, Any)) {
+    if (isMessage(obj, AnySchema)) {
       throw new Error("not implemented");
     }
 
     if (typeof obj === "object" && obj !== null) {
       if (obj instanceof CelMap || obj instanceof CelObject) {
         return obj.accessByName(id, name);
-      } else if (obj instanceof ProtoNull) {
+      }
+      if (obj instanceof ProtoNull) {
         return this.accessByName(id, obj.defaultValue, name);
-      } else if (obj.constructor.name === "Object") {
+      }
+      if (isMessage(obj)) {
+        // Don't allow to select fields on CEL types that are Protobuf messages
+        return undefined;
+      }
+      if (obj.constructor.name === "Object") {
+        // TODO(tstamm) fix access to properties from object prototype
         return obj[name as keyof typeof obj];
       }
     }

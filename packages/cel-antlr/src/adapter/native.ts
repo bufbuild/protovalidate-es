@@ -150,6 +150,14 @@ class NativeValAdapter implements CelValAdapter {
     return Object.keys(value);
   }
 
+  isSetByName(
+    id: number,
+    obj: unknown,
+    name: string,
+  ): boolean | CelError | CelUnknown {
+    return this.accessByName(id, obj, name) !== undefined;
+  }
+
   accessByName(id: number, obj: unknown, name: string) {
     if (obj instanceof Map) {
       return obj.get(name);

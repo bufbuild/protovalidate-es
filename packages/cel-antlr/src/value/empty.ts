@@ -1,15 +1,17 @@
 import {
-  BoolValue,
-  BytesValue,
-  DoubleValue,
-  FloatValue,
-  Int32Value,
-  Int64Value,
-  StringValue,
-  UInt32Value,
-  UInt64Value,
-  Value,
-} from "@bufbuild/protobuf";
+  BoolValueSchema,
+  BytesValueSchema,
+  DoubleValueSchema,
+  FloatValueSchema,
+  Int32ValueSchema,
+  Int64ValueSchema,
+  StringValueSchema,
+  UInt32ValueSchema,
+  UInt64ValueSchema,
+  ValueSchema,
+} from "@bufbuild/protobuf/wkt";
+
+import { create } from "@bufbuild/protobuf";
 
 import { CEL_ADAPTER } from "../adapter/cel.js";
 import { type CelValProvider } from "./provider.js";
@@ -42,52 +44,52 @@ class EmptyProvider implements CelValProvider {
     obj: CelObject | CelMap,
   ): CelResult | undefined {
     switch (typeName) {
-      case BoolValue.typeName: {
+      case BoolValueSchema.typeName: {
         const val = coerceToBool(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
-        return new BoolValue({ value: val });
+        return create(BoolValueSchema, { value: val });
       }
-      case UInt32Value.typeName:
-      case UInt64Value.typeName: {
+      case UInt32ValueSchema.typeName:
+      case UInt64ValueSchema.typeName: {
         const val = coerceToBigInt(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
-        return new UInt64Value({ value: val.valueOf() });
+        return create(UInt64ValueSchema, { value: val.valueOf() });
       }
-      case Int32Value.typeName:
-      case Int64Value.typeName: {
+      case Int32ValueSchema.typeName:
+      case Int64ValueSchema.typeName: {
         const val = coerceToBigInt(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
-        return new Int64Value({ value: val.valueOf() });
+        return create(Int64ValueSchema, { value: val.valueOf() });
       }
-      case FloatValue.typeName:
-      case DoubleValue.typeName: {
+      case FloatValueSchema.typeName:
+      case DoubleValueSchema.typeName: {
         const val = coerceToNumber(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
-        return new DoubleValue({ value: val });
+        return create(DoubleValueSchema, { value: val });
       }
-      case StringValue.typeName: {
+      case StringValueSchema.typeName: {
         const val = coerceToString(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
-        return new StringValue({ value: val });
+        return create(StringValueSchema, { value: val });
       }
-      case BytesValue.typeName: {
+      case BytesValueSchema.typeName: {
         const val = coerceToBytes(id, obj.accessByName(id, "value"));
         if (val instanceof CelError || val instanceof CelUnknown) {
           return val;
         }
-        return new BytesValue({ value: val });
+        return create(BytesValueSchema, { value: val });
       }
-      case Value.typeName:
+      case ValueSchema.typeName:
         if (obj instanceof CelObject) {
           for (const key in obj.getFields()) {
             switch (key) {

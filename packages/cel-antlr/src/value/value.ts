@@ -1,16 +1,26 @@
+import { isMessage, type Message, create } from "@bufbuild/protobuf";
+
 import {
-  Any,
-  BoolValue,
-  BytesValue,
-  DoubleValue,
-  Duration,
-  Int64Value,
-  isMessage,
-  Message,
-  StringValue,
-  Timestamp,
-  UInt64Value,
-} from "@bufbuild/protobuf";
+  AnySchema,
+  BoolValueSchema,
+  BytesValueSchema,
+  DoubleValueSchema,
+  DurationSchema,
+  Int64ValueSchema,
+  StringValueSchema,
+  TimestampSchema,
+  UInt64ValueSchema,
+} from "@bufbuild/protobuf/wkt";
+
+import type { Any } from "@bufbuild/protobuf/wkt";
+import type { BytesValue } from "@bufbuild/protobuf/wkt";
+import type { StringValue } from "@bufbuild/protobuf/wkt";
+import type { BoolValue } from "@bufbuild/protobuf/wkt";
+import type { DoubleValue } from "@bufbuild/protobuf/wkt";
+import type { UInt64Value } from "@bufbuild/protobuf/wkt";
+import type { Int64Value } from "@bufbuild/protobuf/wkt";
+import type { Duration } from "@bufbuild/protobuf/wkt";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
 
 /** Cel Number types, which all existing on the same logical number line. */
 export type CelNum = bigint | CelUint | number;
@@ -36,7 +46,7 @@ export function newTimestamp(
   if (seconds > 253402300799n || seconds < -62135596800n) {
     return CelErrors.badTimestamp(id, seconds, nanos);
   }
-  return new Timestamp({ seconds: seconds, nanos: nanos });
+  return create(TimestampSchema, { seconds: seconds, nanos: nanos });
 }
 
 export function newDuration(
@@ -58,7 +68,7 @@ export function newDuration(
     return CelErrors.badDuration(id, seconds, nanos);
   }
 
-  return new Duration({ seconds: seconds, nanos: nanos });
+  return create(DurationSchema, { seconds: seconds, nanos: nanos });
 }
 
 // A duration string is a possibly signed sequence of
@@ -125,9 +135,9 @@ export function isCelPrim(val: unknown): val is CelPrim {
 export type CelWrapNum = Int64Value | UInt64Value | DoubleValue;
 export function isCelWrapNum(val: unknown): val is CelWrapNum {
   return (
-    isMessage(val, Int64Value) ||
-    isMessage(val, UInt64Value) ||
-    isMessage(val, DoubleValue)
+    isMessage(val, Int64ValueSchema) ||
+    isMessage(val, UInt64ValueSchema) ||
+    isMessage(val, DoubleValueSchema)
   );
 }
 
@@ -135,10 +145,10 @@ export function isCelWrapNum(val: unknown): val is CelWrapNum {
 export type CelWrap = BoolValue | CelWrapNum | StringValue | BytesValue;
 export function isCelWrap(val: unknown): val is CelWrap {
   return (
-    isMessage(val, BoolValue) ||
+    isMessage(val, BoolValueSchema) ||
     isCelWrapNum(val) ||
-    isMessage(val, StringValue) ||
-    isMessage(val, BytesValue)
+    isMessage(val, StringValueSchema) ||
+    isMessage(val, BytesValueSchema)
   );
 }
 
@@ -147,9 +157,9 @@ export type CelMsg = CelWrap | Timestamp | Duration | Any;
 export function isCelMsg(val: unknown): val is CelMsg {
   return (
     isCelWrap(val) ||
-    isMessage(val, Timestamp) ||
-    isMessage(val, Duration) ||
-    isMessage(val, Any)
+    isMessage(val, TimestampSchema) ||
+    isMessage(val, DurationSchema) ||
+    isMessage(val, AnySchema)
   );
 }
 
@@ -189,6 +199,7 @@ export interface CelValAdapter<V = unknown> extends Unwrapper<V> {
   compare(lhs: V, rhs: V): CelResult<number> | undefined;
 
   accessByName(id: number, obj: V, name: string): CelResult<V> | undefined;
+  isSetByName(id: number, obj: V, name: string): CelResult<boolean>;
   accessByIndex(
     id: number,
     obj: V,
@@ -224,6 +235,7 @@ export class ProtoNull {
   ) {}
 }
 
+// TODO(tstamm) Object.prototype.valueOf()
 export class CelUint {
   public static EMPTY: CelUint = new CelUint(BigInt(0));
   public static ONE: CelUint = new CelUint(BigInt(1));
@@ -313,6 +325,10 @@ export class CelMap<K = unknown, V = unknown> implements StructAccess<CelVal> {
     return this.adapter.toCel(result);
   }
 
+  isSetByName(_id: number, name: unknown): CelResult<boolean> {
+    return this.nativeKeyMap.has(name);
+  }
+
   accessByName(_id: number, name: unknown): CelResult | undefined {
     return this.adapter.toCel(this.nativeKeyMap.get(name));
   }
@@ -343,6 +359,10 @@ export class CelObject implements StructAccess<unknown> {
 
   getFields(): string[] {
     return this.adapter.getFields(this.value);
+  }
+
+  isSetByName(id: number, name: string): CelResult<boolean> {
+    return this.adapter.isSetByName(id, this.value, name);
   }
 
   accessByName(id: number, name: string): CelResult | undefined {

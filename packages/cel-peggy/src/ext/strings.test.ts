@@ -1,4 +1,5 @@
 import { suite, test } from "node:test";
+import { create, fromJson } from "@bufbuild/protobuf";
 import { FuncRegistry } from "../func.js";
 import { STD_FUNCS } from "../std/std.js";
 import { addStringsExt, Formatter } from "./strings.js";
@@ -10,10 +11,10 @@ import {
   NATIVE_ADAPTER,
   ObjectActivation,
 } from "../index.js";
-import { Expr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import { ExprSchema } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
 import { EmptyActivation } from "../activation.js";
 import * as assert from "node:assert/strict";
-import { Timestamp } from "@bufbuild/protobuf";
+import { TimestampSchema } from "@bufbuild/protobuf/wkt";
 import { parseDuration } from "../value/value.js";
 
 type StringFormatTestCase = {
@@ -392,7 +393,7 @@ const STRINGS_FORMAT_TEST_CASES: StringFormatTestCase[] = [
     format: "dyntype timestamp: %s",
     formatArgs: `dynTime`,
     dynArgs: {
-      dynTime: Timestamp.fromJson("2009-11-10T23:00:00Z"),
+      dynTime: fromJson(TimestampSchema, "2009-11-10T23:00:00Z"),
     },
     expectedOutput: "dyntype timestamp: 2009-11-10T23:00:00Z",
   },
@@ -648,7 +649,7 @@ void suite("string.format", () => {
       //   "'" + tc.format + "'.format([" + (tc.formatArgs ?? "") + "])";
       const input = `'${tc.format}'.format([${tc.formatArgs ?? ""}])`;
       const parsed = CEL_PARSER.parse(input);
-      const plan = planner.plan(parsed.expr ?? new Expr());
+      const plan = planner.plan(parsed.expr ?? create(ExprSchema));
       const ctx =
         tc.dynArgs === undefined
           ? new EmptyActivation()

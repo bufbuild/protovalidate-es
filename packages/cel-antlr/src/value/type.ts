@@ -1,15 +1,16 @@
+import { isMessage } from "@bufbuild/protobuf";
+
 import {
-  Any,
-  BoolValue,
-  BytesValue,
-  DoubleValue,
-  Duration,
-  Int64Value,
-  isMessage,
-  StringValue,
-  Timestamp,
-  UInt64Value,
-} from "@bufbuild/protobuf";
+  AnySchema,
+  BoolValueSchema,
+  BytesValueSchema,
+  DoubleValueSchema,
+  DurationSchema,
+  Int64ValueSchema,
+  StringValueSchema,
+  TimestampSchema,
+  UInt64ValueSchema,
+} from "@bufbuild/protobuf/wkt";
 
 import {
   CelUint,
@@ -100,23 +101,23 @@ export function getCelType(val: CelVal): CelType {
       } else if (val instanceof Uint8Array) {
         return BYTES;
       } else if (isMessage(val)) {
-        if (isMessage(val, Duration)) {
+        if (isMessage(val, DurationSchema)) {
           return DURATION;
-        } else if (isMessage(val, Timestamp)) {
+        } else if (isMessage(val, TimestampSchema)) {
           return TIMESTAMP;
-        } else if (isMessage(val, Any)) {
+        } else if (isMessage(val, AnySchema)) {
           return DYN;
-        } else if (isMessage(val, BoolValue)) {
+        } else if (isMessage(val, BoolValueSchema)) {
           return WRAP_BOOL;
-        } else if (isMessage(val, UInt64Value)) {
+        } else if (isMessage(val, UInt64ValueSchema)) {
           return WRAP_UINT;
-        } else if (isMessage(val, Int64Value)) {
+        } else if (isMessage(val, Int64ValueSchema)) {
           return WRAP_INT;
-        } else if (isMessage(val, DoubleValue)) {
+        } else if (isMessage(val, DoubleValueSchema)) {
           return WRAP_DOUBLE;
-        } else if (isMessage(val, StringValue)) {
+        } else if (isMessage(val, StringValueSchema)) {
           return WRAP_STRING;
-        } else if (isMessage(val, BytesValue)) {
+        } else if (isMessage(val, BytesValueSchema)) {
           return WRAP_BYTES;
         }
       } else if (val instanceof CelList) {

@@ -1,11 +1,17 @@
 import {
   createRegistry,
-  type IMessageTypeRegistry,
+  type Registry,
   isMessage,
+  create,
 } from "@bufbuild/protobuf";
-
-import { Expr, ParsedExpr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
-import { CheckedExpr } from "@bufbuild/cel-spec/cel/expr/checked_pb.js";
+import {
+  ExprSchema,
+  ParsedExprSchema,
+} from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import type { ParsedExpr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import type { Expr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+import { CheckedExprSchema } from "@bufbuild/cel-spec/cel/expr/checked_pb.js";
+import type { CheckedExpr } from "@bufbuild/cel-spec/cel/expr/checked_pb.js";
 import { ObjectActivation } from "./activation.js";
 import { CEL_ADAPTER } from "./adapter/cel.js";
 import { NATIVE_ADAPTER } from "./adapter/native.js";
@@ -47,7 +53,7 @@ export class CelPlanner {
 
   public constructor(
     namespace: string | undefined = undefined,
-    registry: IMessageTypeRegistry = createRegistry(),
+    registry: Registry = createRegistry(),
   ) {
     this.protoProvider = new ProtoValProvider(new ProtoValAdapter(registry));
     this.dispatcher = new OrderedDispatcher([STD_FUNCS]);
@@ -62,21 +68,21 @@ export class CelPlanner {
     expr: Expr | ParsedExpr | CheckedExpr | undefined,
   ): Interpretable {
     let maybeExpr: Expr | undefined = undefined;
-    if (isMessage(expr, CheckedExpr)) {
+    if (isMessage(expr, CheckedExprSchema)) {
       maybeExpr = expr.expr;
-    } else if (isMessage(expr, ParsedExpr)) {
+    } else if (isMessage(expr, ParsedExprSchema)) {
       maybeExpr = expr.expr;
     } else {
       maybeExpr = expr;
     }
-    return this.planner.plan(maybeExpr ?? new Expr());
+    return this.planner.plan(maybeExpr ?? create(ExprSchema));
   }
 
   public addFuncs(funcs: Dispatcher): void {
     this.dispatcher.add(funcs);
   }
 
-  public setProtoRegistry(registry: IMessageTypeRegistry): void {
+  public setProtoRegistry(registry: Registry): void {
     this.protoProvider.adapter = new ProtoValAdapter(registry);
   }
 
@@ -101,7 +107,7 @@ export class CelEnv {
 
   public constructor(
     namespace: string | undefined = undefined,
-    registry: IMessageTypeRegistry = createRegistry(),
+    registry: Registry = createRegistry(),
   ) {
     this.planner = new CelPlanner(namespace, registry);
   }
@@ -150,7 +156,7 @@ export class CelEnv {
     this.planner = planner;
   }
 
-  public setProtoRegistry(registry: IMessageTypeRegistry): void {
+  public setProtoRegistry(registry: Registry): void {
     this.planner.setProtoRegistry(registry);
   }
 

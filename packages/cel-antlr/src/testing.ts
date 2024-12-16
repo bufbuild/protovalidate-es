@@ -9,12 +9,12 @@ import {
   makeStringExtFuncRegistry,
   ObjectActivation,
 } from "./index.js";
-import {
+import type {
   SimpleTest,
-  type SimpleTestFile,
+  SimpleTestFile,
   SimpleTestSection,
 } from "@bufbuild/cel-spec/cel/expr/conformance/test/simple_pb.js";
-import { type IMessageTypeRegistry } from "@bufbuild/protobuf";
+import type { Registry } from "@bufbuild/protobuf";
 import * as assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -22,7 +22,7 @@ const STRINGS_EXT_FUNCS = makeStringExtFuncRegistry();
 
 export async function testSimpleTestFile(
   simpleTestFile: SimpleTestFile,
-  registry: IMessageTypeRegistry,
+  registry: Registry,
   shouldSkip?: (
     file: SimpleTestFile,
     section?: SimpleTestSection,
@@ -118,7 +118,7 @@ function name(obj: { name: string; description: string }): string {
 function runSimpleTestCase(
   celParser: CelParser,
   testCase: SimpleTest,
-  registry: IMessageTypeRegistry,
+  registry: Registry,
 ) {
   const planner = new CelPlanner(testCase.container, registry);
   planner.addFuncs(STRINGS_EXT_FUNCS);

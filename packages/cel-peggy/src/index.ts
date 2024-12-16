@@ -21,7 +21,7 @@ export { ObjectActivation } from "./activation.js";
 export { makeStringExtFuncRegistry } from "./ext/strings.js";
 export { ExprBuilder } from "./builder.js";
 
-import { Duration, Timestamp } from "@bufbuild/protobuf";
+import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
 import {
   CelError,
   newDuration as _newDuration,

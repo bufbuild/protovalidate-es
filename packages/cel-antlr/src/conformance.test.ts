@@ -6,20 +6,8 @@ import { getTestRegistry } from "@bufbuild/cel-spec/testdata/registry.js";
 const files = getSimpleTestFiles();
 
 const shouldSkip = createSimpleTestFileSkip(files, [
-  // TODO(tstamm) enable with protobuf-es v2, which has an equals() that unpacks
-  ["comparisons", "ne_literal", "ne_proto2_any_unpack"],
-  ["comparisons", "ne_literal", "ne_proto3_any_unpack"],
-  ["comparisons", "eq_wrapper", "eq_proto3_any_unpack_equal"],
-  ["comparisons", "eq_wrapper", "eq_proto2_any_unpack_equal"],
-
   ["bindings_ext"],
   ["block_ext"],
-  ["conversions", "bool", "string_1"],
-  ["conversions", "bool", "string_t"],
-  ["conversions", "bool", "string_true_uppercase"],
-  ["conversions", "bool", "string_true_pascalcase"],
-  ["conversions", "bool", "string_true_badcase"],
-  ["conversions", "bool", "string_false_badcase"],
   ["dynamic", "int32", "literal"],
   ["dynamic", "int32", "literal_zero"],
   ["dynamic", "int32", "var"],
