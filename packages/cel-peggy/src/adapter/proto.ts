@@ -812,6 +812,18 @@ export class ProtoValProvider implements CelValProvider<ProtoValue> {
   }
 
   findIdent(id: number, ident: string): CelResult | undefined {
+    if (ident.indexOf(".") > 1) {
+      const lastDot = ident.lastIndexOf(".");
+      const enumName = ident.substring(0, lastDot);
+      const valueName = ident.substring(lastDot + 1);
+      const descEnum = this.adapter.registry.getEnum(enumName);
+      if (descEnum) {
+        const enumValue = descEnum.values.find((v) => v.name === valueName);
+        if (enumValue) {
+          return BigInt(enumValue.number);
+        }
+      }
+    }
     return EMPTY_PROVIDER.findIdent(id, ident);
   }
 }

@@ -315,6 +315,8 @@ export class ExprValAdapter implements CelValAdapter<ExprType> {
       }
       case "typeValue":
         return new CelType(val.kind.value);
+      case "enumValue":
+        return BigInt(val.kind.value.value);
     }
     throw new Error("unimplemented: " + val.kind.case);
   }
