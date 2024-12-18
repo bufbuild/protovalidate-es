@@ -1,12 +1,12 @@
 {
-  "name": "@bufbuild/cel-peggy",
+  "name": "@bufbuild/cel",
   "version": "0.0.1",
   "description": "A CEL evaluator for ES modules",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/bufbuild/cel-es.git",
-    "directory": "packages/cel-peggy"
+    "url": "git+https://github.com/bufbuild/cel-es-parse.git",
+    "directory": "packages/cel"
   },
   "scripts": {
     "generate": "peggy cel.peggy --format bare --extra-options '{\"typescript\":true}' --plugin peggy-ts -o ./src/parser.ts",

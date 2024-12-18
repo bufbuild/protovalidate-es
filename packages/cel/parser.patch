@@ -1,7 +1,7 @@
-diff --git a/packages/cel-peggy/src/parser.ts b/packages/cel-peggy/src/parser.ts
+diff --git a/packages/cel/src/parser.ts b/packages/cel/src/parser.ts
 index 2abc67d..bb981ec 100644
---- a/packages/cel-peggy/src/parser.ts
-+++ b/packages/cel-peggy/src/parser.ts
+--- a/packages/cel/src/parser.ts
++++ b/packages/cel/src/parser.ts
 @@ -58,28 +58,10 @@ namespace runtime {
      source: any;
      text: string;

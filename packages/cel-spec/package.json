@@ -1,7 +1,13 @@
 {
   "name": "@bufbuild/cel-spec",
   "version": "0.0.1",
+  "description": "A CEL evaluator for ES modules",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bufbuild/cel-es-parse.git",
+    "directory": "packages/cel-spec"
+  },
   "scripts": {
     "fetch-proto": "node scripts/fetch-proto.js",
     "fetch-testdata": "node scripts/fetch-testdata.js",
