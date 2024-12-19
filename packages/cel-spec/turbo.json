@@ -10,7 +10,7 @@
     "fetch-testdata": {
       "inputs": ["scripts/fetch-testdata.js", "package.json"],
       "outputs": ["src/testdata-json.ts"],
-      "dependsOn": []
+      "dependsOn": ["fetch-proto"]
     },
     "update-exports": {
       "dependsOn": ["generate"],

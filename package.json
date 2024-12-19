@@ -7,7 +7,9 @@
   },
   "workspaces": [
     "packages/cel-spec",
-    "packages/cel"
+    "packages/cel",
+    "packages/protovalidate",
+    "packages/protovalidate-testing"
   ],
   "type": "module",
   "packageManager": "npm@10.9.0",

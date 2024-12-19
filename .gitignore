@@ -11,6 +11,7 @@ lerna-debug.log*
 node_modules
 .antlr/
 .turbo
+packages/protovalidate-testing/gobin
 
 # Editor directories and files
 .vscode/*

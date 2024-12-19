@@ -7,6 +7,13 @@
     },
     "generate": {
       "dependsOn": ["^build"],
+      "inputs": [
+        "proto",
+        "buf.gen.yaml",
+        "buf.yaml",
+        "buf.lock",
+        "package.json"
+      ],
       "outputs": ["src/gen/**"]
     },
     "test": {

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "dependsOn": ["^build", "generate", "install-protovalidate-conformance"],
+      "cache": false
+    },
+    "install-protovalidate-conformance": {
+      "dependsOn": [],
+      "inputs": ["package.json", "scripts/*"],
+      "outputs": ["gobin/*"]
+    }
+  }
+}

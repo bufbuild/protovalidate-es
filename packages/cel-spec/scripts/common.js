@@ -13,7 +13,7 @@ import { unzipSync } from "fflate";
  * @return {{upstreamCelSpecRef: string, [k:string]: unknown; }}
  */
 export function readPackageJson(path) {
-  const data = readFileSync("package.json", "utf8");
+  const data = readFileSync(path, "utf8");
   const pkg = JSON.parse(data);
   if (typeof pkg !== "object" || pkg === null) {
     throw new Error(`Failed to parse ${path}`);
