@@ -1,7 +1,7 @@
 {
   "name": "@bufbuild/protovalidate",
   "version": "0.0.1",
-  "description": "TODO",
+  "description": "Protocol Buffer Validation for ECMAScript",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -15,7 +15,8 @@
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
     "format": "prettier --write --ignore-unknown '.' '!dist'",
     "lint": "eslint .",
-    "attw": "attw --pack"
+    "attw": "attw --pack",
+    "license-header": "license-header"
   },
   "type": "module",
   "sideEffects": false,

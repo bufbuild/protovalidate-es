@@ -1,7 +1,7 @@
 {
   "name": "@bufbuild/cel",
   "version": "0.0.1",
-  "description": "A CEL evaluator for ES modules",
+  "description": "A CEL evaluator for ECMAScript",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -18,7 +18,8 @@
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
     "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen' '!src/grammar.ts'",
     "lint": "eslint .",
-    "attw": "attw --pack"
+    "attw": "attw --pack",
+    "license-header": "license-header --ignore 'src/parser.ts'"
   },
   "type": "module",
   "sideEffects": false,

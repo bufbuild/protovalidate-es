@@ -2,8 +2,9 @@
   "private": true,
   "scripts": {
     "clean": "git clean -Xdf",
-    "all": "turbo run --ui tui build format test attw",
-    "format": "prettier --write --ignore-unknown '.' '!packages'"
+    "all": "turbo run --ui tui build format test attw license-header",
+    "format": "prettier --write --ignore-unknown '.' '!packages'",
+    "license-header": "license-header --ignore 'packages/**'"
   },
   "workspaces": [
     "packages/cel-spec",
@@ -13,9 +14,15 @@
   ],
   "type": "module",
   "packageManager": "npm@10.9.0",
+  "licenseHeader": {
+    "licenseType": "apache",
+    "yearRange": "2024-2025",
+    "copyrightHolder": "Buf Technologies, Inc."
+  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.2",
     "@bufbuild/buf": "^1.48.0",
+    "@bufbuild/license-header": "^0.0.4",
     "@eslint/js": "^9.14.0",
     "@types/eslint__js": "^8.42.3",
     "@types/node": "^22.10.3",

@@ -1,7 +1,7 @@
 {
   "name": "@bufbuild/cel-spec",
   "version": "0.0.1",
-  "description": "A CEL evaluator for ES modules",
+  "description": "CEL definitions and test data",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -11,15 +11,18 @@
   "scripts": {
     "fetch-proto": "node scripts/fetch-proto.js",
     "fetch-testdata": "node scripts/fetch-testdata.js",
+    "postfetch-testdata": "license-header src/testdata-json.ts",
     "update-exports": "node scripts/update-exports.js",
     "generate": "buf generate",
+    "postgenerate": "license-header src/gen",
     "prebuild": "rm -rf ./dist/*",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
     "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen' '!src/testdata-json.ts'",
     "lint": "eslint .",
-    "attw": "attw --pack"
+    "attw": "attw --pack",
+    "license-header": "license-header --ignore 'src/gen/**' --ignore 'src/testdata-json.ts'"
   },
   "upstreamCelSpecRef": "v0.18.0",
   "type": "module",

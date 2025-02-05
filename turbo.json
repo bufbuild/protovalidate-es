@@ -21,6 +21,7 @@
       "cache": false
     },
     "format": {},
+    "license-header": {},
     "attw": {
       "dependsOn": ["build"]
     },

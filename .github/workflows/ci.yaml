@@ -24,8 +24,11 @@ jobs:
           - format
           - attw
           - build
+          - license-header
         include:
           - task: format
+            diff-check: true
+          - task: license-header
             diff-check: true
     name: ${{ matrix.task }}
     steps:
