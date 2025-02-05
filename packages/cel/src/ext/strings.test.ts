@@ -45,7 +45,7 @@ type StringFormatTestCase = {
 // TODO find source of truth
 // Also see:
 // https://github.com/bufbuild/cel-es/blob/main/packages/cel/src/ext/strings.test.ts
-// https://github.com/bufbuild/cel-es-parse/blob/main/packages/cel-es-antlr4/src/string_ext.test.ts
+// https://github.com/bufbuild/protovalidate-es/blob/main/packages/cel-es-antlr4/src/string_ext.test.ts
 const STRINGS_FORMAT_TEST_CASES: StringFormatTestCase[] = [
   {
     name: "no-op",

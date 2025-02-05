@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bufbuild/cel-es-parse.git",
+    "url": "git+https://github.com/bufbuild/protovalidate-es.git",
     "directory": "packages/cel-spec"
   },
   "scripts": {
