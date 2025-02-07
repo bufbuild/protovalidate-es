@@ -126,7 +126,7 @@
   },
   "devDependencies": {
     "@bufbuild/protoc-gen-es": "^2.2.3",
-    "@types/node": "^22.10.3",
+    "@types/node": "^22.13.1",
     "fflate": "^0.8.2"
   },
   "peerDependencies": {
