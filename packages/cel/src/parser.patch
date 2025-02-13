@@ -1,0 +1,69 @@
+diff --git a/packages/cel/src/parser.ts b/packages/cel/src/parser.ts
+index eca00a2..f3d956e 100644
+--- a/packages/cel/src/parser.ts
++++ b/packages/cel/src/parser.ts
+@@ -58,28 +58,10 @@ namespace runtime {
+     source: any;
+     text: string;
+   }
+-  function hex(ch: string): string {
+-    return ch.charCodeAt(0).toString(16).toUpperCase();
+-  }
+   export interface Expectation {
+     type: "literal" | "class" | "any" | "end" | "pattern" | "other";
+     value: string;
+   }
+-  function escape(s: string): string {
+-    return s
+-      .replace(/\\/g, "\\\\")
+-      .replace(/"/g, '\\"')
+-      .replace(/\0/g, "\\0")
+-      .replace(/\t/g, "\\t")
+-      .replace(/\n/g, "\\n")
+-      .replace(/\r/g, "\\r")
+-      .replace(/[\x00-\x0F]/g, function (ch) {
+-        return "\\x0" + hex(ch);
+-      })
+-      .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
+-        return "\\x" + hex(ch);
+-      });
+-  }
+   export class ParseFailure {}
+   export class ParseOptions {
+     currentPosition?: number;
+@@ -534,12 +516,7 @@ const item612: runtime.Expectation = {
+ type item57 = ["//", string[], string[]];
+ type item60 = [string | null, item57 | null, string | null];
+ type item125 = [string];
+-type item166 = [string];
+-type item168 = [string[]];
+ type item234 = [string];
+-type item287 = [
+-  (number[] | "\u0007" | "\b" | "\f" | "\n" | "\r" | "\t" | "\v" | string)[],
+-];
+ type item336 = [
+   | string[]
+   | (number[] | "\u0007" | "\b" | "\f" | "\n" | "\r" | "\t" | "\v" | string)[],
+@@ -550,13 +527,9 @@ type item400 = [item60, ".", item60];
+ type item415 = [string, Expr];
+ type item422 = ["." | null, string[], Expr_CreateStruct_Entry[]];
+ type item429 = [string];
+-type item435 = [Expr];
+-type item446 = [Expr[]];
+ type item460 = [Expr, Expr];
+-type item469 = [Expr_CreateStruct_Entry[]];
+ type item485 = [string];
+ type item500 = [Expr];
+-type item502 = [(prevExpr: Expr) => Expr];
+ type item503 = [Expr, ((prevExpr: Expr) => Expr)[]];
+ type item516 = [string, Expr];
+ type item531 = [string, Expr];
+@@ -569,8 +542,6 @@ export function parse(
+   input: string,
+   options: runtime.ParseOptions = new runtime.ParseOptions(),
+ ): Expr {
+-  const parse$lines = input.split(/\r\n|\r|\n/);
+-  const parse$totalLength = input.length;
+   const parse$source = options.grammarSource;
+   const result = item1(input);
+   if (result.success === true) {

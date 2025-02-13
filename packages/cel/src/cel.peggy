@@ -13,7 +13,7 @@
 // limitations under the License.
 
 {{
-  import type { Expr } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
+  import type { Expr, Expr_CreateStruct_Entry } from "@bufbuild/cel-spec/cel/expr/syntax_pb.js";
   import Builder from "./builder.js";
   const builder = new Builder();
 }}
@@ -155,12 +155,12 @@ Access
 
 Primary
   = Literal
-  / "."? S name:Identifier !(S [({]) !("." Identifier|1.., "."| "{")
-    { return builder.newIdentExpr(offset(), name) }
   / "."? S identifier:Identifier S "(" args:ExprList ")"
     { return builder.newCallExpr(offset(), identifier, args) }
-  / "."? name:$Identifier|1.., "."| S "{" entries:FieldInits (",")? S "}"
-    { return builder.newStructExpr(offset(), entries, name) }
+  / dot:"."? S name:Identifier|1.., S "." S| S "{" entries:FieldInits (",")? S "}"
+    { return builder.newStructExpr(offset(), entries, (dot !== null ? dot : '') + name.join('.')) }
+  / "."? S name:Identifier
+    { return builder.newIdentExpr(offset(), name) }
   / "(" @Expr ")"
   / elements:("[" @ExprList (",")? S "]")
     { return builder.newListExpr(offset(), elements) }
@@ -269,7 +269,7 @@ Byte "byte value"
   = $(HexDigit HexDigit)
 
 NewLine "new line"
-  = "\r\n" / "\r" / "\n"
+  = [\r\n]+
 
 BooleanLiteral "boolean literal"
   = keyword:("true" / "false")
@@ -280,10 +280,10 @@ NullLiteral "null literal"
     { return builder.newNullExpr(offset()) }
 
 S
-  = WhiteSpace?
+  = WhiteSpace? Comment? WhiteSpace?
 
 WhiteSpace "whitespace"
   = $([\t\n\f\r ]+)
 
 Comment "comment"
-  = '//' !NewLine* NewLine
+  = '//' [^\r\n]* NewLine
