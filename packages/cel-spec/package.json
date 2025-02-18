@@ -10,6 +10,7 @@
   },
   "scripts": {
     "fetch-proto": "node scripts/fetch-proto.js",
+    "postfetch-proto": "license-header proto",
     "fetch-testdata": "node scripts/fetch-testdata.js",
     "postfetch-testdata": "license-header src/testdata-json.ts",
     "update-exports": "node scripts/update-exports.js",
@@ -22,7 +23,7 @@
     "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen' '!src/testdata-json.ts'",
     "lint": "eslint .",
     "attw": "attw --pack",
-    "license-header": "license-header --ignore 'src/gen/**' --ignore 'src/testdata-json.ts'"
+    "license-header": "license-header"
   },
   "upstreamCelSpecRef": "v0.18.0",
   "type": "module",

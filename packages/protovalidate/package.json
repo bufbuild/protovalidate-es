@@ -9,11 +9,16 @@
     "directory": "packages/protovalidate"
   },
   "scripts": {
+    "fetch-proto": "buf export buf.build/bufbuild/protovalidate:v0.10.0 --output proto",
+    "postfetch-proto": "license-header proto",
+    "generate": "buf generate",
+    "postgenerate": "license-header src/gen",
+    "test": "npx tsx --test ./src/*.test.ts",
     "prebuild": "rm -rf ./dist/*",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
-    "format": "prettier --write --ignore-unknown '.' '!dist'",
+    "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen'",
     "lint": "eslint .",
     "attw": "attw --pack",
     "license-header": "license-header"
@@ -33,5 +38,11 @@
   },
   "peerDependencies": {
     "@bufbuild/protobuf": "^2.2.3"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.49.0",
+    "@bufbuild/protobuf": "^2.2.3",
+    "@bufbuild/protoc-gen-es": "^2.2.3",
+    "@bufbuild/protocompile": "^0.0.1"
   }
 }

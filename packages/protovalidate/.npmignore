@@ -2,3 +2,6 @@ src
 tsconfig.json
 tsconfig.*.json
 turbo.json
+proto
+dist/**/*.test.js
+dist/**/*.test.d.ts

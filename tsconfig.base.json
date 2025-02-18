@@ -5,7 +5,9 @@
     "lib": [
       "ES2017",
       // ES2020.BigInt for 64-bit integers
-      "ES2020.BigInt"
+      "ES2020.BigInt",
+      // ES2022.Error for Error.cause
+      "ES2022.Error"
     ],
     "declaration": true,
     "types": ["@types/node"],
