@@ -52,10 +52,7 @@ import {
   EvalNoop,
   EvalOneofRequired,
   EvalScalarRulesCel,
-  EvalIgnoreCondition,
-  IgnoreConditionListOrMap,
-  IgnoreConditionMessage,
-  IgnoreConditionScalarOrEnum,
+  EvalField,
 } from "./eval.js";
 import {
   getEnumRules,
@@ -67,6 +64,14 @@ import {
   type ScalarRules,
 } from "./rules.js";
 import { RuleCelCache } from "./cel.js";
+import {
+  ignoreScalarValue,
+  ignoreMessageField,
+  ignoreListOrMapField,
+  ignoreScalarOrEnumField,
+  ignoreEnumValue,
+  ignoreMessageValue,
+} from "./condition.js";
 
 export type Planner = {
   plan(message: DescMessage): Eval<ReflectMessage>;
@@ -138,93 +143,97 @@ function planFields(
     if (constraints.required) {
       evals.add(new EvalFieldRequired(field));
     }
-
-    // TODO if IGNORE_ALWAYS, don't plan anything except required check
-
     const evalFieldCels = planFieldCels(
       field,
       constraints?.cel ?? [],
       userRegistry,
     );
-
     switch (field.fieldKind) {
       case "message": {
-        const condition = new IgnoreConditionMessage(field, constraints.ignore);
-        const pass = new EvalMany<ReflectMessage>(
-          evalFieldCels,
-          planMessageValue(
-            field.message,
-            getMessageRules(constraints, field.message, field),
-            ruleCelCache,
-            planner,
+        evals.add(
+          new EvalField(
+            field,
+            ignoreMessageField(field, constraints.ignore),
+            new EvalMany<ReflectMessage>(
+              evalFieldCels,
+              planMessageValue(
+                field.message,
+                getMessageRules(constraints, field.message, field),
+                ruleCelCache,
+                planner,
+              ),
+            ),
           ),
         );
-        evals.add(new EvalIgnoreCondition(field, condition, pass));
         break;
       }
       case "list": {
-        const condition = new IgnoreConditionListOrMap(
-          field,
-          constraints.ignore,
-        );
-        const pass = new EvalMany<ReflectList>(
-          evalFieldCels,
-          planListValue(
+        evals.add(
+          new EvalField(
             field,
-            getListRules(constraints, field),
-            ruleCelCache,
-            planner,
+            ignoreListOrMapField(field, constraints.ignore),
+            new EvalMany<ReflectList>(
+              evalFieldCels,
+              planListValue(
+                field,
+                getListRules(constraints, field),
+                ruleCelCache,
+                planner,
+              ),
+            ),
           ),
         );
-        evals.add(new EvalIgnoreCondition(field, condition, pass));
         break;
       }
       case "map": {
-        const condition = new IgnoreConditionListOrMap(
-          field,
-          constraints.ignore,
-        );
-        const pass = new EvalMany<ReflectMap>(
-          evalFieldCels,
-          planMapValue(
+        evals.add(
+          new EvalField(
             field,
-            getMapRules(constraints, field),
-            ruleCelCache,
-            planner,
+            ignoreListOrMapField(field, constraints.ignore),
+            new EvalMany<ReflectMap>(
+              evalFieldCels,
+              planMapValue(
+                field,
+                getMapRules(constraints, field),
+                ruleCelCache,
+                planner,
+              ),
+            ),
           ),
         );
-        evals.add(new EvalIgnoreCondition(field, condition, pass));
         break;
       }
       case "enum": {
-        const condition = new IgnoreConditionScalarOrEnum(
-          field,
-          constraints.ignore,
-        );
-        const pass = new EvalMany<number>(
-          evalFieldCels,
-          planEnumValue(
-            field.enum,
-            getEnumRules(constraints, field),
-            ruleCelCache,
+        evals.add(
+          new EvalField(
+            field,
+            ignoreScalarOrEnumField(field, constraints.ignore),
+            new EvalMany<ScalarValue>(
+              evalFieldCels,
+              planEnumValue(
+                field.enum,
+                getEnumRules(constraints, field),
+                ruleCelCache,
+              ),
+            ),
           ),
         );
-        evals.add(new EvalIgnoreCondition(field, condition, pass));
         break;
       }
       case "scalar": {
-        const condition = new IgnoreConditionScalarOrEnum(
-          field,
-          constraints.ignore,
-        );
-        const pass = new EvalMany<ScalarValue>(
-          evalFieldCels,
-          planScalarValue(
-            getScalarRules(constraints, field.scalar, field),
-            ruleCelCache,
+        evals.add(
+          new EvalField(
+            field,
+            ignoreScalarOrEnumField(field, constraints.ignore),
+            new EvalMany<ScalarValue>(
+              evalFieldCels,
+              planScalarValue(
+                getScalarRules(constraints, field.scalar, field),
+                ruleCelCache,
+              ),
+            ),
           ),
         );
-        evals.add(new EvalIgnoreCondition(field, condition, pass));
         break;
       }
     }
@@ -246,6 +255,7 @@ function planListValue(
     case "enum": {
       evals.add(
         new EvalListItems<number>(
+          ignoreEnumValue(field.enum, rules?.items?.ignore),
           planEnumValue(
             field.enum,
             getEnumRules(rules?.items, field),
@@ -258,6 +268,7 @@ function planListValue(
     case "scalar": {
       evals.add(
         new EvalListItems<ScalarValue>(
+          ignoreScalarValue(field.scalar, rules?.items?.ignore),
           planScalarValue(
             getScalarRules(rules?.items, field.scalar, field),
             ruleCelCache,
@@ -269,6 +280,7 @@ function planListValue(
     case "message": {
       evals.add(
         new EvalListItems<ReflectMessage>(
+          ignoreMessageValue(rules?.items?.ignore),
           planMessageValue(
             field.message,
             getMessageRules(rules?.items, field.message, field),
@@ -293,6 +305,7 @@ function planMapValue(
   if (rules) {
     evals.add(new EvalMapRulesCel(ruleCelCache.getPlans(rules)));
   }
+  const ignoreKey = ignoreScalarValue(field.mapKey, rules?.keys?.ignore);
   const evalKey = planScalarValue(
     getScalarRules(rules?.keys, field.mapKey, field),
     ruleCelCache,
@@ -302,7 +315,9 @@ function planMapValue(
     case "message":
       evals.add(
         new EvalMapEntries<ReflectMessage>(
+          ignoreKey,
           evalKey,
+          ignoreMessageValue(rules?.values?.ignore),
           planMessageValue(
             field.message,
             getMessageRules(rules?.values, field.message, field),
@@ -315,7 +330,9 @@ function planMapValue(
     case "enum":
       evals.add(
         new EvalMapEntries<number>(
+          ignoreKey,
           evalKey,
+          ignoreEnumValue(field.enum, rules?.values?.ignore),
           planEnumValue(
             field.enum,
             getEnumRules(rules?.values, field),
@@ -327,7 +344,9 @@ function planMapValue(
     case "scalar":
       evals.add(
         new EvalMapEntries<ScalarValue>(
+          ignoreKey,
           evalKey,
+          ignoreScalarValue(field.scalar, rules?.values?.ignore),
           planScalarValue(
             getScalarRules(rules?.values, field.scalar, field),
             ruleCelCache,
