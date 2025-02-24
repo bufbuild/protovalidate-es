@@ -164,10 +164,11 @@ export function violationsToProto(violation: Violation[]) {
  */
 export function violationToProto(violation: Violation) {
   return create(ViolationSchema, {
-    field: pathToProto(violation.field),
-    rule: pathToProto(violation.rule),
+    field:
+      violation.field.length > 0 ? pathToProto(violation.field) : undefined,
+    rule: violation.rule.length > 0 ? pathToProto(violation.rule) : undefined,
     constraintId: violation.constraintId,
-    message: violation.message,
+    message: violation.message.length > 0 ? violation.message : undefined,
     forKey: violation.forKey,
   });
 }

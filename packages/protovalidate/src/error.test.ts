@@ -91,7 +91,7 @@ void suite("violationToProto", () => {
     assert.equal(proto.constraintId, violation.constraintId);
     assert.equal(proto.forKey, violation.forKey);
     assert.strictEqual(proto.field?.elements.length, 2);
-    assert.strictEqual(proto.rule?.elements.length, 0);
+    assert.strictEqual(proto.rule, undefined);
   });
   void test("violationsToProto", () => {
     const violations = [
@@ -105,20 +105,19 @@ void suite("violationToProto", () => {
 });
 
 void suite("pathFromViolationProto", () => {
-  function toProto(path: Path): FieldPath {
-    const proto = violationsToProto([
-      new Violation("message", "id", path, [], false),
-    ]).violations[0].field;
-    assert.ok(proto != undefined);
-    return proto;
+  function toProto(path: Path): FieldPath | undefined {
+    return violationsToProto([new Violation("message", "id", path, [], false)])
+      .violations[0].field;
   }
   const cases = getTestDataForPaths().cases.filter((c) => !c.usesExtension);
   for (const { string, golden, schema } of cases) {
-    void test(string, () => {
-      const proto = toProto(golden);
-      const path = pathFromViolationProto(schema, proto);
-      assertPathsEqual(path, golden);
-    });
+    const proto = toProto(golden);
+    if (proto !== undefined) {
+      void test(string, () => {
+        const path = pathFromViolationProto(schema, proto);
+        assertPathsEqual(path, golden);
+      });
+    }
   }
 });
 
