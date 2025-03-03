@@ -87,7 +87,7 @@ function createCustomFuncs(): FuncRegistry {
       "isNan",
       ["double_is_nan_bool"],
       (_id: number, arg: CelVal): CelResult | undefined => {
-        return typeof arg == "number" && isNaN(arg);
+        return typeof arg == "number" && Number.isNaN(arg);
       },
     ),
   );
