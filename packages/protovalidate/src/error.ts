@@ -281,11 +281,8 @@ function pathToProto(path: Path): FieldPath {
           create(FieldPathElementSchema, {
             fieldName: e.name,
             fieldNumber: e.number,
-            fieldType: e.proto.type,
-            keyType:
-              e.fieldKind == "map"
-                ? (e.mapKey as number as FieldDescriptorProto_Type)
-                : undefined,
+            fieldType: fieldType(e),
+            keyType: mapKeyType(e),
             valueType: mapValueType(e),
           }),
         );
@@ -326,6 +323,20 @@ function pathToProto(path: Path): FieldPath {
     }
   }
   return create(FieldPathSchema, { elements });
+}
+
+function fieldType(field: DescField): FieldDescriptorProto_Type {
+  if (field.fieldKind == "message" && field.delimitedEncoding) {
+    return FieldDescriptorProto_Type.GROUP;
+  }
+  return field.proto.type;
+}
+
+function mapKeyType(field: DescField): FieldDescriptorProto_Type | undefined {
+  if (field.fieldKind == "map") {
+    return field.mapKey as number as FieldDescriptorProto_Type;
+  }
+  return undefined;
 }
 
 function mapValueType(field: DescField): FieldDescriptorProto_Type | undefined {

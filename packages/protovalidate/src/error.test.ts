@@ -23,7 +23,7 @@ import {
   violationsToProto,
   violationToProto,
 } from "./error.js";
-import { parsePath, type Path } from "./path.js";
+import { buildPath, parsePath, type Path } from "./path.js";
 import {
   FieldConstraintsSchema,
   type FieldPath,
@@ -32,6 +32,8 @@ import {
 } from "./gen/buf/validate/validate_pb.js";
 import { isMessage } from "@bufbuild/protobuf";
 import { assertPathsEqual, getTestDataForPaths } from "./path.testdata.js";
+import { compileMessage } from "@bufbuild/protocompile";
+import { FieldDescriptorProto_Type } from "@bufbuild/protobuf/wkt";
 
 void suite("Violation", () => {
   void test("constructor", () => {
@@ -92,6 +94,32 @@ void suite("violationToProto", () => {
     assert.equal(proto.forKey, violation.forKey);
     assert.strictEqual(proto.field?.elements.length, 2);
     assert.strictEqual(proto.rule, undefined);
+  });
+  void test("sets field type GROUP for message field with message_encoding = DELIMITED", () => {
+    const descMessage = compileMessage(`
+      edition="2023";
+      message M {
+        Msg val = 1 [features.message_encoding = DELIMITED];
+        message Msg {
+          string val = 1;
+        }
+      }
+    `);
+    const violation = new Violation(
+      "failure-message",
+      "constraint-id",
+      buildPath(descMessage).field(descMessage.field.val).toPath(),
+      [],
+      false,
+    );
+    const proto = violationToProto(violation);
+    assert.ok(proto.field);
+    assert.equal(proto.field.elements.length, 1);
+    assert.equal(proto.field.elements[0].fieldName, "val");
+    assert.equal(
+      proto.field.elements[0].fieldType,
+      FieldDescriptorProto_Type.GROUP,
+    );
   });
   void test("violationsToProto", () => {
     const violations = [
