@@ -14,13 +14,6 @@
 
 import { type DescMessage, ScalarType } from "@bufbuild/protobuf";
 import {
-  type EnumRules,
-  type FieldConstraints,
-  type MapRules,
-  type RepeatedRules,
-} from "./gen/buf/validate/validate_pb.js";
-import { CompilationError } from "./error.js";
-import {
   AnySchema,
   BoolValueSchema,
   BytesValueSchema,
@@ -34,6 +27,12 @@ import {
   UInt32ValueSchema,
   UInt64ValueSchema,
 } from "@bufbuild/protobuf/wkt";
+import type { PathBuilder } from "./path.js";
+import {
+  type FieldConstraints,
+  FieldConstraintsSchema,
+} from "./gen/buf/validate/validate_pb.js";
+import { CompilationError } from "./error.js";
 
 /**
  * MessageRules is a union of all buf.validate.*Rules message types that are
@@ -118,88 +117,117 @@ const scalarToRuleType = new Map<ScalarType, ruleTypeScalar>([
 ]);
 
 /**
- * Get buf.validate.RepeatedRules from the oneof buf.validate.FieldConstraints.type.
- * Returns undefined if constraints is undefined, or if the oneof is unset.
- * Throws an error if the oneof is set to incompatible rules.
+ * Get buf.validate.RepeatedRules from FieldConstraints.
+ * Returns a tuple with rules, and path to the rules.
+ * Throws an error if the FieldConstraints has incompatible rules.
  */
 export function getListRules(
+  rulePath: PathBuilder,
   constraints: FieldConstraints | undefined,
-  field: { toString(): string },
+  fieldContext: { toString(): string },
 ) {
-  return getRules(constraints, "repeated", field) as RepeatedRules | undefined;
+  return [
+    getRules(constraints, "repeated", fieldContext),
+    getRulePath(rulePath, "repeated"),
+  ] as const;
 }
 
 /**
- * Get buf.validate.MapRules from the oneof buf.validate.FieldConstraints.type.
- * Returns undefined if constraints is undefined, or if the oneof is unset.
- * Throws an error if the oneof is set to incompatible rules.
+ * Get buf.validate.MapRules from FieldConstraints.
+ * Returns a tuple with rules, and path to the rules.
+ * Throws an error if the FieldConstraints has incompatible rules.
  */
 export function getMapRules(
+  rulePath: PathBuilder,
   constraints: FieldConstraints | undefined,
-  field: { toString(): string },
-): MapRules | undefined {
-  return getRules(constraints, "map", field) as MapRules | undefined;
+  fieldContext: { toString(): string },
+) {
+  return [
+    getRules(constraints, "map", fieldContext),
+    getRulePath(rulePath, "map"),
+  ] as const;
 }
 
 /**
- * Get buf.validate.EnumRules from the oneof buf.validate.FieldConstraints.type.
- * Returns undefined if constraints is undefined, or if the oneof is unset.
- * Throws an error if the oneof is set to incompatible rules.
+ * Get buf.validate.EnumRules from FieldConstraints.
+ * Returns a tuple with rules, and path to the rules.
+ * Throws an error if the FieldConstraints has incompatible rules.
  */
 export function getEnumRules(
+  rulePath: PathBuilder,
   constraints: FieldConstraints | undefined,
-  field: { toString(): string },
-): EnumRules | undefined {
-  return getRules(constraints, "enum", field) as EnumRules | undefined;
+  fieldContext: { toString(): string },
+) {
+  return [
+    getRules(constraints, "enum", fieldContext),
+    getRulePath(rulePath, "enum"),
+  ] as const;
 }
 
 /**
- * Get buf.validate.*Rules applicable to messages from the oneof buf.validate.FieldConstraints.type.
- * Returns undefined if constraints is undefined, or if the oneof is unset.
- * Throws an error if the oneof is set to incompatible rules.
+ * Get buf.validate.*Rules for the given message type from FieldConstraints.
+ * Returns a tuple with rules, and path to the rules.
+ * Throws an error if the FieldConstraints has incompatible rules.
  */
 export function getMessageRules(
-  constraints: FieldConstraints | undefined,
   descMessage: DescMessage,
-  field: { toString(): string },
-): MessageRules | undefined {
-  return getRules(
-    constraints,
-    messageToRuleType.get(descMessage.typeName),
-    field,
-  ) as MessageRules | undefined;
+  rulePath: PathBuilder,
+  constraints: FieldConstraints | undefined,
+  fieldContext: { toString(): string },
+) {
+  const type = messageToRuleType.get(descMessage.typeName);
+  return [
+    getRules(constraints, type, fieldContext),
+    getRulePath(rulePath, type),
+  ] as const;
 }
 
 /**
- * Get buf.validate.*Rules applicable to scalar values from the oneof buf.validate.FieldConstraints.type.
- * Returns undefined if constraints is undefined, or if the oneof is unset.
- * Throws an error if the oneof is set to incompatible rules.
+ * Get buf.validate.*Rules for the given scalar type from FieldConstraints.
+ * Returns a tuple with rules, and path to the rules.
+ * Throws an error if the FieldConstraints has incompatible rules.
  */
 export function getScalarRules(
-  constraints: FieldConstraints | undefined,
   scalar: ScalarType,
-  field: { toString(): string },
-): ScalarRules | undefined {
-  return getRules(constraints, scalarToRuleType.get(scalar), field) as
-    | ScalarRules
-    | undefined;
+  rulePath: PathBuilder,
+  constraints: FieldConstraints | undefined,
+  fieldContext: { toString(): string },
+) {
+  const type = scalarToRuleType.get(scalar);
+  return [
+    getRules(constraints, type, fieldContext),
+    getRulePath(rulePath, type),
+  ] as const;
 }
 
-function getRules(
+function getRulePath(base: PathBuilder, type: ruleType | undefined) {
+  if (type == undefined) {
+    return base;
+  }
+  const field = FieldConstraintsSchema.fields.find((f) => f.name === type);
+  if (field == undefined) {
+    throw new CompilationError(`cannot find rule "${type}"`);
+  }
+  return base.clone().field(field);
+}
+
+function getRules<T extends ruleType>(
   constraints: FieldConstraints | undefined,
-  want: ruleType | undefined,
-  field: { toString(): string },
+  want: T | undefined,
+  context: { toString(): string },
 ) {
   const got = constraints?.type.case;
-  if (!constraints || got === undefined) {
+  if (constraints == undefined || got == undefined) {
     return undefined;
   }
-  if (got === want) {
-    return constraints.type.value;
+  if (got != want) {
+    throw new CompilationError(
+      want == undefined
+        ? `constraint "${got}" cannot be used on ${context.toString()}`
+        : `expected constraint "${want}", got "${got}" on ${context.toString()}`,
+    );
   }
-  throw new CompilationError(
-    want == undefined
-      ? `constraint "${got}" cannot be used on ${field.toString()}`
-      : `expected constraint "${want}", got "${got}" on ${field.toString()}`,
-  );
+  return constraints.type.value as (FieldConstraints["type"] & {
+    case: T;
+  })["value"];
 }

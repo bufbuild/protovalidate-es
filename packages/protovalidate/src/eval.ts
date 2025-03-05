@@ -33,8 +33,10 @@ import { type Any } from "@bufbuild/protobuf/wkt";
 import { CelEnv } from "@bufbuild/cel";
 import {
   type AnyRules,
+  AnyRulesSchema,
   type Constraint,
   type EnumRules,
+  EnumRulesSchema,
   FieldConstraintsSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { Cursor } from "./cursor.js";
@@ -46,6 +48,7 @@ import {
   type RuleCelPlan,
 } from "./cel.js";
 import type { Condition } from "./condition.js";
+import type { PathBuilder } from "./path.js";
 
 /**
  * Evaluate constraints for a value.
@@ -309,6 +312,7 @@ export class EvalScalarRulesCel implements Eval<ScalarValue> {
   constructor(
     private readonly plans: RuleCelPlan[],
     private readonly forMapKey = false,
+    private readonly baseRulePath: PathBuilder,
   ) {}
   eval(val: ScalarValue, cursor: Cursor): void {
     for (const plan of this.plans) {
@@ -316,12 +320,8 @@ export class EvalScalarRulesCel implements Eval<ScalarValue> {
       plan.env.set("rules", plan.rules);
       const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
       if (vio) {
-        cursor.violate(
-          vio.message,
-          vio.constraintId,
-          plan.rulePath,
-          this.forMapKey,
-        );
+        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
+        cursor.violate(vio.message, vio.constraintId, rulePath, this.forMapKey);
       }
     }
   }
@@ -331,7 +331,10 @@ export class EvalScalarRulesCel implements Eval<ScalarValue> {
 }
 
 export class EvalMessageRulesCel implements Eval<ReflectMessage> {
-  constructor(private readonly plans: RuleCelPlan[]) {}
+  constructor(
+    private readonly plans: RuleCelPlan[],
+    private readonly baseRulePath: PathBuilder,
+  ) {}
 
   eval(val: ReflectMessage, cursor: Cursor): void {
     // TODO fix this up
@@ -341,7 +344,8 @@ export class EvalMessageRulesCel implements Eval<ReflectMessage> {
       plan.env.set("rules", plan.rules);
       const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
       if (vio) {
-        cursor.violate(vio.message, vio.constraintId, plan.rulePath);
+        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
+        cursor.violate(vio.message, vio.constraintId, rulePath);
       }
     }
   }
@@ -351,7 +355,10 @@ export class EvalMessageRulesCel implements Eval<ReflectMessage> {
 }
 
 export class EvalListRulesCel implements Eval<ReflectList> {
-  constructor(private readonly plans: RuleCelPlan[]) {}
+  constructor(
+    private readonly plans: RuleCelPlan[],
+    private readonly baseRulePath: PathBuilder,
+  ) {}
   eval(val: ReflectList, cursor: Cursor): void {
     // TODO fix this up
     // @ts-expect-error -- TODO
@@ -361,7 +368,8 @@ export class EvalListRulesCel implements Eval<ReflectList> {
       plan.env.set("rules", plan.rules);
       const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
       if (vio) {
-        cursor.violate(vio.message, vio.constraintId, plan.rulePath);
+        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
+        cursor.violate(vio.message, vio.constraintId, rulePath);
       }
     }
   }
@@ -371,7 +379,10 @@ export class EvalListRulesCel implements Eval<ReflectList> {
 }
 
 export class EvalMapRulesCel implements Eval<ReflectMap> {
-  constructor(private readonly plans: RuleCelPlan[]) {}
+  constructor(
+    private readonly plans: RuleCelPlan[],
+    private readonly baseRulePath: PathBuilder,
+  ) {}
   eval(val: ReflectMap, cursor: Cursor): void {
     // @ts-expect-error -- TODO
     const valVal: unknown = val[Symbol.for("reflect unsafe local")];
@@ -380,7 +391,8 @@ export class EvalMapRulesCel implements Eval<ReflectMap> {
       plan.env.set("rules", plan.rules);
       const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
       if (vio) {
-        cursor.violate(vio.message, vio.constraintId, plan.rulePath);
+        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
+        cursor.violate(vio.message, vio.constraintId, rulePath);
       }
     }
   }
@@ -394,7 +406,12 @@ export class EvalMapRulesCel implements Eval<ReflectMap> {
  */
 export class EvalEnumDefinedOnly implements Eval<number> {
   private readonly definedOnly: ReadonlySet<number> | undefined;
-  constructor(descEnum: DescEnum, rules: EnumRules) {
+
+  constructor(
+    descEnum: DescEnum,
+    private readonly rulePath: PathBuilder,
+    rules: EnumRules,
+  ) {
     this.definedOnly = rules.definedOnly
       ? new Set<number>(descEnum.values.map((v) => v.number))
       : undefined;
@@ -405,7 +422,7 @@ export class EvalEnumDefinedOnly implements Eval<number> {
       cursor.violate(
         "value must be one of the defined enum values",
         "enum.defined_only",
-        [],
+        this.rulePath.clone().field(EnumRulesSchema.field.definedOnly).toPath(),
       );
     }
   }
@@ -420,7 +437,10 @@ export class EvalEnumDefinedOnly implements Eval<number> {
 export class EvalAnyRules implements Eval<ReflectMessage> {
   private readonly in: string[];
   private readonly notIn: string[];
-  constructor(rules: AnyRules) {
+  constructor(
+    private readonly rulePath: PathBuilder,
+    rules: AnyRules,
+  ) {
     this.in = rules.in;
     this.notIn = rules.notIn;
   }
@@ -428,14 +448,18 @@ export class EvalAnyRules implements Eval<ReflectMessage> {
     const any = val.message as Any;
     if (this.in.length > 0 && !this.in.includes(any.typeUrl)) {
       // type URL must be in the allow list [any.in]
-      cursor.violate("type URL must be in the allow list", "any.in", []);
+      cursor.violate(
+        "type URL must be in the allow list",
+        "any.in",
+        this.rulePath.clone().field(AnyRulesSchema.field.in).toPath(),
+      );
     }
     if (this.notIn.length > 0 && this.notIn.includes(any.typeUrl)) {
       // type URL must not be in the block list [any.not_in]
       cursor.violate(
         "type URL must not be in the block list",
         "any.not_in",
-        [],
+        this.rulePath.clone().field(AnyRulesSchema.field.notIn).toPath(),
       );
     }
   }
