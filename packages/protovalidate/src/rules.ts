@@ -31,24 +31,10 @@ import type { PathBuilder } from "./path.js";
 import {
   type FieldConstraints,
   FieldConstraintsSchema,
+  MapRulesSchema,
+  RepeatedRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError } from "./error.js";
-
-/**
- * MessageRules is a union of all buf.validate.*Rules message types that are
- * applicable to messages.
- */
-export type MessageRules = (FieldConstraints["type"] & {
-  case: ruleTypeMessage;
-})["value"];
-
-/**
- * MessageRules is a union of all buf.validate.*Rules message types that are
- * applicable to scalar values.
- */
-export type ScalarRules = (FieldConstraints["type"] & {
-  case: ruleTypeScalar;
-})["value"];
 
 type ruleType = Exclude<FieldConstraints["type"]["case"], undefined>;
 type ruleTypeMessage =
@@ -126,9 +112,11 @@ export function getListRules(
   constraints: FieldConstraints | undefined,
   fieldContext: { toString(): string },
 ) {
+  const listRules = getRulePath(rulePath, "repeated");
   return [
     getRules(constraints, "repeated", fieldContext),
-    getRulePath(rulePath, "repeated"),
+    listRules,
+    listRules.clone().field(RepeatedRulesSchema.field.items),
   ] as const;
 }
 
@@ -142,9 +130,12 @@ export function getMapRules(
   constraints: FieldConstraints | undefined,
   fieldContext: { toString(): string },
 ) {
+  const mapRules = getRulePath(rulePath, "map");
   return [
     getRules(constraints, "map", fieldContext),
-    getRulePath(rulePath, "map"),
+    mapRules,
+    mapRules.clone().field(MapRulesSchema.field.keys),
+    mapRules.clone().field(MapRulesSchema.field.values),
   ] as const;
 }
 

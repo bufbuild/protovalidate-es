@@ -264,15 +264,12 @@ export class EvalFieldCel implements Eval<ReflectMessageGet> {
     planned: ReturnType<CelEnv["plan"]>;
   }[] = [];
   constructor(
-    field: DescField,
     constraints: readonly Constraint[],
+    private readonly baseRulePath: PathBuilder,
+    private readonly forMapKey: boolean,
     userRegistry: Registry,
   ) {
-    const namespace = field.parent.typeName.substring(
-      0,
-      field.parent.typeName.lastIndexOf("."),
-    );
-    this.env = createCelEnv(namespace, createCelRegistry(userRegistry, field));
+    this.env = createCelEnv("", userRegistry);
     this.plannedConstraints = constraints.map((constraint, index) => ({
       index,
       constraint,
@@ -296,10 +293,12 @@ export class EvalFieldCel implements Eval<ReflectMessageGet> {
     for (const { index, constraint, planned } of this.plannedConstraints) {
       const vio = celConstraintEval(this.env, constraint, planned);
       if (vio) {
-        cursor.violate(vio.message, vio.constraintId, [
-          FieldConstraintsSchema.field.cel,
-          { kind: "list_sub", index },
-        ]);
+        const rulePath = this.baseRulePath
+          .clone()
+          .field(FieldConstraintsSchema.field.cel)
+          .list(index)
+          .toPath();
+        cursor.violate(vio.message, vio.constraintId, rulePath, this.forMapKey);
       }
     }
   }

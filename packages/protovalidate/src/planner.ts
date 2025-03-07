@@ -16,29 +16,23 @@ import {
   type DescEnum,
   type DescField,
   type DescMessage,
-  type DescOneof,
   getOption,
   isMessage,
   type Registry,
+  type ScalarType,
 } from "@bufbuild/protobuf";
 import {
-  type Constraint,
-  type EnumRules,
-  type MapRules,
-  type RepeatedRules,
+  type FieldConstraints,
   field as ext_field,
   message as ext_message,
   oneof as ext_oneof,
   FieldConstraintsSchema,
-  RepeatedRulesSchema,
-  MapRulesSchema,
   AnyRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import type {
   ReflectList,
   ReflectMap,
   ReflectMessage,
-  ReflectMessageGet,
   ScalarValue,
 } from "@bufbuild/protobuf/reflect";
 import { buildPath, type PathBuilder } from "./path.js";
@@ -46,7 +40,6 @@ import {
   type Eval,
   EvalAnyRules,
   EvalEnumDefinedOnly,
-  EvalFieldCel,
   EvalFieldRequired,
   EvalListItems,
   EvalListRulesCel,
@@ -59,6 +52,7 @@ import {
   EvalOneofRequired,
   EvalScalarRulesCel,
   EvalField,
+  EvalFieldCel,
 } from "./eval.js";
 import {
   getEnumRules,
@@ -66,8 +60,6 @@ import {
   getMapRules,
   getMessageRules,
   getScalarRules,
-  type MessageRules,
-  type ScalarRules,
 } from "./rules.js";
 import { RuleCelCache } from "./cel.js";
 import {
@@ -88,51 +80,31 @@ export function createPlanner(userRegistry: Registry): Planner {
   const ruleCelCache = new RuleCelCache(userRegistry);
   return {
     plan(message) {
-      return planMessage(
-        message,
-        this,
-        userRegistry,
-        messageCache,
-        ruleCelCache,
-      );
+      const existing = messageCache.get(message);
+      if (existing) {
+        return existing;
+      }
+      const constraints = getOption(message, ext_message);
+      if (constraints.disabled) {
+        return EvalNoop.get();
+      }
+      const e = new EvalMany<ReflectMessage>();
+      messageCache.set(message, e);
+      if (!constraints.disabled) {
+        e.add(planFields(message.fields, userRegistry, this, ruleCelCache));
+        if (constraints.cel.length > 0) {
+          e.add(new EvalMessageCel(constraints.cel, message, userRegistry));
+        }
+        e.add(
+          ...message.oneofs
+            .filter((o) => getOption(o, ext_oneof).required)
+            .map((o) => new EvalOneofRequired(o)),
+        );
+      }
+      e.prune();
+      return e;
     },
   } satisfies Planner;
-}
-
-function planMessage(
-  message: DescMessage,
-  planner: Planner,
-  userRegistry: Registry,
-  messageCache: Map<DescMessage, Eval<ReflectMessage>>,
-  ruleCelCache: RuleCelCache,
-): Eval<ReflectMessage> {
-  const existing = messageCache.get(message);
-  if (existing) {
-    return existing;
-  }
-  const constraints = getOption(message, ext_message);
-  if (constraints.disabled) {
-    return EvalNoop.get();
-  }
-  const e = new EvalMany<ReflectMessage>();
-  messageCache.set(message, e);
-  if (!constraints.disabled) {
-    e.add(
-      planOneofs(message.oneofs),
-      planFields(message.fields, userRegistry, planner, ruleCelCache),
-      planMessageCels(message, constraints.cel, userRegistry),
-    );
-  }
-  e.prune();
-  return e;
-}
-
-function planOneofs(oneofs: DescOneof[]): Eval<ReflectMessage> {
-  return new EvalMany(
-    oneofs
-      .filter((oneof) => getOption(oneof, ext_oneof).required)
-      .map((oneof) => new EvalOneofRequired(oneof)),
-  );
 }
 
 // TODO support user-defined shared rules - extensions to any of the buf.validate.*Rules messages
@@ -149,102 +121,90 @@ function planFields(
     if (constraints.required) {
       evals.add(new EvalFieldRequired(field));
     }
-    const evalFieldCels = planFieldCels(
-      field,
-      constraints?.cel ?? [],
-      userRegistry,
-    );
     const baseRulePath = buildPath(FieldConstraintsSchema);
     switch (field.fieldKind) {
       case "message": {
-        const [rules, rulePath] = getMessageRules(
-          field.message,
-          baseRulePath,
-          constraints,
-          field,
-        );
         evals.add(
           new EvalField(
             field,
             ignoreMessageField(field, constraints.ignore),
-            new EvalMany<ReflectMessage>(
-              evalFieldCels,
-              planMessageValue(
-                field.message,
-                rules,
-                rulePath,
-                ruleCelCache,
-                planner,
-              ),
+            planMessage(
+              field.message,
+              constraints,
+              baseRulePath,
+              field,
+              ruleCelCache,
+              userRegistry,
+              planner,
             ),
           ),
         );
         break;
       }
       case "list": {
-        const [rules, rulePath] = getListRules(
-          baseRulePath,
-          constraints,
-          field,
-        );
         evals.add(
           new EvalField(
             field,
             ignoreListOrMapField(field, constraints.ignore),
-            new EvalMany<ReflectList>(
-              evalFieldCels,
-              planListValue(field, rules, rulePath, ruleCelCache, planner),
+            planList(
+              field,
+              constraints,
+              baseRulePath,
+              ruleCelCache,
+              planner,
+              userRegistry,
             ),
           ),
         );
         break;
       }
       case "map": {
-        const [rules, rulePath] = getMapRules(baseRulePath, constraints, field);
         evals.add(
           new EvalField(
             field,
             ignoreListOrMapField(field, constraints.ignore),
-            new EvalMany<ReflectMap>(
-              evalFieldCels,
-              planMapValue(field, rules, rulePath, ruleCelCache, planner),
+            planMap(
+              field,
+              constraints,
+              baseRulePath,
+              ruleCelCache,
+              planner,
+              userRegistry,
             ),
           ),
         );
         break;
       }
       case "enum": {
-        const [rules, rulePath] = getEnumRules(
-          baseRulePath,
-          constraints,
-          field,
-        );
         evals.add(
           new EvalField(
             field,
             ignoreScalarOrEnumField(field, constraints.ignore),
-            new EvalMany<ScalarValue>(
-              evalFieldCels,
-              planEnumValue(field.enum, rules, rulePath, ruleCelCache),
+            planEnum(
+              field.enum,
+              constraints,
+              baseRulePath,
+              field,
+              ruleCelCache,
+              userRegistry,
             ),
           ),
         );
         break;
       }
       case "scalar": {
-        const [rules, rulePath] = getScalarRules(
-          field.scalar,
-          baseRulePath,
-          constraints,
-          field,
-        );
         evals.add(
           new EvalField(
             field,
             ignoreScalarOrEnumField(field, constraints.ignore),
-            new EvalMany<ScalarValue>(
-              evalFieldCels,
-              planScalarValue(rules, rulePath, ruleCelCache),
+            planScalar(
+              field.scalar,
+              constraints,
+              baseRulePath,
+              false,
+              field,
+              ruleCelCache,
+              userRegistry,
             ),
           ),
         );
@@ -255,63 +215,74 @@ function planFields(
   return evals;
 }
 
-function planListValue(
+function planList(
   field: DescField & { fieldKind: "list" },
-  rules: RepeatedRules | undefined,
-  rulePath: PathBuilder,
+  constraints: FieldConstraints | undefined,
+  baseRulePath: PathBuilder,
   ruleCelCache: RuleCelCache,
   planner: Planner,
+  userRegistry: Registry,
 ): Eval<ReflectList> {
   const evals = new EvalMany<ReflectList>();
+  if (constraints) {
+    evals.add(
+      new EvalFieldCel(constraints.cel, baseRulePath, false, userRegistry),
+    );
+  }
+  const [rules, rulePath, rulePathItems] = getListRules(
+    baseRulePath,
+    constraints,
+    field,
+  );
   if (rules) {
     evals.add(new EvalListRulesCel(ruleCelCache.getPlans(rules), rulePath));
   }
-  const baseRulePath = rulePath.clone().field(RepeatedRulesSchema.field.items);
+  const itemsRules = rules?.items;
   switch (field.listKind) {
     case "enum": {
-      const [itemRules, itemRulePath] = getEnumRules(
-        baseRulePath,
-        rules?.items,
-        field,
-      );
       evals.add(
         new EvalListItems<number>(
-          ignoreEnumValue(field.enum, rules?.items?.ignore),
-          planEnumValue(field.enum, itemRules, itemRulePath, ruleCelCache),
+          ignoreEnumValue(field.enum, itemsRules?.ignore),
+          planEnum(
+            field.enum,
+            itemsRules,
+            rulePathItems,
+            field,
+            ruleCelCache,
+            userRegistry,
+          ),
         ),
       );
       break;
     }
     case "scalar": {
-      const [itemRules, itemRulePath] = getScalarRules(
-        field.scalar,
-        baseRulePath,
-        rules?.items,
-        field,
-      );
       evals.add(
         new EvalListItems<ScalarValue>(
-          ignoreScalarValue(field.scalar, rules?.items?.ignore),
-          planScalarValue(itemRules, itemRulePath, ruleCelCache),
+          ignoreScalarValue(field.scalar, itemsRules?.ignore),
+          planScalar(
+            field.scalar,
+            itemsRules,
+            rulePathItems,
+            false,
+            field,
+            ruleCelCache,
+            userRegistry,
+          ),
         ),
       );
       break;
     }
     case "message": {
-      const [itemRules, itemRulePath] = getMessageRules(
-        field.message,
-        baseRulePath,
-        rules?.items,
-        field,
-      );
       evals.add(
         new EvalListItems<ReflectMessage>(
-          ignoreMessageValue(rules?.items?.ignore),
-          planMessageValue(
+          ignoreMessageValue(itemsRules?.ignore),
+          planMessage(
             field.message,
-            itemRules,
-            itemRulePath,
+            itemsRules,
+            rulePathItems,
+            field,
             ruleCelCache,
+            userRegistry,
             planner,
           ),
         ),
@@ -322,44 +293,53 @@ function planListValue(
   return evals;
 }
 
-function planMapValue(
+function planMap(
   field: DescField & { fieldKind: "map" },
-  rules: MapRules | undefined,
-  rulePath: PathBuilder,
+  constraints: FieldConstraints | undefined,
+  baseRulePath: PathBuilder,
   ruleCelCache: RuleCelCache,
   planner: Planner,
+  userRegistry: Registry,
 ): Eval<ReflectMap> {
   const evals = new EvalMany<ReflectMap>();
+  if (constraints) {
+    evals.add(
+      new EvalFieldCel(constraints.cel, baseRulePath, false, userRegistry),
+    );
+  }
+  const [rules, rulePath, rulePathKeys, rulePathValues] = getMapRules(
+    baseRulePath,
+    constraints,
+    field,
+  );
   if (rules) {
     evals.add(new EvalMapRulesCel(ruleCelCache.getPlans(rules), rulePath));
   }
-  const [keyRules, keyRulePath] = getScalarRules(
-    field.mapKey,
-    rulePath.clone().field(MapRulesSchema.field.keys),
-    rules?.keys,
-    field,
-  );
   const ignoreKey = ignoreScalarValue(field.mapKey, rules?.keys?.ignore);
-  const evalKey = planScalarValue(keyRules, keyRulePath, ruleCelCache, true);
-  const baseRulePath = rulePath.clone().field(MapRulesSchema.field.values);
+  const evalKey = planScalar(
+    field.mapKey,
+    rules?.keys,
+    rulePathKeys,
+    true,
+    field,
+    ruleCelCache,
+    userRegistry,
+  );
+  const valuesRules = rules?.values;
   switch (field.mapKind) {
     case "message": {
-      const [valueRules, valueRulePath] = getMessageRules(
-        field.message,
-        baseRulePath,
-        rules?.values,
-        field,
-      );
       evals.add(
         new EvalMapEntries<ReflectMessage>(
           ignoreKey,
           evalKey,
-          ignoreMessageValue(rules?.values?.ignore),
-          planMessageValue(
+          ignoreMessageValue(valuesRules?.ignore),
+          planMessage(
             field.message,
-            valueRules,
-            valueRulePath,
+            valuesRules,
+            rulePathValues,
+            field,
             ruleCelCache,
+            userRegistry,
             planner,
           ),
         ),
@@ -367,34 +347,38 @@ function planMapValue(
       break;
     }
     case "enum": {
-      const [valueRules, valueRulePath] = getEnumRules(
-        baseRulePath,
-        rules?.values,
-        field,
-      );
       evals.add(
         new EvalMapEntries<number>(
           ignoreKey,
           evalKey,
-          ignoreEnumValue(field.enum, rules?.values?.ignore),
-          planEnumValue(field.enum, valueRules, valueRulePath, ruleCelCache),
+          ignoreEnumValue(field.enum, valuesRules?.ignore),
+          planEnum(
+            field.enum,
+            valuesRules,
+            rulePathValues,
+            field,
+            ruleCelCache,
+            userRegistry,
+          ),
         ),
       );
       break;
     }
     case "scalar": {
-      const [valueRules, valueRulePath] = getScalarRules(
-        field.scalar,
-        baseRulePath,
-        rules?.values,
-        field,
-      );
       evals.add(
         new EvalMapEntries<ScalarValue>(
           ignoreKey,
           evalKey,
-          ignoreScalarValue(field.scalar, rules?.values?.ignore),
-          planScalarValue(valueRules, valueRulePath, ruleCelCache),
+          ignoreScalarValue(field.scalar, valuesRules?.ignore),
+          planScalar(
+            field.scalar,
+            valuesRules,
+            rulePathValues,
+            false,
+            field,
+            ruleCelCache,
+            userRegistry,
+          ),
         ),
       );
       break;
@@ -403,46 +387,85 @@ function planMapValue(
   return evals;
 }
 
-function planEnumValue(
+function planEnum(
   descEnum: DescEnum,
-  rules: EnumRules | undefined,
-  rulePath: PathBuilder,
+  constraints: FieldConstraints | undefined,
+  baseRulePath: PathBuilder,
+  fieldContext: { toString(): string },
   ruleCelCache: RuleCelCache,
+  userRegistry: Registry,
 ): Eval<number> {
-  if (!rules) {
-    return EvalNoop.get();
+  const evals = new EvalMany<number>();
+  if (constraints) {
+    evals.add(
+      new EvalFieldCel(constraints.cel, baseRulePath, false, userRegistry),
+    );
   }
-  return new EvalMany<number>(
-    new EvalEnumDefinedOnly(descEnum, rulePath, rules),
-    new EvalScalarRulesCel(ruleCelCache.getPlans(rules), false, rulePath),
+  const [rules, rulePath] = getEnumRules(
+    baseRulePath,
+    constraints,
+    fieldContext,
   );
+  if (rules) {
+    evals.add(new EvalEnumDefinedOnly(descEnum, rulePath, rules));
+    evals.add(
+      new EvalScalarRulesCel(ruleCelCache.getPlans(rules), false, rulePath),
+    );
+  }
+  return evals;
 }
 
-function planScalarValue(
-  rules: ScalarRules | undefined,
-  rulePath: PathBuilder,
+function planScalar(
+  scalar: ScalarType,
+  constraints: FieldConstraints | undefined,
+  baseRulePath: PathBuilder,
+  forMapKey: boolean,
+  fieldContext: { toString(): string },
   ruleCelCache: RuleCelCache,
-  forMapKey = false,
+  userRegistry: Registry,
 ): Eval<ScalarValue> {
-  if (!rules) {
-    return EvalNoop.get();
+  const evals = new EvalMany<ScalarValue>();
+  if (constraints) {
+    evals.add(
+      new EvalFieldCel(constraints.cel, baseRulePath, forMapKey, userRegistry),
+    );
   }
-  return new EvalScalarRulesCel(
-    ruleCelCache.getPlans(rules),
-    forMapKey,
-    rulePath,
+  const [rules, rulePath] = getScalarRules(
+    scalar,
+    baseRulePath,
+    constraints,
+    fieldContext,
   );
+  if (rules) {
+    evals.add(
+      new EvalScalarRulesCel(ruleCelCache.getPlans(rules), forMapKey, rulePath),
+    );
+  }
+  return evals;
 }
 
-function planMessageValue(
+function planMessage(
   descMessage: DescMessage,
-  rules: MessageRules | undefined,
-  rulePath: PathBuilder,
+  constraints: FieldConstraints | undefined,
+  baseRulePath: PathBuilder,
+  fieldContext: { toString(): string },
   ruleCelCache: RuleCelCache,
+  userRegistry: Registry,
   planner: Planner,
 ): Eval<ReflectMessage> {
   const evals = new EvalMany<ReflectMessage>();
+  if (constraints) {
+    evals.add(
+      new EvalFieldCel(constraints.cel, baseRulePath, false, userRegistry),
+    );
+  }
   evals.add(planner.plan(descMessage));
+  const [rules, rulePath] = getMessageRules(
+    descMessage,
+    baseRulePath,
+    constraints,
+    fieldContext,
+  );
   if (rules) {
     if (isMessage(rules, AnyRulesSchema)) {
       evals.add(new EvalAnyRules(rulePath, rules));
@@ -450,24 +473,4 @@ function planMessageValue(
     evals.add(new EvalMessageRulesCel(ruleCelCache.getPlans(rules), rulePath));
   }
   return evals;
-}
-
-function planFieldCels(
-  field: DescField,
-  cel: readonly Constraint[],
-  userRegistry: Registry,
-): Eval<ReflectMessageGet> {
-  return cel.length > 0
-    ? new EvalFieldCel(field, cel, userRegistry)
-    : EvalNoop.get();
-}
-
-function planMessageCels(
-  descMessage: DescMessage,
-  cel: readonly Constraint[],
-  userRegistry: Registry,
-): Eval<ReflectMessage> {
-  return cel.length > 0
-    ? new EvalMessageCel(cel, descMessage, userRegistry)
-    : EvalNoop.get();
 }
