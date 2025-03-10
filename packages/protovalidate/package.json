@@ -9,7 +9,7 @@
     "directory": "packages/protovalidate"
   },
   "scripts": {
-    "fetch-proto": "buf export buf.build/bufbuild/protovalidate:v0.10.0 --output proto",
+    "fetch-proto": "buf export buf.build/bufbuild/protovalidate:v0.10.2 --output proto",
     "postfetch-proto": "license-header proto",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",

@@ -6,9 +6,9 @@
   },
   "scripts": {
     "install-protovalidate-conformance": "node scripts/install-protovalidate-conformance.js",
-    "generate": "buf generate buf.build/bufbuild/protovalidate-testing:v0.10.0",
+    "generate": "buf generate buf.build/bufbuild/protovalidate-testing:v0.10.2",
     "postgenerate": "license-header src/gen",
-    "test": "protovalidate-conformance --expected_failures=expected-failures.yaml -- tsx src/executor.ts",
+    "test": "protovalidate-conformance --strict --strict_message --strict_error --expected_failures=expected-failures.yaml -- tsx src/executor.ts",
     "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen'",
     "lint": "eslint .",
     "license-header": "license-header"

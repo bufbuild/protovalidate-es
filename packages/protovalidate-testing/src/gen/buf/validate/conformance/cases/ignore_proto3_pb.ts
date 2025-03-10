@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/ignore_proto3.proto.
  */
 export const file_buf_validate_conformance_cases_ignore_proto3: GenFile = /*@__PURE__*/
-  fileDesc("CjJidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvaWdub3JlX3Byb3RvMy5wcm90bxIeYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzIkoKJVByb3RvM1NjYWxhck9wdGlvbmFsSWdub3JlVW5zcGVjaWZpZWQSGQoDdmFsGAEgASgFQge6SAQaAiAASACIAQFCBgoEX3ZhbCJHCh9Qcm90bzNTY2FsYXJPcHRpb25hbElnbm9yZUVtcHR5EhwKA3ZhbBgBIAEoBUIKukgH2AEBGgIgAEgAiAEBQgYKBF92YWwiSQohUHJvdG8zU2NhbGFyT3B0aW9uYWxJZ25vcmVEZWZhdWx0EhwKA3ZhbBgBIAEoBUIKukgH2AECGgIgAEgAiAEBQgYKBF92YWwiNQodUHJvdG8zU2NhbGFySWdub3JlVW5zcGVjaWZpZWQSFAoDdmFsGAEgASgFQge6SAQaAiAAIjIKF1Byb3RvM1NjYWxhcklnbm9yZUVtcHR5EhcKA3ZhbBgBIAEoBUIKukgH2AEBGgIgACI0ChlQcm90bzNTY2FsYXJJZ25vcmVEZWZhdWx0EhcKA3ZhbBgBIAEoBUIKukgH2AECGgIgACLwAQomUHJvdG8zTWVzc2FnZU9wdGlvbmFsSWdub3JlVW5zcGVjaWZpZWQSnAEKA3ZhbBgBIAEoCzJKLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNZXNzYWdlT3B0aW9uYWxJZ25vcmVVbnNwZWNpZmllZC5Nc2dCPrpIO7oBOAobcHJvdG8zLm1lc3NhZ2UuaWdub3JlLmVtcHR5EgZmb29iYXIaEXRoaXMudmFsID09ICdmb28nSACIAQEaHwoDTXNnEhAKA3ZhbBgBIAEoCUgAiAEBQgYKBF92YWxCBgoEX3ZhbCLnAQogUHJvdG8zTWVzc2FnZU9wdGlvbmFsSWdub3JlRW1wdHkSmQEKA3ZhbBgBIAEoCzJELmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNZXNzYWdlT3B0aW9uYWxJZ25vcmVFbXB0eS5Nc2dCQbpIProBOAobcHJvdG8zLm1lc3NhZ2UuaWdub3JlLmVtcHR5EgZmb29iYXIaEXRoaXMudmFsID09ICdmb28n2AEBSACIAQEaHwoDTXNnEhAKA3ZhbBgBIAEoCUgAiAEBQgYKBF92YWxCBgoEX3ZhbCLrAQoiUHJvdG8zTWVzc2FnZU9wdGlvbmFsSWdub3JlRGVmYXVsdBKbAQoDdmFsGAEgASgLMkYuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01lc3NhZ2VPcHRpb25hbElnbm9yZURlZmF1bHQuTXNnQkG6SD66ATgKG3Byb3RvMy5tZXNzYWdlLmlnbm9yZS5lbXB0eRIGZm9vYmFyGhF0aGlzLnZhbCA9PSAnZm9vJ9gBAkgAiAEBGh8KA01zZxIQCgN2YWwYASABKAlIAIgBAUIGCgRfdmFsQgYKBF92YWwi0wEKHlByb3RvM01lc3NhZ2VJZ25vcmVVbnNwZWNpZmllZBKPAQoDdmFsGAEgASgLMkIuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01lc3NhZ2VJZ25vcmVVbnNwZWNpZmllZC5Nc2dCPrpIO7oBOAobcHJvdG8zLm1lc3NhZ2UuaWdub3JlLmVtcHR5EgZmb29iYXIaEXRoaXMudmFsID09ICdmb28nGh8KA01zZxIQCgN2YWwYASABKAlIAIgBAUIGCgRfdmFsIsoBChhQcm90bzNNZXNzYWdlSWdub3JlRW1wdHkSjAEKA3ZhbBgBIAEoCzI8LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNZXNzYWdlSWdub3JlRW1wdHkuTXNnQkG6SD66ATgKG3Byb3RvMy5tZXNzYWdlLmlnbm9yZS5lbXB0eRIGZm9vYmFyGhF0aGlzLnZhbCA9PSAnZm9vJ9gBARofCgNNc2cSEAoDdmFsGAEgASgJSACIAQFCBgoEX3ZhbCLOAQoaUHJvdG8zTWVzc2FnZUlnbm9yZURlZmF1bHQSjgEKA3ZhbBgBIAEoCzI+LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNZXNzYWdlSWdub3JlRGVmYXVsdC5Nc2dCQbpIProBOAobcHJvdG8zLm1lc3NhZ2UuaWdub3JlLmVtcHR5EgZmb29iYXIaEXRoaXMudmFsID09ICdmb28n2AECGh8KA01zZxIQCgN2YWwYASABKAlIAIgBAUIGCgRfdmFsIjsKHFByb3RvM09uZW9mSWdub3JlVW5zcGVjaWZpZWQSFgoDdmFsGAEgASgFQge6SAQaAiAASABCAwoBbyI4ChZQcm90bzNPbmVvZklnbm9yZUVtcHR5EhkKA3ZhbBgBIAEoBUIKukgH2AEBGgIgAEgAQgMKAW8iOgoYUHJvdG8zT25lb2ZJZ25vcmVEZWZhdWx0EhkKA3ZhbBgBIAEoBUIKukgH2AECGgIgAEgAQgMKAW8iOAofUHJvdG8zUmVwZWF0ZWRJZ25vcmVVbnNwZWNpZmllZBIVCgN2YWwYASADKAVCCLpIBZIBAggDIjUKGVByb3RvM1JlcGVhdGVkSWdub3JlRW1wdHkSGAoDdmFsGAEgAygFQgu6SAjYAQGSAQIIAyI3ChtQcm90bzNSZXBlYXRlZElnbm9yZURlZmF1bHQSGAoDdmFsGAEgAygFQgu6SAjYAQKSAQIIAyKkAQoaUHJvdG8zTWFwSWdub3JlVW5zcGVjaWZpZWQSWgoDdmFsGAEgAygLMkMuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcElnbm9yZVVuc3BlY2lmaWVkLlZhbEVudHJ5Qgi6SAWaAQIIAxoqCghWYWxFbnRyeRILCgNrZXkYASABKAUSDQoFdmFsdWUYAiABKAU6AjgBIpsBChRQcm90bzNNYXBJZ25vcmVFbXB0eRJXCgN2YWwYASADKAsyPS5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWFwSWdub3JlRW1wdHkuVmFsRW50cnlCC7pICNgBAZoBAggDGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEinwEKFlByb3RvM01hcElnbm9yZURlZmF1bHQSWQoDdmFsGAEgAygLMj8uYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcElnbm9yZURlZmF1bHQuVmFsRW50cnlCC7pICNgBApoBAggDGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEiQAojUHJvdG8zUmVwZWF0ZWRJdGVtSWdub3JlVW5zcGVjaWZpZWQSGQoDdmFsGAEgAygFQgy6SAmSAQYiBBoCIAAiPQodUHJvdG8zUmVwZWF0ZWRJdGVtSWdub3JlRW1wdHkSHAoDdmFsGAEgAygFQg+6SAySAQkiB9gBARoCIAAiPwofUHJvdG8zUmVwZWF0ZWRJdGVtSWdub3JlRGVmYXVsdBIcCgN2YWwYASADKAVCD7pIDJIBCSIH2AECGgIgACKuAQodUHJvdG8zTWFwS2V5SWdub3JlVW5zcGVjaWZpZWQSYQoDdmFsGAEgAygLMkYuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcEtleUlnbm9yZVVuc3BlY2lmaWVkLlZhbEVudHJ5Qgy6SAmaAQYiBBoCIAAaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASKlAQoXUHJvdG8zTWFwS2V5SWdub3JlRW1wdHkSXgoDdmFsGAEgAygLMkAuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcEtleUlnbm9yZUVtcHR5LlZhbEVudHJ5Qg+6SAyaAQkiB9gBARoCIAAaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASKpAQoZUHJvdG8zTWFwS2V5SWdub3JlRGVmYXVsdBJgCgN2YWwYASADKAsyQi5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWFwS2V5SWdub3JlRGVmYXVsdC5WYWxFbnRyeUIPukgMmgEJIgfYAQIaAiAAGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEisgEKH1Byb3RvM01hcFZhbHVlSWdub3JlVW5zcGVjaWZpZWQSYwoDdmFsGAEgAygLMkguYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcFZhbHVlSWdub3JlVW5zcGVjaWZpZWQuVmFsRW50cnlCDLpICZoBBioEGgIgABoqCghWYWxFbnRyeRILCgNrZXkYASABKAUSDQoFdmFsdWUYAiABKAU6AjgBIqkBChlQcm90bzNNYXBWYWx1ZUlnbm9yZUVtcHR5EmAKA3ZhbBgBIAMoCzJCLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBWYWx1ZUlnbm9yZUVtcHR5LlZhbEVudHJ5Qg+6SAyaAQkqB9gBARoCIAAaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASKtAQobUHJvdG8zTWFwVmFsdWVJZ25vcmVEZWZhdWx0EmIKA3ZhbBgBIAMoCzJELmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBWYWx1ZUlnbm9yZURlZmF1bHQuVmFsRW50cnlCD7pIDJoBCSoH2AECGgIgABoqCghWYWxFbnRyeRILCgNrZXkYASABKAUSDQoFdmFsdWUYAiABKAU6AjgBYgZwcm90bzM", [file_buf_validate_validate]);
+  fileDesc("CjJidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvaWdub3JlX3Byb3RvMy5wcm90bxIeYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzIkoKJVByb3RvM1NjYWxhck9wdGlvbmFsSWdub3JlVW5zcGVjaWZpZWQSGQoDdmFsGAEgASgFQge6SAQaAiAASACIAQFCBgoEX3ZhbCJHCh9Qcm90bzNTY2FsYXJPcHRpb25hbElnbm9yZUVtcHR5EhwKA3ZhbBgBIAEoBUIKukgH2AEBGgIgAEgAiAEBQgYKBF92YWwiSQohUHJvdG8zU2NhbGFyT3B0aW9uYWxJZ25vcmVEZWZhdWx0EhwKA3ZhbBgBIAEoBUIKukgH2AECGgIgAEgAiAEBQgYKBF92YWwiSAogUHJvdG8zU2NhbGFyT3B0aW9uYWxJZ25vcmVBbHdheXMSHAoDdmFsGAEgASgFQgq6SAfYAQMaAiAASACIAQFCBgoEX3ZhbCI1Ch1Qcm90bzNTY2FsYXJJZ25vcmVVbnNwZWNpZmllZBIUCgN2YWwYASABKAVCB7pIBBoCIAAiMgoXUHJvdG8zU2NhbGFySWdub3JlRW1wdHkSFwoDdmFsGAEgASgFQgq6SAfYAQEaAiAAIjQKGVByb3RvM1NjYWxhcklnbm9yZURlZmF1bHQSFwoDdmFsGAEgASgFQgq6SAfYAQIaAiAAIjMKGFByb3RvM1NjYWxhcklnbm9yZUFsd2F5cxIXCgN2YWwYASABKAVCCrpIB9gBAxoCIAAi8AEKJlByb3RvM01lc3NhZ2VPcHRpb25hbElnbm9yZVVuc3BlY2lmaWVkEpwBCgN2YWwYASABKAsySi5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWVzc2FnZU9wdGlvbmFsSWdub3JlVW5zcGVjaWZpZWQuTXNnQj66SDu6ATgKG3Byb3RvMy5tZXNzYWdlLmlnbm9yZS5lbXB0eRIGZm9vYmFyGhF0aGlzLnZhbCA9PSAnZm9vJ0gAiAEBGh8KA01zZxIQCgN2YWwYASABKAlIAIgBAUIGCgRfdmFsQgYKBF92YWwi5wEKIFByb3RvM01lc3NhZ2VPcHRpb25hbElnbm9yZUVtcHR5EpkBCgN2YWwYASABKAsyRC5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWVzc2FnZU9wdGlvbmFsSWdub3JlRW1wdHkuTXNnQkG6SD66ATgKG3Byb3RvMy5tZXNzYWdlLmlnbm9yZS5lbXB0eRIGZm9vYmFyGhF0aGlzLnZhbCA9PSAnZm9vJ9gBAUgAiAEBGh8KA01zZxIQCgN2YWwYASABKAlIAIgBAUIGCgRfdmFsQgYKBF92YWwi6wEKIlByb3RvM01lc3NhZ2VPcHRpb25hbElnbm9yZURlZmF1bHQSmwEKA3ZhbBgBIAEoCzJGLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNZXNzYWdlT3B0aW9uYWxJZ25vcmVEZWZhdWx0Lk1zZ0JBukg+ugE4Chtwcm90bzMubWVzc2FnZS5pZ25vcmUuZW1wdHkSBmZvb2JhchoRdGhpcy52YWwgPT0gJ2ZvbyfYAQJIAIgBARofCgNNc2cSEAoDdmFsGAEgASgJSACIAQFCBgoEX3ZhbEIGCgRfdmFsIuoBCiFQcm90bzNNZXNzYWdlT3B0aW9uYWxJZ25vcmVBbHdheXMSmwEKA3ZhbBgBIAEoCzJFLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNZXNzYWdlT3B0aW9uYWxJZ25vcmVBbHdheXMuTXNnQkK6SD+6ATkKHHByb3RvMy5tZXNzYWdlLmlnbm9yZS5hbHdheXMSBmZvb2JhchoRdGhpcy52YWwgPT0gJ2ZvbyfYAQNIAIgBARofCgNNc2cSEAoDdmFsGAEgASgJSACIAQFCBgoEX3ZhbEIGCgRfdmFsItMBCh5Qcm90bzNNZXNzYWdlSWdub3JlVW5zcGVjaWZpZWQSjwEKA3ZhbBgBIAEoCzJCLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNZXNzYWdlSWdub3JlVW5zcGVjaWZpZWQuTXNnQj66SDu6ATgKG3Byb3RvMy5tZXNzYWdlLmlnbm9yZS5lbXB0eRIGZm9vYmFyGhF0aGlzLnZhbCA9PSAnZm9vJxofCgNNc2cSEAoDdmFsGAEgASgJSACIAQFCBgoEX3ZhbCLKAQoYUHJvdG8zTWVzc2FnZUlnbm9yZUVtcHR5EowBCgN2YWwYASABKAsyPC5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWVzc2FnZUlnbm9yZUVtcHR5Lk1zZ0JBukg+ugE4Chtwcm90bzMubWVzc2FnZS5pZ25vcmUuZW1wdHkSBmZvb2JhchoRdGhpcy52YWwgPT0gJ2ZvbyfYAQEaHwoDTXNnEhAKA3ZhbBgBIAEoCUgAiAEBQgYKBF92YWwizgEKGlByb3RvM01lc3NhZ2VJZ25vcmVEZWZhdWx0Eo4BCgN2YWwYASABKAsyPi5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWVzc2FnZUlnbm9yZURlZmF1bHQuTXNnQkG6SD66ATgKG3Byb3RvMy5tZXNzYWdlLmlnbm9yZS5lbXB0eRIGZm9vYmFyGhF0aGlzLnZhbCA9PSAnZm9vJ9gBAhofCgNNc2cSEAoDdmFsGAEgASgJSACIAQFCBgoEX3ZhbCLMAQoZUHJvdG8zTWVzc2FnZUlnbm9yZUFsd2F5cxKNAQoDdmFsGAEgASgLMj0uYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01lc3NhZ2VJZ25vcmVBbHdheXMuTXNnQkG6SD66ATgKG3Byb3RvMy5tZXNzYWdlLmlnbm9yZS5lbXB0eRIGZm9vYmFyGhF0aGlzLnZhbCA9PSAnZm9vJ9gBAhofCgNNc2cSEAoDdmFsGAEgASgJSACIAQFCBgoEX3ZhbCI7ChxQcm90bzNPbmVvZklnbm9yZVVuc3BlY2lmaWVkEhYKA3ZhbBgBIAEoBUIHukgEGgIgAEgAQgMKAW8iOAoWUHJvdG8zT25lb2ZJZ25vcmVFbXB0eRIZCgN2YWwYASABKAVCCrpIB9gBARoCIABIAEIDCgFvIjoKGFByb3RvM09uZW9mSWdub3JlRGVmYXVsdBIZCgN2YWwYASABKAVCCrpIB9gBAhoCIABIAEIDCgFvIjkKF1Byb3RvM09uZW9mSWdub3JlQWx3YXlzEhkKA3ZhbBgBIAEoBUIKukgH2AEDGgIgAEgAQgMKAW8iOAofUHJvdG8zUmVwZWF0ZWRJZ25vcmVVbnNwZWNpZmllZBIVCgN2YWwYASADKAVCCLpIBZIBAggDIjUKGVByb3RvM1JlcGVhdGVkSWdub3JlRW1wdHkSGAoDdmFsGAEgAygFQgu6SAjYAQGSAQIIAyI3ChtQcm90bzNSZXBlYXRlZElnbm9yZURlZmF1bHQSGAoDdmFsGAEgAygFQgu6SAjYAQKSAQIIAyI2ChpQcm90bzNSZXBlYXRlZElnbm9yZUFsd2F5cxIYCgN2YWwYASADKAVCC7pICNgBA5IBAggDIqQBChpQcm90bzNNYXBJZ25vcmVVbnNwZWNpZmllZBJaCgN2YWwYASADKAsyQy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWFwSWdub3JlVW5zcGVjaWZpZWQuVmFsRW50cnlCCLpIBZoBAggDGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEimwEKFFByb3RvM01hcElnbm9yZUVtcHR5ElcKA3ZhbBgBIAMoCzI9LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBJZ25vcmVFbXB0eS5WYWxFbnRyeUILukgI2AEBmgECCAMaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASKfAQoWUHJvdG8zTWFwSWdub3JlRGVmYXVsdBJZCgN2YWwYASADKAsyPy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWFwSWdub3JlRGVmYXVsdC5WYWxFbnRyeUILukgI2AECmgECCAMaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASKdAQoVUHJvdG8zTWFwSWdub3JlQWx3YXlzElgKA3ZhbBgBIAMoCzI+LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBJZ25vcmVBbHdheXMuVmFsRW50cnlCC7pICNgBA5oBAggDGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEiQAojUHJvdG8zUmVwZWF0ZWRJdGVtSWdub3JlVW5zcGVjaWZpZWQSGQoDdmFsGAEgAygFQgy6SAmSAQYiBBoCIAAiPQodUHJvdG8zUmVwZWF0ZWRJdGVtSWdub3JlRW1wdHkSHAoDdmFsGAEgAygFQg+6SAySAQkiB9gBARoCIAAiPwofUHJvdG8zUmVwZWF0ZWRJdGVtSWdub3JlRGVmYXVsdBIcCgN2YWwYASADKAVCD7pIDJIBCSIH2AECGgIgACI+Ch5Qcm90bzNSZXBlYXRlZEl0ZW1JZ25vcmVBbHdheXMSHAoDdmFsGAEgAygFQg+6SAySAQkiB9gBAxoCIAAirgEKHVByb3RvM01hcEtleUlnbm9yZVVuc3BlY2lmaWVkEmEKA3ZhbBgBIAMoCzJGLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBLZXlJZ25vcmVVbnNwZWNpZmllZC5WYWxFbnRyeUIMukgJmgEGIgQaAiAAGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEipQEKF1Byb3RvM01hcEtleUlnbm9yZUVtcHR5El4KA3ZhbBgBIAMoCzJALmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBLZXlJZ25vcmVFbXB0eS5WYWxFbnRyeUIPukgMmgEJIgfYAQEaAiAAGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEiqQEKGVByb3RvM01hcEtleUlnbm9yZURlZmF1bHQSYAoDdmFsGAEgAygLMkIuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcEtleUlnbm9yZURlZmF1bHQuVmFsRW50cnlCD7pIDJoBCSIH2AECGgIgABoqCghWYWxFbnRyeRILCgNrZXkYASABKAUSDQoFdmFsdWUYAiABKAU6AjgBIqcBChhQcm90bzNNYXBLZXlJZ25vcmVBbHdheXMSXwoDdmFsGAEgAygLMkEuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcEtleUlnbm9yZUFsd2F5cy5WYWxFbnRyeUIPukgMmgEJIgfYAQMaAiAAGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEisgEKH1Byb3RvM01hcFZhbHVlSWdub3JlVW5zcGVjaWZpZWQSYwoDdmFsGAEgAygLMkguYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlByb3RvM01hcFZhbHVlSWdub3JlVW5zcGVjaWZpZWQuVmFsRW50cnlCDLpICZoBBioEGgIgABoqCghWYWxFbnRyeRILCgNrZXkYASABKAUSDQoFdmFsdWUYAiABKAU6AjgBIqkBChlQcm90bzNNYXBWYWx1ZUlnbm9yZUVtcHR5EmAKA3ZhbBgBIAMoCzJCLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBWYWx1ZUlnbm9yZUVtcHR5LlZhbEVudHJ5Qg+6SAyaAQkqB9gBARoCIAAaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASKtAQobUHJvdG8zTWFwVmFsdWVJZ25vcmVEZWZhdWx0EmIKA3ZhbBgBIAMoCzJELmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5Qcm90bzNNYXBWYWx1ZUlnbm9yZURlZmF1bHQuVmFsRW50cnlCD7pIDJoBCSoH2AECGgIgABoqCghWYWxFbnRyeRILCgNrZXkYASABKAUSDQoFdmFsdWUYAiABKAU6AjgBIqsBChpQcm90bzNNYXBWYWx1ZUlnbm9yZUFsd2F5cxJhCgN2YWwYASADKAsyQy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUHJvdG8zTWFwVmFsdWVJZ25vcmVBbHdheXMuVmFsRW50cnlCD7pIDJoBCSoH2AEDGgIgABoqCghWYWxFbnRyeRILCgNrZXkYASABKAUSDQoFdmFsdWUYAiABKAU6AjgBYgZwcm90bzM", [file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3ScalarOptionalIgnoreUnspecified
@@ -79,6 +79,23 @@ export const Proto3ScalarOptionalIgnoreDefaultSchema: GenMessage<Proto3ScalarOpt
   messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 2);
 
 /**
+ * @generated from message buf.validate.conformance.cases.Proto3ScalarOptionalIgnoreAlways
+ */
+export type Proto3ScalarOptionalIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3ScalarOptionalIgnoreAlways"> & {
+  /**
+   * @generated from field: optional int32 val = 1;
+   */
+  val?: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3ScalarOptionalIgnoreAlways.
+ * Use `create(Proto3ScalarOptionalIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3ScalarOptionalIgnoreAlwaysSchema: GenMessage<Proto3ScalarOptionalIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 3);
+
+/**
  * @generated from message buf.validate.conformance.cases.Proto3ScalarIgnoreUnspecified
  */
 export type Proto3ScalarIgnoreUnspecified = Message<"buf.validate.conformance.cases.Proto3ScalarIgnoreUnspecified"> & {
@@ -93,7 +110,7 @@ export type Proto3ScalarIgnoreUnspecified = Message<"buf.validate.conformance.ca
  * Use `create(Proto3ScalarIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3ScalarIgnoreUnspecifiedSchema: GenMessage<Proto3ScalarIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 3);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 4);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3ScalarIgnoreEmpty
@@ -110,7 +127,7 @@ export type Proto3ScalarIgnoreEmpty = Message<"buf.validate.conformance.cases.Pr
  * Use `create(Proto3ScalarIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3ScalarIgnoreEmptySchema: GenMessage<Proto3ScalarIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 4);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 5);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3ScalarIgnoreDefault
@@ -127,7 +144,24 @@ export type Proto3ScalarIgnoreDefault = Message<"buf.validate.conformance.cases.
  * Use `create(Proto3ScalarIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3ScalarIgnoreDefaultSchema: GenMessage<Proto3ScalarIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 5);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 6);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3ScalarIgnoreAlways
+ */
+export type Proto3ScalarIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3ScalarIgnoreAlways"> & {
+  /**
+   * @generated from field: int32 val = 1;
+   */
+  val: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3ScalarIgnoreAlways.
+ * Use `create(Proto3ScalarIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3ScalarIgnoreAlwaysSchema: GenMessage<Proto3ScalarIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 7);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreUnspecified
@@ -144,7 +178,7 @@ export type Proto3MessageOptionalIgnoreUnspecified = Message<"buf.validate.confo
  * Use `create(Proto3MessageOptionalIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3MessageOptionalIgnoreUnspecifiedSchema: GenMessage<Proto3MessageOptionalIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 6);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 8);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreUnspecified.Msg
@@ -161,7 +195,7 @@ export type Proto3MessageOptionalIgnoreUnspecified_Msg = Message<"buf.validate.c
  * Use `create(Proto3MessageOptionalIgnoreUnspecified_MsgSchema)` to create a new message.
  */
 export const Proto3MessageOptionalIgnoreUnspecified_MsgSchema: GenMessage<Proto3MessageOptionalIgnoreUnspecified_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 6, 0);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 8, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreEmpty
@@ -178,7 +212,7 @@ export type Proto3MessageOptionalIgnoreEmpty = Message<"buf.validate.conformance
  * Use `create(Proto3MessageOptionalIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3MessageOptionalIgnoreEmptySchema: GenMessage<Proto3MessageOptionalIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 7);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 9);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreEmpty.Msg
@@ -195,7 +229,7 @@ export type Proto3MessageOptionalIgnoreEmpty_Msg = Message<"buf.validate.conform
  * Use `create(Proto3MessageOptionalIgnoreEmpty_MsgSchema)` to create a new message.
  */
 export const Proto3MessageOptionalIgnoreEmpty_MsgSchema: GenMessage<Proto3MessageOptionalIgnoreEmpty_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 7, 0);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 9, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreDefault
@@ -212,7 +246,7 @@ export type Proto3MessageOptionalIgnoreDefault = Message<"buf.validate.conforman
  * Use `create(Proto3MessageOptionalIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3MessageOptionalIgnoreDefaultSchema: GenMessage<Proto3MessageOptionalIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 8);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 10);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreDefault.Msg
@@ -229,7 +263,41 @@ export type Proto3MessageOptionalIgnoreDefault_Msg = Message<"buf.validate.confo
  * Use `create(Proto3MessageOptionalIgnoreDefault_MsgSchema)` to create a new message.
  */
 export const Proto3MessageOptionalIgnoreDefault_MsgSchema: GenMessage<Proto3MessageOptionalIgnoreDefault_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 8, 0);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 10, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreAlways
+ */
+export type Proto3MessageOptionalIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3MessageOptionalIgnoreAlways"> & {
+  /**
+   * @generated from field: optional buf.validate.conformance.cases.Proto3MessageOptionalIgnoreAlways.Msg val = 1;
+   */
+  val?: Proto3MessageOptionalIgnoreAlways_Msg;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreAlways.
+ * Use `create(Proto3MessageOptionalIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3MessageOptionalIgnoreAlwaysSchema: GenMessage<Proto3MessageOptionalIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 11);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreAlways.Msg
+ */
+export type Proto3MessageOptionalIgnoreAlways_Msg = Message<"buf.validate.conformance.cases.Proto3MessageOptionalIgnoreAlways.Msg"> & {
+  /**
+   * @generated from field: optional string val = 1;
+   */
+  val?: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3MessageOptionalIgnoreAlways.Msg.
+ * Use `create(Proto3MessageOptionalIgnoreAlways_MsgSchema)` to create a new message.
+ */
+export const Proto3MessageOptionalIgnoreAlways_MsgSchema: GenMessage<Proto3MessageOptionalIgnoreAlways_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 11, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreUnspecified
@@ -246,7 +314,7 @@ export type Proto3MessageIgnoreUnspecified = Message<"buf.validate.conformance.c
  * Use `create(Proto3MessageIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3MessageIgnoreUnspecifiedSchema: GenMessage<Proto3MessageIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 9);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 12);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreUnspecified.Msg
@@ -263,7 +331,7 @@ export type Proto3MessageIgnoreUnspecified_Msg = Message<"buf.validate.conforman
  * Use `create(Proto3MessageIgnoreUnspecified_MsgSchema)` to create a new message.
  */
 export const Proto3MessageIgnoreUnspecified_MsgSchema: GenMessage<Proto3MessageIgnoreUnspecified_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 9, 0);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 12, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreEmpty
@@ -280,7 +348,7 @@ export type Proto3MessageIgnoreEmpty = Message<"buf.validate.conformance.cases.P
  * Use `create(Proto3MessageIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3MessageIgnoreEmptySchema: GenMessage<Proto3MessageIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 10);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 13);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreEmpty.Msg
@@ -297,7 +365,7 @@ export type Proto3MessageIgnoreEmpty_Msg = Message<"buf.validate.conformance.cas
  * Use `create(Proto3MessageIgnoreEmpty_MsgSchema)` to create a new message.
  */
 export const Proto3MessageIgnoreEmpty_MsgSchema: GenMessage<Proto3MessageIgnoreEmpty_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 10, 0);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 13, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreDefault
@@ -314,7 +382,7 @@ export type Proto3MessageIgnoreDefault = Message<"buf.validate.conformance.cases
  * Use `create(Proto3MessageIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3MessageIgnoreDefaultSchema: GenMessage<Proto3MessageIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 11);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 14);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreDefault.Msg
@@ -331,7 +399,41 @@ export type Proto3MessageIgnoreDefault_Msg = Message<"buf.validate.conformance.c
  * Use `create(Proto3MessageIgnoreDefault_MsgSchema)` to create a new message.
  */
 export const Proto3MessageIgnoreDefault_MsgSchema: GenMessage<Proto3MessageIgnoreDefault_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 11, 0);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 14, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreAlways
+ */
+export type Proto3MessageIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3MessageIgnoreAlways"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.Proto3MessageIgnoreAlways.Msg val = 1;
+   */
+  val?: Proto3MessageIgnoreAlways_Msg;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3MessageIgnoreAlways.
+ * Use `create(Proto3MessageIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3MessageIgnoreAlwaysSchema: GenMessage<Proto3MessageIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 15);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3MessageIgnoreAlways.Msg
+ */
+export type Proto3MessageIgnoreAlways_Msg = Message<"buf.validate.conformance.cases.Proto3MessageIgnoreAlways.Msg"> & {
+  /**
+   * @generated from field: optional string val = 1;
+   */
+  val?: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3MessageIgnoreAlways.Msg.
+ * Use `create(Proto3MessageIgnoreAlways_MsgSchema)` to create a new message.
+ */
+export const Proto3MessageIgnoreAlways_MsgSchema: GenMessage<Proto3MessageIgnoreAlways_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 15, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3OneofIgnoreUnspecified
@@ -354,7 +456,7 @@ export type Proto3OneofIgnoreUnspecified = Message<"buf.validate.conformance.cas
  * Use `create(Proto3OneofIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3OneofIgnoreUnspecifiedSchema: GenMessage<Proto3OneofIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 12);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 16);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3OneofIgnoreEmpty
@@ -377,7 +479,7 @@ export type Proto3OneofIgnoreEmpty = Message<"buf.validate.conformance.cases.Pro
  * Use `create(Proto3OneofIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3OneofIgnoreEmptySchema: GenMessage<Proto3OneofIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 13);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 17);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3OneofIgnoreDefault
@@ -400,7 +502,30 @@ export type Proto3OneofIgnoreDefault = Message<"buf.validate.conformance.cases.P
  * Use `create(Proto3OneofIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3OneofIgnoreDefaultSchema: GenMessage<Proto3OneofIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 14);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 18);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3OneofIgnoreAlways
+ */
+export type Proto3OneofIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3OneofIgnoreAlways"> & {
+  /**
+   * @generated from oneof buf.validate.conformance.cases.Proto3OneofIgnoreAlways.o
+   */
+  o: {
+    /**
+     * @generated from field: int32 val = 1;
+     */
+    value: number;
+    case: "val";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3OneofIgnoreAlways.
+ * Use `create(Proto3OneofIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3OneofIgnoreAlwaysSchema: GenMessage<Proto3OneofIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 19);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3RepeatedIgnoreUnspecified
@@ -417,7 +542,7 @@ export type Proto3RepeatedIgnoreUnspecified = Message<"buf.validate.conformance.
  * Use `create(Proto3RepeatedIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3RepeatedIgnoreUnspecifiedSchema: GenMessage<Proto3RepeatedIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 15);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 20);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3RepeatedIgnoreEmpty
@@ -434,7 +559,7 @@ export type Proto3RepeatedIgnoreEmpty = Message<"buf.validate.conformance.cases.
  * Use `create(Proto3RepeatedIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3RepeatedIgnoreEmptySchema: GenMessage<Proto3RepeatedIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 16);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 21);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3RepeatedIgnoreDefault
@@ -451,7 +576,24 @@ export type Proto3RepeatedIgnoreDefault = Message<"buf.validate.conformance.case
  * Use `create(Proto3RepeatedIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3RepeatedIgnoreDefaultSchema: GenMessage<Proto3RepeatedIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 17);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 22);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3RepeatedIgnoreAlways
+ */
+export type Proto3RepeatedIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3RepeatedIgnoreAlways"> & {
+  /**
+   * @generated from field: repeated int32 val = 1;
+   */
+  val: number[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3RepeatedIgnoreAlways.
+ * Use `create(Proto3RepeatedIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3RepeatedIgnoreAlwaysSchema: GenMessage<Proto3RepeatedIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 23);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapIgnoreUnspecified
@@ -468,7 +610,7 @@ export type Proto3MapIgnoreUnspecified = Message<"buf.validate.conformance.cases
  * Use `create(Proto3MapIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3MapIgnoreUnspecifiedSchema: GenMessage<Proto3MapIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 18);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 24);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapIgnoreEmpty
@@ -485,7 +627,7 @@ export type Proto3MapIgnoreEmpty = Message<"buf.validate.conformance.cases.Proto
  * Use `create(Proto3MapIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3MapIgnoreEmptySchema: GenMessage<Proto3MapIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 19);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 25);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapIgnoreDefault
@@ -502,7 +644,24 @@ export type Proto3MapIgnoreDefault = Message<"buf.validate.conformance.cases.Pro
  * Use `create(Proto3MapIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3MapIgnoreDefaultSchema: GenMessage<Proto3MapIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 20);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 26);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3MapIgnoreAlways
+ */
+export type Proto3MapIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3MapIgnoreAlways"> & {
+  /**
+   * @generated from field: map<int32, int32> val = 1;
+   */
+  val: { [key: number]: number };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3MapIgnoreAlways.
+ * Use `create(Proto3MapIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3MapIgnoreAlwaysSchema: GenMessage<Proto3MapIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 27);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3RepeatedItemIgnoreUnspecified
@@ -519,7 +678,7 @@ export type Proto3RepeatedItemIgnoreUnspecified = Message<"buf.validate.conforma
  * Use `create(Proto3RepeatedItemIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3RepeatedItemIgnoreUnspecifiedSchema: GenMessage<Proto3RepeatedItemIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 21);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 28);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3RepeatedItemIgnoreEmpty
@@ -536,7 +695,7 @@ export type Proto3RepeatedItemIgnoreEmpty = Message<"buf.validate.conformance.ca
  * Use `create(Proto3RepeatedItemIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3RepeatedItemIgnoreEmptySchema: GenMessage<Proto3RepeatedItemIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 22);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 29);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3RepeatedItemIgnoreDefault
@@ -553,7 +712,24 @@ export type Proto3RepeatedItemIgnoreDefault = Message<"buf.validate.conformance.
  * Use `create(Proto3RepeatedItemIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3RepeatedItemIgnoreDefaultSchema: GenMessage<Proto3RepeatedItemIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 23);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 30);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3RepeatedItemIgnoreAlways
+ */
+export type Proto3RepeatedItemIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3RepeatedItemIgnoreAlways"> & {
+  /**
+   * @generated from field: repeated int32 val = 1;
+   */
+  val: number[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3RepeatedItemIgnoreAlways.
+ * Use `create(Proto3RepeatedItemIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3RepeatedItemIgnoreAlwaysSchema: GenMessage<Proto3RepeatedItemIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 31);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapKeyIgnoreUnspecified
@@ -570,7 +746,7 @@ export type Proto3MapKeyIgnoreUnspecified = Message<"buf.validate.conformance.ca
  * Use `create(Proto3MapKeyIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3MapKeyIgnoreUnspecifiedSchema: GenMessage<Proto3MapKeyIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 24);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 32);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapKeyIgnoreEmpty
@@ -587,7 +763,7 @@ export type Proto3MapKeyIgnoreEmpty = Message<"buf.validate.conformance.cases.Pr
  * Use `create(Proto3MapKeyIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3MapKeyIgnoreEmptySchema: GenMessage<Proto3MapKeyIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 25);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 33);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapKeyIgnoreDefault
@@ -604,7 +780,24 @@ export type Proto3MapKeyIgnoreDefault = Message<"buf.validate.conformance.cases.
  * Use `create(Proto3MapKeyIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3MapKeyIgnoreDefaultSchema: GenMessage<Proto3MapKeyIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 26);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 34);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3MapKeyIgnoreAlways
+ */
+export type Proto3MapKeyIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3MapKeyIgnoreAlways"> & {
+  /**
+   * @generated from field: map<int32, int32> val = 1;
+   */
+  val: { [key: number]: number };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3MapKeyIgnoreAlways.
+ * Use `create(Proto3MapKeyIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3MapKeyIgnoreAlwaysSchema: GenMessage<Proto3MapKeyIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 35);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapValueIgnoreUnspecified
@@ -621,7 +814,7 @@ export type Proto3MapValueIgnoreUnspecified = Message<"buf.validate.conformance.
  * Use `create(Proto3MapValueIgnoreUnspecifiedSchema)` to create a new message.
  */
 export const Proto3MapValueIgnoreUnspecifiedSchema: GenMessage<Proto3MapValueIgnoreUnspecified> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 27);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 36);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapValueIgnoreEmpty
@@ -638,7 +831,7 @@ export type Proto3MapValueIgnoreEmpty = Message<"buf.validate.conformance.cases.
  * Use `create(Proto3MapValueIgnoreEmptySchema)` to create a new message.
  */
 export const Proto3MapValueIgnoreEmptySchema: GenMessage<Proto3MapValueIgnoreEmpty> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 28);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 37);
 
 /**
  * @generated from message buf.validate.conformance.cases.Proto3MapValueIgnoreDefault
@@ -655,5 +848,22 @@ export type Proto3MapValueIgnoreDefault = Message<"buf.validate.conformance.case
  * Use `create(Proto3MapValueIgnoreDefaultSchema)` to create a new message.
  */
 export const Proto3MapValueIgnoreDefaultSchema: GenMessage<Proto3MapValueIgnoreDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 29);
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 38);
+
+/**
+ * @generated from message buf.validate.conformance.cases.Proto3MapValueIgnoreAlways
+ */
+export type Proto3MapValueIgnoreAlways = Message<"buf.validate.conformance.cases.Proto3MapValueIgnoreAlways"> & {
+  /**
+   * @generated from field: map<int32, int32> val = 1;
+   */
+  val: { [key: number]: number };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.Proto3MapValueIgnoreAlways.
+ * Use `create(Proto3MapValueIgnoreAlwaysSchema)` to create a new message.
+ */
+export const Proto3MapValueIgnoreAlwaysSchema: GenMessage<Proto3MapValueIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_ignore_proto3, 39);
 
