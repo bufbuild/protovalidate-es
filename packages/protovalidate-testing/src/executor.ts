@@ -16,42 +16,76 @@ import {
   create,
   createFileRegistry,
   fromBinary,
+  type Registry,
   toBinary,
 } from "@bufbuild/protobuf";
 import {
   TestConformanceRequestSchema,
   TestConformanceResponseSchema,
-  TestResultSchema,
+  type TestResult,
 } from "./gen/buf/validate/conformance/harness/harness_pb.js";
-import { anyUnpack } from "@bufbuild/protobuf/wkt";
+import { type Any, anyUnpack } from "@bufbuild/protobuf/wkt";
 import * as process from "node:process";
+import {
+  createValidator,
+  CompilationError,
+  RuntimeError,
+  ValidationError,
+  violationsToProto,
+} from "@bufbuild/protovalidate";
 
-const req = fromBinary(TestConformanceRequestSchema, await readStdin());
-const res = create(TestConformanceResponseSchema);
-if (!req.fdset) {
+const request = fromBinary(TestConformanceRequestSchema, await readStdin());
+if (!request.fdset) {
   throw new Error(`Empty request field "fdset"`);
 }
-const registry = createFileRegistry(req.fdset);
+const registry = createFileRegistry(request.fdset);
 
-for (const [name, any] of Object.entries(req.cases)) {
-  const unpacked = anyUnpack(any, registry);
-  if (!unpacked) {
-    res.results[name] = create(TestResultSchema, {
-      result: {
-        case: "unexpectedError",
-        value: `Unable to unpack Any with type_url "${any.typeUrl}"`,
-      },
-    });
+for (const [name, any] of Object.entries(request.cases)) {
+  let r: TestResult["result"];
+  try {
+    const unpacked = unpackTest(any, registry);
+    if (!unpacked) {
+      throw new Error(`Unable to unpack Any with type_url "${any.typeUrl}"`);
+    }
+    createValidator({ registry }).validate(unpacked.schema, unpacked.message);
+    r = { case: "success", value: true };
+  } catch (e) {
+    if (e instanceof ValidationError) {
+      r = {
+        case: "validationError",
+        value: violationsToProto(e.violations),
+      };
+    } else if (e instanceof CompilationError) {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      r = { case: "compilationError", value: String(e) };
+    } else if (e instanceof RuntimeError) {
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string
+      r = { case: "runtimeError", value: String(e) };
+    } else {
+      r = { case: "unexpectedError", value: String(e) };
+    }
   }
-  res.results[name] = create(TestResultSchema, {
-    result: {
-      case: "runtimeError",
-      value: "not implemented",
+  // Write a TestConformanceResponse with the test results just for this case.
+  const response = create(TestConformanceResponseSchema, {
+    results: {
+      [name]: {
+        result: r,
+      },
     },
   });
+  process.stdout.write(toBinary(TestConformanceResponseSchema, response));
 }
 
-process.stdout.write(toBinary(TestConformanceResponseSchema, res));
+function unpackTest(any: Any, registry: Registry) {
+  const message = anyUnpack(any, registry);
+  if (message) {
+    const schema = registry.getMessage(message.$typeName);
+    if (schema) {
+      return { message, schema };
+    }
+  }
+  return undefined;
+}
 
 async function readStdin(): Promise<Uint8Array> {
   const chunks: Uint8Array[] = [];
