@@ -1263,14 +1263,6 @@ standard_constraints/map:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapMin]:{val:{key:1 value:2} val:{key:3 value:4} val:{key:5 value:6}}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
-  - recursive/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MapRecursive]:{val:{key:1 value:{}}}
-  #        want: 1 validation error(s)
-  #          1. val[1].val: string.min_len (string.min_len)
-  #             value length must be at least 3 characters
-  #         got: 1 validation error(s)
-  #          1. val[1].val: string.min_len (string.min_len)
-  #             value length must be at least 3 characters
   - values/pattern/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapValuesPattern]:{val:{key:"a" value:"A"} val:{key:"b" value:"!@#$%^&*()"}}
   #        want: 1 validation error(s)

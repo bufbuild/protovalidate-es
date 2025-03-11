@@ -404,7 +404,7 @@ function setMapSub(
         case ScalarType.UINT64:
         case ScalarType.FIXED64:
           proto.subscript = {
-            case: "intKey",
+            case: "uintKey",
             value: BigInt(key),
           };
           break;
