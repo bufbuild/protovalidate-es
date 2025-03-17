@@ -105,10 +105,10 @@ export class Ipv4 {
   }
 
   // Return the 32-bit value of an address parsed through address() or addressPrefix().
-  // Return -1 if no address was parsed successfully.
+  // Return 0 if no address was parsed successfully.
   getBits(): number {
     if (this.octets.length != 4) {
-      return -1;
+      return 0;
     }
     return (
       ((this.octets[0] << 24) |
