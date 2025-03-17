@@ -747,7 +747,7 @@ class Uri {
   }
 
   // > The authority component [...] is terminated by the next slash ("/"),
-  // > question mark ("?"), or number > sign ("#") character, or by the
+  // > question mark ("?"), or number sign ("#") character, or by the
   // > end of the URI.
   isAuthorityEnd(): boolean {
     return (
