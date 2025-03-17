@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/custom_constraints/custom_constraints.proto.
  */
 export const file_buf_validate_conformance_cases_custom_constraints_custom_constraints: GenFile = /*@__PURE__*/
-  fileDesc("CkpidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvY3VzdG9tX2NvbnN0cmFpbnRzL2N1c3RvbV9jb25zdHJhaW50cy5wcm90bxIxYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cyK8AQoNTm9FeHByZXNzaW9ucxIJCgFhGAEgASgFEkIKAWIYAiABKA4yNy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkVudW0SUgoBYxgDIAEoCzJHLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuTm9FeHByZXNzaW9ucy5OZXN0ZWQaCAoGTmVzdGVkIqsFChJNZXNzYWdlRXhwcmVzc2lvbnMSCQoBYRgBIAEoBRIJCgFiGAIgASgFEkIKAWMYAyABKA4yNy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkVudW0SQgoBZBgEIAEoDjI3LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRW51bRJXCgFlGAUgASgLMkwuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5NZXNzYWdlRXhwcmVzc2lvbnMuTmVzdGVkElcKAWYYBiABKAsyTC5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLk1lc3NhZ2VFeHByZXNzaW9ucy5OZXN0ZWQacgoGTmVzdGVkEgkKAWEYASABKAUSCQoBYhgCIAEoBTpSukhPGk0KGW1lc3NhZ2VfZXhwcmVzc2lvbl9uZXN0ZWQaMHRoaXMuYSA+IHRoaXMuYiA/ICcnOiAnYSBtdXN0IGJlIGdyZWF0ZXIgdGhhbiBiJzrQAbpIzAEaQwoZbWVzc2FnZV9leHByZXNzaW9uX3NjYWxhchIVYSBtdXN0IGJlIGxlc3MgdGhhbiBiGg90aGlzLmEgPCB0aGlzLmIaPwoXbWVzc2FnZV9leHByZXNzaW9uX2VudW0SEmMgbXVzdCBub3QgZXF1YWwgZBoQdGhpcy5jICE9IHRoaXMuZBpEChhtZXNzYWdlX2V4cHJlc3Npb25fZW1iZWQSEmUuYSBtdXN0IGVxdWFsIGYuYRoUdGhpcy5lLmEgPT0gdGhpcy5mLmEimwUKEEZpZWxkRXhwcmVzc2lvbnMSVwoBYRgBIAEoBUJMukhJugFGChdmaWVsZF9leHByZXNzaW9uX3NjYWxhchordGhpcyA+IDQyID8gJyc6ICdhIG11c3QgYmUgZ3JlYXRlciB0aGFuIDQyJxJ8CgFiGAIgASgOMjcuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5FbnVtQji6SDW6ATIKFWZpZWxkX2V4cHJlc3Npb25fZW51bRIOYiBtdXN0IGJlIH5PTkUaCXRoaXMgPT0gMRKjAQoBYxgDIAEoCzJKLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRmllbGRFeHByZXNzaW9ucy5OZXN0ZWRCTLpISboBRgoWZmllbGRfZXhwcmVzc2lvbl9lbWJlZBIbYy5hIG11c3QgYmUgYSBtdWx0aXBsZSBvZiA0Gg90aGlzLmEgJSA0ID09IDASrgEKAWQYBCABKAVCogG6SJ4BugFMCiJmaWVsZF9leHByZXNzaW9uX3NjYWxhcl9tdWx0aXBsZV8xGiZ0aGlzIDwgMSA/ICcnOiAnZCBtdXN0IGJlIGxlc3MgdGhhbiAxJ7oBTAoiZmllbGRfZXhwcmVzc2lvbl9zY2FsYXJfbXVsdGlwbGVfMhomdGhpcyA8IDIgPyAnJzogJ2QgbXVzdCBiZSBsZXNzIHRoYW4gMicaWQoGTmVzdGVkEk8KAWEYASABKAVCRLpIQboBPgoXZmllbGRfZXhwcmVzc2lvbl9uZXN0ZWQaI3RoaXMgPiAwID8gJyc6ICdhIG11c3QgYmUgcG9zaXRpdmUnIk8KDE1pc3NpbmdGaWVsZBIJCgFhGAEgASgFOjS6SDEaLwoNbWlzc2luZ19maWVsZBISYiBtdXN0IGJlIHBvc2l0aXZlGgp0aGlzLmIgPiAwImQKDUluY29ycmVjdFR5cGUSCQoBYRgBIAEoBTpIukhFGkMKDmluY29ycmVjdF90eXBlEhdhIG11c3Qgc3RhcnQgd2l0aCAnZm9vJxoYdGhpcy5hLnN0YXJ0c1dpdGgoJ2ZvbycpInoKD0R5blJ1bnRpbWVFcnJvchIJCgFhGAEgASgFOly6SFkaVwoPZHluX3J1bnRpbWVfZXJyEi5keW5hbWljIHR5cGUgdHJpZXMgdG8gdXNlIGEgbm9uLWV4aXN0ZW50IGZpZWxkGhRkeW4odGhpcykuYiA9PSAnZm9vJyJcCgxOb3dFcXVhbHNOb3c6TLpISRpHCg5ub3dfZXF1YWxzX25vdxIpbm93IHNob3VsZCBlcXVhbCBub3cgd2l0aGluIGFuIGV4cHJlc3Npb24aCm5vdyA9PSBub3cqKgoERW51bRIUChBFTlVNX1VOU1BFQ0lGSUVEEAASDAoIRU5VTV9PTkUQAWIGcHJvdG8z", [file_buf_validate_validate]);
+  fileDesc("CkpidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvY3VzdG9tX2NvbnN0cmFpbnRzL2N1c3RvbV9jb25zdHJhaW50cy5wcm90bxIxYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cyK8AQoNTm9FeHByZXNzaW9ucxIJCgFhGAEgASgFEkIKAWIYAiABKA4yNy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkVudW0SUgoBYxgDIAEoCzJHLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuTm9FeHByZXNzaW9ucy5OZXN0ZWQaCAoGTmVzdGVkIqsFChJNZXNzYWdlRXhwcmVzc2lvbnMSCQoBYRgBIAEoBRIJCgFiGAIgASgFEkIKAWMYAyABKA4yNy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkVudW0SQgoBZBgEIAEoDjI3LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRW51bRJXCgFlGAUgASgLMkwuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5NZXNzYWdlRXhwcmVzc2lvbnMuTmVzdGVkElcKAWYYBiABKAsyTC5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLk1lc3NhZ2VFeHByZXNzaW9ucy5OZXN0ZWQacgoGTmVzdGVkEgkKAWEYASABKAUSCQoBYhgCIAEoBTpSukhPGk0KGW1lc3NhZ2VfZXhwcmVzc2lvbl9uZXN0ZWQaMHRoaXMuYSA+IHRoaXMuYiA/ICcnOiAnYSBtdXN0IGJlIGdyZWF0ZXIgdGhhbiBiJzrQAbpIzAEaQwoZbWVzc2FnZV9leHByZXNzaW9uX3NjYWxhchIVYSBtdXN0IGJlIGxlc3MgdGhhbiBiGg90aGlzLmEgPCB0aGlzLmIaPwoXbWVzc2FnZV9leHByZXNzaW9uX2VudW0SEmMgbXVzdCBub3QgZXF1YWwgZBoQdGhpcy5jICE9IHRoaXMuZBpEChhtZXNzYWdlX2V4cHJlc3Npb25fZW1iZWQSEmUuYSBtdXN0IGVxdWFsIGYuYRoUdGhpcy5lLmEgPT0gdGhpcy5mLmEiTwoMTWlzc2luZ0ZpZWxkEgkKAWEYASABKAU6NLpIMRovCg1taXNzaW5nX2ZpZWxkEhJiIG11c3QgYmUgcG9zaXRpdmUaCnRoaXMuYiA+IDAiZAoNSW5jb3JyZWN0VHlwZRIJCgFhGAEgASgFOki6SEUaQwoOaW5jb3JyZWN0X3R5cGUSF2EgbXVzdCBzdGFydCB3aXRoICdmb28nGhh0aGlzLmEuc3RhcnRzV2l0aCgnZm9vJykiegoPRHluUnVudGltZUVycm9yEgkKAWEYASABKAU6XLpIWRpXCg9keW5fcnVudGltZV9lcnISLmR5bmFtaWMgdHlwZSB0cmllcyB0byB1c2UgYSBub24tZXhpc3RlbnQgZmllbGQaFGR5bih0aGlzKS5iID09ICdmb28nIlwKDE5vd0VxdWFsc05vdzpMukhJGkcKDm5vd19lcXVhbHNfbm93Eilub3cgc2hvdWxkIGVxdWFsIG5vdyB3aXRoaW4gYW4gZXhwcmVzc2lvbhoKbm93ID09IG5vdyLaAgodRmllbGRFeHByZXNzaW9uTXVsdGlwbGVTY2FsYXISuAIKA3ZhbBgBIAEoBUKqArpIpgK6AV8KImZpZWxkX2V4cHJlc3Npb24ubXVsdGlwbGUuc2NhbGFyLjESL3Rlc3QgbWVzc2FnZSBmaWVsZF9leHByZXNzaW9uLm11bHRpcGxlLnNjYWxhci4xGgh0aGlzID4gMLoBXwoiZmllbGRfZXhwcmVzc2lvbi5tdWx0aXBsZS5zY2FsYXIuMhIvdGVzdCBtZXNzYWdlIGZpZWxkX2V4cHJlc3Npb24ubXVsdGlwbGUuc2NhbGFyLjIaCHRoaXMgPiAxugFfCiJmaWVsZF9leHByZXNzaW9uLm11bHRpcGxlLnNjYWxhci4zEi90ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5tdWx0aXBsZS5zY2FsYXIuMxoIdGhpcyA+IDIidwobRmllbGRFeHByZXNzaW9uTmVzdGVkU2NhbGFyElgKBm5lc3RlZBgBIAEoCzJILmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRmllbGRFeHByZXNzaW9uU2NhbGFyIp0BCh1GaWVsZEV4cHJlc3Npb25PcHRpb25hbFNjYWxhchJ0CgN2YWwYASABKAVCYrpIX7oBXAogZmllbGRfZXhwcmVzc2lvbi5vcHRpb25hbC5zY2FsYXISLXRlc3QgbWVzc2FnZSBmaWVsZF9leHByZXNzaW9uLm9wdGlvbmFsLnNjYWxhchoJdGhpcyA9PSAxSACIAQFCBgoEX3ZhbCJ2ChVGaWVsZEV4cHJlc3Npb25TY2FsYXISXQoDdmFsGAEgASgFQlC6SE26AUoKF2ZpZWxkX2V4cHJlc3Npb24uc2NhbGFyEiR0ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5zY2FsYXIaCXRoaXMgPT0gMSKqAQoTRmllbGRFeHByZXNzaW9uRW51bRKSAQoDdmFsGAEgASgOMjcuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5FbnVtQky6SEm6AUYKFWZpZWxkX2V4cHJlc3Npb24uZW51bRIidGVzdCBtZXNzYWdlIGZpZWxkX2V4cHJlc3Npb24uZW51bRoJdGhpcyA9PSAxIt0BChZGaWVsZEV4cHJlc3Npb25NZXNzYWdlErABCgN2YWwYASABKAsyTS5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkZpZWxkRXhwcmVzc2lvbk1lc3NhZ2UuTXNnQlS6SFG6AU4KGGZpZWxkX2V4cHJlc3Npb24ubWVzc2FnZRIldGVzdCBtZXNzYWdlIGZpZWxkX2V4cHJlc3Npb24ubWVzc2FnZRoLdGhpcy5hID09IDEaEAoDTXNnEgkKAWEYASABKAUilAIKGEZpZWxkRXhwcmVzc2lvbk1hcFNjYWxhchLLAQoDdmFsGAEgAygLMlQuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5GaWVsZEV4cHJlc3Npb25NYXBTY2FsYXIuVmFsRW50cnlCaLpIZboBYgobZmllbGRfZXhwcmVzc2lvbi5tYXAuc2NhbGFyEih0ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5tYXAuc2NhbGFyGhl0aGlzLmFsbChrLCB0aGlzW2tdID09IDEpGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRINCgV2YWx1ZRgCIAEoBToCOAEixQIKFkZpZWxkRXhwcmVzc2lvbk1hcEVudW0SxQEKA3ZhbBgBIAMoCzJSLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRmllbGRFeHByZXNzaW9uTWFwRW51bS5WYWxFbnRyeUJkukhhugFeChlmaWVsZF9leHByZXNzaW9uLm1hcC5lbnVtEiZ0ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5tYXAuZW51bRoZdGhpcy5hbGwoaywgdGhpc1trXSA9PSAxKRpjCghWYWxFbnRyeRILCgNrZXkYASABKAUSRgoFdmFsdWUYAiABKA4yNy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkVudW06AjgBIv4CChlGaWVsZEV4cHJlc3Npb25NYXBNZXNzYWdlEtABCgN2YWwYASADKAsyVS5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkZpZWxkRXhwcmVzc2lvbk1hcE1lc3NhZ2UuVmFsRW50cnlCbLpIaboBZgocZmllbGRfZXhwcmVzc2lvbi5tYXAubWVzc2FnZRIpdGVzdCBtZXNzYWdlIGZpZWxkX2V4cHJlc3Npb24ubWFwLm1lc3NhZ2UaG3RoaXMuYWxsKGssIHRoaXNba10uYSA9PSAxKRp8CghWYWxFbnRyeRILCgNrZXkYASABKAUSXwoFdmFsdWUYAiABKAsyUC5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkZpZWxkRXhwcmVzc2lvbk1hcE1lc3NhZ2UuTXNnOgI4ARoQCgNNc2cSCQoBYRgBIAEoBSKOAgoWRmllbGRFeHByZXNzaW9uTWFwS2V5cxLHAQoDdmFsGAEgAygLMlIuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5GaWVsZEV4cHJlc3Npb25NYXBLZXlzLlZhbEVudHJ5Qma6SGOaAWAiXroBWwoZZmllbGRfZXhwcmVzc2lvbi5tYXAua2V5cxImdGVzdCBtZXNzYWdlIGZpZWxkX2V4cHJlc3Npb24ubWFwLmtleXMaFnRoaXMgPT0gNCB8fCB0aGlzID09IDgaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASKjAgoeRmllbGRFeHByZXNzaW9uTWFwU2NhbGFyVmFsdWVzEtQBCgN2YWwYASADKAsyWi5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkZpZWxkRXhwcmVzc2lvbk1hcFNjYWxhclZhbHVlcy5WYWxFbnRyeUJrukhomgFlKmO6AWAKImZpZWxkX2V4cHJlc3Npb24ubWFwLnNjYWxhci52YWx1ZXMSL3Rlc3QgbWVzc2FnZSBmaWVsZF9leHByZXNzaW9uLm1hcC5zY2FsYXIudmFsdWVzGgl0aGlzID09IDEaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgFEg0KBXZhbHVlGAIgASgFOgI4ASLUAgocRmllbGRFeHByZXNzaW9uTWFwRW51bVZhbHVlcxLOAQoDdmFsGAEgAygLMlguYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5GaWVsZEV4cHJlc3Npb25NYXBFbnVtVmFsdWVzLlZhbEVudHJ5Qme6SGSaAWEqX7oBXAogZmllbGRfZXhwcmVzc2lvbi5tYXAuZW51bS52YWx1ZXMSLXRlc3QgbWVzc2FnZSBmaWVsZF9leHByZXNzaW9uLm1hcC5lbnVtLnZhbHVlcxoJdGhpcyA9PSAxGmMKCFZhbEVudHJ5EgsKA2tleRgBIAEoBRJGCgV2YWx1ZRgCIAEoDjI3LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRW51bToCOAEilAMKH0ZpZWxkRXhwcmVzc2lvbk1hcE1lc3NhZ2VWYWx1ZXMS2QEKA3ZhbBgBIAMoCzJbLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRmllbGRFeHByZXNzaW9uTWFwTWVzc2FnZVZhbHVlcy5WYWxFbnRyeUJvukhsmgFpKme6AWQKI2ZpZWxkX2V4cHJlc3Npb24ubWFwLm1lc3NhZ2UudmFsdWVzEjB0ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5tYXAubWVzc2FnZS52YWx1ZXMaC3RoaXMuYSA9PSAxGoIBCghWYWxFbnRyeRILCgNrZXkYASABKAUSZQoFdmFsdWUYAiABKAsyVi5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkZpZWxkRXhwcmVzc2lvbk1hcE1lc3NhZ2VWYWx1ZXMuTXNnOgI4ARoQCgNNc2cSCQoBYRgBIAEoBSKaAQodRmllbGRFeHByZXNzaW9uUmVwZWF0ZWRTY2FsYXISeQoDdmFsGAEgAygFQmy6SGm6AWYKIGZpZWxkX2V4cHJlc3Npb24ucmVwZWF0ZWQuc2NhbGFyEi10ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5yZXBlYXRlZC5zY2FsYXIaE3RoaXMuYWxsKGUsIGUgPT0gMSkizgEKG0ZpZWxkRXhwcmVzc2lvblJlcGVhdGVkRW51bRKuAQoDdmFsGAEgAygOMjcuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5FbnVtQmi6SGW6AWIKHmZpZWxkX2V4cHJlc3Npb24ucmVwZWF0ZWQuZW51bRIrdGVzdCBtZXNzYWdlIGZpZWxkX2V4cHJlc3Npb24ucmVwZWF0ZWQuZW51bRoTdGhpcy5hbGwoZSwgZSA9PSAxKSKJAgoeRmllbGRFeHByZXNzaW9uUmVwZWF0ZWRNZXNzYWdlEtQBCgN2YWwYASADKAsyVS5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuY3VzdG9tX2NvbnN0cmFpbnRzLkZpZWxkRXhwcmVzc2lvblJlcGVhdGVkTWVzc2FnZS5Nc2dCcLpIbboBagohZmllbGRfZXhwcmVzc2lvbi5yZXBlYXRlZC5tZXNzYWdlEi50ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5yZXBlYXRlZC5tZXNzYWdlGhV0aGlzLmFsbChlLCBlLmEgPT0gMSkaEAoDTXNnEgkKAWEYASABKAUipwEKIkZpZWxkRXhwcmVzc2lvblJlcGVhdGVkU2NhbGFySXRlbXMSgAEKA3ZhbBgBIAMoBUJzukhwkgFtImu6AWgKJmZpZWxkX2V4cHJlc3Npb24ucmVwZWF0ZWQuc2NhbGFyLml0ZW1zEjN0ZXN0IG1lc3NhZ2UgZmllbGRfZXhwcmVzc2lvbi5yZXBlYXRlZC5zY2FsYXIuaXRlbXMaCXRoaXMgPT0gMSLaAQogRmllbGRFeHByZXNzaW9uUmVwZWF0ZWRFbnVtSXRlbXMStQEKA3ZhbBgBIAMoDjI3LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5jdXN0b21fY29uc3RyYWludHMuRW51bUJvukhskgFpIme6AWQKJGZpZWxkX2V4cHJlc3Npb24ucmVwZWF0ZWQuZW51bS5pdGVtcxIxdGVzdCBtZXNzYWdlIGZpZWxkX2V4cHJlc3Npb24ucmVwZWF0ZWQuZW51bS5pdGVtcxoJdGhpcyA9PSAxIpoCCiNGaWVsZEV4cHJlc3Npb25SZXBlYXRlZE1lc3NhZ2VJdGVtcxLgAQoDdmFsGAEgAygLMlouYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLmN1c3RvbV9jb25zdHJhaW50cy5GaWVsZEV4cHJlc3Npb25SZXBlYXRlZE1lc3NhZ2VJdGVtcy5Nc2dCd7pIdJIBcSJvugFsCidmaWVsZF9leHByZXNzaW9uLnJlcGVhdGVkLm1lc3NhZ2UuaXRlbXMSNHRlc3QgbWVzc2FnZSBmaWVsZF9leHByZXNzaW9uLnJlcGVhdGVkLm1lc3NhZ2UuaXRlbXMaC3RoaXMuYSA9PSAxGhAKA01zZxIJCgFhGAEgASgFKioKBEVudW0SFAoQRU5VTV9VTlNQRUNJRklFRBAAEgwKCEVOVU1fT05FEAFiBnByb3RvMw", [file_buf_validate_validate]);
 
 /**
  * A message that does not contain any expressions
@@ -136,55 +136,6 @@ export const MessageExpressions_NestedSchema: GenMessage<MessageExpressions_Nest
   messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 1, 0);
 
 /**
- * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressions
- */
-export type FieldExpressions = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressions"> & {
-  /**
-   * @generated from field: int32 a = 1;
-   */
-  a: number;
-
-  /**
-   * @generated from field: buf.validate.conformance.cases.custom_constraints.Enum b = 2;
-   */
-  b: Enum;
-
-  /**
-   * @generated from field: buf.validate.conformance.cases.custom_constraints.FieldExpressions.Nested c = 3;
-   */
-  c?: FieldExpressions_Nested;
-
-  /**
-   * @generated from field: int32 d = 4;
-   */
-  d: number;
-};
-
-/**
- * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressions.
- * Use `create(FieldExpressionsSchema)` to create a new message.
- */
-export const FieldExpressionsSchema: GenMessage<FieldExpressions> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 2);
-
-/**
- * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressions.Nested
- */
-export type FieldExpressions_Nested = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressions.Nested"> & {
-  /**
-   * @generated from field: int32 a = 1;
-   */
-  a: number;
-};
-
-/**
- * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressions.Nested.
- * Use `create(FieldExpressions_NestedSchema)` to create a new message.
- */
-export const FieldExpressions_NestedSchema: GenMessage<FieldExpressions_Nested> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 2, 0);
-
-/**
  * @generated from message buf.validate.conformance.cases.custom_constraints.MissingField
  */
 export type MissingField = Message<"buf.validate.conformance.cases.custom_constraints.MissingField"> & {
@@ -199,7 +150,7 @@ export type MissingField = Message<"buf.validate.conformance.cases.custom_constr
  * Use `create(MissingFieldSchema)` to create a new message.
  */
 export const MissingFieldSchema: GenMessage<MissingField> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 3);
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 2);
 
 /**
  * @generated from message buf.validate.conformance.cases.custom_constraints.IncorrectType
@@ -216,7 +167,7 @@ export type IncorrectType = Message<"buf.validate.conformance.cases.custom_const
  * Use `create(IncorrectTypeSchema)` to create a new message.
  */
 export const IncorrectTypeSchema: GenMessage<IncorrectType> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 4);
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 3);
 
 /**
  * @generated from message buf.validate.conformance.cases.custom_constraints.DynRuntimeError
@@ -233,7 +184,7 @@ export type DynRuntimeError = Message<"buf.validate.conformance.cases.custom_con
  * Use `create(DynRuntimeErrorSchema)` to create a new message.
  */
 export const DynRuntimeErrorSchema: GenMessage<DynRuntimeError> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 5);
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 4);
 
 /**
  * @generated from message buf.validate.conformance.cases.custom_constraints.NowEqualsNow
@@ -246,7 +197,415 @@ export type NowEqualsNow = Message<"buf.validate.conformance.cases.custom_constr
  * Use `create(NowEqualsNowSchema)` to create a new message.
  */
 export const NowEqualsNowSchema: GenMessage<NowEqualsNow> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 5);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMultipleScalar
+ */
+export type FieldExpressionMultipleScalar = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMultipleScalar"> & {
+  /**
+   * @generated from field: int32 val = 1;
+   */
+  val: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMultipleScalar.
+ * Use `create(FieldExpressionMultipleScalarSchema)` to create a new message.
+ */
+export const FieldExpressionMultipleScalarSchema: GenMessage<FieldExpressionMultipleScalar> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 6);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionNestedScalar
+ */
+export type FieldExpressionNestedScalar = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionNestedScalar"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.custom_constraints.FieldExpressionScalar nested = 1;
+   */
+  nested?: FieldExpressionScalar;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionNestedScalar.
+ * Use `create(FieldExpressionNestedScalarSchema)` to create a new message.
+ */
+export const FieldExpressionNestedScalarSchema: GenMessage<FieldExpressionNestedScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 7);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionOptionalScalar
+ */
+export type FieldExpressionOptionalScalar = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionOptionalScalar"> & {
+  /**
+   * @generated from field: optional int32 val = 1;
+   */
+  val?: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionOptionalScalar.
+ * Use `create(FieldExpressionOptionalScalarSchema)` to create a new message.
+ */
+export const FieldExpressionOptionalScalarSchema: GenMessage<FieldExpressionOptionalScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 8);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionScalar
+ */
+export type FieldExpressionScalar = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionScalar"> & {
+  /**
+   * @generated from field: int32 val = 1;
+   */
+  val: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionScalar.
+ * Use `create(FieldExpressionScalarSchema)` to create a new message.
+ */
+export const FieldExpressionScalarSchema: GenMessage<FieldExpressionScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 9);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionEnum
+ */
+export type FieldExpressionEnum = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionEnum"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.custom_constraints.Enum val = 1;
+   */
+  val: Enum;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionEnum.
+ * Use `create(FieldExpressionEnumSchema)` to create a new message.
+ */
+export const FieldExpressionEnumSchema: GenMessage<FieldExpressionEnum> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 10);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMessage
+ */
+export type FieldExpressionMessage = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMessage"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.custom_constraints.FieldExpressionMessage.Msg val = 1;
+   */
+  val?: FieldExpressionMessage_Msg;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMessage.
+ * Use `create(FieldExpressionMessageSchema)` to create a new message.
+ */
+export const FieldExpressionMessageSchema: GenMessage<FieldExpressionMessage> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 11);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMessage.Msg
+ */
+export type FieldExpressionMessage_Msg = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMessage.Msg"> & {
+  /**
+   * @generated from field: int32 a = 1;
+   */
+  a: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMessage.Msg.
+ * Use `create(FieldExpressionMessage_MsgSchema)` to create a new message.
+ */
+export const FieldExpressionMessage_MsgSchema: GenMessage<FieldExpressionMessage_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 11, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapScalar
+ */
+export type FieldExpressionMapScalar = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapScalar"> & {
+  /**
+   * @generated from field: map<int32, int32> val = 1;
+   */
+  val: { [key: number]: number };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapScalar.
+ * Use `create(FieldExpressionMapScalarSchema)` to create a new message.
+ */
+export const FieldExpressionMapScalarSchema: GenMessage<FieldExpressionMapScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 12);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapEnum
+ */
+export type FieldExpressionMapEnum = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapEnum"> & {
+  /**
+   * @generated from field: map<int32, buf.validate.conformance.cases.custom_constraints.Enum> val = 1;
+   */
+  val: { [key: number]: Enum };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapEnum.
+ * Use `create(FieldExpressionMapEnumSchema)` to create a new message.
+ */
+export const FieldExpressionMapEnumSchema: GenMessage<FieldExpressionMapEnum> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 13);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessage
+ */
+export type FieldExpressionMapMessage = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessage"> & {
+  /**
+   * @generated from field: map<int32, buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessage.Msg> val = 1;
+   */
+  val: { [key: number]: FieldExpressionMapMessage_Msg };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessage.
+ * Use `create(FieldExpressionMapMessageSchema)` to create a new message.
+ */
+export const FieldExpressionMapMessageSchema: GenMessage<FieldExpressionMapMessage> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 14);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessage.Msg
+ */
+export type FieldExpressionMapMessage_Msg = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessage.Msg"> & {
+  /**
+   * @generated from field: int32 a = 1;
+   */
+  a: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessage.Msg.
+ * Use `create(FieldExpressionMapMessage_MsgSchema)` to create a new message.
+ */
+export const FieldExpressionMapMessage_MsgSchema: GenMessage<FieldExpressionMapMessage_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 14, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapKeys
+ */
+export type FieldExpressionMapKeys = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapKeys"> & {
+  /**
+   * @generated from field: map<int32, int32> val = 1;
+   */
+  val: { [key: number]: number };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapKeys.
+ * Use `create(FieldExpressionMapKeysSchema)` to create a new message.
+ */
+export const FieldExpressionMapKeysSchema: GenMessage<FieldExpressionMapKeys> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 15);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapScalarValues
+ */
+export type FieldExpressionMapScalarValues = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapScalarValues"> & {
+  /**
+   * @generated from field: map<int32, int32> val = 1;
+   */
+  val: { [key: number]: number };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapScalarValues.
+ * Use `create(FieldExpressionMapScalarValuesSchema)` to create a new message.
+ */
+export const FieldExpressionMapScalarValuesSchema: GenMessage<FieldExpressionMapScalarValues> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 16);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapEnumValues
+ */
+export type FieldExpressionMapEnumValues = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapEnumValues"> & {
+  /**
+   * @generated from field: map<int32, buf.validate.conformance.cases.custom_constraints.Enum> val = 1;
+   */
+  val: { [key: number]: Enum };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapEnumValues.
+ * Use `create(FieldExpressionMapEnumValuesSchema)` to create a new message.
+ */
+export const FieldExpressionMapEnumValuesSchema: GenMessage<FieldExpressionMapEnumValues> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 17);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessageValues
+ */
+export type FieldExpressionMapMessageValues = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessageValues"> & {
+  /**
+   * @generated from field: map<int32, buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessageValues.Msg> val = 1;
+   */
+  val: { [key: number]: FieldExpressionMapMessageValues_Msg };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessageValues.
+ * Use `create(FieldExpressionMapMessageValuesSchema)` to create a new message.
+ */
+export const FieldExpressionMapMessageValuesSchema: GenMessage<FieldExpressionMapMessageValues> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 18);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessageValues.Msg
+ */
+export type FieldExpressionMapMessageValues_Msg = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessageValues.Msg"> & {
+  /**
+   * @generated from field: int32 a = 1;
+   */
+  a: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionMapMessageValues.Msg.
+ * Use `create(FieldExpressionMapMessageValues_MsgSchema)` to create a new message.
+ */
+export const FieldExpressionMapMessageValues_MsgSchema: GenMessage<FieldExpressionMapMessageValues_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 18, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedScalar
+ */
+export type FieldExpressionRepeatedScalar = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedScalar"> & {
+  /**
+   * @generated from field: repeated int32 val = 1;
+   */
+  val: number[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedScalar.
+ * Use `create(FieldExpressionRepeatedScalarSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedScalarSchema: GenMessage<FieldExpressionRepeatedScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 19);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedEnum
+ */
+export type FieldExpressionRepeatedEnum = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedEnum"> & {
+  /**
+   * @generated from field: repeated buf.validate.conformance.cases.custom_constraints.Enum val = 1;
+   */
+  val: Enum[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedEnum.
+ * Use `create(FieldExpressionRepeatedEnumSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedEnumSchema: GenMessage<FieldExpressionRepeatedEnum> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 20);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessage
+ */
+export type FieldExpressionRepeatedMessage = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessage"> & {
+  /**
+   * @generated from field: repeated buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessage.Msg val = 1;
+   */
+  val: FieldExpressionRepeatedMessage_Msg[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessage.
+ * Use `create(FieldExpressionRepeatedMessageSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedMessageSchema: GenMessage<FieldExpressionRepeatedMessage> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 21);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessage.Msg
+ */
+export type FieldExpressionRepeatedMessage_Msg = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessage.Msg"> & {
+  /**
+   * @generated from field: int32 a = 1;
+   */
+  a: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessage.Msg.
+ * Use `create(FieldExpressionRepeatedMessage_MsgSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedMessage_MsgSchema: GenMessage<FieldExpressionRepeatedMessage_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 21, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedScalarItems
+ */
+export type FieldExpressionRepeatedScalarItems = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedScalarItems"> & {
+  /**
+   * @generated from field: repeated int32 val = 1;
+   */
+  val: number[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedScalarItems.
+ * Use `create(FieldExpressionRepeatedScalarItemsSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedScalarItemsSchema: GenMessage<FieldExpressionRepeatedScalarItems> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 22);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedEnumItems
+ */
+export type FieldExpressionRepeatedEnumItems = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedEnumItems"> & {
+  /**
+   * @generated from field: repeated buf.validate.conformance.cases.custom_constraints.Enum val = 1;
+   */
+  val: Enum[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedEnumItems.
+ * Use `create(FieldExpressionRepeatedEnumItemsSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedEnumItemsSchema: GenMessage<FieldExpressionRepeatedEnumItems> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 23);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessageItems
+ */
+export type FieldExpressionRepeatedMessageItems = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessageItems"> & {
+  /**
+   * @generated from field: repeated buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessageItems.Msg val = 1;
+   */
+  val: FieldExpressionRepeatedMessageItems_Msg[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessageItems.
+ * Use `create(FieldExpressionRepeatedMessageItemsSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedMessageItemsSchema: GenMessage<FieldExpressionRepeatedMessageItems> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 24);
+
+/**
+ * @generated from message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessageItems.Msg
+ */
+export type FieldExpressionRepeatedMessageItems_Msg = Message<"buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessageItems.Msg"> & {
+  /**
+   * @generated from field: int32 a = 1;
+   */
+  a: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.custom_constraints.FieldExpressionRepeatedMessageItems.Msg.
+ * Use `create(FieldExpressionRepeatedMessageItems_MsgSchema)` to create a new message.
+ */
+export const FieldExpressionRepeatedMessageItems_MsgSchema: GenMessage<FieldExpressionRepeatedMessageItems_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_custom_constraints_custom_constraints, 24, 0);
 
 /**
  * @generated from enum buf.validate.conformance.cases.custom_constraints.Enum
