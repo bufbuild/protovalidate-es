@@ -23,3 +23,11 @@ import type { SimpleTestFile } from "@bufbuild/cel-spec/cel/expr/conformance/tes
 
 const files: SimpleTestFile[] = getSimpleTestFiles();
 ```
+
+In addition to CEL's conformance test data, this package also exports parser
+tests extracted from github.com/google/cel-go:
+
+```ts
+import { parserTests } from "@bufbuild/cel-spec/testdata/parser.js";
+import { parserTests as parserComprehensionsTests } from "@bufbuild/cel-spec/testdata/parser-comprehensions.js";
+```

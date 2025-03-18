@@ -13,6 +13,7 @@ permissions:
 env:
   # https://consoledonottrack.com/
   DO_NOT_TRACK: 1
+  GOMODCACHE: /home/runner/go/pkg/mod
 
 jobs:
   tasks:
@@ -30,9 +31,12 @@ jobs:
             diff-check: true
           - task: license-header
             diff-check: true
+          - task: build
+            diff-check: true
     name: ${{ matrix.task }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

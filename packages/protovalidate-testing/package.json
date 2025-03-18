@@ -16,7 +16,6 @@
   "type": "module",
   "sideEffects": false,
   "devDependencies": {
-    "@bufbuild/protoc-gen-es": "^2.2.3",
     "@bufbuild/protobuf": "^2.2.3",
     "@bufbuild/protovalidate": "^0.0.1"
   }

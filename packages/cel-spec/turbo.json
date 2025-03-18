@@ -12,8 +12,18 @@
       "outputs": ["src/testdata-json.ts"],
       "dependsOn": ["fetch-proto"]
     },
+    "fetch-parser": {
+      "inputs": ["scripts/*.go", "scripts/go.*", "package.json"],
+      "outputs": ["src/testdata/parser.ts"],
+      "env": ["GO*"]
+    },
+    "fetch-parser-comprehensions": {
+      "inputs": ["scripts/*.go", "scripts/go.*", "package.json"],
+      "outputs": ["src/testdata/parser-comprehensions.ts"],
+      "env": ["GO*"]
+    },
     "update-exports": {
-      "dependsOn": ["generate"],
+      "dependsOn": ["generate", "fetch-parser", "fetch-parser-comprehensions"],
       "inputs": ["src/**"],
       "outputs": ["package.json"]
     },

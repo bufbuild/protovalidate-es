@@ -13,6 +13,10 @@
     "postfetch-proto": "license-header proto",
     "fetch-testdata": "node scripts/fetch-testdata.js",
     "postfetch-testdata": "license-header src/testdata-json.ts",
+    "fetch-parser": "go run -C scripts gen_parser_tests.go -output ../src/testdata/parser.ts parser/parser_test.go",
+    "postfetch-parser": "prettier --write src/testdata/parser.ts && license-header src/testdata/parser.ts",
+    "fetch-parser-comprehensions": "go run -C scripts gen_parser_tests.go -output ../src/testdata/parser-comprehensions.ts ext/comprehensions_test.go",
+    "postfetch-parser-comprehensions": "prettier --write src/testdata/parser-comprehensions.ts && license-header src/testdata/parser-comprehensions.ts",
     "update-exports": "node scripts/update-exports.js",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
@@ -29,6 +33,14 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
+    "./testdata/parser-comprehensions.js": {
+      "import": "./dist/esm/testdata/parser-comprehensions.js",
+      "require": "./dist/cjs/testdata/parser-comprehensions.js"
+    },
+    "./testdata/parser.js": {
+      "import": "./dist/esm/testdata/parser.js",
+      "require": "./dist/cjs/testdata/parser.js"
+    },
     "./testdata/registry.js": {
       "import": "./dist/esm/testdata/registry.js",
       "require": "./dist/cjs/testdata/registry.js"
@@ -36,6 +48,10 @@
     "./testdata/simple.js": {
       "import": "./dist/esm/testdata/simple.js",
       "require": "./dist/cjs/testdata/simple.js"
+    },
+    "./testdata/to-debug-string.js": {
+      "import": "./dist/esm/testdata/to-debug-string.js",
+      "require": "./dist/cjs/testdata/to-debug-string.js"
     },
     "./cel/expr/checked_pb.js": {
       "import": "./dist/esm/gen/cel/expr/checked_pb.js",
@@ -84,11 +100,20 @@
   },
   "typesVersions": {
     "*": {
+      "testdata/parser-comprehensions.js": [
+        "./dist/cjs/testdata/parser-comprehensions.d.ts"
+      ],
+      "testdata/parser.js": [
+        "./dist/cjs/testdata/parser.d.ts"
+      ],
       "testdata/registry.js": [
         "./dist/cjs/testdata/registry.d.ts"
       ],
       "testdata/simple.js": [
         "./dist/cjs/testdata/simple.d.ts"
+      ],
+      "testdata/to-debug-string.js": [
+        "./dist/cjs/testdata/to-debug-string.d.ts"
       ],
       "cel/expr/checked_pb.js": [
         "./dist/cjs/gen/cel/expr/checked_pb.d.ts"
@@ -126,7 +151,6 @@
     }
   },
   "devDependencies": {
-    "@bufbuild/protoc-gen-es": "^2.2.3",
     "@types/node": "^22.13.8",
     "fflate": "^0.8.2"
   },

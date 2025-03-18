@@ -24,7 +24,7 @@ git fetch upstream
 ```
 
 Install dependencies (you'll need Node.js in the version specified in `.nvmrc`,
-and `npm` in the version specified in `package.json`):
+and `npm` in the version specified in `package.json`, and a current version of Golang):
 
 ```bash
 npm ci
