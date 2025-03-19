@@ -380,10 +380,12 @@ export class Ipv6 {
     return this.doubleColonSeen || this.pieces.length == 8;
   }
 
+  // Parses the rule from RFC 6874:
+  //
+  //     RFC 6874: ZoneID = 1*( unreserved / pct-encoded )
+  //
   // There is no definition for the character set allowed in the zone
   // identifier. RFC 4007 permits basically any non-null string.
-  //
-  // RFC 6874: ZoneID = 1*( unreserved / pct-encoded )
   zoneId() {
     const start = this.i;
     if (this.take("%")) {
@@ -399,7 +401,10 @@ export class Ipv6 {
     return false;
   }
 
-  // 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
+  // Parses the rule:
+  //
+  //     1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
+  //
   // Stores match in `dottedRaw`.
   dotted(): boolean {
     const start = this.i;
@@ -418,7 +423,10 @@ export class Ipv6 {
     return false;
   }
 
-  // h16 = 1*4HEXDIG
+  // Parses the rule:
+  //
+  //     h16 = 1*4HEXDIG
+  //
   // Stores 16-bit value in `pieces`
   h16(): boolean {
     const start = this.i;
@@ -438,7 +446,9 @@ export class Ipv6 {
     return true;
   }
 
-  // HEXDIG =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
+  // Parses the rule:
+  //
+  //     HEXDIG =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
   hexdig(): boolean {
     const c = this.str[this.i];
     if (
@@ -453,7 +463,9 @@ export class Ipv6 {
     return false;
   }
 
-  // DIGIT = %x30-39  ; 0-9
+  // Parses the rule:
+  //
+  //     DIGIT = %x30-39  ; 0-9
   digit(): boolean {
     const c = this.str[this.i];
     if ("0" <= c && c <= "9") {
@@ -614,7 +626,9 @@ class Uri {
     this.l = str.length;
   }
 
-  // URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
+  // Parses the rule:
+  //
+  //     URI = scheme ":" hier-part [ "?" query ] [ "#" fragment ]
   uri(): boolean {
     const start = this.i;
     if (!(this.scheme() && this.take(":") && this.hierPart())) {
@@ -634,10 +648,12 @@ class Uri {
     return true;
   }
 
-  // hier-part = "//" authority path-abempty
-  //           / path-absolute
-  //           / path-rootless
-  //           / path-empty
+  /// Parses the rule:
+  //
+  //     hier-part = "//" authority path-abempty
+  //               / path-absolute
+  //               / path-rootless
+  //               / path-empty
   hierPart(): boolean {
     const start = this.i;
     if (
@@ -652,12 +668,16 @@ class Uri {
     return this.pathAbsolute() || this.pathRootless() || this.pathEmpty();
   }
 
-  // URI-reference = URI / relative-ref
+  // Parses the rule:
+  //
+  //     URI-reference = URI / relative-ref
   uriReference(): boolean {
     return this.uri() || this.relativeRef();
   }
 
-  // relative-ref = relative-part [ "?" query ] [ "#" fragment ]
+  // Parses the rule:
+  //
+  //     relative-ref = relative-part [ "?" query ] [ "#" fragment ]
   relativeRef(): boolean {
     const start = this.i;
     if (!this.relativePart()) {
@@ -678,10 +698,12 @@ class Uri {
     return true;
   }
 
-  // relative-part = "//" authority path-abempty
-  //               / path-absolute
-  //               / path-noscheme
-  //               / path-empty
+  // Parses the rule:
+  //
+  //     relative-part = "//" authority path-abempty
+  //                   / path-absolute
+  //                   / path-noscheme
+  //                   / path-empty
   relativePart(): boolean {
     const start = this.i;
     if (
@@ -696,7 +718,10 @@ class Uri {
     return this.pathAbsolute() || this.pathNoscheme() || this.pathEmpty();
   }
 
-  // scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+  // Parses the rule:
+  //
+  //     scheme = ALPHA *( ALPHA / DIGIT / "+" / "-" / "." )
+  //
   // Terminated by ":".
   scheme(): boolean {
     const start = this.i;
@@ -718,9 +743,11 @@ class Uri {
     return false;
   }
 
-  // authority = [ userinfo "@" ] host [ ":" port ]
-  // Lead by double slash ("").
-  // Terminated by "/", "?", "#", or end of URI.
+  // Parses the rule:
+  //
+  //     authority = [ userinfo "@" ] host [ ":" port ]
+  //
+  // Lead by double slash ("") and terminated by "/", "?", "#", or end of URI.
   authority(): boolean {
     const start = this.i;
     if (this.userinfo()) {
@@ -758,7 +785,10 @@ class Uri {
     );
   }
 
-  // userinfo = *( unreserved / pct-encoded / sub-delims / ":" )
+  // Parses the rule:
+  //
+  //     userinfo = *( unreserved / pct-encoded / sub-delims / ":" )
+  //
   // Terminated by "@" in authority.
   userinfo(): boolean {
     const start = this.i;
@@ -779,7 +809,9 @@ class Uri {
     }
   }
 
-  // host = IP-literal / IPv4address / reg-name
+  // Parses the rule:
+  //
+  //     host = IP-literal / IPv4address / reg-name
   host(): boolean {
     const start = this.i;
     this.pctEncodedFound = false;
@@ -812,7 +844,10 @@ class Uri {
     return false;
   }
 
-  // port = *DIGIT
+  // Parses the rule:
+  //
+  //     port = *DIGIT
+  //
   // Terminated by end of authority.
   port(): boolean {
     const start = this.i;
@@ -828,8 +863,9 @@ class Uri {
     }
   }
 
-  // RFC 6874:
-  // IP-literal = "[" ( IPv6address / IPv6addrz / IPvFuture  ) "]"
+  // Parses the rule from RFC 6874:
+  //
+  //     IP-literal = "[" ( IPv6address / IPv6addrz / IPvFuture  ) "]"
   ipLiteral(): boolean {
     const start = this.i;
     if (this.take("[")) {
@@ -850,8 +886,8 @@ class Uri {
     return false;
   }
 
-  // IPv6address
-  // Relies on the implementation of isIp6() to match the RFC 3986 grammar.
+  // Parses the rule "IPv6address".
+  // Relies on the implementation of isIp().
   ipv6Address(): boolean {
     const start = this.i;
     while (this.hexdig() || this.take(":")) {
@@ -864,8 +900,9 @@ class Uri {
     return false;
   }
 
-  // RFC 6874:
-  // IPv6addrz = IPv6address "%25" ZoneID
+  // Parses the rule from RFC 6874:
+  //
+  //     IPv6addrz = IPv6address "%25" ZoneID
   ipv6addrz(): boolean {
     const start = this.i;
     if (
@@ -881,8 +918,9 @@ class Uri {
     return false;
   }
 
-  // RFC 6874:
-  // ZoneID = 1*( unreserved / pct-encoded )
+  // Parses the rule from RFC 6874:
+  //
+  //     ZoneID = 1*( unreserved / pct-encoded )
   zoneId(): boolean {
     const start = this.i;
     while (this.unreserved() || this.pctEncoded()) {
@@ -895,7 +933,9 @@ class Uri {
     return false;
   }
 
-  // IPvFuture  = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
+  // Parses the rule:
+  //
+  //     IPvFuture  = "v" 1*HEXDIG "." 1*( unreserved / sub-delims / ":" )
   ipvFuture(): boolean {
     const start = this.i;
     if (this.take("v") && this.hexdig()) {
@@ -916,7 +956,10 @@ class Uri {
     return false;
   }
 
-  // reg-name = *( unreserved / pct-encoded / sub-delims )
+  // Parses the rule:
+  //
+  //     reg-name = *( unreserved / pct-encoded / sub-delims )
+  //
   // Terminates on start of port (":") or end of authority.
   regName(): boolean {
     const start = this.i;
@@ -944,7 +987,10 @@ class Uri {
     );
   }
 
-  // path-abempty = *( "/" segment )
+  // Parses the rule:
+  //
+  //     path-abempty = *( "/" segment )
+  //
   // Terminated by end of path: "?", "#", or end of URI.
   pathAbempty(): boolean {
     const start = this.i;
@@ -958,7 +1004,10 @@ class Uri {
     return false;
   }
 
-  // path-absolute = "/" [ segment-nz *( "/" segment ) ]
+  // Parses the rule:
+  //
+  //     path-absolute = "/" [ segment-nz *( "/" segment ) ]
+  //
   // Terminated by end of path: "?", "#", or end of URI.
   pathAbsolute(): boolean {
     const start = this.i;
@@ -976,7 +1025,10 @@ class Uri {
     return false;
   }
 
-  // path-noscheme = segment-nz-nc *( "/" segment )
+  // Parses the rule:
+  //
+  //     path-noscheme = segment-nz-nc *( "/" segment )
+  //
   // Terminated by end of path: "?", "#", or end of URI.
   pathNoscheme(): boolean {
     const start = this.i;
@@ -992,7 +1044,10 @@ class Uri {
     return false;
   }
 
-  // path-rootless = segment-nz *( "/" segment )
+  // Parses the rule:
+  //
+  //     path-rootless = segment-nz *( "/" segment )
+  //
   // Terminated by end of path: "?", "#", or end of URI.
   pathRootless(): boolean {
     const start = this.i;
@@ -1008,13 +1063,18 @@ class Uri {
     return false;
   }
 
-  // path-empty = 0<pchar>
+  // Parses the rule:
+  //
+  //     path-empty = 0<pchar>
+  //
   // Terminated by end of path: "?", "#", or end of URI.
   pathEmpty(): boolean {
     return this.isPathEnd();
   }
 
-  // segment = *pchar
+  // Parses the rule:
+  //
+  //     segment = *pchar
   segment(): boolean {
     while (this.pchar()) {
       // continue
@@ -1022,7 +1082,9 @@ class Uri {
     return true;
   }
 
-  // segment-nz = 1*pchar
+  // Parses the rule:
+  //
+  //     segment-nz = 1*pchar
   segmentNz(): boolean {
     const start = this.i;
     if (this.pchar()) {
@@ -1035,8 +1097,10 @@ class Uri {
     return false;
   }
 
-  // segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
-  //               ; non-zero-length segment without any colon ":"
+  // Parses the rule:
+  //
+  //     segment-nz-nc = 1*( unreserved / pct-encoded / sub-delims / "@" )
+  //                   ; non-zero-length segment without any colon ":"
   segmentNzNc(): boolean {
     const start = this.i;
     while (
@@ -1054,7 +1118,9 @@ class Uri {
     return false;
   }
 
-  // pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
+  // Parses the rule:
+  //
+  //     pchar = unreserved / pct-encoded / sub-delims / ":" / "@"
   pchar(): boolean {
     return (
       this.unreserved() ||
@@ -1065,7 +1131,10 @@ class Uri {
     );
   }
 
-  // query = *( pchar / "/" / "?" )
+  // Parses the rule:
+  //
+  //     query = *( pchar / "/" / "?" )
+  //
   // Terminated by "#" or end of URI.
   query(): boolean {
     const start = this.i;
@@ -1081,7 +1150,10 @@ class Uri {
     }
   }
 
-  // fragment = *( pchar / "/" / "?" )
+  // Parses the rule:
+  //
+  //     fragment = *( pchar / "/" / "?" )
+  //
   // Terminated by end of URI.
   fragment(): boolean {
     const start = this.i;
@@ -1097,7 +1169,10 @@ class Uri {
     }
   }
 
-  // pct-encoded = "%" HEXDIG HEXDIG
+  // Parses the rule:
+  //
+  //     pct-encoded = "%" HEXDIG HEXDIG
+  //
   // Sets `pctEncodedFound` to true if a valid triplet was found
   pctEncoded(): boolean {
     const start = this.i;
@@ -1109,7 +1184,9 @@ class Uri {
     return false;
   }
 
-  // unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+  // Parses the rule:
+  //
+  //     unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
   unreserved(): boolean {
     return (
       this.alpha() ||
@@ -1121,8 +1198,10 @@ class Uri {
     );
   }
 
-  // sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
-  //   / "*" / "+" / "," / ";" / "="
+  // Parses the rule:
+  //
+  //     sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
+  //                 / "*" / "+" / "," / ";" / "="
   subDelims(): boolean {
     return (
       this.take("!") ||
@@ -1139,7 +1218,9 @@ class Uri {
     );
   }
 
-  // ALPHA =  %x41-5A / %x61-7A ; A-Z / a-z
+  // Parses the rule:
+  //
+  //     ALPHA =  %x41-5A / %x61-7A ; A-Z / a-z
   alpha(): boolean {
     const c = this.str[this.i];
     if (("A" <= c && c <= "Z") || ("a" <= c && c <= "z")) {
@@ -1149,7 +1230,9 @@ class Uri {
     return false;
   }
 
-  // DIGIT = %x30-39  ; 0-9
+  // Parses the rule:
+  //
+  //     DIGIT = %x30-39  ; 0-9
   digit(): boolean {
     const c = this.str[this.i];
     if ("0" <= c && c <= "9") {
@@ -1159,7 +1242,9 @@ class Uri {
     return false;
   }
 
-  // HEXDIG =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
+  // Parses the rule:
+  //
+  //     HEXDIG =  DIGIT / "A" / "B" / "C" / "D" / "E" / "F"
   hexdig(): boolean {
     const c = this.str[this.i];
     if (
