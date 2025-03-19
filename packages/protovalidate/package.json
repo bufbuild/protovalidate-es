@@ -37,10 +37,10 @@
     "@bufbuild/cel": "^0.0.1"
   },
   "peerDependencies": {
-    "@bufbuild/protobuf": "^2.2.3"
+    "@bufbuild/protobuf": "^2.2.5"
   },
   "devDependencies": {
-    "@bufbuild/protobuf": "^2.2.3",
+    "@bufbuild/protobuf": "^2.2.5",
     "@bufbuild/protocompile": "^0.0.1"
   }
 }

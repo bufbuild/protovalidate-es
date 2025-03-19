@@ -155,6 +155,6 @@
     "fflate": "^0.8.2"
   },
   "peerDependencies": {
-    "@bufbuild/protobuf": "^2.2.3"
+    "@bufbuild/protobuf": "^2.2.5"
   }
 }
