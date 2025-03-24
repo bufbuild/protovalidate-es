@@ -13,15 +13,16 @@
 // limitations under the License.
 
 import {
-  createRegistry,
+  createMutableRegistry,
   type DescMessage,
   type MessageShape,
   type Registry,
 } from "@bufbuild/protobuf";
-import { reflect } from "@bufbuild/protobuf/reflect";
+import { nestedTypes, reflect } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
 import { createPlanner } from "./planner.js";
 import { updateCelNow } from "./cel.js";
+import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
 
 /**
  * Options for creating a validator.
@@ -60,14 +61,20 @@ export type BoundValidationFn<T> = (message: T) => void;
  * Create a validator.
  */
 export function createValidator(opt?: ValidatorOptions): Validator {
-  const userRegistry = opt?.registry ?? createRegistry();
+  const registry = opt?.registry
+    ? createMutableRegistry(opt.registry, file_buf_validate_validate)
+    : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
-  const planner = createPlanner(userRegistry);
+  const planner = createPlanner(registry);
   return {
     validate(schema, message) {
       this.for(schema)(message);
     },
     for(schema) {
+      registry.add(schema);
+      for (const type of nestedTypes(schema)) {
+        registry.add(type);
+      }
       const plan = planner.plan(schema);
       return function boundValidationFn(message) {
         const msg = reflect(schema, message);

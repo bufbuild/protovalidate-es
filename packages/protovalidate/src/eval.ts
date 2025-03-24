@@ -25,7 +25,6 @@ import {
 import {
   type DescEnum,
   type DescField,
-  type DescMessage,
   type DescOneof,
   type Registry,
 } from "@bufbuild/protobuf";
@@ -44,7 +43,6 @@ import {
   celConstraintEval,
   celConstraintPlan,
   createCelEnv,
-  createCelRegistry,
   type RuleCelPlan,
 } from "./cel.js";
 import type { Condition } from "./condition.js";
@@ -217,19 +215,8 @@ export class EvalMessageCel implements Eval<ReflectMessage> {
     constraint: Constraint;
     planned: ReturnType<CelEnv["plan"]>;
   }[] = [];
-  constructor(
-    constraints: readonly Constraint[],
-    descMessage: DescMessage,
-    userRegistry: Registry,
-  ) {
-    const namespace = descMessage.typeName.substring(
-      0,
-      descMessage.typeName.lastIndexOf("."),
-    );
-    this.env = createCelEnv(
-      namespace,
-      createCelRegistry(userRegistry, descMessage),
-    );
+  constructor(constraints: readonly Constraint[], registry: Registry) {
+    this.env = createCelEnv("", registry);
     this.plannedConstraints = constraints.map((constraint, index) => ({
       index,
       constraint,
@@ -267,9 +254,9 @@ export class EvalFieldCel implements Eval<ReflectMessageGet> {
     constraints: readonly Constraint[],
     private readonly baseRulePath: PathBuilder,
     private readonly forMapKey: boolean,
-    userRegistry: Registry,
+    registry: Registry,
   ) {
-    this.env = createCelEnv("", userRegistry);
+    this.env = createCelEnv("", registry);
     this.plannedConstraints = constraints.map((constraint, index) => ({
       index,
       constraint,

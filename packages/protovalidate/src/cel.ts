@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import {
-  createRegistry,
   type DescField,
   type DescMessage,
   getOption,
@@ -26,7 +25,6 @@ import { timestampNow } from "@bufbuild/protobuf/wkt";
 import {
   type Constraint,
   type FieldConstraints,
-  file_buf_validate_validate,
   predefined,
 } from "./gen/buf/validate/validate_pb.js";
 import {
@@ -231,26 +229,6 @@ function createCustomFuncs(): FuncRegistry {
 }
 
 /**
- * Create a registry for CEL evaluation.
- */
-export function createCelRegistry(
-  userRegistry: Registry,
-  desc: DescField | DescMessage,
-): Registry {
-  let descMessage: DescMessage | undefined;
-  if (desc.kind == "field" && desc.message) {
-    descMessage = desc.message;
-  } else if (desc.kind == "message") {
-    descMessage = desc;
-  }
-  if (!descMessage) {
-    return userRegistry;
-  }
-  // TODO add nested types to registry?
-  return createRegistry(userRegistry, descMessage);
-}
-
-/**
  * Parse and compile a buf.validate.Constraint, a Protovalidate CEL expression.
  *
  * The result can be given to celConstraintEval().
@@ -321,12 +299,9 @@ export class RuleCelCache {
   private readonly env: CelEnv;
   private planCache = new Map<DescField, RuleCelPlan[]>();
 
-  constructor(userRegistry: Registry) {
-    this.rulesRegistry = createRegistry(
-      userRegistry,
-      ...file_buf_validate_validate.messages,
-    );
-    this.env = createCelEnv("", this.rulesRegistry);
+  constructor(registry: Registry) {
+    this.rulesRegistry = registry;
+    this.env = createCelEnv("", registry);
   }
 
   getPlans(
