@@ -14,7 +14,11 @@
 
 import * as assert from "node:assert/strict";
 import { compileFile } from "@bufbuild/protocompile";
-import { type DescExtension, type DescMessage } from "@bufbuild/protobuf";
+import {
+  createRegistry,
+  type DescExtension,
+  type DescMessage,
+} from "@bufbuild/protobuf";
 import { type Path } from "./path.js";
 
 export function assertPathsEqual(got: Path, want: Path) {
@@ -219,5 +223,5 @@ export function getTestDataForPaths() {
       error: `Invalid map key at column 9`,
     },
   ];
-  return { cases, invalid, schema };
+  return { cases, invalid, schema, registry: createRegistry(file) };
 }

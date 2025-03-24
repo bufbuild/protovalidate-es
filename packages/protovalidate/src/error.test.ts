@@ -196,12 +196,12 @@ void suite("pathFromViolationProto", () => {
     return violationsToProto([new Violation("message", "id", path, [], false)])
       .violations[0].field;
   }
-  const cases = getTestDataForPaths().cases.filter((c) => !c.usesExtension);
+  const { cases, registry } = getTestDataForPaths();
   for (const { string, golden, schema } of cases) {
     const proto = toProto(golden);
     if (proto !== undefined) {
       void test(string, () => {
-        const path = pathFromViolationProto(schema, proto);
+        const path = pathFromViolationProto(schema, proto, registry);
         assertPathsEqual(path, golden);
       });
     }

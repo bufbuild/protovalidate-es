@@ -25,6 +25,7 @@ import {
   create,
   type DescField,
   type DescMessage,
+  type Registry,
   ScalarType,
 } from "@bufbuild/protobuf";
 import { FieldDescriptorProto_Type } from "@bufbuild/protobuf/wkt";
@@ -182,6 +183,7 @@ export function violationToProto(violation: Violation) {
 export function pathFromViolationProto(
   schema: DescMessage,
   proto: FieldPath,
+  registry?: Registry,
 ): Path {
   const path: Path = [];
   let parent: DescMessage | undefined = schema;
@@ -198,6 +200,14 @@ export function pathFromViolationProto(
         path.push(oneof);
         parent = undefined;
         continue;
+      }
+      if (registry) {
+        const ext = registry.getExtensionFor(parent, e.fieldNumber);
+        if (ext) {
+          path.push(ext);
+          parent = ext.message;
+          continue;
+        }
       }
       throw errInvPathProto(i);
     }
@@ -286,14 +296,13 @@ function pathToProto(path: Path): FieldPath {
         );
         break;
       case "extension":
-        // buf.validate.FieldPath does not support extensions at this time
-        // elements.push(
-        //   create(FieldPathElementSchema, {
-        //     fieldName: e.typeName,
-        //     fieldNumber: e.number,
-        //     fieldType: e.proto.type,
-        //   }),
-        // );
+        elements.push(
+          create(FieldPathElementSchema, {
+            fieldName: "[" + e.typeName + "]",
+            fieldNumber: e.number,
+            fieldType: e.proto.type,
+          }),
+        );
         break;
       case "oneof":
         elements.push(
