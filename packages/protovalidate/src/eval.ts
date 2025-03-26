@@ -13,9 +13,6 @@
 // limitations under the License.
 
 import {
-  isReflectList,
-  isReflectMap,
-  isReflectMessage,
   type ReflectList,
   type ReflectMap,
   type ReflectMessage,
@@ -26,25 +23,16 @@ import {
   type DescEnum,
   type DescField,
   type DescOneof,
-  type Registry,
 } from "@bufbuild/protobuf";
 import { type Any } from "@bufbuild/protobuf/wkt";
-import { CelEnv } from "@bufbuild/cel";
 import {
   type AnyRules,
   AnyRulesSchema,
-  type Constraint,
   type EnumRules,
   EnumRulesSchema,
   FieldConstraintsSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { Cursor } from "./cursor.js";
-import {
-  celConstraintEval,
-  celConstraintPlan,
-  createCelEnv,
-  type RuleCelPlan,
-} from "./cel.js";
 import type { Condition } from "./condition.js";
 import type { PathBuilder } from "./path.js";
 
@@ -205,185 +193,6 @@ export class EvalOneofRequired implements Eval<ReflectMessage> {
   }
   prune(): boolean {
     return false;
-  }
-}
-
-export class EvalMessageCel implements Eval<ReflectMessage> {
-  private readonly env: CelEnv;
-  private readonly plannedConstraints: {
-    index: number;
-    constraint: Constraint;
-    planned: ReturnType<CelEnv["plan"]>;
-  }[] = [];
-  constructor(constraints: readonly Constraint[], registry: Registry) {
-    this.env = createCelEnv("", registry);
-    this.plannedConstraints = constraints.map((constraint, index) => ({
-      index,
-      constraint,
-      planned: celConstraintPlan(this.env, constraint),
-    }));
-  }
-
-  eval(val: ReflectMessage, cursor: Cursor) {
-    this.env.set("this", val.message);
-    // TODO protovalidate-go does not populate Violation.rule for FieldConstraints.cel
-    // for (const { index, constraint, planned } of this.plannedConstraints) {
-    for (const { constraint, planned } of this.plannedConstraints) {
-      const vio = celConstraintEval(this.env, constraint, planned);
-      if (vio) {
-        cursor.violate(vio.message, vio.constraintId, [
-          // MessageConstraintsSchema.field.cel,
-          // { kind: "list_sub", index },
-        ]);
-      }
-    }
-  }
-  prune(): boolean {
-    return this.plannedConstraints.length == 0;
-  }
-}
-
-export class EvalFieldCel implements Eval<ReflectMessageGet> {
-  private readonly env: CelEnv;
-  private readonly plannedConstraints: {
-    index: number;
-    constraint: Constraint;
-    planned: ReturnType<CelEnv["plan"]>;
-  }[] = [];
-  constructor(
-    constraints: readonly Constraint[],
-    private readonly baseRulePath: PathBuilder,
-    private readonly forMapKey: boolean,
-    registry: Registry,
-  ) {
-    this.env = createCelEnv("", registry);
-    this.plannedConstraints = constraints.map((constraint, index) => ({
-      index,
-      constraint,
-      planned: celConstraintPlan(this.env, constraint),
-    }));
-  }
-
-  eval(val: ReflectMessageGet, cursor: Cursor): void {
-    // TODO fix this up
-    let valVal: unknown = val;
-    if (isReflectMessage(val)) {
-      valVal = val.message;
-    } else if (isReflectList(val)) {
-      // @ts-expect-error -- TODO
-      valVal = val[Symbol.for("reflect unsafe local")];
-    } else if (isReflectMap(val)) {
-      // @ts-expect-error -- TODO
-      valVal = val[Symbol.for("reflect unsafe local")];
-    }
-    this.env.set("this", valVal);
-    for (const { index, constraint, planned } of this.plannedConstraints) {
-      const vio = celConstraintEval(this.env, constraint, planned);
-      if (vio) {
-        const rulePath = this.baseRulePath
-          .clone()
-          .field(FieldConstraintsSchema.field.cel)
-          .list(index)
-          .toPath();
-        cursor.violate(vio.message, vio.constraintId, rulePath, this.forMapKey);
-      }
-    }
-  }
-  prune(): boolean {
-    return this.plannedConstraints.length == 0;
-  }
-}
-
-export class EvalScalarRulesCel implements Eval<ScalarValue> {
-  constructor(
-    private readonly plans: RuleCelPlan[],
-    private readonly forMapKey = false,
-    private readonly baseRulePath: PathBuilder,
-  ) {}
-  eval(val: ScalarValue, cursor: Cursor): void {
-    for (const plan of this.plans) {
-      plan.env.set("this", val);
-      plan.env.set("rules", plan.rules);
-      const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
-      if (vio) {
-        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
-        cursor.violate(vio.message, vio.constraintId, rulePath, this.forMapKey);
-      }
-    }
-  }
-  prune(): boolean {
-    return this.plans.length == 0;
-  }
-}
-
-export class EvalMessageRulesCel implements Eval<ReflectMessage> {
-  constructor(
-    private readonly plans: RuleCelPlan[],
-    private readonly baseRulePath: PathBuilder,
-  ) {}
-
-  eval(val: ReflectMessage, cursor: Cursor): void {
-    // TODO fix this up
-    const valVal: unknown = val.message;
-    for (const plan of this.plans) {
-      plan.env.set("this", valVal);
-      plan.env.set("rules", plan.rules);
-      const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
-      if (vio) {
-        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
-        cursor.violate(vio.message, vio.constraintId, rulePath);
-      }
-    }
-  }
-  prune(): boolean {
-    return this.plans.length == 0;
-  }
-}
-
-export class EvalListRulesCel implements Eval<ReflectList> {
-  constructor(
-    private readonly plans: RuleCelPlan[],
-    private readonly baseRulePath: PathBuilder,
-  ) {}
-  eval(val: ReflectList, cursor: Cursor): void {
-    // TODO fix this up
-    // @ts-expect-error -- TODO
-    const valVal: unknown = val[Symbol.for("reflect unsafe local")];
-    for (const plan of this.plans) {
-      plan.env.set("this", valVal);
-      plan.env.set("rules", plan.rules);
-      const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
-      if (vio) {
-        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
-        cursor.violate(vio.message, vio.constraintId, rulePath);
-      }
-    }
-  }
-  prune(): boolean {
-    return this.plans.length == 0;
-  }
-}
-
-export class EvalMapRulesCel implements Eval<ReflectMap> {
-  constructor(
-    private readonly plans: RuleCelPlan[],
-    private readonly baseRulePath: PathBuilder,
-  ) {}
-  eval(val: ReflectMap, cursor: Cursor): void {
-    // @ts-expect-error -- TODO
-    const valVal: unknown = val[Symbol.for("reflect unsafe local")];
-    for (const plan of this.plans) {
-      plan.env.set("this", valVal);
-      plan.env.set("rules", plan.rules);
-      const vio = celConstraintEval(plan.env, plan.constraint, plan.planned);
-      if (vio) {
-        const rulePath = this.baseRulePath.clone().add(plan.rulePath).toPath();
-        cursor.violate(vio.message, vio.constraintId, rulePath);
-      }
-    }
-  }
-  prune(): boolean {
-    return this.plans.length == 0;
   }
 }
 

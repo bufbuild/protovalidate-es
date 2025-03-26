@@ -214,51 +214,7 @@ kitchen_sink:
   #             field: "val.rep_ts_val[0]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:13  field_name:"rep_ts_val"  field_type:TYPE_MESSAGE  index:0}
   #             rule: "repeated.items.timestamp.gte" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"gte"  field_type:TYPE_MESSAGE}
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - unset/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.KitchenSinkMessage]:{}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
 predefined_constraints:
-  - proto/2023/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedBoolRuleEdition2023]:{val:true}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.edition_2023"
-  #             message: "bool value is not false"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BOOL}
-  #             rule: "bool.[buf.validate.conformance.cases.bool_false_edition_2023]" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bool_false_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/bytes/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedBytesRuleEdition2023]:{val:"../invalid/path"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.edition_2023"
-  #             message: "not a valid path: `../invalid/path`"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
-  #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_edition_2023]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bytes_valid_path_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedDoubleRuleEdition2023]:{val:-2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.edition_2023"
-  #             message: "double value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_DOUBLE}
-  #             rule: "double.[buf.validate.conformance.cases.double_abs_range_edition_2023]" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.double_abs_range_edition_2023]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto/2023/duration/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedDurationRuleEdition2023]:{val:{seconds:15}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "duration.too_long.edition_2023"
-  #             message: "duration can't be longer than 10 seconds"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "duration.[buf.validate.conformance.cases.duration_too_long_edition_2023]" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.duration_too_long_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/enum/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedEnumRuleEdition2023]:{val:ENUM_EDITION2023_ZERO_UNSPECIFIED}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "enum.non_zero.edition_2023"
-  #             message: "enum value is not non-zero"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_ENUM}
-  #             rule: "enum.[buf.validate.conformance.cases.enum_non_zero_edition_2023]" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.enum_non_zero_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
   - proto/2023/fixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
@@ -266,7 +222,11 @@ predefined_constraints:
   #             message: "fixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED32}
   #             rule: "fixed32.[buf.validate.conformance.cases.fixed32_even_edition_2023]" elements:{field_number:9  field_name:"fixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.fixed32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
+  - proto/2023/fixed32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleEdition2023]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
   - proto/2023/fixed64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
@@ -274,31 +234,11 @@ predefined_constraints:
   #             message: "fixed64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED64}
   #             rule: "fixed64.[buf.validate.conformance.cases.fixed64_even_edition_2023]" elements:{field_number:10  field_name:"fixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.fixed64_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFloatRuleEdition2023]:{val:-2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.edition_2023"
-  #             message: "float value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FLOAT}
-  #             rule: "float.[buf.validate.conformance.cases.float_abs_range_edition_2023]" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.float_abs_range_edition_2023]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto/2023/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedInt32RuleEdition2023]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.edition_2023"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT32}
-  #             rule: "int32.[buf.validate.conformance.cases.int32_abs_in_edition_2023]" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.int32_abs_in_edition_2023]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto/2023/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedInt64RuleEdition2023]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.edition_2023"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT64}
-  #             rule: "int64.[buf.validate.conformance.cases.int64_abs_in_edition_2023]" elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.int64_abs_in_edition_2023]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
+  - proto/2023/fixed64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleEdition2023]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
   - proto/2023/map/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedMapRuleEdition2023]:{val:{key:1  value:1}  val:{key:2  value:2}  val:{key:3  value:3}}
   #        want: validation error (1 violation)
@@ -306,7 +246,11 @@ predefined_constraints:
   #             message: "map must have at least five pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.[buf.validate.conformance.cases.map_at_least_five_edition_2023]" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.map_at_least_five_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
+  - proto/2023/map/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedMapRuleEdition2023]:{val:{key:1  value:1}  val:{key:2  value:2}  val:{key:3  value:3}  val:{key:4  value:4}  val:{key:5  value:5}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
   - proto/2023/predefined_and_custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleEdition2023]:{a:-1  b:{c:-1}}
   #        want: validation error (5 violations)
@@ -330,38 +274,11 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: validation error (3 violations)
-  #          1. constraint_id: "predefined_and_custom_rule_embedded_edition_2023"
-  #             message: "b.c must be a multiple of 3"
-  #             field: "b" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          2. constraint_id: "predefined_and_custom_rule_nested_edition_2023"
-  #             message: "c must be positive"
-  #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          3. constraint_id: "predefined_and_custom_rule_scalar_edition_2023"
-  #             message: "a must be greater than 24"
-  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  - proto/2023/repeated/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedRuleEdition2023]:{val:1  val:2  val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "repeated.at_least_five.edition_2023"
-  #             message: "repeated field must have at least five values"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
-  #             rule: "repeated.[buf.validate.conformance.cases.repeated_at_least_five_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.repeated_at_least_five_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/repeated/wrapped/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBoolRuleEdition2023]:{val:{}  val:{value:true}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.edition_2023"
-  #             message: "bool value is not false"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.bool.[buf.validate.conformance.cases.bool_false_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bool_false_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto/2023/predefined_and_custom/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleEdition2023]:{a:26  b:{c:12}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto/2023/repeated/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBytesRuleEdition2023]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -369,39 +286,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.bytes.[buf.validate.conformance.cases.bytes_valid_path_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bytes_valid_path_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/repeated/wrapped/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedDoubleRuleEdition2023]:{val:{value:1}  val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.edition_2023"
-  #             message: "double value is out of range"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.double.[buf.validate.conformance.cases.double_abs_range_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.double_abs_range_edition_2023]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto/2023/repeated/wrapped/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedFloatRuleEdition2023]:{val:{value:1}  val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.edition_2023"
-  #             message: "float value is out of range"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.float.[buf.validate.conformance.cases.float_abs_range_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.float_abs_range_edition_2023]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto/2023/repeated/wrapped/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedInt32RuleEdition2023]:{val:{value:2}  val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.edition_2023"
-  #             message: "value must be in absolute value of list"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.int32.[buf.validate.conformance.cases.int32_abs_in_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.int32_abs_in_edition_2023]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto/2023/repeated/wrapped/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedInt64RuleEdition2023]:{val:{value:2}  val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.edition_2023"
-  #             message: "value must be in absolute value of list"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.int64.[buf.validate.conformance.cases.int64_abs_in_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.int64_abs_in_edition_2023]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto/2023/repeated/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedStringRuleEdition2023]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -409,7 +294,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.string.[buf.validate.conformance.cases.string_valid_path_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.string_valid_path_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto/2023/repeated/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleEdition2023]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
@@ -417,7 +302,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint32.[buf.validate.conformance.cases.uint32_even_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto/2023/repeated/wrapped/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleEdition2023]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto/2023/repeated/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleEdition2023]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
@@ -425,7 +314,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint64.[buf.validate.conformance.cases.uint64_even_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint64_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto/2023/repeated/wrapped/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleEdition2023]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto/2023/sfixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
@@ -433,15 +326,11 @@ predefined_constraints:
   #             message: "sfixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED32}
   #             rule: "sfixed32.[buf.validate.conformance.cases.sfixed32_even_edition_2023]" elements:{field_number:11  field_name:"sfixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sfixed32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/sfixed64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed64RuleEdition2023]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed64.even.edition_2023"
-  #             message: "sfixed64 value is not even"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED64}
-  #             rule: "sfixed64.[buf.validate.conformance.cases.sfixed64_even_edition_2023]" elements:{field_number:12  field_name:"sfixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sfixed64_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto/2023/sfixed32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleEdition2023]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto/2023/sint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
@@ -449,15 +338,19 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/sint64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt64RuleEdition2023]:{val:3}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto/2023/sint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleEdition2023]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto/2023/standard_predefined_custom/custom/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleEdition2023]:{a:24}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint64.even.edition_2023"
-  #             message: "sint64 value is not even"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT64}
-  #             rule: "sint64.[buf.validate.conformance.cases.sint64_even_edition_2023]" elements:{field_number:8  field_name:"sint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint64_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #          1. constraint_id: "standard_predefined_and_custom_rule_scalar_edition_2023"
+  #             message: "a must be greater than 24"
+  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
+  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto/2023/standard_predefined_custom/predefined/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleEdition2023]:{a:27}
   #        want: validation error (1 violation)
@@ -465,23 +358,19 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/string/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedStringRuleEdition2023]:{val:"../invalid/path"}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto/2023/standard_predefined_custom/standard/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleEdition2023]:{a:28}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.edition_2023"
-  #             message: "not a valid path: `../invalid/path`"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING}
-  #             rule: "string.[buf.validate.conformance.cases.string_valid_path_edition_2023]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.string_valid_path_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/timestamp/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedTimestampRuleEdition2023]:{val:{seconds:1725415496}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "timestamp.time_range.edition_2023"
-  #             message: "timestamp out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "timestamp.[buf.validate.conformance.cases.timestamp_in_range_edition_2023]" elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.timestamp_in_range_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #          1. constraint_id: "sint32.lt"
+  #             message: "value must be less than 28"
+  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
+  #             rule: "sint32.lt" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_SINT32}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto/2023/standard_predefined_custom/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleEdition2023]:{a:26}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto/2023/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
@@ -489,7 +378,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT32}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_edition_2023]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
+  - proto/2023/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleEdition2023]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
   - proto/2023/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
@@ -497,15 +390,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_edition_2023]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint64_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/wrapped/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBoolRuleEdition2023]:{val:{value:true}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.edition_2023"
-  #             message: "bool value is not false"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "bool.[buf.validate.conformance.cases.bool_false_edition_2023]" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bool_false_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
+  - proto/2023/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleEdition2023]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
   - proto/2023/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBytesRuleEdition2023]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -513,39 +402,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_edition_2023]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bytes_valid_path_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto/2023/wrapped/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedDoubleRuleEdition2023]:{val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.edition_2023"
-  #             message: "double value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "double.[buf.validate.conformance.cases.double_abs_range_edition_2023]" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.double_abs_range_edition_2023]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto/2023/wrapped/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedFloatRuleEdition2023]:{val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.edition_2023"
-  #             message: "float value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "float.[buf.validate.conformance.cases.float_abs_range_edition_2023]" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.float_abs_range_edition_2023]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto/2023/wrapped/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedInt32RuleEdition2023]:{val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.edition_2023"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "int32.[buf.validate.conformance.cases.int32_abs_in_edition_2023]" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.int32_abs_in_edition_2023]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto/2023/wrapped/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedInt64RuleEdition2023]:{val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.edition_2023"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "int64.[buf.validate.conformance.cases.int64_abs_in_edition_2023]" elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.int64_abs_in_edition_2023]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto/2023/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedStringRuleEdition2023]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -553,7 +410,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "string.[buf.validate.conformance.cases.string_valid_path_edition_2023]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.string_valid_path_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto/2023/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleEdition2023]:{val:{value:3}}
   #        want: validation error (1 violation)
@@ -561,7 +418,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_edition_2023]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto/2023/wrapped/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleEdition2023]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto/2023/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleEdition2023]:{val:{value:3}}
   #        want: validation error (1 violation)
@@ -569,47 +430,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_edition_2023]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint64_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedBoolRuleProto2]:{val:true}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.proto2"
-  #             message: "bool value is not false"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BOOL}
-  #             rule: "bool.[buf.validate.conformance.cases.bool_false_proto2]" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bool_false_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/bytes/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedBytesRuleProto2]:{val:"../invalid/path"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.proto2"
-  #             message: "not a valid path: `../invalid/path`"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
-  #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedDoubleRuleProto2]:{val:-2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.proto2"
-  #             message: "double value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_DOUBLE}
-  #             rule: "double.[buf.validate.conformance.cases.double_abs_range_proto2]" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.double_abs_range_proto2]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto2/duration/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedDurationRuleProto2]:{val:{seconds:15}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "duration.too_long.proto2"
-  #             message: "duration can't be longer than 10 seconds"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "duration.[buf.validate.conformance.cases.duration_too_long_proto2]" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.duration_too_long_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/enum/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedEnumRuleProto2]:{val:ENUM_PROTO2_ZERO_UNSPECIFIED}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "enum.non_zero.proto2"
-  #             message: "enum value is not non-zero"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_ENUM}
-  #             rule: "enum.[buf.validate.conformance.cases.enum_non_zero_proto2]" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.enum_non_zero_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto/2023/wrapped/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleEdition2023]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto2/fixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
@@ -617,7 +442,11 @@ predefined_constraints:
   #             message: "fixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED32}
   #             rule: "fixed32.[buf.validate.conformance.cases.fixed32_even_proto2]" elements:{field_number:9  field_name:"fixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
+  - proto2/fixed32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleProto2]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
   - proto2/fixed64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleProto2]:{val:3}
   #        want: validation error (1 violation)
@@ -625,31 +454,11 @@ predefined_constraints:
   #             message: "fixed64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED64}
   #             rule: "fixed64.[buf.validate.conformance.cases.fixed64_even_proto2]" elements:{field_number:10  field_name:"fixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFloatRuleProto2]:{val:-2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.proto2"
-  #             message: "float value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FLOAT}
-  #             rule: "float.[buf.validate.conformance.cases.float_abs_range_proto2]" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.float_abs_range_proto2]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto2/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedInt32RuleProto2]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT32}
-  #             rule: "int32.[buf.validate.conformance.cases.int32_abs_in_proto2]" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int32_abs_in_proto2]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto2/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedInt64RuleProto2]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT64}
-  #             rule: "int64.[buf.validate.conformance.cases.int64_abs_in_proto2]" elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int64_abs_in_proto2]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
+  - proto2/fixed64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleProto2]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
   - proto2/predefined_and_custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleProto2]:{a:-1  b:{c:-1}}
   #        want: validation error (5 violations)
@@ -673,38 +482,11 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: validation error (3 violations)
-  #          1. constraint_id: "predefined_and_custom_rule_embedded_proto2"
-  #             message: "b.c must be a multiple of 3"
-  #             field: "b" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          2. constraint_id: "predefined_and_custom_rule_nested_proto2"
-  #             message: "c must be positive"
-  #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          3. constraint_id: "predefined_and_custom_rule_scalar_proto2"
-  #             message: "a must be greater than 24"
-  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  - proto2/repeated/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedRuleProto2]:{val:1  val:2  val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "repeated.at_least_five.proto2"
-  #             message: "repeated field must have at least five values"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
-  #             rule: "repeated.[buf.validate.conformance.cases.repeated_at_least_five_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.repeated_at_least_five_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/repeated/wrapped/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBoolRuleProto2]:{val:{}  val:{value:true}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.proto2"
-  #             message: "bool value is not false"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.bool.[buf.validate.conformance.cases.bool_false_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bool_false_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto2/predefined_and_custom/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleProto2]:{a:26  b:{c:12}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto2/repeated/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBytesRuleProto2]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -712,39 +494,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/repeated/wrapped/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedDoubleRuleProto2]:{val:{value:1}  val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.proto2"
-  #             message: "double value is out of range"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.double.[buf.validate.conformance.cases.double_abs_range_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.double_abs_range_proto2]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto2/repeated/wrapped/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedFloatRuleProto2]:{val:{value:1}  val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.proto2"
-  #             message: "float value is out of range"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.float.[buf.validate.conformance.cases.float_abs_range_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.float_abs_range_proto2]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto2/repeated/wrapped/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedInt32RuleProto2]:{val:{value:2}  val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.int32.[buf.validate.conformance.cases.int32_abs_in_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int32_abs_in_proto2]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto2/repeated/wrapped/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedInt64RuleProto2]:{val:{value:2}  val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.int64.[buf.validate.conformance.cases.int64_abs_in_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int64_abs_in_proto2]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto2/repeated/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedStringRuleProto2]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -752,7 +502,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto2/repeated/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleProto2]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
@@ -760,7 +510,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto2/repeated/wrapped/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleProto2]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto2/repeated/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleProto2]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
@@ -768,7 +522,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto2/repeated/wrapped/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleProto2]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto2/sfixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
@@ -776,15 +534,11 @@ predefined_constraints:
   #             message: "sfixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED32}
   #             rule: "sfixed32.[buf.validate.conformance.cases.sfixed32_even_proto2]" elements:{field_number:11  field_name:"sfixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sfixed32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/sfixed64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed64RuleProto2]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed64.even.proto2"
-  #             message: "sfixed64 value is not even"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED64}
-  #             rule: "sfixed64.[buf.validate.conformance.cases.sfixed64_even_proto2]" elements:{field_number:12  field_name:"sfixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sfixed64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto2/sfixed32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleProto2]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto2/sint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
@@ -792,15 +546,19 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/sint64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt64RuleProto2]:{val:3}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto2/sint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleProto2]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto2/standard_predefined_custom/custom/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto2]:{a:24}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint64.even.proto2"
-  #             message: "sint64 value is not even"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT64}
-  #             rule: "sint64.[buf.validate.conformance.cases.sint64_even_proto2]" elements:{field_number:8  field_name:"sint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #          1. constraint_id: "standard_predefined_and_custom_rule_scalar_proto2"
+  #             message: "a must be greater than 24"
+  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
+  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto2/standard_predefined_custom/predefined/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto2]:{a:27}
   #        want: validation error (1 violation)
@@ -808,23 +566,19 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/string/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedStringRuleProto2]:{val:"../invalid/path"}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto2/standard_predefined_custom/standard/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto2]:{a:28}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.proto2"
-  #             message: "not a valid path: `../invalid/path`"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING}
-  #             rule: "string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/timestamp/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedTimestampRuleProto2]:{val:{seconds:1725415496}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "timestamp.time_range.proto2"
-  #             message: "timestamp out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "timestamp.[buf.validate.conformance.cases.timestamp_in_range_proto2]" elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.timestamp_in_range_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #          1. constraint_id: "sint32.lt"
+  #             message: "value must be less than 28"
+  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
+  #             rule: "sint32.lt" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_SINT32}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto2/standard_predefined_custom/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto2]:{a:26}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto2/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
@@ -832,7 +586,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT32}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
+  - proto2/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleProto2]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
   - proto2/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleProto2]:{val:3}
   #        want: validation error (1 violation)
@@ -840,15 +598,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/wrapped/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBoolRuleProto2]:{val:{value:true}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.proto2"
-  #             message: "bool value is not false"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "bool.[buf.validate.conformance.cases.bool_false_proto2]" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bool_false_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
+  - proto2/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleProto2]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
   - proto2/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBytesRuleProto2]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -856,39 +610,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto2/wrapped/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedDoubleRuleProto2]:{val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.proto2"
-  #             message: "double value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "double.[buf.validate.conformance.cases.double_abs_range_proto2]" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.double_abs_range_proto2]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto2/wrapped/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedFloatRuleProto2]:{val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.proto2"
-  #             message: "float value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "float.[buf.validate.conformance.cases.float_abs_range_proto2]" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.float_abs_range_proto2]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto2/wrapped/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedInt32RuleProto2]:{val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "int32.[buf.validate.conformance.cases.int32_abs_in_proto2]" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int32_abs_in_proto2]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto2/wrapped/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedInt64RuleProto2]:{val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "int64.[buf.validate.conformance.cases.int64_abs_in_proto2]" elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int64_abs_in_proto2]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto2/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedStringRuleProto2]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -896,7 +618,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto2/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleProto2]:{val:{value:3}}
   #        want: validation error (1 violation)
@@ -904,7 +626,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto2/wrapped/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleProto2]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto2/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleProto2]:{val:{value:3}}
   #        want: validation error (1 violation)
@@ -912,47 +638,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedBoolRuleProto3]:{val:true}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.proto2"
-  #             message: "bool value is not false"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BOOL}
-  #             rule: "bool.[buf.validate.conformance.cases.bool_false_proto2]" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bool_false_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/bytes/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedBytesRuleProto3]:{val:"../invalid/path"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.proto2"
-  #             message: "not a valid path: `../invalid/path`"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
-  #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedDoubleRuleProto3]:{val:-2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.proto2"
-  #             message: "double value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_DOUBLE}
-  #             rule: "double.[buf.validate.conformance.cases.double_abs_range_proto2]" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.double_abs_range_proto2]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto3/duration/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedDurationRuleProto3]:{val:{seconds:15}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "duration.too_long.proto2"
-  #             message: "duration can't be longer than 10 seconds"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "duration.[buf.validate.conformance.cases.duration_too_long_proto2]" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.duration_too_long_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/enum/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedEnumRuleProto3]:{}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "enum.non_zero.proto2"
-  #             message: "enum value is not non-zero"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_ENUM}
-  #             rule: "enum.[buf.validate.conformance.cases.enum_non_zero_proto2]" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.enum_non_zero_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto2/wrapped/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleProto2]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto3/fixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
@@ -960,7 +650,11 @@ predefined_constraints:
   #             message: "fixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED32}
   #             rule: "fixed32.[buf.validate.conformance.cases.fixed32_even_proto2]" elements:{field_number:9  field_name:"fixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
+  - proto3/fixed32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleProto3]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
   - proto3/fixed64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleProto3]:{val:3}
   #        want: validation error (1 violation)
@@ -968,31 +662,11 @@ predefined_constraints:
   #             message: "fixed64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED64}
   #             rule: "fixed64.[buf.validate.conformance.cases.fixed64_even_proto2]" elements:{field_number:10  field_name:"fixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFloatRuleProto3]:{val:-2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.proto2"
-  #             message: "float value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FLOAT}
-  #             rule: "float.[buf.validate.conformance.cases.float_abs_range_proto2]" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.float_abs_range_proto2]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto3/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedInt32RuleProto3]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT32}
-  #             rule: "int32.[buf.validate.conformance.cases.int32_abs_in_proto2]" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int32_abs_in_proto2]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto3/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedInt64RuleProto3]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.edition_2023"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT64}
-  #             rule: "int64.[buf.validate.conformance.cases.int64_abs_in_edition_2023]" elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.int64_abs_in_edition_2023]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
+  - proto3/fixed64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleProto3]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
   - proto3/map/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedMapRuleProto3]:{val:{key:1  value:1}  val:{key:2  value:2}  val:{key:3  value:3}}
   #        want: validation error (1 violation)
@@ -1000,7 +674,11 @@ predefined_constraints:
   #             message: "map must have at least five pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.[buf.validate.conformance.cases.map_at_least_five_edition_2023]" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.map_at_least_five_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
+  - proto3/map/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedMapRuleProto3]:{val:{key:1  value:1}  val:{key:2  value:2}  val:{key:3  value:3}  val:{key:4  value:4}  val:{key:5  value:5}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
   - proto3/predefined_and_custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleProto3]:{a:-1  b:{c:-1}}
   #        want: validation error (5 violations)
@@ -1024,38 +702,11 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #         got: validation error (3 violations)
-  #          1. constraint_id: "predefined_and_custom_rule_embedded_proto3"
-  #             message: "b.c must be a multiple of 3"
-  #             field: "b" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          2. constraint_id: "predefined_and_custom_rule_nested_proto3"
-  #             message: "c must be positive"
-  #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          3. constraint_id: "predefined_and_custom_rule_scalar_proto3"
-  #             message: "a must be greater than 24"
-  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
-  #             for_key: false
-  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  - proto3/repeated/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedRuleProto3]:{val:1  val:2  val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "repeated.at_least_five.proto2"
-  #             message: "repeated field must have at least five values"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
-  #             rule: "repeated.[buf.validate.conformance.cases.repeated_at_least_five_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.repeated_at_least_five_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/repeated/wrapped/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBoolRuleProto3]:{val:{}  val:{value:true}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.proto2"
-  #             message: "bool value is not false"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.bool.[buf.validate.conformance.cases.bool_false_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bool_false_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto3/predefined_and_custom/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleProto3]:{a:26  b:{c:12}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto3/repeated/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBytesRuleProto3]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -1063,39 +714,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/repeated/wrapped/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedDoubleRuleProto3]:{val:{value:1}  val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.proto2"
-  #             message: "double value is out of range"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.double.[buf.validate.conformance.cases.double_abs_range_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.double_abs_range_proto2]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto3/repeated/wrapped/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedFloatRuleProto3]:{val:{value:1}  val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.proto2"
-  #             message: "float value is out of range"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.float.[buf.validate.conformance.cases.float_abs_range_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.float_abs_range_proto2]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto3/repeated/wrapped/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedInt32RuleProto3]:{val:{value:2}  val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.int32.[buf.validate.conformance.cases.int32_abs_in_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int32_abs_in_proto2]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto3/repeated/wrapped/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedInt64RuleProto3]:{val:{value:2}  val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
-  #             rule: "repeated.items.int64.[buf.validate.conformance.cases.int64_abs_in_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int64_abs_in_proto2]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto3/repeated/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedStringRuleProto3]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -1103,7 +722,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto3/repeated/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleProto3]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
@@ -1111,7 +730,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto3/repeated/wrapped/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleProto3]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto3/repeated/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleProto3]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
@@ -1119,7 +742,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto3/repeated/wrapped/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleProto3]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto3/sfixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
@@ -1127,15 +754,11 @@ predefined_constraints:
   #             message: "sfixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED32}
   #             rule: "sfixed32.[buf.validate.conformance.cases.sfixed32_even_proto2]" elements:{field_number:11  field_name:"sfixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sfixed32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/sfixed64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed64RuleProto3]:{val:3}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed64.even.proto2"
-  #             message: "sfixed64 value is not even"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED64}
-  #             rule: "sfixed64.[buf.validate.conformance.cases.sfixed64_even_proto2]" elements:{field_number:12  field_name:"sfixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sfixed64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto3/sfixed32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleProto3]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto3/sint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
@@ -1143,15 +766,19 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/sint64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt64RuleProto3]:{val:3}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto3/sint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleProto3]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto3/standard_predefined_custom/custom/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto3]:{a:24}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint64.even.proto2"
-  #             message: "sint64 value is not even"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT64}
-  #             rule: "sint64.[buf.validate.conformance.cases.sint64_even_proto2]" elements:{field_number:8  field_name:"sint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #          1. constraint_id: "standard_predefined_and_custom_rule_scalar_proto3"
+  #             message: "a must be greater than 24"
+  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
+  #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto3/standard_predefined_custom/predefined/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto3]:{a:27}
   #        want: validation error (1 violation)
@@ -1159,23 +786,19 @@ predefined_constraints:
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/string/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedStringRuleProto3]:{val:"../invalid/path"}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto3/standard_predefined_custom/standard/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto3]:{a:28}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.proto2"
-  #             message: "not a valid path: `../invalid/path`"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING}
-  #             rule: "string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/timestamp/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedTimestampRuleProto3]:{val:{seconds:1725415496}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "timestamp.time_range.proto2"
-  #             message: "timestamp out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "timestamp.[buf.validate.conformance.cases.timestamp_in_range_proto2]" elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.timestamp_in_range_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #          1. constraint_id: "sint32.lt"
+  #             message: "value must be less than 28"
+  #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
+  #             rule: "sint32.lt" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_SINT32}
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
+  - proto3/standard_predefined_custom/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto3]:{a:26}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, int)'
   - proto3/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
@@ -1183,7 +806,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT32}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
+  - proto3/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleProto3]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(double, uint)'
   - proto3/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleProto3]:{val:3}
   #        want: validation error (1 violation)
@@ -1191,15 +818,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/wrapped/bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBoolRuleProto3]:{val:{value:true}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.false.proto2"
-  #             message: "bool value is not false"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "bool.[buf.validate.conformance.cases.bool_false_proto2]" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bool_false_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
+  - proto3/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleProto3]:{val:2}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(int, uint)'
   - proto3/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBytesRuleProto3]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -1207,39 +830,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
-  - proto3/wrapped/double/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedDoubleRuleProto3]:{val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.abs_range.proto2"
-  #             message: "double value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "double.[buf.validate.conformance.cases.double_abs_range_proto2]" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.double_abs_range_proto2]"  field_type:TYPE_DOUBLE}
-  #         got: valid
-  - proto3/wrapped/float/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedFloatRuleProto3]:{val:{value:-2}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.abs_range.proto2"
-  #             message: "float value is out of range"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "float.[buf.validate.conformance.cases.float_abs_range_proto2]" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.float_abs_range_proto2]"  field_type:TYPE_FLOAT}
-  #         got: valid
-  - proto3/wrapped/int32/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedInt32RuleProto3]:{val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "int32.[buf.validate.conformance.cases.int32_abs_in_proto2]" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int32_abs_in_proto2]"  field_type:TYPE_INT32}
-  #         got: valid
-  - proto3/wrapped/int64/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedInt64RuleProto3]:{val:{value:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.abs_in.proto2"
-  #             message: "value must be in absolute value of list"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "int64.[buf.validate.conformance.cases.int64_abs_in_proto2]" elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.int64_abs_in_proto2]"  field_type:TYPE_MESSAGE}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto3/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedStringRuleProto3]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
@@ -1247,7 +838,7 @@ predefined_constraints:
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: invalid argument to function format: invalid string value
   - proto3/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleProto3]:{val:{value:3}}
   #        want: validation error (1 violation)
@@ -1255,7 +846,11 @@ predefined_constraints:
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto3/wrapped/uint32/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleProto3]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
   - proto3/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleProto3]:{val:{value:3}}
   #        want: validation error (1 violation)
@@ -1263,7 +858,11 @@ predefined_constraints:
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
-  #         got: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
+  - proto3/wrapped/uint64/valid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleProto3]:{val:{value:2}}
+  #        want: valid
+  #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
 standard_constraints/bool:
   - const/false/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.BoolConstFalse]:{val:true}
@@ -1717,10 +1316,6 @@ standard_constraints/message:
   #             field: "val.nested.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - field/unset/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Message]:{}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
   - field/valid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Message]:{val:{const:"foo"}}
   #        want: valid
@@ -1729,74 +1324,17 @@ standard_constraints/message:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequiredButOptional]:{val:{const:"foo"}}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequired]:{}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "required"
-  #             message: "value is required"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/oneof/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequiredOneof]:{}
-  #        want: validation error (2 violations)
-  #          1. constraint_id: "required"
-  #             message: "exactly one field is required in oneof"
-  #             field: "one" elements:{field_name:"one"}
-  #          2. constraint_id: "required"
-  #             message: "value is required"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
   - required/oneof/valid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequiredOneof]:{val:{const:"foo"}}
   #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/unset/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequiredButOptional]:{}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "required"
-  #             message: "value is required"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
   - required/valid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequired]:{val:{const:"foo"}}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - skip/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageSkip]:{val:{}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
 standard_constraints/oneof:
-  - field/X/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{x:"fizzbuzz"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.prefix"
-  #             field: "x" elements:{field_number:1  field_name:"x"  field_type:TYPE_STRING}
-  #             rule: "string.prefix" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:7  field_name:"prefix"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - field/X/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{x:"foobar"}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - field/Y/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{y:-1}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.gt"
-  #             field: "y" elements:{field_number:2  field_name:"y"  field_type:TYPE_INT32}
-  #             rule: "int32.gt" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"gt"  field_type:TYPE_INT32}
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - field/Y/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{y:123}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
   - field/Z/valid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{z:{val:true}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - field/empty/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
   - filed/Z/invalid
@@ -1841,7 +1379,6 @@ standard_constraints/sfixed64:
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED64}
   #             rule: "sfixed64.const" elements:{field_number:12  field_name:"sfixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_SFIXED64}
   #         got: compilation err: CompilationError: failed to compile sfixed64.const: parse error: <input>:1:15: reserved identifier
-  #FAIL (failed: 255, skipped: 0, passed: 2563, total: 2818)
   - const/valid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.SFixed64Const]:{val:1}
   #        want: valid
@@ -1939,10 +1476,6 @@ standard_constraints/well_known_types/duration:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.DurationConst]:{val:{seconds:3}}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile duration.const: parse error: <input>:1:15: reserved identifier
-  - const/valid/empty
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.DurationConst]:{}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile duration.const: parse error: <input>:1:15: reserved identifier
 standard_constraints/well_known_types/timestamp:
   - const/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.TimestampConst]:{val:{nanos:3}}
@@ -1955,15 +1488,7 @@ standard_constraints/well_known_types/timestamp:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.TimestampConst]:{val:{seconds:3}}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile timestamp.const: parse error: <input>:1:15: reserved identifier
-  - const/valid/empty
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.TimestampConst]:{}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile timestamp.const: parse error: <input>:1:15: reserved identifier
 standard_constraints/well_known_types/wrapper:
-  - bool/empty/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperBool]:{}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
   - bool/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperBool]:{val:{}}
   #        want: validation error (1 violation)
@@ -1976,14 +1501,6 @@ standard_constraints/well_known_types/wrapper:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperBool]:{val:{value:true}}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - required/empty/string/empty/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredEmptyString]:{}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "required"
-  #             message: "value is required"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
   - required/empty/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredEmptyString]:{val:{value:"foo"}}
   #        want: validation error (1 violation)
@@ -1995,14 +1512,6 @@ standard_constraints/well_known_types/wrapper:
   - required/empty/string/valid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredEmptyString]:{val:{}}
   #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/string/empty/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredString]:{}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "required"
-  #             message: "value is required"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
   - required/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredString]:{val:{value:"foo"}}

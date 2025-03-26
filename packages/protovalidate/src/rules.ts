@@ -29,10 +29,29 @@ import {
 } from "@bufbuild/protobuf/wkt";
 import type { PathBuilder } from "./path.js";
 import {
+  AnyRulesSchema,
+  BoolRulesSchema,
+  BytesRulesSchema,
+  DoubleRulesSchema,
+  DurationRulesSchema,
+  EnumRulesSchema,
   type FieldConstraints,
   FieldConstraintsSchema,
+  Fixed32RulesSchema,
+  Fixed64RulesSchema,
+  FloatRulesSchema,
+  Int32RulesSchema,
+  Int64RulesSchema,
   MapRulesSchema,
   RepeatedRulesSchema,
+  SFixed32RulesSchema,
+  SFixed64RulesSchema,
+  SInt32RulesSchema,
+  SInt64RulesSchema,
+  StringRulesSchema,
+  TimestampRulesSchema,
+  UInt32RulesSchema,
+  UInt64RulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError } from "./error.js";
 
@@ -101,6 +120,42 @@ const scalarToRuleType = new Map<ScalarType, ruleTypeScalar>([
   [ScalarType.STRING, "string"],
   [ScalarType.BYTES, "bytes"],
 ]);
+
+/**
+ * Get the descriptor for one of the buf.validate.*Rules messages.
+ */
+export function getRuleDescriptor(
+  typeName: Exclude<FieldConstraints["type"]["value"], undefined>["$typeName"],
+): DescMessage {
+  for (const d of [
+    FloatRulesSchema,
+    DoubleRulesSchema,
+    Int32RulesSchema,
+    Int64RulesSchema,
+    UInt32RulesSchema,
+    UInt64RulesSchema,
+    SInt32RulesSchema,
+    SInt64RulesSchema,
+    Fixed32RulesSchema,
+    Fixed64RulesSchema,
+    SFixed32RulesSchema,
+    SFixed64RulesSchema,
+    BoolRulesSchema,
+    StringRulesSchema,
+    BytesRulesSchema,
+    EnumRulesSchema,
+    RepeatedRulesSchema,
+    MapRulesSchema,
+    AnyRulesSchema,
+    DurationRulesSchema,
+    TimestampRulesSchema,
+  ]) {
+    if (typeName == d.typeName) {
+      return d;
+    }
+  }
+  throw new Error(`unable to find descriptor for ${typeName}`);
+}
 
 /**
  * Get buf.validate.RepeatedRules from FieldConstraints.

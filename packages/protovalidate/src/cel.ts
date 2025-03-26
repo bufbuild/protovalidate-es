@@ -13,22 +13,15 @@
 // limitations under the License.
 
 import {
+  type DescExtension,
   type DescField,
   type DescMessage,
   getOption,
   hasOption,
-  isFieldSet,
-  type Message,
   type Registry,
 } from "@bufbuild/protobuf";
-import { timestampNow } from "@bufbuild/protobuf/wkt";
 import {
-  type Constraint,
-  type FieldConstraints,
-  predefined,
-} from "./gen/buf/validate/validate_pb.js";
-import {
-  CelEnv,
+  type CelEnv,
   CelError,
   CelList,
   type CelResult,
@@ -37,8 +30,22 @@ import {
   Func,
   FuncRegistry,
 } from "@bufbuild/cel";
+import {
+  type Constraint,
+  type FieldConstraints,
+  predefined,
+} from "./gen/buf/validate/validate_pb.js";
 import { CompilationError, RuntimeError } from "./error.js";
+import {
+  isReflectList,
+  isReflectMap,
+  isReflectMessage,
+  type ReflectMessageGet,
+} from "@bufbuild/protobuf/reflect";
+import type { Eval } from "./eval.js";
 import type { Path } from "./path.js";
+import { Cursor } from "./cursor.js";
+import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
 import {
   isEmail,
   isHostAndPort,
@@ -51,30 +58,32 @@ import {
   unique,
 } from "./lib.js";
 
-// Value of the CEL variable "now".
-const now = timestampNow();
+type CelCompiledRules = {
+  standard: {
+    field: DescField;
+    constraint: Constraint;
+    compiled: CelCompiledConstraint;
+  }[];
+  extensions: Map<
+    number,
+    {
+      ext: DescExtension;
+      constraint: Constraint;
+      compiled: CelCompiledConstraint;
+    }[]
+  >;
+};
 
-/**
- * Create a CEL environment with extensions for Protovalidate.
- *
- * This includes the variable "now", which must be updated before each evaluation
- * by calling updateCelNow().
- */
-export function createCelEnv(namespace: string, registry: Registry): CelEnv {
-  const env = createEnv(namespace, registry);
-  env.addFuncs(createCustomFuncs());
-  env.set("now", now);
-  return env;
-}
-
-/**
- * Update the CEL variable "now" to the current time.
- */
-export function updateCelNow(): void {
-  const n2 = timestampNow();
-  now.seconds = n2.seconds;
-  now.nanos = n2.nanos;
-}
+export type CelCompiledConstraint =
+  | {
+      kind: "compilation_error";
+      error: CompilationError;
+    }
+  | {
+      kind: "interpretable";
+      interpretable: ReturnType<CelEnv["plan"]>;
+      constraint: Constraint;
+    };
 
 // TODO contains, endsWith, startsWith for bytes
 
@@ -228,125 +237,291 @@ function createCustomFuncs(): FuncRegistry {
   return reg;
 }
 
-/**
- * Parse and compile a buf.validate.Constraint, a Protovalidate CEL expression.
- *
- * The result can be given to celConstraintEval().
- *
- * Throws a CompilationError.
- */
-export function celConstraintPlan(
-  env: CelEnv,
-  constraint: Constraint,
-): ReturnType<CelEnv["plan"]> {
-  try {
-    return env.plan(env.parse(constraint.expression));
-  } catch (cause) {
-    throw new CompilationError(
-      `failed to compile ${constraint.id}: ${String(cause)}`,
-      { cause },
+export class CelManager {
+  // CEL environment with extensions for Protovalidate.
+  // This includes the variable "now", which must be updated before each evaluation
+  // by calling updateCelNow().
+  private readonly env: CelEnv;
+
+  // Value of the CEL variable "now"
+  private readonly now: Timestamp;
+
+  private readonly rulesCache = new Map<string, CelCompiledRules>();
+
+  constructor(private readonly registry: Registry) {
+    this.now = timestampNow();
+    this.env = createEnv("", registry);
+    this.env.addFuncs(createCustomFuncs());
+    this.env.set("now", this.now);
+  }
+
+  /**
+   * Update the CEL variable "now" to the current time.
+   */
+  updateCelNow(): void {
+    const n2 = timestampNow();
+    this.now.seconds = n2.seconds;
+    this.now.nanos = n2.nanos;
+  }
+
+  clearEnv(key: "this" | "rules" | "rule"): void {
+    // TODO should clear, not set `null` - support clearing in CEL, or refactor this code
+    this.env.set(key, null);
+  }
+
+  setEnv(key: "this" | "rules" | "rule", value: unknown): void {
+    this.env.set(key, value);
+  }
+
+  eval(compiled: CelCompiledConstraint) {
+    if (compiled.kind == "compilation_error") {
+      throw compiled.error;
+    }
+    const constraint = compiled.constraint;
+    const result = this.env.eval(compiled.interpretable);
+    if (typeof result == "string" || typeof result == "boolean") {
+      const success = typeof result == "boolean" ? result : result.length == 0;
+      if (success) {
+        return undefined;
+      }
+      // From field buf.validate.Constraint.message:
+      // > If a non-empty message is provided, any strings resulting from the CEL
+      // > expression evaluation are ignored.
+      return {
+        message:
+          constraint.message.length == 0 && typeof result == "string"
+            ? result
+            : constraint.message,
+        constraintId: constraint.id,
+      };
+    }
+    if (result instanceof CelError) {
+      throw new RuntimeError(result.message, { cause: result });
+    }
+    throw new RuntimeError(
+      `expression ${constraint.id} outputs ${typeof result}, wanted either bool or string`,
     );
   }
-}
 
-/**
- * Run a compiled buf.validate.Constraint, a Protovalidate CEL expression.
- */
-export function celConstraintEval(
-  env: CelEnv,
-  constraint: Constraint,
-  planned: ReturnType<CelEnv["plan"]>,
-): { message: string; constraintId: string } | undefined {
-  const result = env.eval(planned);
-  if (isExpectedResult(result)) {
-    const success = typeof result == "boolean" ? result : result.length == 0;
-    if (success) {
-      return undefined;
+  compileConstraint(constraint: Constraint): CelCompiledConstraint {
+    try {
+      return {
+        kind: "interpretable",
+        interpretable: this.env.plan(this.env.parse(constraint.expression)),
+        constraint,
+      };
+    } catch (cause) {
+      return {
+        kind: "compilation_error",
+        error: new CompilationError(
+          `failed to compile ${constraint.id}: ${String(cause)}`,
+          { cause },
+        ),
+      };
     }
-    // From field buf.validate.Constraint.message:
-    // > If a non-empty message is provided, any strings resulting from the CEL
-    // > expression evaluation are ignored.
-    return {
-      message:
-        constraint.message.length == 0 && typeof result == "string"
-          ? result
-          : constraint.message,
-      constraintId: constraint.id,
-    };
-  }
-  if (result instanceof CelError) {
-    throw new RuntimeError(result.message, { cause: result });
-  }
-  throw new RuntimeError(
-    `expression ${constraint.id} outputs ${typeof result}, wanted either bool or string`,
-  );
-}
-
-function isExpectedResult(result: CelResult): result is "string" | "boolean" {
-  return typeof result == "string" || typeof result == "boolean";
-}
-
-export type RuleCelPlan = {
-  rules: Message;
-  rulePath: Path;
-  constraint: Constraint;
-  planned: ReturnType<CelEnv["plan"]>;
-  env: CelEnv;
-};
-
-export class RuleCelCache {
-  private readonly rulesRegistry: Registry;
-  private readonly env: CelEnv;
-  private planCache = new Map<DescField, RuleCelPlan[]>();
-
-  constructor(registry: Registry) {
-    this.rulesRegistry = registry;
-    this.env = createCelEnv("", registry);
   }
 
-  getPlans(
-    rules: Exclude<FieldConstraints["type"]["value"], undefined>,
-  ): RuleCelPlan[] {
-    const plans: RuleCelPlan[] = [];
-    for (const field of this.rulesMessageDesc(rules).fields) {
-      if (isFieldSet(rules, field)) {
-        plans.push(...this.getFieldPlans(rules, field));
+  compileRules(descMessage: DescMessage): CelCompiledRules {
+    let compiled = this.rulesCache.get(descMessage.typeName);
+    if (!compiled) {
+      this.rulesCache.set(
+        descMessage.typeName,
+        (compiled = this.compileRulesUncached(descMessage)),
+      );
+    }
+    return compiled;
+  }
+
+  private compileRulesUncached(descMessage: DescMessage): CelCompiledRules {
+    const standard: CelCompiledRules["standard"] = [];
+    const extensions: CelCompiledRules["extensions"] = new Map();
+    for (const field of descMessage.fields) {
+      if (!hasOption(field, predefined)) {
+        continue;
+      }
+      for (const constraint of getOption(field, predefined).cel) {
+        standard.push({
+          field,
+          constraint,
+          compiled: this.compileConstraint(constraint),
+        });
       }
     }
-    return plans;
-  }
-
-  private getFieldPlans(rules: Message, field: DescField): RuleCelPlan[] {
-    let plans = this.planCache.get(field);
-    if (plans === undefined) {
-      plans = [];
-      if (hasOption(field, predefined)) {
-        const predefinedConstraints = getOption(field, predefined);
-        if (predefinedConstraints.cel.length) {
-          for (const constraint of predefinedConstraints.cel) {
-            plans.push({
-              rules,
-              rulePath: [field],
-              constraint,
-              planned: celConstraintPlan(this.env, constraint),
-              env: this.env,
-            });
-          }
-        }
+    for (const ext of registryGetExtensionsFor(this.registry, descMessage)) {
+      if (!hasOption(ext, predefined)) {
+        continue;
       }
-      // TODO enable caching, but fix bug: can't cache "rules", because they can contain non-static values
-      // this.planCache.set(field, plans);
+      let list = extensions.get(ext.number);
+      if (!list) {
+        extensions.set(ext.number, (list = []));
+      }
+      for (const constraint of getOption(ext, predefined).cel) {
+        list.push({
+          ext,
+          constraint,
+          compiled: this.compileConstraint(constraint),
+        });
+      }
     }
-    return plans;
+    return { standard, extensions };
+  }
+}
+
+function registryGetExtensionsFor(
+  registry: Registry,
+  extendee: DescMessage,
+): DescExtension[] {
+  const result: DescExtension[] = [];
+  for (const type of registry) {
+    if (
+      type.kind == "extension" &&
+      type.extendee.typeName == extendee.typeName
+    ) {
+      result.push(type);
+    }
+  }
+  return result;
+}
+
+export class EvalCustomCel implements Eval<ReflectMessageGet> {
+  private readonly children: {
+    compiled: CelCompiledConstraint;
+    rulePath: Path;
+  }[] = [];
+
+  constructor(
+    private readonly celMan: CelManager,
+    private readonly forMapKey: boolean,
+  ) {}
+
+  add(compiled: CelCompiledConstraint, rulePath: Path): void {
+    this.children.push({ compiled, rulePath });
   }
 
-  private rulesMessageDesc(
-    rules: Exclude<FieldConstraints["type"]["value"], undefined>,
-  ): DescMessage {
-    const desc = this.rulesRegistry.getMessage(rules.$typeName);
-    if (!desc) {
-      throw new Error(`unable to find descriptor for ${rules.$typeName}`);
+  eval(val: ReflectMessageGet, cursor: Cursor): void {
+    this.celMan.setEnv("this", reflectToCel(val));
+    this.celMan.clearEnv("rules");
+    this.celMan.clearEnv("rule");
+    for (const child of this.children) {
+      const vio = this.celMan.eval(child.compiled);
+      if (vio) {
+        cursor.violate(
+          vio.message,
+          vio.constraintId,
+          child.rulePath,
+          this.forMapKey,
+        );
+      }
     }
-    return desc;
   }
+
+  prune(): boolean {
+    return this.children.length == 0;
+  }
+}
+
+export class EvalExtendedRulesCel implements Eval<ReflectMessageGet> {
+  private readonly children: {
+    compiled: CelCompiledConstraint;
+    rulePath: Path;
+    ruleValue: unknown;
+  }[] = [];
+
+  constructor(
+    private readonly celMan: CelManager,
+    private readonly rules: Exclude<
+      FieldConstraints["type"]["value"],
+      undefined
+    >,
+    private readonly forMapKey: boolean,
+  ) {}
+
+  add(
+    compiled: CelCompiledConstraint,
+    rulePath: Path,
+    ruleValue: unknown,
+  ): void {
+    this.children.push({
+      compiled,
+      rulePath,
+      ruleValue: reflectToCel(ruleValue),
+    });
+  }
+
+  eval(val: ReflectMessageGet, cursor: Cursor): void {
+    this.celMan.setEnv("this", reflectToCel(val));
+    this.celMan.setEnv("rules", this.rules);
+    for (const child of this.children) {
+      this.celMan.setEnv("rule", child.ruleValue);
+      const vio = this.celMan.eval(child.compiled);
+      if (vio) {
+        cursor.violate(
+          vio.message,
+          vio.constraintId,
+          child.rulePath,
+          this.forMapKey,
+        );
+      }
+    }
+  }
+
+  prune(): boolean {
+    return this.children.length == 0;
+  }
+}
+
+export class EvalStandardRulesCel implements Eval<ReflectMessageGet> {
+  private readonly children: {
+    compiled: CelCompiledConstraint;
+    rulePath: Path;
+  }[] = [];
+
+  constructor(
+    private readonly celMan: CelManager,
+    private readonly rules: Exclude<
+      FieldConstraints["type"]["value"],
+      undefined
+    >,
+    private readonly forMapKey: boolean,
+  ) {}
+
+  add(compiled: CelCompiledConstraint, rulePath: Path): void {
+    this.children.push({ compiled, rulePath });
+  }
+
+  eval(val: ReflectMessageGet, cursor: Cursor): void {
+    this.celMan.setEnv("this", reflectToCel(val));
+    this.celMan.setEnv("rules", this.rules);
+    this.celMan.clearEnv("rule");
+    for (const child of this.children) {
+      const vio = this.celMan.eval(child.compiled);
+      if (vio) {
+        cursor.violate(
+          vio.message,
+          vio.constraintId,
+          child.rulePath,
+          this.forMapKey,
+        );
+      }
+    }
+  }
+
+  prune(): boolean {
+    return this.children.length == 0;
+  }
+}
+
+function reflectToCel(val: unknown): unknown {
+  if (isReflectMessage(val)) {
+    return val.message;
+  }
+  if (isReflectList(val)) {
+    // @ts-expect-error -- TODO provide public access in protobuf-es, or support reflection types in CEL
+    return val[Symbol.for("reflect unsafe local")];
+  }
+  if (isReflectMap(val)) {
+    // @ts-expect-error -- TODO provide public access in protobuf-es, or support reflection types in CEL
+    return val[Symbol.for("reflect unsafe local")];
+  }
+  return val;
 }

@@ -20,8 +20,8 @@ import {
 } from "@bufbuild/protobuf";
 import { nestedTypes, reflect } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
-import { createPlanner } from "./planner.js";
-import { updateCelNow } from "./cel.js";
+import { Planner } from "./planner.js";
+import { CelManager } from "./cel.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
 
 /**
@@ -65,7 +65,8 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
     : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
-  const planner = createPlanner(registry);
+  const celMan = new CelManager(registry);
+  const planner = new Planner(celMan);
   return {
     validate(schema, message) {
       this.for(schema)(message);
@@ -79,7 +80,7 @@ export function createValidator(opt?: ValidatorOptions): Validator {
       return function boundValidationFn(message) {
         const msg = reflect(schema, message);
         const cursor = Cursor.create(schema, failFast);
-        updateCelNow();
+        celMan.updateCelNow();
         plan.eval(msg, cursor);
         cursor.throwIfViolated();
       };
