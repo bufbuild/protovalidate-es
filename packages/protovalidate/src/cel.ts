@@ -264,11 +264,6 @@ export class CelManager {
     this.now.nanos = n2.nanos;
   }
 
-  clearEnv(key: "this" | "rules" | "rule"): void {
-    // TODO should clear, not set `null` - support clearing in CEL, or refactor this code
-    this.env.set(key, null);
-  }
-
   setEnv(key: "this" | "rules" | "rule", value: unknown): void {
     this.env.set(key, value);
   }
@@ -400,8 +395,8 @@ export class EvalCustomCel implements Eval<ReflectMessageGet> {
 
   eval(val: ReflectMessageGet, cursor: Cursor): void {
     this.celMan.setEnv("this", reflectToCel(val));
-    this.celMan.clearEnv("rules");
-    this.celMan.clearEnv("rule");
+    this.celMan.setEnv("rules", undefined);
+    this.celMan.setEnv("rule", undefined);
     for (const child of this.children) {
       const vio = this.celMan.eval(child.compiled);
       if (vio) {
@@ -492,7 +487,7 @@ export class EvalStandardRulesCel implements Eval<ReflectMessageGet> {
   eval(val: ReflectMessageGet, cursor: Cursor): void {
     this.celMan.setEnv("this", reflectToCel(val));
     this.celMan.setEnv("rules", this.rules);
-    this.celMan.clearEnv("rule");
+    this.celMan.setEnv("rule", undefined);
     for (const child of this.children) {
       const vio = this.celMan.eval(child.compiled);
       if (vio) {

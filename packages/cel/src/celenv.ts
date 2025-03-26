@@ -148,8 +148,15 @@ export class CelEnv {
     return this.eval(this.plan(this.parse(expr)));
   }
 
+  /**
+   * Define a variable.
+   *
+   * Passing `undefined` as a value removes any previous definition.
+   */
   public set(name: string, value: unknown): void {
-    if (
+    if (value === undefined) {
+      delete this.data[name];
+    } else if (
       isCelVal(value) ||
       value instanceof CelError ||
       value instanceof CelUnknown
