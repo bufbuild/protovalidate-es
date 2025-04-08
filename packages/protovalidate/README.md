@@ -49,6 +49,6 @@ try {
 }
 ```
 
-[protovalidate]: https://buf.build/docs/protovalidate/overview/
+[protovalidate]: https://buf.build/docs/protovalidate
 [cel]: https://cel.dev
 [protoc-gen-validate]: https://github.com/bufbuild/protoc-gen-validate
