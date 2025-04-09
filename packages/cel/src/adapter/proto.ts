@@ -212,11 +212,7 @@ export class ProtoValAdapter implements CelValAdapter {
       const schema = this.getSchema(obj.$typeName);
       const field = schema.fields.find((f) => f.name === name);
       if (!field) {
-        return CelErrors.fieldNotFound(
-          id,
-          name,
-          schema.fields.map((f) => f.name),
-        );
+        return CelErrors.fieldNotFound(id, name, schema.toString());
       }
       return isFieldSet(obj, field);
     }
@@ -232,11 +228,7 @@ export class ProtoValAdapter implements CelValAdapter {
       const schema = this.getSchema(obj.$typeName);
       const field = schema.fields.find((f) => f.name === name);
       if (!field) {
-        return CelErrors.fieldNotFound(
-          id,
-          name,
-          schema.fields.map((f) => f.name),
-        );
+        return CelErrors.fieldNotFound(id, name, schema.toString());
       }
       const r = reflect(schema, obj);
       switch (field.fieldKind) {
@@ -564,7 +556,7 @@ export class ProtoValAdapter implements CelValAdapter {
     for (const key of keys) {
       const field = fields.get(key as string);
       if (!field) {
-        return CelErrors.fieldNotFound(id, key, Array.from(fields.keys()));
+        return CelErrors.fieldNotFound(id, key, messageSchema.toString());
       }
       // TODO(tstamm) what does accessByName return? why don't we use the adapter?
       const val = obj.accessByName(id, key);

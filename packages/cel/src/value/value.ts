@@ -689,12 +689,12 @@ export class CelErrors {
   static fieldNotFound(
     id: number,
     name: unknown,
-    fields: unknown = undefined,
+    container?: string,
   ): CelError {
-    if (fields !== undefined) {
+    if (container !== undefined) {
       return new CelError(
         id,
-        `field not found: ${String(name)} in ${String(fields)}`,
+        `field not found: ${String(name)} in ${container}`,
       );
     }
     return new CelError(id, `field not found: ${String(name)}`);
