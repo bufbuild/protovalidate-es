@@ -25,12 +25,13 @@ import {
 } from "@bufbuild/protobuf";
 import {
   type FieldConstraints,
+  type MessageConstraints,
+  Ignore,
   field as ext_field,
   message as ext_message,
   oneof as ext_oneof,
   FieldConstraintsSchema,
   AnyRulesSchema,
-  type MessageConstraints,
 } from "./gen/buf/validate/validate_pb.js";
 import type {
   ReflectList,
@@ -112,7 +113,7 @@ export class Planner {
     const evals = new EvalMany<ReflectMessage>();
     for (const field of fields) {
       const constraints = getOption(field, ext_field);
-      if (constraints.required) {
+      if (constraints.required && constraints.ignore !== Ignore.ALWAYS) {
         evals.add(new EvalFieldRequired(field));
       }
       const baseRulePath = buildPath(FieldConstraintsSchema);
