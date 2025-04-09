@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/required_field_proto_editions.proto.
  */
 export const file_buf_validate_conformance_cases_required_field_proto_editions: GenFile = /*@__PURE__*/
-  fileDesc("CkJidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvcmVxdWlyZWRfZmllbGRfcHJvdG9fZWRpdGlvbnMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyI9CiZSZXF1aXJlZEVkaXRpb25zU2NhbGFyRXhwbGljaXRQcmVzZW5jZRITCgN2YWwYASABKAlCBrpIA8gBASJJCi1SZXF1aXJlZEVkaXRpb25zU2NhbGFyRXhwbGljaXRQcmVzZW5jZURlZmF1bHQSGAoDdmFsGAEgASgJOgNmb29CBrpIA8gBASJCCiZSZXF1aXJlZEVkaXRpb25zU2NhbGFySW1wbGljaXRQcmVzZW5jZRIYCgN2YWwYASABKAlCC6oBAggCukgDyAEBIkAKJFJlcXVpcmVkRWRpdGlvbnNTY2FsYXJMZWdhY3lSZXF1aXJlZBIYCgN2YWwYASABKAlCC6oBAggDukgDyAEBIp8BCidSZXF1aXJlZEVkaXRpb25zTWVzc2FnZUV4cGxpY2l0UHJlc2VuY2USYAoDdmFsGAEgASgLMksuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkRWRpdGlvbnNNZXNzYWdlRXhwbGljaXRQcmVzZW5jZS5Nc2dCBrpIA8gBARoSCgNNc2cSCwoDdmFsGAEgASgJIrYBCjBSZXF1aXJlZEVkaXRpb25zTWVzc2FnZUV4cGxpY2l0UHJlc2VuY2VEZWxpbWl0ZWQSbgoDdmFsGAEgASgLMlQuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkRWRpdGlvbnNNZXNzYWdlRXhwbGljaXRQcmVzZW5jZURlbGltaXRlZC5Nc2dCC6oBAigCukgDyAEBGhIKA01zZxILCgN2YWwYASABKAkioAEKJVJlcXVpcmVkRWRpdGlvbnNNZXNzYWdlTGVnYWN5UmVxdWlyZWQSYwoDdmFsGAEgASgLMkkuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkRWRpdGlvbnNNZXNzYWdlTGVnYWN5UmVxdWlyZWQuTXNnQguqAQIIA7pIA8gBARoSCgNNc2cSCwoDdmFsGAEgASgJIrQBCi5SZXF1aXJlZEVkaXRpb25zTWVzc2FnZUxlZ2FjeVJlcXVpcmVkRGVsaW1pdGVkEm4KA3ZhbBgBIAEoCzJSLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZEVkaXRpb25zTWVzc2FnZUxlZ2FjeVJlcXVpcmVkRGVsaW1pdGVkLk1zZ0INqgEECAMoArpIA8gBARoSCgNNc2cSCwoDdmFsGAEgASgJIkAKFVJlcXVpcmVkRWRpdGlvbnNPbmVvZhITCgFhGAEgASgJQga6SAPIAQFIABILCgFiGAIgASgJSABCBQoDdmFsIi8KGFJlcXVpcmVkRWRpdGlvbnNSZXBlYXRlZBITCgN2YWwYASADKAlCBrpIA8gBASI8CiBSZXF1aXJlZEVkaXRpb25zUmVwZWF0ZWRFeHBhbmRlZBIYCgN2YWwYASADKAlCC6oBAhgCukgDyAEBIpQBChNSZXF1aXJlZEVkaXRpb25zTWFwElEKA3ZhbBgBIAMoCzI8LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZEVkaXRpb25zTWFwLlZhbEVudHJ5Qga6SAPIAQEaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AWIIZWRpdGlvbnNw6Ac", [file_buf_validate_validate]);
+  fileDesc("CkJidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvcmVxdWlyZWRfZmllbGRfcHJvdG9fZWRpdGlvbnMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyI9CiZSZXF1aXJlZEVkaXRpb25zU2NhbGFyRXhwbGljaXRQcmVzZW5jZRITCgN2YWwYASABKAlCBrpIA8gBASJMCjJSZXF1aXJlZEVkaXRpb25zU2NhbGFyRXhwbGljaXRQcmVzZW5jZUlnbm9yZUFsd2F5cxIWCgN2YWwYASABKAlCCbpIBsgBAdgBAyJJCi1SZXF1aXJlZEVkaXRpb25zU2NhbGFyRXhwbGljaXRQcmVzZW5jZURlZmF1bHQSGAoDdmFsGAEgASgJOgNmb29CBrpIA8gBASJYCjlSZXF1aXJlZEVkaXRpb25zU2NhbGFyRXhwbGljaXRQcmVzZW5jZURlZmF1bHRJZ25vcmVBbHdheXMSGwoDdmFsGAEgASgJOgNmb29CCbpIBsgBAdgBAyJCCiZSZXF1aXJlZEVkaXRpb25zU2NhbGFySW1wbGljaXRQcmVzZW5jZRIYCgN2YWwYASABKAlCC6oBAggCukgDyAEBIlEKMlJlcXVpcmVkRWRpdGlvbnNTY2FsYXJJbXBsaWNpdFByZXNlbmNlSWdub3JlQWx3YXlzEhsKA3ZhbBgBIAEoCUIOqgECCAK6SAbIAQHYAQMiQAokUmVxdWlyZWRFZGl0aW9uc1NjYWxhckxlZ2FjeVJlcXVpcmVkEhgKA3ZhbBgBIAEoCUILqgECCAO6SAPIAQEinwEKJ1JlcXVpcmVkRWRpdGlvbnNNZXNzYWdlRXhwbGljaXRQcmVzZW5jZRJgCgN2YWwYASABKAsySy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUmVxdWlyZWRFZGl0aW9uc01lc3NhZ2VFeHBsaWNpdFByZXNlbmNlLk1zZ0IGukgDyAEBGhIKA01zZxILCgN2YWwYASABKAkiugEKM1JlcXVpcmVkRWRpdGlvbnNNZXNzYWdlRXhwbGljaXRQcmVzZW5jZUlnbm9yZUFsd2F5cxJvCgN2YWwYASABKAsyVy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUmVxdWlyZWRFZGl0aW9uc01lc3NhZ2VFeHBsaWNpdFByZXNlbmNlSWdub3JlQWx3YXlzLk1zZ0IJukgGyAEB2AEDGhIKA01zZxILCgN2YWwYASABKAkitgEKMFJlcXVpcmVkRWRpdGlvbnNNZXNzYWdlRXhwbGljaXRQcmVzZW5jZURlbGltaXRlZBJuCgN2YWwYASABKAsyVC5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUmVxdWlyZWRFZGl0aW9uc01lc3NhZ2VFeHBsaWNpdFByZXNlbmNlRGVsaW1pdGVkLk1zZ0ILqgECKAK6SAPIAQEaEgoDTXNnEgsKA3ZhbBgBIAEoCSLRAQo8UmVxdWlyZWRFZGl0aW9uc01lc3NhZ2VFeHBsaWNpdFByZXNlbmNlRGVsaW1pdGVkSWdub3JlQWx3YXlzEn0KA3ZhbBgBIAEoCzJgLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZEVkaXRpb25zTWVzc2FnZUV4cGxpY2l0UHJlc2VuY2VEZWxpbWl0ZWRJZ25vcmVBbHdheXMuTXNnQg6qAQIoArpIBsgBAdgBAxoSCgNNc2cSCwoDdmFsGAEgASgJIqABCiVSZXF1aXJlZEVkaXRpb25zTWVzc2FnZUxlZ2FjeVJlcXVpcmVkEmMKA3ZhbBgBIAEoCzJJLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZEVkaXRpb25zTWVzc2FnZUxlZ2FjeVJlcXVpcmVkLk1zZ0ILqgECCAO6SAPIAQEaEgoDTXNnEgsKA3ZhbBgBIAEoCSK0AQouUmVxdWlyZWRFZGl0aW9uc01lc3NhZ2VMZWdhY3lSZXF1aXJlZERlbGltaXRlZBJuCgN2YWwYASABKAsyUi5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUmVxdWlyZWRFZGl0aW9uc01lc3NhZ2VMZWdhY3lSZXF1aXJlZERlbGltaXRlZC5Nc2dCDaoBBAgDKAK6SAPIAQEaEgoDTXNnEgsKA3ZhbBgBIAEoCSJAChVSZXF1aXJlZEVkaXRpb25zT25lb2YSEwoBYRgBIAEoCUIGukgDyAEBSAASCwoBYhgCIAEoCUgAQgUKA3ZhbCJPCiFSZXF1aXJlZEVkaXRpb25zT25lb2ZJZ25vcmVBbHdheXMSFgoBYRgBIAEoCUIJukgGyAEB2AEDSAASCwoBYhgCIAEoCUgAQgUKA3ZhbCIvChhSZXF1aXJlZEVkaXRpb25zUmVwZWF0ZWQSEwoDdmFsGAEgAygJQga6SAPIAQEiPgokUmVxdWlyZWRFZGl0aW9uc1JlcGVhdGVkSWdub3JlQWx3YXlzEhYKA3ZhbBgBIAMoCUIJukgGyAEB2AEDIjwKIFJlcXVpcmVkRWRpdGlvbnNSZXBlYXRlZEV4cGFuZGVkEhgKA3ZhbBgBIAMoCUILqgECGAK6SAPIAQEiSwosUmVxdWlyZWRFZGl0aW9uc1JlcGVhdGVkRXhwYW5kZWRJZ25vcmVBbHdheXMSGwoDdmFsGAEgAygJQg6qAQIYArpIBsgBAdgBAyKUAQoTUmVxdWlyZWRFZGl0aW9uc01hcBJRCgN2YWwYASADKAsyPC5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUmVxdWlyZWRFZGl0aW9uc01hcC5WYWxFbnRyeUIGukgDyAEBGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEirwEKH1JlcXVpcmVkRWRpdGlvbnNNYXBJZ25vcmVBbHdheXMSYAoDdmFsGAEgAygLMkguYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkRWRpdGlvbnNNYXBJZ25vcmVBbHdheXMuVmFsRW50cnlCCbpIBsgBAdgBAxoqCghWYWxFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBYghlZGl0aW9uc3DoBw", [file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresence
@@ -45,6 +45,23 @@ export const RequiredEditionsScalarExplicitPresenceSchema: GenMessage<RequiredEd
   messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 0);
 
 /**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceIgnoreAlways
+ */
+export type RequiredEditionsScalarExplicitPresenceIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceIgnoreAlways"> & {
+  /**
+   * @generated from field: string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceIgnoreAlways.
+ * Use `create(RequiredEditionsScalarExplicitPresenceIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsScalarExplicitPresenceIgnoreAlwaysSchema: GenMessage<RequiredEditionsScalarExplicitPresenceIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 1);
+
+/**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceDefault
  */
 export type RequiredEditionsScalarExplicitPresenceDefault = Message<"buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceDefault"> & {
@@ -59,7 +76,24 @@ export type RequiredEditionsScalarExplicitPresenceDefault = Message<"buf.validat
  * Use `create(RequiredEditionsScalarExplicitPresenceDefaultSchema)` to create a new message.
  */
 export const RequiredEditionsScalarExplicitPresenceDefaultSchema: GenMessage<RequiredEditionsScalarExplicitPresenceDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 1);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 2);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlways
+ */
+export type RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlways"> & {
+  /**
+   * @generated from field: string val = 1 [default = "foo"];
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlways.
+ * Use `create(RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlwaysSchema: GenMessage<RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 3);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsScalarImplicitPresence
@@ -76,7 +110,24 @@ export type RequiredEditionsScalarImplicitPresence = Message<"buf.validate.confo
  * Use `create(RequiredEditionsScalarImplicitPresenceSchema)` to create a new message.
  */
 export const RequiredEditionsScalarImplicitPresenceSchema: GenMessage<RequiredEditionsScalarImplicitPresence> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 2);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 4);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsScalarImplicitPresenceIgnoreAlways
+ */
+export type RequiredEditionsScalarImplicitPresenceIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsScalarImplicitPresenceIgnoreAlways"> & {
+  /**
+   * @generated from field: string val = 1 [features.field_presence = IMPLICIT];
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsScalarImplicitPresenceIgnoreAlways.
+ * Use `create(RequiredEditionsScalarImplicitPresenceIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsScalarImplicitPresenceIgnoreAlwaysSchema: GenMessage<RequiredEditionsScalarImplicitPresenceIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 5);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsScalarLegacyRequired
@@ -93,7 +144,7 @@ export type RequiredEditionsScalarLegacyRequired = Message<"buf.validate.conform
  * Use `create(RequiredEditionsScalarLegacyRequiredSchema)` to create a new message.
  */
 export const RequiredEditionsScalarLegacyRequiredSchema: GenMessage<RequiredEditionsScalarLegacyRequired> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 3);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 6);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresence
@@ -110,7 +161,7 @@ export type RequiredEditionsMessageExplicitPresence = Message<"buf.validate.conf
  * Use `create(RequiredEditionsMessageExplicitPresenceSchema)` to create a new message.
  */
 export const RequiredEditionsMessageExplicitPresenceSchema: GenMessage<RequiredEditionsMessageExplicitPresence> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 4);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 7);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresence.Msg
@@ -127,7 +178,41 @@ export type RequiredEditionsMessageExplicitPresence_Msg = Message<"buf.validate.
  * Use `create(RequiredEditionsMessageExplicitPresence_MsgSchema)` to create a new message.
  */
 export const RequiredEditionsMessageExplicitPresence_MsgSchema: GenMessage<RequiredEditionsMessageExplicitPresence_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 4, 0);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 7, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways
+ */
+export type RequiredEditionsMessageExplicitPresenceIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways.Msg val = 1;
+   */
+  val?: RequiredEditionsMessageExplicitPresenceIgnoreAlways_Msg;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways.
+ * Use `create(RequiredEditionsMessageExplicitPresenceIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsMessageExplicitPresenceIgnoreAlwaysSchema: GenMessage<RequiredEditionsMessageExplicitPresenceIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 8);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways.Msg
+ */
+export type RequiredEditionsMessageExplicitPresenceIgnoreAlways_Msg = Message<"buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways.Msg"> & {
+  /**
+   * @generated from field: string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways.Msg.
+ * Use `create(RequiredEditionsMessageExplicitPresenceIgnoreAlways_MsgSchema)` to create a new message.
+ */
+export const RequiredEditionsMessageExplicitPresenceIgnoreAlways_MsgSchema: GenMessage<RequiredEditionsMessageExplicitPresenceIgnoreAlways_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 8, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimited
@@ -144,7 +229,7 @@ export type RequiredEditionsMessageExplicitPresenceDelimited = Message<"buf.vali
  * Use `create(RequiredEditionsMessageExplicitPresenceDelimitedSchema)` to create a new message.
  */
 export const RequiredEditionsMessageExplicitPresenceDelimitedSchema: GenMessage<RequiredEditionsMessageExplicitPresenceDelimited> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 5);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 9);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimited.Msg
@@ -161,7 +246,41 @@ export type RequiredEditionsMessageExplicitPresenceDelimited_Msg = Message<"buf.
  * Use `create(RequiredEditionsMessageExplicitPresenceDelimited_MsgSchema)` to create a new message.
  */
 export const RequiredEditionsMessageExplicitPresenceDelimited_MsgSchema: GenMessage<RequiredEditionsMessageExplicitPresenceDelimited_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 5, 0);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 9, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways
+ */
+export type RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways.Msg val = 1 [features.message_encoding = DELIMITED];
+   */
+  val?: RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways_Msg;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways.
+ * Use `create(RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlwaysSchema: GenMessage<RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 10);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways.Msg
+ */
+export type RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways_Msg = Message<"buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways.Msg"> & {
+  /**
+   * @generated from field: string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways.Msg.
+ * Use `create(RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways_MsgSchema)` to create a new message.
+ */
+export const RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways_MsgSchema: GenMessage<RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 10, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageLegacyRequired
@@ -178,7 +297,7 @@ export type RequiredEditionsMessageLegacyRequired = Message<"buf.validate.confor
  * Use `create(RequiredEditionsMessageLegacyRequiredSchema)` to create a new message.
  */
 export const RequiredEditionsMessageLegacyRequiredSchema: GenMessage<RequiredEditionsMessageLegacyRequired> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 6);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 11);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageLegacyRequired.Msg
@@ -195,7 +314,7 @@ export type RequiredEditionsMessageLegacyRequired_Msg = Message<"buf.validate.co
  * Use `create(RequiredEditionsMessageLegacyRequired_MsgSchema)` to create a new message.
  */
 export const RequiredEditionsMessageLegacyRequired_MsgSchema: GenMessage<RequiredEditionsMessageLegacyRequired_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 6, 0);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 11, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageLegacyRequiredDelimited
@@ -212,7 +331,7 @@ export type RequiredEditionsMessageLegacyRequiredDelimited = Message<"buf.valida
  * Use `create(RequiredEditionsMessageLegacyRequiredDelimitedSchema)` to create a new message.
  */
 export const RequiredEditionsMessageLegacyRequiredDelimitedSchema: GenMessage<RequiredEditionsMessageLegacyRequiredDelimited> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 7);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 12);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMessageLegacyRequiredDelimited.Msg
@@ -229,7 +348,7 @@ export type RequiredEditionsMessageLegacyRequiredDelimited_Msg = Message<"buf.va
  * Use `create(RequiredEditionsMessageLegacyRequiredDelimited_MsgSchema)` to create a new message.
  */
 export const RequiredEditionsMessageLegacyRequiredDelimited_MsgSchema: GenMessage<RequiredEditionsMessageLegacyRequiredDelimited_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 7, 0);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 12, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsOneof
@@ -258,7 +377,36 @@ export type RequiredEditionsOneof = Message<"buf.validate.conformance.cases.Requ
  * Use `create(RequiredEditionsOneofSchema)` to create a new message.
  */
 export const RequiredEditionsOneofSchema: GenMessage<RequiredEditionsOneof> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 8);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 13);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsOneofIgnoreAlways
+ */
+export type RequiredEditionsOneofIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsOneofIgnoreAlways"> & {
+  /**
+   * @generated from oneof buf.validate.conformance.cases.RequiredEditionsOneofIgnoreAlways.val
+   */
+  val: {
+    /**
+     * @generated from field: string a = 1;
+     */
+    value: string;
+    case: "a";
+  } | {
+    /**
+     * @generated from field: string b = 2;
+     */
+    value: string;
+    case: "b";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsOneofIgnoreAlways.
+ * Use `create(RequiredEditionsOneofIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsOneofIgnoreAlwaysSchema: GenMessage<RequiredEditionsOneofIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 14);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsRepeated
@@ -275,7 +423,24 @@ export type RequiredEditionsRepeated = Message<"buf.validate.conformance.cases.R
  * Use `create(RequiredEditionsRepeatedSchema)` to create a new message.
  */
 export const RequiredEditionsRepeatedSchema: GenMessage<RequiredEditionsRepeated> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 9);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 15);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsRepeatedIgnoreAlways
+ */
+export type RequiredEditionsRepeatedIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsRepeatedIgnoreAlways"> & {
+  /**
+   * @generated from field: repeated string val = 1;
+   */
+  val: string[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsRepeatedIgnoreAlways.
+ * Use `create(RequiredEditionsRepeatedIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsRepeatedIgnoreAlwaysSchema: GenMessage<RequiredEditionsRepeatedIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 16);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsRepeatedExpanded
@@ -292,7 +457,24 @@ export type RequiredEditionsRepeatedExpanded = Message<"buf.validate.conformance
  * Use `create(RequiredEditionsRepeatedExpandedSchema)` to create a new message.
  */
 export const RequiredEditionsRepeatedExpandedSchema: GenMessage<RequiredEditionsRepeatedExpanded> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 10);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 17);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsRepeatedExpandedIgnoreAlways
+ */
+export type RequiredEditionsRepeatedExpandedIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsRepeatedExpandedIgnoreAlways"> & {
+  /**
+   * @generated from field: repeated string val = 1 [features.repeated_field_encoding = EXPANDED];
+   */
+  val: string[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsRepeatedExpandedIgnoreAlways.
+ * Use `create(RequiredEditionsRepeatedExpandedIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsRepeatedExpandedIgnoreAlwaysSchema: GenMessage<RequiredEditionsRepeatedExpandedIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 18);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredEditionsMap
@@ -309,5 +491,22 @@ export type RequiredEditionsMap = Message<"buf.validate.conformance.cases.Requir
  * Use `create(RequiredEditionsMapSchema)` to create a new message.
  */
 export const RequiredEditionsMapSchema: GenMessage<RequiredEditionsMap> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 11);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 19);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredEditionsMapIgnoreAlways
+ */
+export type RequiredEditionsMapIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredEditionsMapIgnoreAlways"> & {
+  /**
+   * @generated from field: map<string, string> val = 1;
+   */
+  val: { [key: string]: string };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredEditionsMapIgnoreAlways.
+ * Use `create(RequiredEditionsMapIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredEditionsMapIgnoreAlwaysSchema: GenMessage<RequiredEditionsMapIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto_editions, 20);
 

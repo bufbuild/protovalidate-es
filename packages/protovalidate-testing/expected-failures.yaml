@@ -1,3 +1,241 @@
+library/is_ip:
+  - version/omitted/invalid/ipv6/g
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:":0::0"}
+  #        want: validation error (1 violation)
+  #          1. constraint_id: "library.is_ip"
+  #         got: valid
+  - version/omitted/invalid/ipv6/h
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:"0::0:"}
+  #        want: validation error (1 violation)
+  #          1. constraint_id: "library.is_ip"
+  #         got: valid
+  - version/omitted/invalid/ipv6/i
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:"0::0:"}
+  #        want: validation error (1 violation)
+  #          1. constraint_id: "library.is_ip"
+  #         got: valid
+  - version/omitted/invalid/ipv6/j
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:"::0000ffff"}
+  #        want: validation error (1 violation)
+  #          1. constraint_id: "library.is_ip"
+  #         got: valid
+standard_constraints/required:
+  - proto/2023/map/empty/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsMapIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/message/explicit_presence/delimited/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceDelimitedIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_GROUP}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/message/explicit_presence/length_prefixed/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsMessageExplicitPresenceIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/oneof/other_member/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsOneofIgnoreAlways]:{b:"foo"}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "a" elements:{field_number:1 field_name:"a" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/oneof/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsOneofIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "a" elements:{field_number:1 field_name:"a" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/repeated/compact/empty/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsRepeatedIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/repeated/expanded/empty/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsRepeatedExpandedIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/scalar/explicit_presence/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/scalar/explicit_presence_with_default/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsScalarExplicitPresenceDefaultIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto/2023/scalar/implicit_presence/zero/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredEditionsScalarImplicitPresenceIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto2/map/empty/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto2MapIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto2/message/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto2/oneof/other_member/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto2OneofIgnoreAlways]:{b:"foo"}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "a" elements:{field_number:1 field_name:"a" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto2/oneof/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto2OneofIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "a" elements:{field_number:1 field_name:"a" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto2/repeated/empty/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto2RepeatedIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto2/scalar/optional/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto2ScalarOptionalIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto2/scalar/optional_with_default/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto2ScalarOptionalDefaultIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto3/map/empty/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto3MapIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto3/message/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto3MessageIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto3/oneof/other_member/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto3OneOfIgnoreAlways]:{b:"foo"}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "a" elements:{field_number:1 field_name:"a" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto3/oneof/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto3OneOfIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "a" elements:{field_number:1 field_name:"a" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto3/repeated/empty/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto3RepeatedIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto3/scalar/optional/unset/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto3OptionalScalarIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
+  - proto3/scalar/zero/ignore_always
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RequiredProto3ScalarIgnoreAlways]:{}
+  #        want: valid
+  #         got: validation error (1 violation)
+  #          1. constraint_id: "required"
+  #             message: "value is required"
+  #             field: "val" elements:{field_number:1 field_name:"val" field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25 field_name:"required" field_type:TYPE_BOOL}
 custom_constraints:
   - compilation/incorrect_type
   #       input: [type.googleapis.com/buf.validate.conformance.cases.custom_constraints.IncorrectType]:{a:123}

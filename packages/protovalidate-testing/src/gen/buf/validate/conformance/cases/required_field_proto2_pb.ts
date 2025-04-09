@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/required_field_proto2.proto.
  */
 export const file_buf_validate_conformance_cases_required_field_proto2: GenFile = /*@__PURE__*/
-  fileDesc("CjpidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvcmVxdWlyZWRfZmllbGRfcHJvdG8yLnByb3RvEh5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMiNgocUmVxdWlyZWRQcm90bzJTY2FsYXJPcHRpb25hbBIWCgN2YWwYASABKAlCCbpIBsgBAdgBAyJCCiNSZXF1aXJlZFByb3RvMlNjYWxhck9wdGlvbmFsRGVmYXVsdBIbCgN2YWwYASABKAk6A2Zvb0IJukgGyAEB2AEDIjMKHFJlcXVpcmVkUHJvdG8yU2NhbGFyUmVxdWlyZWQSEwoDdmFsGAEgAigJQga6SAPIAQEiewoVUmVxdWlyZWRQcm90bzJNZXNzYWdlEk4KA3ZhbBgBIAEoCzI5LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvMk1lc3NhZ2UuTXNnQga6SAPIAQEaEgoDTXNnEgsKA3ZhbBgBIAEoCSI+ChNSZXF1aXJlZFByb3RvMk9uZW9mEhMKAWEYASABKAlCBrpIA8gBAUgAEgsKAWIYAiABKAlIAEIFCgN2YWwiLQoWUmVxdWlyZWRQcm90bzJSZXBlYXRlZBITCgN2YWwYASADKAlCBrpIA8gBASKQAQoRUmVxdWlyZWRQcm90bzJNYXASTwoDdmFsGAEgAygLMjouYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkUHJvdG8yTWFwLlZhbEVudHJ5Qga6SAPIAQEaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AQ", [file_buf_validate_validate]);
+  fileDesc("CjpidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvcmVxdWlyZWRfZmllbGRfcHJvdG8yLnByb3RvEh5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMiMwocUmVxdWlyZWRQcm90bzJTY2FsYXJPcHRpb25hbBITCgN2YWwYASABKAlCBrpIA8gBASJCCihSZXF1aXJlZFByb3RvMlNjYWxhck9wdGlvbmFsSWdub3JlQWx3YXlzEhYKA3ZhbBgBIAEoCUIJukgGyAEB2AEDIj8KI1JlcXVpcmVkUHJvdG8yU2NhbGFyT3B0aW9uYWxEZWZhdWx0EhgKA3ZhbBgBIAEoCToDZm9vQga6SAPIAQEiTgovUmVxdWlyZWRQcm90bzJTY2FsYXJPcHRpb25hbERlZmF1bHRJZ25vcmVBbHdheXMSGwoDdmFsGAEgASgJOgNmb29CCbpIBsgBAdgBAyIzChxSZXF1aXJlZFByb3RvMlNjYWxhclJlcXVpcmVkEhMKA3ZhbBgBIAIoCUIGukgDyAEBInsKFVJlcXVpcmVkUHJvdG8yTWVzc2FnZRJOCgN2YWwYASABKAsyOS5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUmVxdWlyZWRQcm90bzJNZXNzYWdlLk1zZ0IGukgDyAEBGhIKA01zZxILCgN2YWwYASABKAkilgEKIVJlcXVpcmVkUHJvdG8yTWVzc2FnZUlnbm9yZUFsd2F5cxJdCgN2YWwYASABKAsyRS5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuUmVxdWlyZWRQcm90bzJNZXNzYWdlSWdub3JlQWx3YXlzLk1zZ0IJukgGyAEB2AEDGhIKA01zZxILCgN2YWwYASABKAkiPgoTUmVxdWlyZWRQcm90bzJPbmVvZhITCgFhGAEgASgJQga6SAPIAQFIABILCgFiGAIgASgJSABCBQoDdmFsIk0KH1JlcXVpcmVkUHJvdG8yT25lb2ZJZ25vcmVBbHdheXMSFgoBYRgBIAEoCUIJukgGyAEB2AEDSAASCwoBYhgCIAEoCUgAQgUKA3ZhbCItChZSZXF1aXJlZFByb3RvMlJlcGVhdGVkEhMKA3ZhbBgBIAMoCUIGukgDyAEBIjwKIlJlcXVpcmVkUHJvdG8yUmVwZWF0ZWRJZ25vcmVBbHdheXMSFgoDdmFsGAEgAygJQgm6SAbIAQHYAQMikAEKEVJlcXVpcmVkUHJvdG8yTWFwEk8KA3ZhbBgBIAMoCzI6LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvMk1hcC5WYWxFbnRyeUIGukgDyAEBGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEiqwEKHVJlcXVpcmVkUHJvdG8yTWFwSWdub3JlQWx3YXlzEl4KA3ZhbBgBIAMoCzJGLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvMk1hcElnbm9yZUFsd2F5cy5WYWxFbnRyeUIJukgGyAEB2AEDGioKCFZhbEVudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAE", [file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto2ScalarOptional
@@ -45,6 +45,23 @@ export const RequiredProto2ScalarOptionalSchema: GenMessage<RequiredProto2Scalar
   messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 0);
 
 /**
+ * @generated from message buf.validate.conformance.cases.RequiredProto2ScalarOptionalIgnoreAlways
+ */
+export type RequiredProto2ScalarOptionalIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredProto2ScalarOptionalIgnoreAlways"> & {
+  /**
+   * @generated from field: optional string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto2ScalarOptionalIgnoreAlways.
+ * Use `create(RequiredProto2ScalarOptionalIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredProto2ScalarOptionalIgnoreAlwaysSchema: GenMessage<RequiredProto2ScalarOptionalIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 1);
+
+/**
  * @generated from message buf.validate.conformance.cases.RequiredProto2ScalarOptionalDefault
  */
 export type RequiredProto2ScalarOptionalDefault = Message<"buf.validate.conformance.cases.RequiredProto2ScalarOptionalDefault"> & {
@@ -59,7 +76,24 @@ export type RequiredProto2ScalarOptionalDefault = Message<"buf.validate.conforma
  * Use `create(RequiredProto2ScalarOptionalDefaultSchema)` to create a new message.
  */
 export const RequiredProto2ScalarOptionalDefaultSchema: GenMessage<RequiredProto2ScalarOptionalDefault> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 1);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 2);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto2ScalarOptionalDefaultIgnoreAlways
+ */
+export type RequiredProto2ScalarOptionalDefaultIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredProto2ScalarOptionalDefaultIgnoreAlways"> & {
+  /**
+   * @generated from field: optional string val = 1 [default = "foo"];
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto2ScalarOptionalDefaultIgnoreAlways.
+ * Use `create(RequiredProto2ScalarOptionalDefaultIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredProto2ScalarOptionalDefaultIgnoreAlwaysSchema: GenMessage<RequiredProto2ScalarOptionalDefaultIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 3);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto2ScalarRequired
@@ -76,7 +110,7 @@ export type RequiredProto2ScalarRequired = Message<"buf.validate.conformance.cas
  * Use `create(RequiredProto2ScalarRequiredSchema)` to create a new message.
  */
 export const RequiredProto2ScalarRequiredSchema: GenMessage<RequiredProto2ScalarRequired> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 2);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 4);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto2Message
@@ -93,7 +127,7 @@ export type RequiredProto2Message = Message<"buf.validate.conformance.cases.Requ
  * Use `create(RequiredProto2MessageSchema)` to create a new message.
  */
 export const RequiredProto2MessageSchema: GenMessage<RequiredProto2Message> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 3);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 5);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto2Message.Msg
@@ -110,7 +144,41 @@ export type RequiredProto2Message_Msg = Message<"buf.validate.conformance.cases.
  * Use `create(RequiredProto2Message_MsgSchema)` to create a new message.
  */
 export const RequiredProto2Message_MsgSchema: GenMessage<RequiredProto2Message_Msg> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 3, 0);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 5, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways
+ */
+export type RequiredProto2MessageIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways"> & {
+  /**
+   * @generated from field: optional buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways.Msg val = 1;
+   */
+  val?: RequiredProto2MessageIgnoreAlways_Msg;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways.
+ * Use `create(RequiredProto2MessageIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredProto2MessageIgnoreAlwaysSchema: GenMessage<RequiredProto2MessageIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 6);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways.Msg
+ */
+export type RequiredProto2MessageIgnoreAlways_Msg = Message<"buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways.Msg"> & {
+  /**
+   * @generated from field: optional string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto2MessageIgnoreAlways.Msg.
+ * Use `create(RequiredProto2MessageIgnoreAlways_MsgSchema)` to create a new message.
+ */
+export const RequiredProto2MessageIgnoreAlways_MsgSchema: GenMessage<RequiredProto2MessageIgnoreAlways_Msg> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 6, 0);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto2Oneof
@@ -139,7 +207,36 @@ export type RequiredProto2Oneof = Message<"buf.validate.conformance.cases.Requir
  * Use `create(RequiredProto2OneofSchema)` to create a new message.
  */
 export const RequiredProto2OneofSchema: GenMessage<RequiredProto2Oneof> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 4);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 7);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto2OneofIgnoreAlways
+ */
+export type RequiredProto2OneofIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredProto2OneofIgnoreAlways"> & {
+  /**
+   * @generated from oneof buf.validate.conformance.cases.RequiredProto2OneofIgnoreAlways.val
+   */
+  val: {
+    /**
+     * @generated from field: string a = 1;
+     */
+    value: string;
+    case: "a";
+  } | {
+    /**
+     * @generated from field: string b = 2;
+     */
+    value: string;
+    case: "b";
+  } | { case: undefined; value?: undefined };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto2OneofIgnoreAlways.
+ * Use `create(RequiredProto2OneofIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredProto2OneofIgnoreAlwaysSchema: GenMessage<RequiredProto2OneofIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 8);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto2Repeated
@@ -156,7 +253,24 @@ export type RequiredProto2Repeated = Message<"buf.validate.conformance.cases.Req
  * Use `create(RequiredProto2RepeatedSchema)` to create a new message.
  */
 export const RequiredProto2RepeatedSchema: GenMessage<RequiredProto2Repeated> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 5);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 9);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto2RepeatedIgnoreAlways
+ */
+export type RequiredProto2RepeatedIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredProto2RepeatedIgnoreAlways"> & {
+  /**
+   * @generated from field: repeated string val = 1;
+   */
+  val: string[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto2RepeatedIgnoreAlways.
+ * Use `create(RequiredProto2RepeatedIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredProto2RepeatedIgnoreAlwaysSchema: GenMessage<RequiredProto2RepeatedIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 10);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto2Map
@@ -173,5 +287,22 @@ export type RequiredProto2Map = Message<"buf.validate.conformance.cases.Required
  * Use `create(RequiredProto2MapSchema)` to create a new message.
  */
 export const RequiredProto2MapSchema: GenMessage<RequiredProto2Map> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 6);
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 11);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto2MapIgnoreAlways
+ */
+export type RequiredProto2MapIgnoreAlways = Message<"buf.validate.conformance.cases.RequiredProto2MapIgnoreAlways"> & {
+  /**
+   * @generated from field: map<string, string> val = 1;
+   */
+  val: { [key: string]: string };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto2MapIgnoreAlways.
+ * Use `create(RequiredProto2MapIgnoreAlwaysSchema)` to create a new message.
+ */
+export const RequiredProto2MapIgnoreAlwaysSchema: GenMessage<RequiredProto2MapIgnoreAlways> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto2, 12);
 
