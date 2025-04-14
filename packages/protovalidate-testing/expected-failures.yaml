@@ -1,24 +1,3 @@
-library/is_ip:
-  - version/omitted/invalid/ipv6/g
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:":0::0"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "library.is_ip"
-  #         got: valid
-  - version/omitted/invalid/ipv6/h
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:"0::0:"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "library.is_ip"
-  #         got: valid
-  - version/omitted/invalid/ipv6/i
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:"0::0:"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "library.is_ip"
-  #         got: valid
-  - version/omitted/invalid/ipv6/j
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.IsIp]:{val:"::0000ffff"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "library.is_ip"
-  #         got: valid
 custom_constraints:
   - compilation/incorrect_type
   #       input: [type.googleapis.com/buf.validate.conformance.cases.custom_constraints.IncorrectType]:{a:123}

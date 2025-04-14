@@ -356,7 +356,12 @@ export class Ipv6 {
         }
         return false;
       }
-      if (this.h16()) {
+
+      const result = this.h16();
+      if (result === "error") {
+        return false;
+      }
+      if (result) {
         continue;
       }
       if (this.take(":")) {
@@ -367,6 +372,11 @@ export class Ipv6 {
           this.doubleColonSeen = true;
           this.doubleColonAt = this.pieces.length;
           if (this.take(":")) {
+            return false;
+          }
+        } else {
+          if (this.i === 1 || this.i === this.str.length) {
+            // invalid - string cannot start or end on single colon
             return false;
           }
         }
@@ -427,8 +437,11 @@ export class Ipv6 {
   //
   //     h16 = 1*4HEXDIG
   //
-  // Stores 16-bit value in `pieces`
-  h16(): boolean {
+  // If 1-4 hex digits are found, the parsed 16-bit unsigned integer is stored in `pieces` and true is returned.
+  // If 0 hex digits are found, returns false.
+  // If more than 4 hex digits are found, "error" is returned.
+  //
+  h16(): boolean | "error" {
     const start = this.i;
     while (this.hexdig()) {
       // continue
@@ -436,11 +449,15 @@ export class Ipv6 {
     const str = this.str.substring(start, this.i);
     if (str.length == 0) {
       // too short
+      // this is not an error condition, it just means we didn't find any
+      // hex digits at the current position.
       return false;
     }
     if (str.length > 4) {
       // too long
-      return false;
+      // this is an error condition, it means we found a string of more than
+      // four valid hex digits, which is invalid in ipv6 addresses.
+      return "error";
     }
     this.pieces.push(parseInt(str, 16));
     return true;
