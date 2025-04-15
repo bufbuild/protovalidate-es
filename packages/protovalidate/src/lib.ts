@@ -561,7 +561,7 @@ export function isHostAndPort(str: string, portRequired: boolean): boolean {
   }
   const splitIdx = str.lastIndexOf(":");
   if (str[0] == "[") {
-    const end = str.indexOf("]");
+    const end = str.lastIndexOf("]");
     switch (end + 1) {
       case str.length: // no port
         return !portRequired && isIp(str.substring(1, end), 6);
