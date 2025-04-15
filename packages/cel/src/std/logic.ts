@@ -376,7 +376,11 @@ const matchesFunc = Func.binary(
 
 const sizeStringOp: StrictUnaryOp = (_id: number, x: CelVal) => {
   if (typeof x === "string") {
-    return BigInt(x.length);
+    let size = 0;
+    for (const _ of x) {
+      size++;
+    }
+    return BigInt(size);
   }
   return undefined;
 };

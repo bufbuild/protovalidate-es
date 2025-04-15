@@ -1419,15 +1419,6 @@ standard_constraints/string:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StringConst]:{val:"foo"}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - len/valid/emoji/simple
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.StringLen]:{val:"😅😄👾"}
-  #        want: valid
-  #         got: validation error (1 violation)
-  #          1. constraint_id: "string.len"
-  #             message: "value length must be 3 characters"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING}
-  #             for_key: false
-  #             rule: "string.len" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:19  field_name:"len"  field_type:TYPE_UINT64}
   - pattern/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StringPattern]:{val:"!#@$#$%"}
   #        want: validation error (1 violation)
