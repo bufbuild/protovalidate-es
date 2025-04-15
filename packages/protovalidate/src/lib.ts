@@ -592,6 +592,9 @@ function isPort(str: string): boolean {
     }
     return false;
   }
+  if (str.length > 1 && str[0] === "0") {
+    return false;
+  }
   return parseInt(str) <= 65535;
 }
 
