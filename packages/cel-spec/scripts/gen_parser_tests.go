@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"reflect"
 	"strconv"
@@ -196,23 +197,19 @@ func parseCelGoSourceFile(goModPath string, filePath string) (*goast.File, strin
 		return nil, "", fmt.Errorf("unexpected go.mod structure")
 	}
 	ver = ver[:i]
-	goModCache := os.Getenv("GOMODCACHE")
+	goModCache := getGoModCache()
 	if goModCache == "" {
-		goPath := os.Getenv("GOPATH")
-		if goPath == "" {
-			return nil, "", fmt.Errorf("cannot resolve go module cache, GOPATH and GOMODCACHE empty")
-		}
-		goModCache = path.Join(goPath, "pkg/mod")
+		return nil, "", fmt.Errorf("cannot resolve go module cache, GOPATH and GOMODCACHE empty")
 	}
 	celGoModulePath := path.Join(goModCache, celGoModule+"@"+ver)
 	_, err = os.Stat(celGoModulePath)
 	if err != nil {
-		return nil, "", fmt.Errorf("cannot resolve %s %s in go module cache: %w", celGoModule, ver, err)
+		return nil, "", fmt.Errorf("cannot resolve %s in go module cache: %w", celGoModulePath, err)
 	}
 	celGoFilePath := path.Join(celGoModulePath, filePath)
 	fileData, err := os.ReadFile(celGoFilePath)
 	if err != nil {
-		return nil, "", fmt.Errorf("cannot resolve %s in %s: %w", filePath, celGoModulePath, err)
+		return nil, "", fmt.Errorf("cannot read %s in %s: %w", filePath, celGoModulePath, err)
 	}
 	fset := gotoken.NewFileSet()
 	file, err := goparser.ParseFile(fset, filePath, fileData, goparser.SkipObjectResolution)
@@ -354,4 +351,24 @@ func write(parserTests []*ParserTest, sourceId string, outputPath string) error 
 		output, _ = json.Marshal(parserTests)
 	}
 	return os.WriteFile(outputPath, output, 0644)
+}
+
+// GOMODCACHE is not always guaranteed to set.
+// We can fallback to using `go env`
+func getGoModCache() string {
+	goModCache := os.Getenv("GOMODCACHE")
+	if goModCache != "" {
+		return goModCache
+	}
+	goPath := os.Getenv("GOPATH")
+	if goPath != "" {
+		return path.Join(goPath, "pkg/mod")
+	}
+	cmd := exec.Command("go", "env", "GOMODCACHE")
+	var sb strings.Builder
+	cmd.Stdout = &sb
+	if err := cmd.Run(); err != nil {
+		return ""
+	}
+	return strings.TrimSpace(sb.String())
 }
