@@ -109,6 +109,7 @@ void suite("isHostname", () => {
     "invalid/interior_label_64_characters",
     "foo.abcd012345678901234567890123456789012345678901234567890123456789.com",
   );
+  t("invalid/fuzz1", "İ");
 });
 
 void suite("isHostAndPort", () => {
@@ -140,6 +141,10 @@ void suite("isHostAndPort", () => {
   t("port_required/true/invalid/missing_port_number", "example.com:");
   t("port_required/false/invalid/missing_port_number", "example.com:");
   t("port_required/true/valid/port_zero", "example.com:0");
+  t("port_required/true/invalid/port_double_zero", "example.com:00");
+  t("port_required/true/invalid/port_leading_zero", "example.com:080");
+  t("port_required/false/invalid/port_double_zero", "example.com:00");
+  t("port_required/false/invalid/port_leading_zero", "example.com:080");
   t("port_required/true/invalid/port_number_sign", "example.com:+0");
   t("port_required/false/invalid/port_number_sign", "example.com:+0");
   t("port_required/false/invalid/port_number_0x", "example.com:0xFA");
@@ -179,6 +184,10 @@ void suite("isHostAndPort", () => {
   t(
     "port_required/false/valid/ipv6_zone-id_any_non_null_character",
     "[::1%% :x\x1F]",
+  );
+  t(
+    "port_required/false/valid/ipv6_zone-id_any_non_null_character_2",
+    "[::0%00]]",
   );
   t("port_required/false/invalid/ipv4_in_brackets", "[127.0.0.1]");
   t("port_required/false/invalid/name_in_brackets", "[example.com]");
@@ -578,6 +587,8 @@ void suite("isIp", () => {
   t("version/omitted/valid/ipv6/g", "0:0:0:0:0:0:0:0");
   t("version/omitted/valid/ipv6/h", "::1");
   t("version/omitted/valid/ipv6/i", "::");
+  t("version/omitted/valid/ipv6/j", "0:00::000:0000");
+  t("version/omitted/valid/ipv6/k", "0::");
   t("version/omitted/valid/ipv6_embedded_ipv4", "0:0:0:0:0:ffff:192.1.56.10");
   t(
     "version/omitted/invalid/ipv6_embedded_ipv4/a",
@@ -605,6 +616,10 @@ void suite("isIp", () => {
   t("version/omitted/invalid/ipv6/d", ":::1");
   t("version/omitted/invalid/ipv6/e", "1::3:4::6:7:8");
   t("version/omitted/invalid/ipv6/f", "1::3:4::6:7:8");
+  t("version/omitted/invalid/ipv6/g", ":0::0");
+  t("version/omitted/invalid/ipv6/h", "0::0:");
+  t("version/omitted/invalid/ipv6/i", "0::0:");
+  t("version/omitted/invalid/ipv6/j", "::0000ffff");
   t("version/omitted/valid/ipv4/a", "127.0.0.1");
   t("version/omitted/valid/ipv4/b", "255.255.255.255");
   t("version/omitted/valid/ipv4/c", "0.0.0.0");
@@ -637,6 +652,8 @@ void suite("isEmail", () => {
   t("invalid/empty_string", "");
   t("invalid/leading_space", " foo@example.com");
   t("invalid/trailing_space", "foo@example.com ");
+  t("invalid/leading_newline", "\nfoo.bar@example.com");
+  t("invalid/trailing_newline", "foo.bar@example.com\n");
   t("valid/multiple_atext", "foo.bar@example.com");
   t("valid/empty_atext", ".@example.com");
   t("valid/multiple_empty_atext", "...@example.com");
@@ -926,6 +943,7 @@ void suite("isUri", () => {
     "valid/fragment_exhaust",
     "https://example.com/#0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-._~%20!$&'()*+,=;:@?/",
   );
+  t("valid/fuzz1", "A://");
 });
 
 void suite("isUriRef", () => {
