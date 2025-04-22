@@ -18,7 +18,6 @@ import {
   timestampDate,
   TimestampSchema,
 } from "@bufbuild/protobuf/wkt";
-import { utcToZonedTime } from "date-fns-tz";
 
 import {
   Func,
@@ -27,10 +26,9 @@ import {
   type StrictUnaryOp,
 } from "../func.js";
 import * as olc from "../gen/dev/cel/expr/overload_const.js";
-import { CelErrors, type CelVal } from "../value/value.js";
+import { type CelVal } from "../value/value.js";
 
 type TimeFunc = (val: Date) => number;
-
 function makeTimeOp(_op: string, t: TimeFunc): StrictOp {
   return (id: number, args: CelVal[]) => {
     if (!isMessage(args[0], TimestampSchema)) {
@@ -41,17 +39,99 @@ function makeTimeOp(_op: string, t: TimeFunc): StrictOp {
       if (typeof args[1] !== "string") {
         return undefined;
       }
-      val = utcToZonedTime(val, args[1]);
-      // check if InvalidDate was returned
-      if (isNaN(val.getTime())) {
-        // Try with a leading '+' as a workaround for date-fns-tz bug.
-        val = utcToZonedTime(timestampDate(args[0]), "+" + args[1]);
-        if (isNaN(val.getTime())) {
-          return CelErrors.invalidTz(id, args[1]);
+      // Timezone can either be Fixed or IANA or "UTC".
+      // We first check for the fixed offset case.
+      //
+      // Ref: https://github.com/google/cel-spec/blob/master/doc/langdef.md#timezones
+      const timeOffset = args[1].match(
+        /^(?<sign>[+-]?)(?<hours>\d\d):(?<minutes>\d\d)$/,
+      );
+      if (timeOffset && timeOffset.groups) {
+        const sign = timeOffset.groups["sign"] == "-" ? 1 : -1;
+        const hours = parseInt(timeOffset.groups["hours"]);
+        const minutes = parseInt(timeOffset.groups["minutes"]);
+        const offset = sign * (hours * 60 * 60 * 1000 + minutes * 60 * 1000);
+        val = new Date(val.getTime() - offset);
+        val = new Date(
+          val.getUTCFullYear(),
+          val.getUTCMonth(),
+          val.getUTCDate(),
+          val.getUTCHours(),
+          val.getUTCMinutes(),
+          val.getUTCSeconds(),
+          val.getUTCMilliseconds(),
+        );
+      } else {
+        // Must be an IANA timezone, so we use the Intl API to format the string
+        // in the desired timezone and extract the parts from that.
+        //
+        // The APIs are part of baseline 2020.
+        const format = new Intl.DateTimeFormat("en-US", {
+          hourCycle: "h23",
+          hour12: false,
+          timeZone: args[1],
+          year: "numeric",
+          month: "numeric",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        let year, month, day, hour, minute, second;
+        for (const part of format.formatToParts(val)) {
+          switch (part.type) {
+            case "year":
+              year = parseInt(part.value);
+              break;
+            case "month":
+              month = parseInt(part.value) - 1;
+              break;
+            case "day":
+              day = parseInt(part.value);
+              break;
+            case "hour":
+              hour = parseInt(part.value);
+              break;
+            case "minute":
+              minute = parseInt(part.value);
+              break;
+            case "second":
+              second = parseInt(part.value);
+              break;
+          }
         }
+        if (
+          year === undefined ||
+          month === undefined ||
+          day === undefined ||
+          hour === undefined ||
+          minute === undefined ||
+          second === undefined
+        ) {
+          throw new Error(
+            `Error converting ${toJson(TimestampSchema, args[0])} to IANA timezone ${args[1]}`,
+          );
+        }
+        val = new Date(
+          year,
+          month,
+          day,
+          hour,
+          minute,
+          second,
+          val.getUTCMilliseconds(),
+        );
       }
     } else {
-      val = utcToZonedTime(val, "UTC");
+      val = new Date(
+        val.getUTCFullYear(),
+        val.getUTCMonth(),
+        val.getUTCDate(),
+        val.getUTCHours(),
+        val.getUTCMinutes(),
+        val.getUTCSeconds(),
+        val.getUTCMilliseconds(),
+      );
     }
     const result = t(val);
     try {

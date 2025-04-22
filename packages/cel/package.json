@@ -35,8 +35,7 @@
     "@bufbuild/protobuf": "^2.2.5"
   },
   "dependencies": {
-    "@bufbuild/cel-spec": "0.0.1",
-    "date-fns-tz": "^2.0.0"
+    "@bufbuild/cel-spec": "0.0.1"
   },
   "devDependencies": {
     "peggy": "^4.0.3",
