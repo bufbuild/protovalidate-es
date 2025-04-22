@@ -585,10 +585,7 @@ void suite("isIp", () => {
   t("version/omitted/valid/ipv6/e", "a:115c:a1e0:ab12:4843:cd96:626b:430b");
   t("version/omitted/valid/ipv6/f", "1:2:3:4:5:6:7:8");
   t("version/omitted/valid/ipv6/g", "0:0:0:0:0:0:0:0");
-  t("version/omitted/valid/ipv6/h", "::1");
-  t("version/omitted/valid/ipv6/i", "::");
   t("version/omitted/valid/ipv6/j", "0:00::000:0000");
-  t("version/omitted/valid/ipv6/k", "0::");
   t("version/omitted/valid/ipv6_embedded_ipv4", "0:0:0:0:0:ffff:192.1.56.10");
   t(
     "version/omitted/invalid/ipv6_embedded_ipv4/a",
@@ -631,6 +628,45 @@ void suite("isIp", () => {
   t("version/omitted/invalid/ipv4/d", "127.0.0.0.1");
   t("version/omitted/invalid/ipv4/e", "256.0.0.0");
   t("version/omitted/invalid/ipv4/f", "0x0.0.0.0");
+  // From rule IPv6address from RFC 3986, we can have zero to seven h16,
+  // and a double colon at the end:
+  //
+  //     [ *6( h16 ":" ) h16 ] "::"
+  //
+  t("version/6/valid/ipv6/double_colon", "::");
+  t("version/6/valid/ipv6/1h16_double_colon", "1::");
+  t("version/6/valid/ipv6/2h16_double_colon", "1:2::");
+  t("version/6/valid/ipv6/3h16_double_colon", "1:2:3::");
+  t("version/6/valid/ipv6/4h16_double_colon", "1:2:3:4::");
+  t("version/6/valid/ipv6/5h16_double_colon", "1:2:3:4:5::");
+  t("version/6/valid/ipv6/6h16_double_colon", "1:2:3:4:5:6::");
+  t("version/6/valid/ipv6/7h16_double_colon", "1:2:3:4:5:6:7::");
+  t("version/6/invalid/ipv6/7h16_double_colon", "1:2:3:4:5:6:7:8::"); // Eight or more is invalid
+  // We can have zero to six 16, a double colon and one h16 at the end:
+  t("version/6/valid/ipv6/1h16_double_colon_1h16", "1::1");
+  t("version/6/valid/ipv6/2h16_double_colon_1h16", "1:2::1");
+  t("version/6/valid/ipv6/3h16_double_colon_1h16", "1:2:3::1");
+  t("version/6/valid/ipv6/4h16_double_colon_1h16", "1:2:3:4::1");
+  t("version/6/valid/ipv6/5h16_double_colon_1h16", "1:2:3:4:5::1");
+  t("version/6/valid/ipv6/6h16_double_colon_1h16", "1:2:3:4:5:6::1");
+  t("version/6/invalid/ipv6/7h16_double_colon_1h16", "1:2:3:4:5:6:7::1"); // Seven or more is invalid
+  // Following the first eight lines of the grammar, we can have a double colon
+  // at the start, followed by zero to seven h16:
+  t("version/6/valid/ipv6/double_colon_1h16", "::1");
+  t("version/6/valid/ipv6/double_colon_2h16", "::1:2");
+  t("version/6/valid/ipv6/double_colon_3h16", "::1:2:3");
+  t("version/6/valid/ipv6/double_colon_4h16", "::1:2:3:4");
+  t("version/6/valid/ipv6/double_colon_5h16", "::1:2:3:4:5");
+  t("version/6/valid/ipv6/double_colon_6h16", "::1:2:3:4:5:6");
+  t("version/6/valid/ipv6/double_colon_7h16", "::1:2:3:4:5:6:7");
+  t("version/6/invalid/ipv6/double_colon_8h16", "::1:2:3:4:5:6:7:8"); // Eight or more is invalid
+  // With one h16 and a double colon at the start, we can have zero to six h16:
+  t("version/6/valid/ipv6/1h16_double_colon_2h16", "1::1:2");
+  t("version/6/valid/ipv6/1h16_double_colon_3h16", "1::1:2:3");
+  t("version/6/valid/ipv6/1h16_double_colon_4h16", "1::1:2:3:4");
+  t("version/6/valid/ipv6/1h16_double_colon_5h16", "1::1:2:3:4:5");
+  t("version/6/valid/ipv6/1h16_double_colon_6h16", "1::1:2:3:4:5:6");
+  t("version/6/invalid/ipv6/1h16_double_colon_7h16", "1::1:2:3:4:5:6:7"); // Seven or more is invalid
 });
 
 void suite("isEmail", () => {

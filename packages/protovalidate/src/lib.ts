@@ -387,7 +387,10 @@ export class Ipv6 {
       }
       break;
     }
-    return this.doubleColonSeen || this.pieces.length == 8;
+    if (this.doubleColonSeen) {
+      return this.pieces.length < 8;
+    }
+    return this.pieces.length == 8;
   }
 
   // Parses the rule from RFC 6874:
