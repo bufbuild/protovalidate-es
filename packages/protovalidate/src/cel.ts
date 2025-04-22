@@ -24,6 +24,7 @@ import {
   type CelEnv,
   CelError,
   CelList,
+  CelObject,
   type CelResult,
   type CelVal,
   createEnv,
@@ -231,6 +232,18 @@ function createCustomFuncs(): FuncRegistry {
       ["list_unique_bool"],
       (_id: number, arg: CelVal): CelResult | undefined => {
         return arg instanceof CelList && unique(arg);
+      },
+    ),
+  );
+  reg.add(
+    Func.binary(
+      "getField",
+      ["dyn_string_get_field_dyn"],
+      (id: number, lhs: CelVal, rhs: CelVal): CelResult | undefined => {
+        if (typeof rhs == "string" && lhs instanceof CelObject) {
+          return lhs.accessByName(id, rhs);
+        }
+        return undefined;
       },
     ),
   );
