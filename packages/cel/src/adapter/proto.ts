@@ -42,6 +42,7 @@ import {
   ValueSchema,
 } from "@bufbuild/protobuf/wkt";
 import {
+  isReflectMap,
   isReflectMessage,
   reflect,
   reflectList,
@@ -79,7 +80,7 @@ import {
 } from "../value/value.js";
 import { CEL_ADAPTER } from "./cel.js";
 
-type ProtoValue = CelVal | ScalarValue | ReflectMessage | Message;
+type ProtoValue = CelVal | ScalarValue | ReflectMessage | Message | ReflectMap;
 type ProtoResult = CelResult<ProtoValue>;
 
 export function isProtoMsg(val: unknown): val is Message {
@@ -116,6 +117,27 @@ export class ProtoValAdapter implements CelValAdapter {
     if (isReflectMessage(lhs) || isReflectMessage(rhs)) {
       throw new Error("not implemented");
     }
+    if (isReflectMap(lhs)) {
+      if (!isReflectMap(rhs)) {
+        return false;
+      }
+      if (lhs.size != rhs.size) {
+        return false;
+      }
+      for (const [key, val] of lhs) {
+        const rhsVal = rhs.get(key);
+        if (rhsVal == null) {
+          return false;
+        }
+        // Map values are either of type ReflectMessage or scalars.
+        if (!this.equals(val as ProtoValue, rhsVal as ProtoValue)) {
+          return false;
+        }
+      }
+      return true;
+    } else if (isReflectMap(rhs)) {
+      return false;
+    }
     if (isProtoMsg(lhs)) {
       if (!isMessage(rhs)) {
         return false;
@@ -147,6 +169,9 @@ export class ProtoValAdapter implements CelValAdapter {
       return undefined;
     }
     if (isReflectMessage(lhs) || isReflectMessage(rhs)) {
+      return undefined;
+    }
+    if (isReflectMap(lhs) || isReflectMap(rhs)) {
       return undefined;
     }
     return CEL_ADAPTER.compare(lhs, rhs);
@@ -196,6 +221,26 @@ export class ProtoValAdapter implements CelValAdapter {
         this.getMetadata(native.$typeName).TYPE,
       );
     }
+    if (isReflectMap(native)) {
+      const field = native.field();
+      let valType: CelType;
+      switch (field.mapKind) {
+        case "scalar":
+          valType = getScalarType(field.scalar);
+          break;
+        case "enum":
+          valType = new CelType(field.enum.typeName);
+          break;
+        case "message":
+          valType = new CelType(field.message.typeName);
+          break;
+      }
+      return new CelMap(
+        native,
+        this,
+        new type.MapType(getScalarType(field.mapKey), valType),
+      );
+    }
     return CEL_ADAPTER.toCel(native);
   }
 
@@ -223,7 +268,14 @@ export class ProtoValAdapter implements CelValAdapter {
     id: number,
     obj: Message | CelVal,
     name: string,
-  ): undefined | ScalarValue | ReflectMessage | CelVal | CelError | CelUnknown {
+  ):
+    | undefined
+    | ScalarValue
+    | ReflectMessage
+    | ReflectMap
+    | CelVal
+    | CelError
+    | CelUnknown {
     if (isProtoMsg(obj)) {
       const schema = this.getSchema(obj.$typeName);
       const field = schema.fields.find((f) => f.name === name);
@@ -259,8 +311,7 @@ export class ProtoValAdapter implements CelValAdapter {
           // TODO(tstamm) return ReflectList instead, and support it in toCel()?
           return this.accessList(r.get(field));
         case "map":
-          // TODO(tstamm) return ReflectMap instead, and support it in toCel()?
-          return this.accessMap(r.get(field));
+          return r.get(field);
       }
     }
     return CEL_ADAPTER.accessByName(id, obj, name);
@@ -330,40 +381,6 @@ export class ProtoValAdapter implements CelValAdapter {
     }
   }
 
-  private accessMap(map: ReflectMap): CelObject {
-    const field = map.field();
-    // TODO(tstamm) see if we can convert lazily
-    const value = Object.create(null) as Record<string, unknown>;
-    const celMapKeyType = getScalarType(field.mapKey);
-    let celMapValueType: CelType;
-    switch (field.mapKind) {
-      case "scalar":
-        celMapValueType = getScalarType(field.scalar);
-        for (const [k, v] of map.entries()) {
-          value[String(k)] = v;
-        }
-        break;
-      case "enum":
-        celMapValueType = new CelType(field.enum.typeName);
-        for (const [k, v] of map.entries()) {
-          value[String(k)] = v;
-        }
-        break;
-      case "message":
-        celMapValueType = new CelType(field.message.typeName);
-        for (const [k, v] of map.entries()) {
-          value[String(k)] = (v as ReflectMessage).message;
-        }
-        break;
-    }
-    // TODO(tstamm) why not CelMap?
-    return new CelObject(
-      value,
-      this,
-      new type.MapType(celMapKeyType, celMapValueType),
-    );
-  }
-
   getFields(value: object): string[] {
     if (isProtoMsg(value)) {
       return this.getMetadata(value.$typeName).FIELD_NAMES;
@@ -380,6 +397,9 @@ export class ProtoValAdapter implements CelValAdapter {
       return undefined;
     }
     if (isReflectMessage(obj)) {
+      return undefined;
+    }
+    if (isReflectMap(obj)) {
       return undefined;
     }
     return CEL_ADAPTER.accessByIndex(id, obj, index);

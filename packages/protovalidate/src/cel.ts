@@ -503,8 +503,7 @@ function reflectToCel(val: unknown): unknown {
     return val[Symbol.for("reflect unsafe local")];
   }
   if (isReflectMap(val)) {
-    // @ts-expect-error -- TODO provide public access in protobuf-es, or support reflection types in CEL
-    return val[Symbol.for("reflect unsafe local")];
+    return val;
   }
   return val;
 }

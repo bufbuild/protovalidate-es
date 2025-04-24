@@ -44,6 +44,7 @@ import {
   type CelResult,
 } from "./value/value.js";
 import { Namespace } from "./value/namespace.js";
+import { isReflectMap } from "@bufbuild/protobuf/reflect";
 
 /**
  * A CEL parser interface
@@ -163,6 +164,8 @@ export class CelEnv {
     ) {
       this.data[name] = value;
     } else if (isProtoMsg(value)) {
+      this.data[name] = this.planner.getAdapter().toCel(value);
+    } else if (isReflectMap(value)) {
       this.data[name] = this.planner.getAdapter().toCel(value);
     } else {
       this.data[name] = NATIVE_ADAPTER.toCel(value);
