@@ -15,6 +15,9 @@
 import * as assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import {
+  bytesContains,
+  bytesEndsWith,
+  bytesStartsWith,
   isEmail,
   isHostAndPort,
   isHostname,
@@ -1282,6 +1285,56 @@ void suite("unique", () => {
       "]"
     );
   }
+});
+
+void suite("bytes overloads", () => {
+  function s2b(str: string) {
+    return new TextEncoder().encode(str);
+  }
+  void test("contains", () => {
+    assert.strictEqual(
+      bytesContains(s2b("hello world"), s2b("hello world")),
+      true,
+    );
+    assert.strictEqual(bytesContains(s2b("hello world"), s2b("o w")), true);
+    assert.strictEqual(bytesContains(s2b("hello world"), s2b("hello")), true);
+    assert.strictEqual(bytesContains(s2b("hello world"), s2b("world")), true);
+    assert.strictEqual(bytesContains(s2b("hello world"), s2b("earth")), false);
+    assert.strictEqual(bytesContains(s2b("hello world"), s2b("")), true);
+    assert.strictEqual(
+      bytesContains(s2b("hello world"), s2b("hello world from moon")),
+      false,
+    );
+  });
+  void test("startsWith", () => {
+    assert.strictEqual(
+      bytesStartsWith(s2b("hello world"), s2b("hello world")),
+      true,
+    );
+    assert.strictEqual(bytesStartsWith(s2b("hello world"), s2b("hello")), true);
+    assert.strictEqual(
+      bytesStartsWith(s2b("hello world"), s2b("world")),
+      false,
+    );
+    assert.strictEqual(
+      bytesStartsWith(s2b("hello world"), s2b("hello world from moon")),
+      false,
+    );
+    assert.strictEqual(bytesStartsWith(s2b("hello world"), s2b("")), true);
+  });
+  void test("endsWith", () => {
+    assert.strictEqual(
+      bytesEndsWith(s2b("hello world"), s2b("hello world")),
+      true,
+    );
+    assert.strictEqual(bytesEndsWith(s2b("hello world"), s2b("world")), true);
+    assert.strictEqual(bytesEndsWith(s2b("hello world"), s2b("hello")), false);
+    assert.strictEqual(
+      bytesEndsWith(s2b("hello world"), s2b("hello world from moon")),
+      false,
+    );
+    assert.strictEqual(bytesEndsWith(s2b("hello world"), s2b("")), true);
+  });
 });
 
 // from a call to t(), generate conformance test cases

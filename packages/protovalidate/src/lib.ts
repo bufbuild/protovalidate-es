@@ -1327,3 +1327,61 @@ export function unique(list: { getItems(): CelResult[] }): boolean {
     return arr.indexOf(a) === index;
   });
 }
+
+/**
+ * Returns true if argument bytes contains argument sub.
+ */
+export function bytesContains(bytes: Uint8Array, sub: Uint8Array): boolean {
+  if (sub.length === 0) {
+    return true;
+  }
+  if (sub.length > bytes.length) {
+    return false;
+  }
+  for (let i = 0; i < bytes.length - sub.length + 1; i++) {
+    let found = true;
+    for (let j = 0; j < sub.length; j++) {
+      if (bytes[i + j] != sub[j]) {
+        found = false;
+        break;
+      }
+    }
+    if (found) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Returns true if argument bytes starts with argument sub.
+ */
+export function bytesStartsWith(bytes: Uint8Array, sub: Uint8Array): boolean {
+  if (sub.length > bytes.length) {
+    return false;
+  }
+  for (let i = 0; i < sub.length; i++) {
+    if (sub[i] != bytes[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Returns true if argument bytes ends with argument sub.
+ */
+export function bytesEndsWith(bytes: Uint8Array, sub: Uint8Array): boolean {
+  if (sub.length > bytes.length) {
+    return false;
+  }
+  if (bytes.length < sub.length) {
+    return false;
+  }
+  for (let i = 0; i < sub.length; i++) {
+    if (sub[sub.length - i - 1] != bytes[bytes.length - i - 1]) {
+      return false;
+    }
+  }
+  return true;
+}
