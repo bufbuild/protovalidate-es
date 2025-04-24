@@ -32,8 +32,8 @@ import {
   FuncRegistry,
 } from "@bufbuild/cel";
 import {
-  type Constraint,
-  type FieldConstraints,
+  type Rule,
+  type FieldRules,
   predefined,
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError, RuntimeError } from "./error.js";
@@ -62,20 +62,20 @@ import {
 type CelCompiledRules = {
   standard: {
     field: DescField;
-    constraint: Constraint;
-    compiled: CelCompiledConstraint;
+    rule: Rule;
+    compiled: CelCompiledRule;
   }[];
   extensions: Map<
     number,
     {
       ext: DescExtension;
-      constraint: Constraint;
-      compiled: CelCompiledConstraint;
+      rule: Rule;
+      compiled: CelCompiledRule;
     }[]
   >;
 };
 
-export type CelCompiledConstraint =
+export type CelCompiledRule =
   | {
       kind: "compilation_error";
       error: CompilationError;
@@ -83,7 +83,7 @@ export type CelCompiledConstraint =
   | {
       kind: "interpretable";
       interpretable: ReturnType<CelEnv["plan"]>;
-      constraint: Constraint;
+      rule: Rule;
     };
 
 // TODO contains, endsWith, startsWith for bytes
@@ -281,48 +281,48 @@ export class CelManager {
     this.env.set(key, value);
   }
 
-  eval(compiled: CelCompiledConstraint) {
+  eval(compiled: CelCompiledRule) {
     if (compiled.kind == "compilation_error") {
       throw compiled.error;
     }
-    const constraint = compiled.constraint;
+    const rule = compiled.rule;
     const result = this.env.eval(compiled.interpretable);
     if (typeof result == "string" || typeof result == "boolean") {
       const success = typeof result == "boolean" ? result : result.length == 0;
       if (success) {
         return undefined;
       }
-      // From field buf.validate.Constraint.message:
+      // From field buf.validate.Rule.message:
       // > If a non-empty message is provided, any strings resulting from the CEL
       // > expression evaluation are ignored.
       return {
         message:
-          constraint.message.length == 0 && typeof result == "string"
+          rule.message.length == 0 && typeof result == "string"
             ? result
-            : constraint.message,
-        constraintId: constraint.id,
+            : rule.message,
+        ruleId: rule.id,
       };
     }
     if (result instanceof CelError) {
       throw new RuntimeError(result.message, { cause: result });
     }
     throw new RuntimeError(
-      `expression ${constraint.id} outputs ${typeof result}, wanted either bool or string`,
+      `expression ${rule.id} outputs ${typeof result}, wanted either bool or string`,
     );
   }
 
-  compileConstraint(constraint: Constraint): CelCompiledConstraint {
+  compileRule(rule: Rule): CelCompiledRule {
     try {
       return {
         kind: "interpretable",
-        interpretable: this.env.plan(this.env.parse(constraint.expression)),
-        constraint,
+        interpretable: this.env.plan(this.env.parse(rule.expression)),
+        rule,
       };
     } catch (cause) {
       return {
         kind: "compilation_error",
         error: new CompilationError(
-          `failed to compile ${constraint.id}: ${String(cause)}`,
+          `failed to compile ${rule.id}: ${String(cause)}`,
           { cause },
         ),
       };
@@ -347,11 +347,11 @@ export class CelManager {
       if (!hasOption(field, predefined)) {
         continue;
       }
-      for (const constraint of getOption(field, predefined).cel) {
+      for (const rule of getOption(field, predefined).cel) {
         standard.push({
           field,
-          constraint,
-          compiled: this.compileConstraint(constraint),
+          rule,
+          compiled: this.compileRule(rule),
         });
       }
     }
@@ -363,11 +363,11 @@ export class CelManager {
       if (!list) {
         extensions.set(ext.number, (list = []));
       }
-      for (const constraint of getOption(ext, predefined).cel) {
+      for (const rule of getOption(ext, predefined).cel) {
         list.push({
           ext,
-          constraint,
-          compiled: this.compileConstraint(constraint),
+          rule,
+          compiled: this.compileRule(rule),
         });
       }
     }
@@ -393,7 +393,7 @@ function registryGetExtensionsFor(
 
 export class EvalCustomCel implements Eval<ReflectMessageGet> {
   private readonly children: {
-    compiled: CelCompiledConstraint;
+    compiled: CelCompiledRule;
     rulePath: Path;
   }[] = [];
 
@@ -402,7 +402,7 @@ export class EvalCustomCel implements Eval<ReflectMessageGet> {
     private readonly forMapKey: boolean,
   ) {}
 
-  add(compiled: CelCompiledConstraint, rulePath: Path): void {
+  add(compiled: CelCompiledRule, rulePath: Path): void {
     this.children.push({ compiled, rulePath });
   }
 
@@ -413,12 +413,7 @@ export class EvalCustomCel implements Eval<ReflectMessageGet> {
     for (const child of this.children) {
       const vio = this.celMan.eval(child.compiled);
       if (vio) {
-        cursor.violate(
-          vio.message,
-          vio.constraintId,
-          child.rulePath,
-          this.forMapKey,
-        );
+        cursor.violate(vio.message, vio.ruleId, child.rulePath, this.forMapKey);
       }
     }
   }
@@ -430,25 +425,18 @@ export class EvalCustomCel implements Eval<ReflectMessageGet> {
 
 export class EvalExtendedRulesCel implements Eval<ReflectMessageGet> {
   private readonly children: {
-    compiled: CelCompiledConstraint;
+    compiled: CelCompiledRule;
     rulePath: Path;
     ruleValue: unknown;
   }[] = [];
 
   constructor(
     private readonly celMan: CelManager,
-    private readonly rules: Exclude<
-      FieldConstraints["type"]["value"],
-      undefined
-    >,
+    private readonly rules: Exclude<FieldRules["type"]["value"], undefined>,
     private readonly forMapKey: boolean,
   ) {}
 
-  add(
-    compiled: CelCompiledConstraint,
-    rulePath: Path,
-    ruleValue: unknown,
-  ): void {
+  add(compiled: CelCompiledRule, rulePath: Path, ruleValue: unknown): void {
     this.children.push({
       compiled,
       rulePath,
@@ -463,12 +451,7 @@ export class EvalExtendedRulesCel implements Eval<ReflectMessageGet> {
       this.celMan.setEnv("rule", child.ruleValue);
       const vio = this.celMan.eval(child.compiled);
       if (vio) {
-        cursor.violate(
-          vio.message,
-          vio.constraintId,
-          child.rulePath,
-          this.forMapKey,
-        );
+        cursor.violate(vio.message, vio.ruleId, child.rulePath, this.forMapKey);
       }
     }
   }
@@ -480,20 +463,17 @@ export class EvalExtendedRulesCel implements Eval<ReflectMessageGet> {
 
 export class EvalStandardRulesCel implements Eval<ReflectMessageGet> {
   private readonly children: {
-    compiled: CelCompiledConstraint;
+    compiled: CelCompiledRule;
     rulePath: Path;
   }[] = [];
 
   constructor(
     private readonly celMan: CelManager,
-    private readonly rules: Exclude<
-      FieldConstraints["type"]["value"],
-      undefined
-    >,
+    private readonly rules: Exclude<FieldRules["type"]["value"], undefined>,
     private readonly forMapKey: boolean,
   ) {}
 
-  add(compiled: CelCompiledConstraint, rulePath: Path): void {
+  add(compiled: CelCompiledRule, rulePath: Path): void {
     this.children.push({ compiled, rulePath });
   }
 
@@ -504,12 +484,7 @@ export class EvalStandardRulesCel implements Eval<ReflectMessageGet> {
     for (const child of this.children) {
       const vio = this.celMan.eval(child.compiled);
       if (vio) {
-        cursor.violate(
-          vio.message,
-          vio.constraintId,
-          child.rulePath,
-          this.forMapKey,
-        );
+        cursor.violate(vio.message, vio.ruleId, child.rulePath, this.forMapKey);
       }
     }
   }

@@ -42,14 +42,14 @@ export class Cursor {
 
   violate(
     message: string,
-    constraintId: string,
+    ruleId: string,
     rulePath: Path,
     forMapKey = false,
   ): void {
     this.violations.push(
       new Violation(
         message,
-        constraintId,
+        ruleId,
         this.builder.toPath(),
         rulePath,
         forMapKey,

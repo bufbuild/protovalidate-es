@@ -24,13 +24,13 @@ import {
   type ScalarType,
 } from "@bufbuild/protobuf";
 import {
-  type FieldConstraints,
-  type MessageConstraints,
+  type FieldRules,
+  type MessageRules,
   Ignore,
   field as ext_field,
   message as ext_message,
   oneof as ext_oneof,
-  FieldConstraintsSchema,
+  FieldRulesSchema,
   AnyRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import type {
@@ -86,15 +86,15 @@ export class Planner {
     if (existing) {
       return existing;
     }
-    const constraints = getOption(message, ext_message);
-    if (constraints.disabled) {
+    const messageRules = getOption(message, ext_message);
+    if (messageRules.disabled) {
       return EvalNoop.get();
     }
     const e = new EvalMany<ReflectMessage>();
     this.messageCache.set(message, e);
-    if (!constraints.disabled) {
+    if (!messageRules.disabled) {
       e.add(this.fields(message.fields));
-      e.add(this.messageCel(constraints));
+      e.add(this.messageCel(messageRules));
       e.add(this.oneofs(message.oneofs));
     }
     e.prune();
@@ -112,18 +112,18 @@ export class Planner {
   private fields(fields: DescField[]): Eval<ReflectMessage> {
     const evals = new EvalMany<ReflectMessage>();
     for (const field of fields) {
-      const constraints = getOption(field, ext_field);
-      if (constraints.required && constraints.ignore !== Ignore.ALWAYS) {
+      const fieldRules = getOption(field, ext_field);
+      if (fieldRules.required && fieldRules.ignore !== Ignore.ALWAYS) {
         evals.add(new EvalFieldRequired(field));
       }
-      const baseRulePath = buildPath(FieldConstraintsSchema);
+      const baseRulePath = buildPath(FieldRulesSchema);
       switch (field.fieldKind) {
         case "message": {
           evals.add(
             new EvalField(
               field,
-              ignoreMessageField(field, constraints.ignore),
-              this.message(field.message, constraints, baseRulePath, field),
+              ignoreMessageField(field, fieldRules.ignore),
+              this.message(field.message, fieldRules, baseRulePath, field),
             ),
           );
           break;
@@ -132,8 +132,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreListOrMapField(field, constraints.ignore),
-              this.planList(field, constraints, baseRulePath),
+              ignoreListOrMapField(field, fieldRules.ignore),
+              this.planList(field, fieldRules, baseRulePath),
             ),
           );
           break;
@@ -142,8 +142,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreListOrMapField(field, constraints.ignore),
-              this.map(field, constraints, baseRulePath),
+              ignoreListOrMapField(field, fieldRules.ignore),
+              this.map(field, fieldRules, baseRulePath),
             ),
           );
           break;
@@ -152,8 +152,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreScalarOrEnumField(field, constraints.ignore),
-              this.enumeration(field.enum, constraints, baseRulePath, field),
+              ignoreScalarOrEnumField(field, fieldRules.ignore),
+              this.enumeration(field.enum, fieldRules, baseRulePath, field),
             ),
           );
           break;
@@ -162,14 +162,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreScalarOrEnumField(field, constraints.ignore),
-              this.scalar(
-                field.scalar,
-                constraints,
-                baseRulePath,
-                false,
-                field,
-              ),
+              ignoreScalarOrEnumField(field, fieldRules.ignore),
+              this.scalar(field.scalar, fieldRules, baseRulePath, false, field),
             ),
           );
           break;
@@ -181,15 +175,15 @@ export class Planner {
 
   private planList(
     field: DescField & { fieldKind: "list" },
-    constraints: FieldConstraints | undefined,
+    fieldRules: FieldRules | undefined,
     baseRulePath: PathBuilder,
   ): Eval<ReflectList> {
     const evals = new EvalMany<ReflectList>(
-      this.fieldCel(constraints, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false),
     );
     const [rules, rulePath, rulePathItems] = getListRules(
       baseRulePath,
-      constraints,
+      fieldRules,
       field,
     );
     if (rules) {
@@ -230,15 +224,15 @@ export class Planner {
 
   private map(
     field: DescField & { fieldKind: "map" },
-    constraints: FieldConstraints | undefined,
+    fieldRules: FieldRules | undefined,
     baseRulePath: PathBuilder,
   ): Eval<ReflectMap> {
     const evals = new EvalMany<ReflectMap>(
-      this.fieldCel(constraints, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false),
     );
     const [rules, rulePath, rulePathKeys, rulePathValues] = getMapRules(
       baseRulePath,
-      constraints,
+      fieldRules,
       field,
     );
     if (rules) {
@@ -299,16 +293,16 @@ export class Planner {
 
   private enumeration(
     descEnum: DescEnum,
-    constraints: FieldConstraints | undefined,
+    fieldRules: FieldRules | undefined,
     baseRulePath: PathBuilder,
     fieldContext: { toString(): string },
   ): Eval<number> {
     const evals = new EvalMany<number>(
-      this.fieldCel(constraints, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false),
     );
     const [rules, rulePath] = getEnumRules(
       baseRulePath,
-      constraints,
+      fieldRules,
       fieldContext,
     );
     if (rules) {
@@ -320,18 +314,18 @@ export class Planner {
 
   private scalar(
     scalar: ScalarType,
-    constraints: FieldConstraints | undefined,
+    fieldRules: FieldRules | undefined,
     baseRulePath: PathBuilder,
     forMapKey: boolean,
     fieldContext: { toString(): string },
   ): Eval<ScalarValue> {
     const evals = new EvalMany<ScalarValue>(
-      this.fieldCel(constraints, baseRulePath, forMapKey),
+      this.fieldCel(fieldRules, baseRulePath, forMapKey),
     );
     const [rules, rulePath] = getScalarRules(
       scalar,
       baseRulePath,
-      constraints,
+      fieldRules,
       fieldContext,
     );
     if (rules) {
@@ -342,18 +336,18 @@ export class Planner {
 
   private message(
     descMessage: DescMessage,
-    constraints: FieldConstraints | undefined,
+    fieldRules: FieldRules | undefined,
     baseRulePath: PathBuilder,
     fieldContext: { toString(): string },
   ): Eval<ReflectMessage> {
     const evals = new EvalMany<ReflectMessage>(
-      this.fieldCel(constraints, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false),
     );
     evals.add(this.plan(descMessage));
     const [rules, rulePath] = getMessageRules(
       descMessage,
       baseRulePath,
-      constraints,
+      fieldRules,
       fieldContext,
     );
     if (rules) {
@@ -366,7 +360,7 @@ export class Planner {
   }
 
   private rules(
-    rules: Exclude<FieldConstraints["type"]["value"], undefined>,
+    rules: Exclude<FieldRules["type"]["value"], undefined>,
     rulePath: PathBuilder,
     forMapKey: boolean,
   ) {
@@ -409,30 +403,30 @@ export class Planner {
     return new EvalMany(evalStandard, evalExtended);
   }
 
-  private messageCel(constraints: MessageConstraints): Eval<ReflectMessage> {
+  private messageCel(messageRules: MessageRules): Eval<ReflectMessage> {
     const e = new EvalCustomCel(this.celMan, false);
-    for (const constraint of constraints.cel) {
-      e.add(this.celMan.compileConstraint(constraint), []);
+    for (const rule of messageRules.cel) {
+      e.add(this.celMan.compileRule(rule), []);
     }
     return e;
   }
 
   private fieldCel(
-    constraints: FieldConstraints | undefined,
+    fieldRules: FieldRules | undefined,
     baseRulePath: PathBuilder,
     forMapKey: boolean,
   ): Eval<ReflectMessageGet> {
-    if (!constraints) {
+    if (!fieldRules) {
       return EvalNoop.get();
     }
     const e = new EvalCustomCel(this.celMan, forMapKey);
-    for (const [index, constraint] of constraints.cel.entries()) {
+    for (const [index, rule] of fieldRules.cel.entries()) {
       const rulePath = baseRulePath
         .clone()
-        .field(FieldConstraintsSchema.field.cel)
+        .field(FieldRulesSchema.field.cel)
         .list(index)
         .toPath();
-      e.add(this.celMan.compileConstraint(constraint), rulePath);
+      e.add(this.celMan.compileRule(rule), rulePath);
     }
     return e;
   }

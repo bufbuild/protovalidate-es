@@ -32,7 +32,7 @@ import { FieldDescriptorProto_Type } from "@bufbuild/protobuf/wkt";
 
 /**
  * A CompilationError is raised if a CEL expression cannot be compiled, or if
- * invalid standard constraints are applied.
+ * invalid standard rules are applied.
  */
 export class CompilationError extends Error {
   override name = "CompilationError";
@@ -57,7 +57,7 @@ export class RuntimeError extends Error {
 }
 
 /**
- * A ValidationError is raised if one or more constraint violations were
+ * A ValidationError is raised if one or more rule violations were
  * detected.
  */
 export class ValidationError extends Error {
@@ -87,23 +87,23 @@ function validationErrorMessage(violations: Violation[]): string {
 /**
  * Violation represents a single instance where a validation rule was not met.
  * It provides information about the field that caused the violation, the
- * specific unfulfilled constraint, and a human-readable error message.
+ * specific unfulfilled rule, and a human-readable error message.
  */
 export class Violation {
   /**
    * A human-readable error message that describes the nature of the violation.
    *
-   * This can be the default error message from the violated `Constraint`, or it
+   * This can be the default error message from the violated `Rule`, or it
    * can be a custom message that gives more context about the violation.
    */
   public message: string;
 
   /**
-   * The unique identifier of the `Constraint` that was not fulfilled.
-   * This is the same `id` that was specified in the `Constraint` message,
+   * The unique identifier of the `Rule` that was not fulfilled.
+   * This is the same `id` that was specified in the `Rule` message,
    * allowing easy tracing of which rule was violated.
    */
-  public constraintId: string;
+  public ruleId: string;
 
   /**
    * A machine-readable path to the field that failed validation.
@@ -114,12 +114,12 @@ export class Violation {
   public field: Path;
 
   /**
-   * A machine-readable path that points to the specific constraint rule that
-   * failed validation.
+   * A machine-readable path that points to the specific rule that failed
+   * validation.
    *
-   * This will be a nested field starting from the FieldConstraints of the field
-   * that failed validation. For custom constraints, this will provide the path
-   * of the constraint, e.g. `cel[0]`.
+   * This will be a nested field starting from the FieldRules of the field
+   * that failed validation. For custom rules, this will provide the path
+   * of the rule, e.g. `cel[0]`.
    */
   public rule: Path;
 
@@ -130,13 +130,13 @@ export class Violation {
 
   constructor(
     message: string,
-    constraintId: string,
+    ruleId: string,
     field: Path,
     rule: Path,
     forKey: boolean,
   ) {
     this.message = message;
-    this.constraintId = constraintId;
+    this.ruleId = ruleId;
     this.field = field;
     this.rule = rule;
     this.forKey = forKey;
@@ -147,7 +147,7 @@ export class Violation {
     if (path.length > 0) {
       path += ": ";
     }
-    return path + `${this.message} [${this.constraintId}]`;
+    return path + `${this.message} [${this.ruleId}]`;
   }
 }
 
@@ -168,7 +168,7 @@ export function violationToProto(violation: Violation) {
     field:
       violation.field.length > 0 ? pathToProto(violation.field) : undefined,
     rule: violation.rule.length > 0 ? pathToProto(violation.rule) : undefined,
-    constraintId: violation.constraintId,
+    ruleId: violation.ruleId,
     message: violation.message.length > 0 ? violation.message : undefined,
     forKey: violation.forKey,
   });

@@ -23,7 +23,7 @@ const suites = [];
 let suite;
 let kase;
 for (const line of lines) {
-  // --- FAIL: standard_constraints/map (failed: 18, skipped: 0, passed: 11, total: 29)
+  // --- FAIL: standard_rules/map (failed: 18, skipped: 0, passed: 11, total: 29)
   const mSuite =
     /^--- FAIL: (.+) \(failed: \d+, skipped: \d+, passed: \d+, total: \d+\)$/.exec(
       line,

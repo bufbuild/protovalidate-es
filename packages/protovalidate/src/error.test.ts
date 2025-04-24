@@ -25,7 +25,7 @@ import {
 } from "./error.js";
 import { buildPath, parsePath, type Path } from "./path.js";
 import {
-  FieldConstraintsSchema,
+  FieldRulesSchema,
   type FieldPath,
   FieldPathElementSchema,
   ViolationSchema,
@@ -38,44 +38,26 @@ import { FieldDescriptorProto_Type } from "@bufbuild/protobuf/wkt";
 
 void suite("Violation", () => {
   void test("constructor", () => {
-    const field = parsePath(FieldConstraintsSchema, "cel[1].id");
-    const rule = parsePath(FieldConstraintsSchema, "string.min_len");
-    const v = new Violation(
-      "failure-message",
-      "constraint-id",
-      field,
-      rule,
-      false,
-    );
+    const field = parsePath(FieldRulesSchema, "cel[1].id");
+    const rule = parsePath(FieldRulesSchema, "string.min_len");
+    const v = new Violation("failure-message", "rule-id", field, rule, false);
     assert.strictEqual(v.message, "failure-message");
-    assert.strictEqual(v.constraintId, "constraint-id");
+    assert.strictEqual(v.ruleId, "rule-id");
     assert.strictEqual(v.field, field);
     assert.strictEqual(v.rule, rule);
     assert.strictEqual(v.forKey, false);
   });
   void test("toString", () => {
-    const field = parsePath(FieldConstraintsSchema, "cel[1].id");
-    const rule = parsePath(FieldConstraintsSchema, "string.min_len");
-    const v = new Violation(
-      "failure-message",
-      "constraint-id",
-      field,
-      rule,
-      false,
-    );
-    assert.equal(v.toString(), "cel[1].id: failure-message [constraint-id]");
+    const field = parsePath(FieldRulesSchema, "cel[1].id");
+    const rule = parsePath(FieldRulesSchema, "string.min_len");
+    const v = new Violation("failure-message", "rule-id", field, rule, false);
+    assert.equal(v.toString(), "cel[1].id: failure-message [rule-id]");
   });
   void test("toString with empty field path", () => {
     const field: Path = [];
-    const rule = parsePath(FieldConstraintsSchema, "string.min_len");
-    const v = new Violation(
-      "failure-message",
-      "constraint-id",
-      field,
-      rule,
-      false,
-    );
-    assert.equal(v.toString(), "failure-message [constraint-id]");
+    const rule = parsePath(FieldRulesSchema, "string.min_len");
+    const v = new Violation("failure-message", "rule-id", field, rule, false);
+    assert.equal(v.toString(), "failure-message [rule-id]");
   });
 });
 
@@ -83,15 +65,15 @@ void suite("violationToProto", () => {
   void test("converts as expected", () => {
     const violation = new Violation(
       "failure-message",
-      "constraint-id",
-      parsePath(FieldConstraintsSchema, "cel[1].id"),
+      "rule-id",
+      parsePath(FieldRulesSchema, "cel[1].id"),
       [],
       false,
     );
     const proto = violationToProto(violation);
     assert.ok(isMessage(proto, ViolationSchema));
     assert.equal(proto.message, violation.message);
-    assert.equal(proto.constraintId, violation.constraintId);
+    assert.equal(proto.ruleId, violation.ruleId);
     assert.equal(proto.forKey, violation.forKey);
     assert.strictEqual(proto.field?.elements.length, 2);
     assert.strictEqual(proto.rule, undefined);
@@ -108,7 +90,7 @@ void suite("violationToProto", () => {
     `);
     const violation = new Violation(
       "failure-message",
-      "constraint-id",
+      "rule-id",
       buildPath(descMessage).field(descMessage.field.val).toPath(),
       [],
       false,
@@ -131,7 +113,7 @@ void suite("violationToProto", () => {
     `);
     const violation = new Violation(
       "failure-message",
-      "constraint-id",
+      "rule-id",
       buildPath(descMessage).field(descMessage.field.m).toPath(),
       [],
       false,
@@ -160,7 +142,7 @@ void suite("violationToProto", () => {
     `);
     const violation = new Violation(
       "failure-message",
-      "constraint-id",
+      "rule-id",
       buildPath(descMessage).field(descMessage.field.m).mapKey(123).toPath(),
       [],
       false,
@@ -213,28 +195,28 @@ void suite("ValidationError", () => {
     const violations = [
       new Violation(
         "failure-message",
-        "constraint-id",
-        parsePath(FieldConstraintsSchema, "cel[1].id"),
+        "rule-id",
+        parsePath(FieldRulesSchema, "cel[1].id"),
         [],
         false,
       ),
     ];
     const err = new ValidationError(violations);
-    assert.equal(err.message, "cel[1].id: failure-message [constraint-id]");
+    assert.equal(err.message, "cel[1].id: failure-message [rule-id]");
   });
   void test("constructor with 2 violations", () => {
     const violations = [
       new Violation(
         "failure-message-1",
-        "constraint-id-1",
-        parsePath(FieldConstraintsSchema, "cel[1].id"),
+        "rule-id-1",
+        parsePath(FieldRulesSchema, "cel[1].id"),
         [],
         false,
       ),
       new Violation(
         "failure-message-2",
-        "constraint-id-2",
-        parsePath(FieldConstraintsSchema, "cel[2].id"),
+        "rule-id-2",
+        parsePath(FieldRulesSchema, "cel[2].id"),
         [],
         false,
       ),
@@ -242,7 +224,7 @@ void suite("ValidationError", () => {
     const err = new ValidationError(violations);
     assert.equal(
       err.message,
-      "cel[1].id: failure-message-1 [constraint-id-1], and 1 more violation",
+      "cel[1].id: failure-message-1 [rule-id-1], and 1 more violation",
     );
   });
   void test("constructor without violations", () => {

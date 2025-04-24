@@ -32,7 +32,7 @@ import {
   DoubleRulesSchema,
   DurationRulesSchema,
   EnumRulesSchema,
-  FieldConstraintsSchema,
+  FieldRulesSchema,
   FloatRulesSchema,
   Int32RulesSchema,
   Int64RulesSchema,
@@ -53,48 +53,45 @@ void suite("getListRules()", () => {
   const fakeField = {
     toString: () => "field fake.Foo.field",
   };
-  const basePath = buildPath(FieldConstraintsSchema);
-  void test("constraints undefined returns rules undefined", () => {
-    const constraints = undefined;
-    const [rules, path] = getListRules(basePath, constraints, fakeField);
+  const basePath = buildPath(FieldRulesSchema);
+  void test("fieldRules undefined returns rules undefined", () => {
+    const fieldRules = undefined;
+    const [rules, path] = getListRules(basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
     assert.strictEqual(pathToString(path.toPath()), "repeated");
   });
-  void test("constraints without rules returns rules undefined", () => {
-    const constraints = create(FieldConstraintsSchema);
-    const [rules, path] = getListRules(basePath, constraints, fakeField);
+  void test("fieldRules without rules returns rules undefined", () => {
+    const fieldRules = create(FieldRulesSchema);
+    const [rules, path] = getListRules(basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
     assert.strictEqual(pathToString(path.toPath()), "repeated");
   });
-  void test("constraints with repeated rules returns rules", () => {
-    const constraints = create(FieldConstraintsSchema, {
+  void test("fieldRules with repeated rules returns rules", () => {
+    const fieldRules = create(FieldRulesSchema, {
       type: { case: "repeated", value: {} },
     });
-    const [rules, path] = getListRules(basePath, constraints, fakeField);
+    const [rules, path] = getListRules(basePath, fieldRules, fakeField);
     assert.ok(rules);
     assert.strictEqual(rules.$typeName, RepeatedRulesSchema.typeName);
     assert.strictEqual(pathToString(path.toPath()), "repeated");
   });
   const failureCases: {
-    type: Exclude<
-      MessageInitShape<typeof FieldConstraintsSchema>["type"],
-      undefined
-    >;
+    type: Exclude<MessageInitShape<typeof FieldRulesSchema>["type"], undefined>;
     error: string;
   }[] = [
     {
       type: { case: "string", value: {} },
-      error: `expected constraint "repeated", got "string" on field fake.Foo.field`,
+      error: `expected rule "repeated", got "string" on field fake.Foo.field`,
     },
     {
       type: { case: "map", value: {} },
-      error: `expected constraint "repeated", got "map" on field fake.Foo.field`,
+      error: `expected rule "repeated", got "map" on field fake.Foo.field`,
     },
   ];
   for (const { type, error } of failureCases) {
     void test(`rule "${type.case}" errors`, () => {
-      const constraints = create(FieldConstraintsSchema, { type });
-      assert.throws(() => getListRules(basePath, constraints, fakeField), {
+      const fieldRules = create(FieldRulesSchema, { type });
+      assert.throws(() => getListRules(basePath, fieldRules, fakeField), {
         name: "CompilationError",
         message: error,
       });
@@ -106,48 +103,45 @@ void suite("getMapRules()", () => {
   const fakeField = {
     toString: () => "field fake.Foo.field",
   };
-  const basePath = buildPath(FieldConstraintsSchema);
-  void test("constraints undefined returns rules undefined", () => {
-    const constraints = undefined;
-    const [rules, path] = getMapRules(basePath, constraints, fakeField);
+  const basePath = buildPath(FieldRulesSchema);
+  void test("fieldRules undefined returns rules undefined", () => {
+    const fieldRules = undefined;
+    const [rules, path] = getMapRules(basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
     assert.strictEqual(pathToString(path.toPath()), "map");
   });
-  void test("constraints without rules returns rules undefined", () => {
-    const constraints = create(FieldConstraintsSchema);
-    const [rules, path] = getMapRules(basePath, constraints, fakeField);
+  void test("fieldRules without rules returns rules undefined", () => {
+    const fieldRules = create(FieldRulesSchema);
+    const [rules, path] = getMapRules(basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
     assert.strictEqual(pathToString(path.toPath()), "map");
   });
-  void test("constraints with map rules returns rules", () => {
-    const constraints = create(FieldConstraintsSchema, {
+  void test("fieldRules with map rules returns rules", () => {
+    const fieldRules = create(FieldRulesSchema, {
       type: { case: "map", value: {} },
     });
-    const [rules, path] = getMapRules(basePath, constraints, fakeField);
+    const [rules, path] = getMapRules(basePath, fieldRules, fakeField);
     assert.ok(rules);
     assert.strictEqual(rules.$typeName, MapRulesSchema.typeName);
     assert.strictEqual(pathToString(path.toPath()), "map");
   });
   const failureCases: {
-    type: Exclude<
-      MessageInitShape<typeof FieldConstraintsSchema>["type"],
-      undefined
-    >;
+    type: Exclude<MessageInitShape<typeof FieldRulesSchema>["type"], undefined>;
     error: string;
   }[] = [
     {
       type: { case: "string", value: {} },
-      error: `expected constraint "map", got "string" on field fake.Foo.field`,
+      error: `expected rule "map", got "string" on field fake.Foo.field`,
     },
     {
       type: { case: "repeated", value: {} },
-      error: `expected constraint "map", got "repeated" on field fake.Foo.field`,
+      error: `expected rule "map", got "repeated" on field fake.Foo.field`,
     },
   ];
   for (const { type, error } of failureCases) {
     void test(`rule "${type.case}" errors`, () => {
-      const constraints = create(FieldConstraintsSchema, { type });
-      assert.throws(() => getMapRules(basePath, constraints, fakeField), {
+      const rules = create(FieldRulesSchema, { type });
+      assert.throws(() => getMapRules(basePath, rules, fakeField), {
         name: "CompilationError",
         message: error,
       });
@@ -159,50 +153,47 @@ void suite("getEnumRules()", () => {
   const fakeField = {
     toString: () => "field fake.Foo.field",
   };
-  const basePath = buildPath(FieldConstraintsSchema)
-    .field(FieldConstraintsSchema.field.repeated)
+  const basePath = buildPath(FieldRulesSchema)
+    .field(FieldRulesSchema.field.repeated)
     .field(RepeatedRulesSchema.field.items);
-  void test("constraints undefined returns rules undefined", () => {
-    const constraints = undefined;
-    const [rules, path] = getEnumRules(basePath, constraints, fakeField);
+  void test("fieldRules undefined returns rules undefined", () => {
+    const fieldRules = undefined;
+    const [rules, path] = getEnumRules(basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
     assert.strictEqual(pathToString(path.toPath()), "repeated.items.enum");
   });
-  void test("constraints without rules returns rules undefined", () => {
-    const constraints = create(FieldConstraintsSchema);
-    const [rules, path] = getEnumRules(basePath, constraints, fakeField);
+  void test("fieldRules without rules returns rules undefined", () => {
+    const fieldRules = create(FieldRulesSchema);
+    const [rules, path] = getEnumRules(basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
     assert.strictEqual(pathToString(path.toPath()), "repeated.items.enum");
   });
-  void test("constraints with enum rules returns rules", () => {
-    const constraints = create(FieldConstraintsSchema, {
+  void test("fieldRules with enum rules returns rules", () => {
+    const fieldRules = create(FieldRulesSchema, {
       type: { case: "enum", value: {} },
     });
-    const [rules, path] = getEnumRules(basePath, constraints, fakeField);
+    const [rules, path] = getEnumRules(basePath, fieldRules, fakeField);
     assert.ok(rules);
     assert.strictEqual(rules.$typeName, EnumRulesSchema.typeName);
     assert.strictEqual(pathToString(path.toPath()), "repeated.items.enum");
   });
   const failureCases: {
-    type: Exclude<
-      MessageInitShape<typeof FieldConstraintsSchema>["type"],
-      undefined
-    >;
+    type: Exclude<MessageInitShape<typeof FieldRulesSchema>["type"], undefined>;
     error: string;
   }[] = [
     {
       type: { case: "string", value: {} },
-      error: `expected constraint "enum", got "string" on field fake.Foo.field`,
+      error: `expected rule "enum", got "string" on field fake.Foo.field`,
     },
     {
       type: { case: "any", value: {} },
-      error: `expected constraint "enum", got "any" on field fake.Foo.field`,
+      error: `expected rule "enum", got "any" on field fake.Foo.field`,
     },
   ];
   for (const { type, error } of failureCases) {
     void test(`rule "${type.case}" errors`, () => {
-      const constraints = create(FieldConstraintsSchema, { type });
-      assert.throws(() => getEnumRules(basePath, constraints, fakeField), {
+      const fieldRules = create(FieldRulesSchema, { type });
+      assert.throws(() => getEnumRules(basePath, fieldRules, fakeField), {
         name: "CompilationError",
         message: error,
       });
@@ -214,55 +205,42 @@ void suite("getMessageRules()", () => {
   const fakeField = {
     toString: () => "field fake.Foo.field",
   };
-  const basePath = buildPath(FieldConstraintsSchema)
-    .field(FieldConstraintsSchema.field.repeated)
+  const basePath = buildPath(FieldRulesSchema)
+    .field(FieldRulesSchema.field.repeated)
     .field(RepeatedRulesSchema.field.items);
-  void test("constraints undefined returns rules undefined", () => {
-    const constraints = undefined;
-    const [rules] = getMessageRules(
-      AnySchema,
-      basePath,
-      constraints,
-      fakeField,
-    );
+  void test("fieldRules undefined returns rules undefined", () => {
+    const fieldRules = undefined;
+    const [rules] = getMessageRules(AnySchema, basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
   });
-  void test("constraints without rules returns rules undefined", () => {
-    const constraints = create(FieldConstraintsSchema);
-    const [rules] = getMessageRules(
-      AnySchema,
-      basePath,
-      constraints,
-      fakeField,
-    );
+  void test("fieldRules without rules returns rules undefined", () => {
+    const fieldRules = create(FieldRulesSchema);
+    const [rules] = getMessageRules(AnySchema, basePath, fieldRules, fakeField);
     assert.strictEqual(rules, undefined);
   });
   void test("adds wanted rule to path", () => {
-    const constraints = create(FieldConstraintsSchema);
+    const fieldRules = create(FieldRulesSchema);
     const [, path] = getMessageRules(
       AnySchema,
       basePath,
-      constraints,
+      fieldRules,
       fakeField,
     );
     assert.strictEqual(pathToString(path.toPath()), "repeated.items.any");
   });
   void test("does not modify path for message type without rules", () => {
-    const constraints = create(FieldConstraintsSchema);
+    const fieldRules = create(FieldRulesSchema);
     const [, path] = getMessageRules(
-      FieldConstraintsSchema,
+      FieldRulesSchema,
       basePath,
-      constraints,
+      fieldRules,
       fakeField,
     );
     assert.strictEqual(pathToString(path.toPath()), "repeated.items");
   });
   const successCases: {
     message: DescMessage;
-    type: Exclude<
-      MessageInitShape<typeof FieldConstraintsSchema>["type"],
-      undefined
-    >;
+    type: Exclude<MessageInitShape<typeof FieldRulesSchema>["type"], undefined>;
     wantPath: string;
     wantRuleType: DescMessage;
   }[] = [
@@ -293,11 +271,11 @@ void suite("getMessageRules()", () => {
   ];
   for (const { message, type, wantPath, wantRuleType } of successCases) {
     void test(`rule "${type.case}" on field with ${message.toString()} is ok`, () => {
-      const constraints = create(FieldConstraintsSchema, { type });
+      const fieldRules = create(FieldRulesSchema, { type });
       const [rules, path] = getMessageRules(
         message,
         basePath,
-        constraints,
+        fieldRules,
         fakeField,
       );
       assert.ok(rules);
@@ -307,28 +285,25 @@ void suite("getMessageRules()", () => {
   }
   const failureCases: {
     message: DescMessage;
-    type: Exclude<
-      MessageInitShape<typeof FieldConstraintsSchema>["type"],
-      undefined
-    >;
+    type: Exclude<MessageInitShape<typeof FieldRulesSchema>["type"], undefined>;
     error: string;
   }[] = [
     {
-      message: FieldConstraintsSchema,
+      message: FieldRulesSchema,
       type: { case: "string", value: {} },
-      error: `constraint "string" cannot be used on field fake.Foo.field`,
+      error: `rule "string" cannot be used on field fake.Foo.field`,
     },
     {
       message: AnySchema,
       type: { case: "repeated", value: {} },
-      error: `expected constraint "any", got "repeated" on field fake.Foo.field`,
+      error: `expected rule "any", got "repeated" on field fake.Foo.field`,
     },
   ];
   for (const { message, type, error } of failureCases) {
     void test(`rule "${type.case}" on field with ${message.toString()} errors`, () => {
-      const constraints = create(FieldConstraintsSchema, { type });
+      const fieldRules = create(FieldRulesSchema, { type });
       assert.throws(
-        () => getMessageRules(message, basePath, constraints, fakeField),
+        () => getMessageRules(message, basePath, fieldRules, fakeField),
         {
           name: "CompilationError",
           message: error,
@@ -342,45 +317,42 @@ void suite("getScalarRules()", () => {
   const fakeField = {
     toString: () => "field fake.Foo.field",
   };
-  const basePath = buildPath(FieldConstraintsSchema)
-    .field(FieldConstraintsSchema.field.repeated)
+  const basePath = buildPath(FieldRulesSchema)
+    .field(FieldRulesSchema.field.repeated)
     .field(RepeatedRulesSchema.field.items);
-  void test("constraints undefined returns rules undefined", () => {
-    const constraints = undefined;
+  void test("fieldRules undefined returns rules undefined", () => {
+    const fieldRules = undefined;
     const [rules] = getScalarRules(
       ScalarType.INT32,
       basePath,
-      constraints,
+      fieldRules,
       fakeField,
     );
     assert.strictEqual(rules, undefined);
   });
-  void test("constraints without rules returns rules undefined", () => {
-    const constraints = create(FieldConstraintsSchema);
+  void test("fieldRules without rules returns rules undefined", () => {
+    const fieldRules = create(FieldRulesSchema);
     const [rules] = getScalarRules(
       ScalarType.STRING,
       basePath,
-      constraints,
+      fieldRules,
       fakeField,
     );
     assert.strictEqual(rules, undefined);
   });
   void test("adds wanted rule to path", () => {
-    const constraints = create(FieldConstraintsSchema);
+    const fieldRules = create(FieldRulesSchema);
     const [, path] = getScalarRules(
       ScalarType.STRING,
       basePath,
-      constraints,
+      fieldRules,
       fakeField,
     );
     assert.strictEqual(pathToString(path.toPath()), "repeated.items.string");
   });
 
   const successCases: {
-    type: Exclude<
-      MessageInitShape<typeof FieldConstraintsSchema>["type"],
-      undefined
-    >;
+    type: Exclude<MessageInitShape<typeof FieldRulesSchema>["type"], undefined>;
     scalar: ScalarType;
     wantPath: string;
     wantRuleType: DescMessage;
@@ -412,11 +384,11 @@ void suite("getScalarRules()", () => {
   ];
   for (const { scalar, type, wantPath, wantRuleType } of successCases) {
     void test(`rule ${type.case} on ${ScalarType[scalar]} field is ok`, () => {
-      const constraints = create(FieldConstraintsSchema, { type });
+      const fieldRules = create(FieldRulesSchema, { type });
       const [rules, path] = getScalarRules(
         scalar,
         basePath,
-        constraints,
+        fieldRules,
         fakeField,
       );
       assert.ok(rules);
@@ -426,29 +398,26 @@ void suite("getScalarRules()", () => {
   }
 
   const failureCases: {
-    type: Exclude<
-      MessageInitShape<typeof FieldConstraintsSchema>["type"],
-      undefined
-    >;
+    type: Exclude<MessageInitShape<typeof FieldRulesSchema>["type"], undefined>;
     scalar: ScalarType;
     error: string;
   }[] = [
     {
       scalar: ScalarType.FLOAT,
       type: { case: "string", value: {} },
-      error: `expected constraint "float", got "string" on field fake.Foo.field`,
+      error: `expected rule "float", got "string" on field fake.Foo.field`,
     },
     {
       scalar: ScalarType.STRING,
       type: { case: "any", value: {} },
-      error: `expected constraint "string", got "any" on field fake.Foo.field`,
+      error: `expected rule "string", got "any" on field fake.Foo.field`,
     },
   ];
   for (const { type, scalar, error } of failureCases) {
     void test(`rule ${type.case} on ${ScalarType[scalar]} field errors`, () => {
-      const constraints = create(FieldConstraintsSchema, { type });
+      const fieldRules = create(FieldRulesSchema, { type });
       assert.throws(
-        () => getScalarRules(scalar, basePath, constraints, fakeField),
+        () => getScalarRules(scalar, basePath, fieldRules, fakeField),
         {
           name: "CompilationError",
           message: error,

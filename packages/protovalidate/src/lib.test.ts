@@ -1301,7 +1301,7 @@ void suite("unique", () => {
 //       const expect = m[3] === "valid";
 //       const e = expect ? `results.Success(true)` : `results.Violations(
 // 				&validate.Violation{
-// 					ConstraintId: proto.String("library.is_ip_prefix"),
+// 					RuleId: proto.String("library.is_ip_prefix"),
 // 				},
 // 				)`;
 //       const p = version !== undefined ? `, Version: proto.Int32(${version})` : ``;
@@ -1318,7 +1318,7 @@ void suite("unique", () => {
 //       const expect = m[1] === "valid";
 //       const e = expect ? `results.Success(true)` : `results.Violations(
 // 				&validate.Violation{
-// 					ConstraintId: proto.String("library.is_hostname"),
+// 					RuleId: proto.String("library.is_hostname"),
 // 				},
 // 				)`;
 //       return `"${name}": {
@@ -1334,7 +1334,7 @@ void suite("unique", () => {
 //       const expect = m[2] === "valid";
 //       const e = expect ? `results.Success(true)` : `results.Violations(
 // 				&validate.Violation{
-// 					ConstraintId: proto.String("library.is_host_and_port"),
+// 					RuleId: proto.String("library.is_host_and_port"),
 // 				},
 // 				)`;
 //       const p = portRequired ? `, PortRequired: true` : ``;
@@ -1350,7 +1350,7 @@ void suite("unique", () => {
 //       const expect = m[1] === "valid";
 //       const e = expect ? `results.Success(true)` : `results.Violations(
 // 				&validate.Violation{
-// 					ConstraintId: proto.String("library.is_email"),
+// 					RuleId: proto.String("library.is_email"),
 // 				},
 // 				)`;
 //       return `"${name}": {
@@ -1366,7 +1366,7 @@ void suite("unique", () => {
 //       const expect = m[2] === "valid";
 //       const e = expect ? `results.Success(true)` : `results.Violations(
 // 				&validate.Violation{
-// 					ConstraintId: proto.String("library.is_ip"),
+// 					RuleId: proto.String("library.is_ip"),
 // 				},
 // 				)`;
 //       const p = version !== undefined ? `, Version: proto.Int32(${version})` : ``;
@@ -1382,7 +1382,7 @@ void suite("unique", () => {
 //       const expect = m[1] === "valid";
 //       const e = expect ? `results.Success(true)` : `results.Violations(
 // 				&validate.Violation{
-// 					ConstraintId: proto.String("library.is_uri"),
+// 					RuleId: proto.String("library.is_uri"),
 // 				},
 // 				)`;
 //       return `"${name}": {
@@ -1397,7 +1397,7 @@ void suite("unique", () => {
 //       const expect = m[1] === "valid";
 //       const e = expect ? `results.Success(true)` : `results.Violations(
 // 				&validate.Violation{
-// 					ConstraintId: proto.String("library.is_uri_ref"),
+// 					RuleId: proto.String("library.is_uri_ref"),
 // 				},
 // 				)`;
 //       return `"${name}": {

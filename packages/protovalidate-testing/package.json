@@ -6,7 +6,7 @@
   },
   "scripts": {
     "install-protovalidate-conformance": "node scripts/install-protovalidate-conformance.js",
-    "generate": "buf generate buf.build/bufbuild/protovalidate-testing:v0.10.4",
+    "generate": "buf generate buf.build/bufbuild/protovalidate-testing:v0.11.0",
     "postgenerate": "license-header src/gen",
     "test": "protovalidate-conformance --strict_message --strict_error --expected_failures=expected-failures.yaml -- tsx src/executor.ts",
     "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen'",

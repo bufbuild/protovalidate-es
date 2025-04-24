@@ -35,8 +35,8 @@ import {
   DoubleRulesSchema,
   DurationRulesSchema,
   EnumRulesSchema,
-  type FieldConstraints,
-  FieldConstraintsSchema,
+  type FieldRules,
+  FieldRulesSchema,
   Fixed32RulesSchema,
   Fixed64RulesSchema,
   FloatRulesSchema,
@@ -55,7 +55,7 @@ import {
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError } from "./error.js";
 
-type ruleType = Exclude<FieldConstraints["type"]["case"], undefined>;
+type ruleType = Exclude<FieldRules["type"]["case"], undefined>;
 type ruleTypeMessage =
   | "any"
   | "duration"
@@ -125,7 +125,7 @@ const scalarToRuleType = new Map<ScalarType, ruleTypeScalar>([
  * Get the descriptor for one of the buf.validate.*Rules messages.
  */
 export function getRuleDescriptor(
-  typeName: Exclude<FieldConstraints["type"]["value"], undefined>["$typeName"],
+  typeName: Exclude<FieldRules["type"]["value"], undefined>["$typeName"],
 ): DescMessage {
   for (const d of [
     FloatRulesSchema,
@@ -158,36 +158,36 @@ export function getRuleDescriptor(
 }
 
 /**
- * Get buf.validate.RepeatedRules from FieldConstraints.
+ * Get buf.validate.RepeatedRules from FieldRules.
  * Returns a tuple with rules, and path to the rules.
- * Throws an error if the FieldConstraints has incompatible rules.
+ * Throws an error if the FieldRules has incompatible rules.
  */
 export function getListRules(
   rulePath: PathBuilder,
-  constraints: FieldConstraints | undefined,
+  fieldRules: FieldRules | undefined,
   fieldContext: { toString(): string },
 ) {
   const listRules = getRulePath(rulePath, "repeated");
   return [
-    getRules(constraints, "repeated", fieldContext),
+    getRules(fieldRules, "repeated", fieldContext),
     listRules,
     listRules.clone().field(RepeatedRulesSchema.field.items),
   ] as const;
 }
 
 /**
- * Get buf.validate.MapRules from FieldConstraints.
+ * Get buf.validate.MapRules from FieldRules.
  * Returns a tuple with rules, and path to the rules.
- * Throws an error if the FieldConstraints has incompatible rules.
+ * Throws an error if the FieldRules has incompatible rules.
  */
 export function getMapRules(
   rulePath: PathBuilder,
-  constraints: FieldConstraints | undefined,
+  fieldRules: FieldRules | undefined,
   fieldContext: { toString(): string },
 ) {
   const mapRules = getRulePath(rulePath, "map");
   return [
-    getRules(constraints, "map", fieldContext),
+    getRules(fieldRules, "map", fieldContext),
     mapRules,
     mapRules.clone().field(MapRulesSchema.field.keys),
     mapRules.clone().field(MapRulesSchema.field.values),
@@ -195,53 +195,53 @@ export function getMapRules(
 }
 
 /**
- * Get buf.validate.EnumRules from FieldConstraints.
+ * Get buf.validate.EnumRules from FieldRules.
  * Returns a tuple with rules, and path to the rules.
- * Throws an error if the FieldConstraints has incompatible rules.
+ * Throws an error if the FieldRules has incompatible rules.
  */
 export function getEnumRules(
   rulePath: PathBuilder,
-  constraints: FieldConstraints | undefined,
+  fieldRules: FieldRules | undefined,
   fieldContext: { toString(): string },
 ) {
   return [
-    getRules(constraints, "enum", fieldContext),
+    getRules(fieldRules, "enum", fieldContext),
     getRulePath(rulePath, "enum"),
   ] as const;
 }
 
 /**
- * Get buf.validate.*Rules for the given message type from FieldConstraints.
+ * Get buf.validate.*Rules for the given message type from FieldRules.
  * Returns a tuple with rules, and path to the rules.
- * Throws an error if the FieldConstraints has incompatible rules.
+ * Throws an error if the FieldRules has incompatible rules.
  */
 export function getMessageRules(
   descMessage: DescMessage,
   rulePath: PathBuilder,
-  constraints: FieldConstraints | undefined,
+  fieldRules: FieldRules | undefined,
   fieldContext: { toString(): string },
 ) {
   const type = messageToRuleType.get(descMessage.typeName);
   return [
-    getRules(constraints, type, fieldContext),
+    getRules(fieldRules, type, fieldContext),
     getRulePath(rulePath, type),
   ] as const;
 }
 
 /**
- * Get buf.validate.*Rules for the given scalar type from FieldConstraints.
+ * Get buf.validate.*Rules for the given scalar type from FieldRules.
  * Returns a tuple with rules, and path to the rules.
- * Throws an error if the FieldConstraints has incompatible rules.
+ * Throws an error if the FieldRules has incompatible rules.
  */
 export function getScalarRules(
   scalar: ScalarType,
   rulePath: PathBuilder,
-  constraints: FieldConstraints | undefined,
+  fieldRules: FieldRules | undefined,
   fieldContext: { toString(): string },
 ) {
   const type = scalarToRuleType.get(scalar);
   return [
-    getRules(constraints, type, fieldContext),
+    getRules(fieldRules, type, fieldContext),
     getRulePath(rulePath, type),
   ] as const;
 }
@@ -250,7 +250,7 @@ function getRulePath(base: PathBuilder, type: ruleType | undefined) {
   if (type == undefined) {
     return base;
   }
-  const field = FieldConstraintsSchema.fields.find((f) => f.name === type);
+  const field = FieldRulesSchema.fields.find((f) => f.name === type);
   if (field == undefined) {
     throw new CompilationError(`cannot find rule "${type}"`);
   }
@@ -258,22 +258,22 @@ function getRulePath(base: PathBuilder, type: ruleType | undefined) {
 }
 
 function getRules<T extends ruleType>(
-  constraints: FieldConstraints | undefined,
+  fieldRules: FieldRules | undefined,
   want: T | undefined,
   context: { toString(): string },
 ) {
-  const got = constraints?.type.case;
-  if (constraints == undefined || got == undefined) {
+  const got = fieldRules?.type.case;
+  if (fieldRules == undefined || got == undefined) {
     return undefined;
   }
   if (got != want) {
     throw new CompilationError(
       want == undefined
-        ? `constraint "${got}" cannot be used on ${context.toString()}`
-        : `expected constraint "${want}", got "${got}" on ${context.toString()}`,
+        ? `rule "${got}" cannot be used on ${context.toString()}`
+        : `expected rule "${want}", got "${got}" on ${context.toString()}`,
     );
   }
-  return constraints.type.value as (FieldConstraints["type"] & {
+  return fieldRules.type.value as (FieldRules["type"] & {
     case: T;
   })["value"];
 }

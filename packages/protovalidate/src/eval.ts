@@ -30,14 +30,14 @@ import {
   AnyRulesSchema,
   type EnumRules,
   EnumRulesSchema,
-  FieldConstraintsSchema,
+  FieldRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { Cursor } from "./cursor.js";
 import type { Condition } from "./condition.js";
 import type { PathBuilder } from "./path.js";
 
 /**
- * Evaluate constraints for a value.
+ * Evaluate rules for a value.
  */
 export type Eval<V> = {
   eval(val: V, cursor: Cursor): void;
@@ -170,7 +170,7 @@ export class EvalFieldRequired implements Eval<ReflectMessage> {
       cursor
         .field(this.field)
         .violate("value is required", "required", [
-          FieldConstraintsSchema.field.required,
+          FieldRulesSchema.field.required,
         ]);
     }
   }
@@ -188,7 +188,6 @@ export class EvalOneofRequired implements Eval<ReflectMessage> {
     }
     cursor
       .oneof(this.oneof)
-      // TODO protovalidate-go does not populate Violation.rule for OneofConstraints.required
       .violate("exactly one field is required in oneof", "required", []);
   }
   prune(): boolean {

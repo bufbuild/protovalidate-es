@@ -16,13 +16,17 @@ import * as assert from "node:assert/strict";
 import { suite, test } from "node:test";
 import {
   AnyRulesSchema,
-  ConstraintSchema,
+  RuleSchema,
   EnumRulesSchema,
   file_buf_validate_validate,
   MapRulesSchema,
   predefined,
   RepeatedRulesSchema,
   StringRulesSchema,
+  MessageRulesSchema,
+  OneofRulesSchema,
+  FieldRulesSchema,
+  PredefinedRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { nestedTypes } from "@bufbuild/protobuf/reflect";
 import { getOption, hasOption } from "@bufbuild/protobuf";
@@ -38,6 +42,34 @@ void suite("check buf.validate.*Rules fields", () => {
     RepeatedRulesSchema.field.items,
     EnumRulesSchema.field.definedOnly,
     StringRulesSchema.field.strict,
+    MessageRulesSchema.field.cel,
+    MessageRulesSchema.field.disabled,
+    OneofRulesSchema.field.required,
+    FieldRulesSchema.field.cel,
+    FieldRulesSchema.field.required,
+    FieldRulesSchema.field.ignore,
+    FieldRulesSchema.field.float,
+    FieldRulesSchema.field.double,
+    FieldRulesSchema.field.int32,
+    FieldRulesSchema.field.int64,
+    FieldRulesSchema.field.uint32,
+    FieldRulesSchema.field.uint64,
+    FieldRulesSchema.field.sint32,
+    FieldRulesSchema.field.sint64,
+    FieldRulesSchema.field.fixed32,
+    FieldRulesSchema.field.fixed64,
+    FieldRulesSchema.field.sfixed32,
+    FieldRulesSchema.field.sfixed64,
+    FieldRulesSchema.field.bool,
+    FieldRulesSchema.field.string,
+    FieldRulesSchema.field.bytes,
+    FieldRulesSchema.field.enum,
+    FieldRulesSchema.field.repeated,
+    FieldRulesSchema.field.map,
+    FieldRulesSchema.field.any,
+    FieldRulesSchema.field.duration,
+    FieldRulesSchema.field.timestamp,
+    PredefinedRulesSchema.field.cel,
   ];
   const rulesMessages = Array.from(nestedTypes(file_buf_validate_validate))
     .filter((t) => t.kind == "message")
@@ -96,7 +128,7 @@ void suite("EvalMany", () => {
     const a = new EvalTest(false);
     const b = new EvalTest(false);
     const m = new EvalMany<string>(a, b);
-    m.eval("", Cursor.create(ConstraintSchema, false));
+    m.eval("", Cursor.create(RuleSchema, false));
     assert.equal(a.evaluated, true);
     assert.equal(b.evaluated, true);
   });
@@ -105,14 +137,14 @@ void suite("EvalMany", () => {
       const a = new EvalTest(true);
       const m = new EvalMany<string>(a, EvalNoop.get());
       assert.strictEqual(m.prune(), true);
-      m.eval("", Cursor.create(ConstraintSchema, false));
+      m.eval("", Cursor.create(RuleSchema, false));
       assert.equal(a.evaluated, false);
     });
     void test("keeps ops", () => {
       const a = new EvalTest(false);
       const m = new EvalMany<string>(a);
       assert.strictEqual(m.prune(), false);
-      m.eval("", Cursor.create(ConstraintSchema, false));
+      m.eval("", Cursor.create(RuleSchema, false));
       assert.equal(a.evaluated, true);
     });
   });

@@ -37,8 +37,8 @@ export type ValidatorOptions = {
  */
 export type Validator = {
   /**
-   * Checks that message satisfies its constraints. Constraints are defined
-   * within the Protobuf file as options from the buf.validate package.
+   * Checks that message satisfies its rules. Rules are defined within the
+   * Protobuf file as options from the buf.validate package.
    */
   validate<Desc extends DescMessage>(
     schema: Desc,

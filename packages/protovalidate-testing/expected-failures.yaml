@@ -1,224 +1,454 @@
-custom_constraints:
+custom_rules:
   - compilation/incorrect_type
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.custom_constraints.IncorrectType]:{a:123}
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.custom_rules.IncorrectType]:{a:123}
   #        want: compilation err: expression incorrectly treats an int32 field as a string
   #         got: runtime error: RuntimeError: found no matching overload for 'startsWith' applied to '(int, string)'
   - compilation/missing_field
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.custom_constraints.MissingField]:{a:123}
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.custom_rules.MissingField]:{a:123}
   #        want: compilation err: expression references a non-existent field b
-  #         got: runtime error: RuntimeError: field not found: b in a
+  #         got: runtime error: RuntimeError: field not found: b in message buf.validate.conformance.cases.custom_rules.MissingField
 kitchen_sink:
   - field/embedded/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.KitchenSinkMessage]:{val:{another:{}}}
   #        want: validation error (14 violations)
-  #          1. constraint_id: "bytes.const"
+  #          1. rule_id: "bytes.const"
   #             message: "value must be 0099"
   #             field: "val.another.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
   #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
-  #          2. constraint_id: "bytes.const"
+  #          2. rule_id: "bytes.const"
   #             message: "value must be 0099"
   #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
   #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
-  #          3. constraint_id: "double.in"
-  #             message: "value must be in list [456.789000, 123.000000]"
+  #          3. rule_id: "double.in"
+  #             message: "value must be in list [456.789, 123]"
   #             field: "val.another.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
   #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
-  #          4. constraint_id: "double.in"
-  #             message: "value must be in list [456.789000, 123.000000]"
+  #          4. rule_id: "double.in"
+  #             message: "value must be in list [456.789, 123]"
   #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
   #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
-  #          5. constraint_id: "enum.const"
+  #          5. rule_id: "enum.const"
   #             message: "value must equal 2"
   #             field: "val.another.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
   #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          6. constraint_id: "enum.const"
+  #          6. rule_id: "enum.const"
   #             message: "value must equal 2"
   #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
   #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          7. constraint_id: "int32.const"
+  #          7. rule_id: "int32.const"
   #             message: "value must equal 5"
   #             field: "val.another.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
   #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          8. constraint_id: "int32.const"
+  #          8. rule_id: "int32.const"
   #             message: "value must equal 5"
   #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
   #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          9. constraint_id: "required"
+  #          9. rule_id: "required"
   #             message: "value is required"
   #             field: "val.another.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
   #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         10. constraint_id: "required"
+  #         10. rule_id: "required"
   #             message: "exactly one field is required in oneof"
   #             field: "val.another.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
-  #         11. constraint_id: "required"
+  #         11. rule_id: "required"
   #             message: "value is required"
   #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
   #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         12. constraint_id: "required"
+  #         12. rule_id: "required"
   #             message: "exactly one field is required in oneof"
   #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
-  #         13. constraint_id: "string.const"
+  #         13. rule_id: "string.const"
   #             message: "value must equal `abcd`"
   #             field: "val.another.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         14. constraint_id: "string.const"
+  #         14. rule_id: "string.const"
   #             message: "value must equal `abcd`"
   #             field: "val.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
+  #         got: validation error (14 violations)
+  #          1. rule_id: "bytes.const"
+  #             message: "value must be 099"
+  #             field: "val.another.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
+  #             for_key: false
+  #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
+  #          2. rule_id: "bytes.const"
+  #             message: "value must be 099"
+  #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
+  #             for_key: false
+  #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
+  #          3. rule_id: "double.in"
+  #             message: "value must be in list [456.789000, 123.000000]"
+  #             field: "val.another.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
+  #             for_key: false
+  #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
+  #          4. rule_id: "double.in"
+  #             message: "value must be in list [456.789000, 123.000000]"
+  #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
+  #             for_key: false
+  #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
+  #          5. rule_id: "enum.const"
+  #             message: "value must equal 2"
+  #             field: "val.another.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
+  #             for_key: false
+  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          6. rule_id: "enum.const"
+  #             message: "value must equal 2"
+  #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
+  #             for_key: false
+  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          7. rule_id: "int32.const"
+  #             message: "value must equal 5"
+  #             field: "val.another.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
+  #             for_key: false
+  #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          8. rule_id: "int32.const"
+  #             message: "value must equal 5"
+  #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
+  #             for_key: false
+  #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          9. rule_id: "required"
+  #             message: "value is required"
+  #             field: "val.another.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
+  #         10. rule_id: "required"
+  #             message: "exactly one field is required in oneof"
+  #             field: "val.another.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
+  #             for_key: false
+  #         11. rule_id: "required"
+  #             message: "value is required"
+  #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
+  #         12. rule_id: "required"
+  #             message: "exactly one field is required in oneof"
+  #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
+  #             for_key: false
+  #         13. rule_id: "string.const"
+  #             message: "value must equal `abcd`"
+  #             field: "val.another.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"another"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
+  #         14. rule_id: "string.const"
+  #             message: "value must equal `abcd`"
+  #             field: "val.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   - field/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.KitchenSinkMessage]:{val:{}}
   #        want: validation error (7 violations)
-  #          1. constraint_id: "bytes.const"
+  #          1. rule_id: "bytes.const"
   #             message: "value must be 0099"
   #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
   #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
-  #          2. constraint_id: "double.in"
-  #             message: "value must be in list [456.789000, 123.000000]"
+  #          2. rule_id: "double.in"
+  #             message: "value must be in list [456.789, 123]"
   #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
   #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
-  #          3. constraint_id: "enum.const"
+  #          3. rule_id: "enum.const"
   #             message: "value must equal 2"
   #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
   #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          4. constraint_id: "int32.const"
+  #          4. rule_id: "int32.const"
   #             message: "value must equal 5"
   #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
   #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          5. constraint_id: "required"
+  #          5. rule_id: "required"
   #             message: "value is required"
   #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
   #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #          6. constraint_id: "required"
+  #          6. rule_id: "required"
   #             message: "exactly one field is required in oneof"
   #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
-  #          7. constraint_id: "string.const"
+  #          7. rule_id: "string.const"
   #             message: "value must equal `abcd`"
   #             field: "val.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
+  #         got: validation error (7 violations)
+  #          1. rule_id: "bytes.const"
+  #             message: "value must be 099"
+  #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
+  #             for_key: false
+  #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
+  #          2. rule_id: "double.in"
+  #             message: "value must be in list [456.789000, 123.000000]"
+  #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
+  #             for_key: false
+  #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
+  #          3. rule_id: "enum.const"
+  #             message: "value must equal 2"
+  #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
+  #             for_key: false
+  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          4. rule_id: "int32.const"
+  #             message: "value must equal 5"
+  #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
+  #             for_key: false
+  #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          5. rule_id: "required"
+  #             message: "value is required"
+  #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
+  #          6. rule_id: "required"
+  #             message: "exactly one field is required in oneof"
+  #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
+  #             for_key: false
+  #          7. rule_id: "string.const"
+  #             message: "value must equal `abcd`"
+  #             field: "val.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   - field/transitive/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.KitchenSinkMessage]:{val:{const:"abcd"  nested:{}  bool_const:true}}
   #        want: validation error (14 violations)
-  #          1. constraint_id: "bool.const"
+  #          1. rule_id: "bool.const"
   #             message: "value must equal false"
   #             field: "val.bool_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"bool_const"  field_type:TYPE_BOOL}
   #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
-  #          2. constraint_id: "bytes.const"
+  #          2. rule_id: "bytes.const"
   #             message: "value must be 0099"
   #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
   #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
-  #          3. constraint_id: "bytes.const"
+  #          3. rule_id: "bytes.const"
   #             message: "value must be 0099"
   #             field: "val.nested.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
   #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
-  #          4. constraint_id: "double.in"
-  #             message: "value must be in list [456.789000, 123.000000]"
+  #          4. rule_id: "double.in"
+  #             message: "value must be in list [456.789, 123]"
   #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
   #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
-  #          5. constraint_id: "double.in"
-  #             message: "value must be in list [456.789000, 123.000000]"
+  #          5. rule_id: "double.in"
+  #             message: "value must be in list [456.789, 123]"
   #             field: "val.nested.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
   #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
-  #          6. constraint_id: "enum.const"
+  #          6. rule_id: "enum.const"
   #             message: "value must equal 2"
   #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
   #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          7. constraint_id: "enum.const"
+  #          7. rule_id: "enum.const"
   #             message: "value must equal 2"
   #             field: "val.nested.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
   #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          8. constraint_id: "int32.const"
+  #          8. rule_id: "int32.const"
   #             message: "value must equal 5"
   #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
   #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          9. constraint_id: "int32.const"
+  #          9. rule_id: "int32.const"
   #             message: "value must equal 5"
   #             field: "val.nested.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
   #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #         10. constraint_id: "required"
+  #         10. rule_id: "required"
   #             message: "value is required"
   #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
   #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         11. constraint_id: "required"
+  #         11. rule_id: "required"
   #             message: "value is required"
   #             field: "val.nested.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
   #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         12. constraint_id: "required"
+  #         12. rule_id: "required"
   #             message: "exactly one field is required in oneof"
   #             field: "val.nested.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
-  #         13. constraint_id: "required"
+  #         13. rule_id: "required"
   #             message: "exactly one field is required in oneof"
   #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
-  #         14. constraint_id: "string.const"
+  #         14. rule_id: "string.const"
   #             message: "value must equal `abcd`"
   #             field: "val.nested.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - field/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.KitchenSinkMessage]:{val:{const:"abcd"  int_const:5  float_val:{value:1}  dur_val:{seconds:3}  ts_val:{seconds:17}  float_const:7  double_in:123  enum_const:COMPLEX_TEST_ENUM_TWO  any_val:{[type.googleapis.com/google.protobuf.Duration]:{}}  rep_ts_val:{seconds:3}  map_val:{key:-2  value:"b"}  map_val:{key:-1  value:"a"}  bytes_val:"\x00\x99"  x:"foobar"}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
+  #         got: validation error (14 violations)
+  #          1. rule_id: "bool.const"
+  #             message: "value must equal false"
+  #             field: "val.bool_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"bool_const"  field_type:TYPE_BOOL}
+  #             for_key: false
+  #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
+  #          2. rule_id: "bytes.const"
+  #             message: "value must be 099"
+  #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
+  #             for_key: false
+  #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
+  #          3. rule_id: "bytes.const"
+  #             message: "value must be 099"
+  #             field: "val.nested.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
+  #             for_key: false
+  #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
+  #          4. rule_id: "double.in"
+  #             message: "value must be in list [456.789000, 123.000000]"
+  #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
+  #             for_key: false
+  #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
+  #          5. rule_id: "double.in"
+  #             message: "value must be in list [456.789000, 123.000000]"
+  #             field: "val.nested.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
+  #             for_key: false
+  #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
+  #          6. rule_id: "enum.const"
+  #             message: "value must equal 2"
+  #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
+  #             for_key: false
+  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          7. rule_id: "enum.const"
+  #             message: "value must equal 2"
+  #             field: "val.nested.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
+  #             for_key: false
+  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          8. rule_id: "int32.const"
+  #             message: "value must equal 5"
+  #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
+  #             for_key: false
+  #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          9. rule_id: "int32.const"
+  #             message: "value must equal 5"
+  #             field: "val.nested.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
+  #             for_key: false
+  #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #         10. rule_id: "required"
+  #             message: "value is required"
+  #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
+  #         11. rule_id: "required"
+  #             message: "value is required"
+  #             field: "val.nested.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
+  #         12. rule_id: "required"
+  #             message: "exactly one field is required in oneof"
+  #             field: "val.nested.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
+  #             for_key: false
+  #         13. rule_id: "required"
+  #             message: "exactly one field is required in oneof"
+  #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
+  #             for_key: false
+  #         14. rule_id: "string.const"
+  #             message: "value must equal `abcd`"
+  #             field: "val.nested.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   - many/all-non-message-fields/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.KitchenSinkMessage]:{val:{bool_const:true  float_val:{}  ts_val:{}  float_const:8  any_val:{type_url:"asdf"}  rep_ts_val:{nanos:1}}}
   #        want: validation error (13 violations)
-  #          1. constraint_id: "any.in"
+  #          1. rule_id: "any.in"
   #             message: "type URL must be in the allow list"
   #             field: "val.any_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:12  field_name:"any_val"  field_type:TYPE_MESSAGE}
   #             rule: "any.in" elements:{field_number:20  field_name:"any"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"in"  field_type:TYPE_STRING}
-  #          2. constraint_id: "bool.const"
+  #          2. rule_id: "bool.const"
   #             message: "value must equal false"
   #             field: "val.bool_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"bool_const"  field_type:TYPE_BOOL}
   #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
-  #          3. constraint_id: "bytes.const"
+  #          3. rule_id: "bytes.const"
   #             message: "value must be 0099"
   #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
   #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
-  #          4. constraint_id: "double.in"
-  #             message: "value must be in list [456.789000, 123.000000]"
+  #          4. rule_id: "double.in"
+  #             message: "value must be in list [456.789, 123]"
   #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
   #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
-  #          5. constraint_id: "enum.const"
+  #          5. rule_id: "enum.const"
   #             message: "value must equal 2"
   #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
   #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          6. constraint_id: "float.gt"
+  #          6. rule_id: "float.gt"
   #             message: "value must be greater than 0"
   #             field: "val.float_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"float_val"  field_type:TYPE_MESSAGE}
   #             rule: "float.gt" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"gt"  field_type:TYPE_FLOAT}
-  #          7. constraint_id: "float.lt"
+  #          7. rule_id: "float.lt"
   #             message: "value must be less than 8"
   #             field: "val.float_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:9  field_name:"float_const"  field_type:TYPE_FLOAT}
   #             rule: "float.lt" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_FLOAT}
-  #          8. constraint_id: "int32.const"
+  #          8. rule_id: "int32.const"
   #             message: "value must equal 5"
   #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
   #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #          9. constraint_id: "required"
+  #          9. rule_id: "required"
   #             message: "value is required"
   #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
   #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
-  #         10. constraint_id: "required"
+  #         10. rule_id: "required"
   #             message: "exactly one field is required in oneof"
   #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
-  #         11. constraint_id: "string.const"
+  #         11. rule_id: "string.const"
   #             message: "value must equal `abcd`"
   #             field: "val.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
   #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         12. constraint_id: "timestamp.gt"
+  #         12. rule_id: "timestamp.gt"
   #             message: "value must be greater than 1970-01-01T00:00:07Z"
   #             field: "val.ts_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:7  field_name:"ts_val"  field_type:TYPE_MESSAGE}
   #             rule: "timestamp.gt" elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"gt"  field_type:TYPE_MESSAGE}
-  #         13. constraint_id: "timestamp.gte"
+  #         13. rule_id: "timestamp.gte"
   #             message: "value must be greater than or equal to 1970-01-01T00:00:00.001Z"
   #             field: "val.rep_ts_val[0]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:13  field_name:"rep_ts_val"  field_type:TYPE_MESSAGE  index:0}
   #             rule: "repeated.items.timestamp.gte" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"gte"  field_type:TYPE_MESSAGE}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-predefined_constraints:
+  #         got: validation error (13 violations)
+  #          1. rule_id: "any.in"
+  #             message: "type URL must be in the allow list"
+  #             field: "val.any_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:12  field_name:"any_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "any.in" elements:{field_number:20  field_name:"any"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"in"  field_type:TYPE_STRING}
+  #          2. rule_id: "bool.const"
+  #             message: "value must equal false"
+  #             field: "val.bool_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"bool_const"  field_type:TYPE_BOOL}
+  #             for_key: false
+  #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
+  #          3. rule_id: "bytes.const"
+  #             message: "value must be 099"
+  #             field: "val.bytes_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes_val"  field_type:TYPE_BYTES}
+  #             for_key: false
+  #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
+  #          4. rule_id: "double.in"
+  #             message: "value must be in list [456.789000, 123.000000]"
+  #             field: "val.double_in" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"double_in"  field_type:TYPE_DOUBLE}
+  #             for_key: false
+  #             rule: "double.in" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"in"  field_type:TYPE_DOUBLE}
+  #          5. rule_id: "enum.const"
+  #             message: "value must equal 2"
+  #             field: "val.enum_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"enum_const"  field_type:TYPE_ENUM}
+  #             for_key: false
+  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          6. rule_id: "float.gt"
+  #             message: "value must be greater than 0"
+  #             field: "val.float_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"float_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "float.gt" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"gt"  field_type:TYPE_FLOAT}
+  #          7. rule_id: "float.lt"
+  #             message: "value must be less than 8"
+  #             field: "val.float_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:9  field_name:"float_const"  field_type:TYPE_FLOAT}
+  #             for_key: false
+  #             rule: "float.lt" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_FLOAT}
+  #          8. rule_id: "int32.const"
+  #             message: "value must equal 5"
+  #             field: "val.int_const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:3  field_name:"int_const"  field_type:TYPE_INT32}
+  #             for_key: false
+  #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
+  #          9. rule_id: "required"
+  #             message: "value is required"
+  #             field: "val.dur_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"dur_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "required" elements:{field_number:25  field_name:"required"  field_type:TYPE_BOOL}
+  #         10. rule_id: "required"
+  #             message: "exactly one field is required in oneof"
+  #             field: "val.o" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_name:"o"}
+  #             for_key: false
+  #         11. rule_id: "string.const"
+  #             message: "value must equal `abcd`"
+  #             field: "val.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
+  #             for_key: false
+  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
+  #         12. rule_id: "timestamp.gt"
+  #             message: "value must be greater than 1970-01-01T00:00:07Z"
+  #             field: "val.ts_val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:7  field_name:"ts_val"  field_type:TYPE_MESSAGE}
+  #             for_key: false
+  #             rule: "timestamp.gt" elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"gt"  field_type:TYPE_MESSAGE}
+  #         13. rule_id: "timestamp.gte"
+  #             message: "value must be greater than or equal to 1970-01-01T00:00:00.001Z"
+  #             field: "val.rep_ts_val[0]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:13  field_name:"rep_ts_val"  field_type:TYPE_MESSAGE  index:0}
+  #             for_key: false
+  #             rule: "repeated.items.timestamp.gte" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"gte"  field_type:TYPE_MESSAGE}
+predefined_rules:
   - proto/2023/fixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed32.even.edition_2023"
+  #          1. rule_id: "fixed32.even.edition_2023"
   #             message: "fixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED32}
   #             rule: "fixed32.[buf.validate.conformance.cases.fixed32_even_edition_2023]" elements:{field_number:9  field_name:"fixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.fixed32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -230,7 +460,7 @@ predefined_constraints:
   - proto/2023/fixed64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed64.even.edition_2023"
+  #          1. rule_id: "fixed64.even.edition_2023"
   #             message: "fixed64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED64}
   #             rule: "fixed64.[buf.validate.conformance.cases.fixed64_even_edition_2023]" elements:{field_number:10  field_name:"fixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.fixed64_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -242,7 +472,7 @@ predefined_constraints:
   - proto/2023/map/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedMapRuleEdition2023]:{val:{key:1  value:1}  val:{key:2  value:2}  val:{key:3  value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.at_least_five.edition_2023"
+  #          1. rule_id: "map.at_least_five.edition_2023"
   #             message: "map must have at least five pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.[buf.validate.conformance.cases.map_at_least_five_edition_2023]" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.map_at_least_five_edition_2023]"  field_type:TYPE_BOOL}
@@ -254,23 +484,23 @@ predefined_constraints:
   - proto/2023/predefined_and_custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleEdition2023]:{a:-1  b:{c:-1}}
   #        want: validation error (5 violations)
-  #          1. constraint_id: "predefined_and_custom_rule_embedded_edition_2023"
+  #          1. rule_id: "predefined_and_custom_rule_embedded_edition_2023"
   #             message: "b.c must be a multiple of 3"
   #             field: "b" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          2. constraint_id: "predefined_and_custom_rule_nested_edition_2023"
+  #          2. rule_id: "predefined_and_custom_rule_nested_edition_2023"
   #             message: "c must be positive"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          3. constraint_id: "predefined_and_custom_rule_scalar_edition_2023"
+  #          3. rule_id: "predefined_and_custom_rule_scalar_edition_2023"
   #             message: "a must be greater than 24"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          4. constraint_id: "sint32.even.edition_2023"
+  #          4. rule_id: "sint32.even.edition_2023"
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #          5. constraint_id: "sint32.even.edition_2023"
+  #          5. rule_id: "sint32.even.edition_2023"
   #             message: "sint32 value is not even"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -282,7 +512,7 @@ predefined_constraints:
   - proto/2023/repeated/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBytesRuleEdition2023]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.edition_2023"
+  #          1. rule_id: "bytes.valid_path.edition_2023"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.bytes.[buf.validate.conformance.cases.bytes_valid_path_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bytes_valid_path_edition_2023]"  field_type:TYPE_BOOL}
@@ -290,7 +520,7 @@ predefined_constraints:
   - proto/2023/repeated/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedStringRuleEdition2023]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.edition_2023"
+  #          1. rule_id: "string.valid_path.edition_2023"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.string.[buf.validate.conformance.cases.string_valid_path_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.string_valid_path_edition_2023]"  field_type:TYPE_BOOL}
@@ -298,7 +528,7 @@ predefined_constraints:
   - proto/2023/repeated/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleEdition2023]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.edition_2023"
+  #          1. rule_id: "uint32.even.edition_2023"
   #             message: "uint32 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint32.[buf.validate.conformance.cases.uint32_even_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -310,7 +540,7 @@ predefined_constraints:
   - proto/2023/repeated/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleEdition2023]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.edition_2023"
+  #          1. rule_id: "uint64.even.edition_2023"
   #             message: "uint64 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint64.[buf.validate.conformance.cases.uint64_even_edition_2023]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint64_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -322,7 +552,7 @@ predefined_constraints:
   - proto/2023/sfixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed32.even.edition_2023"
+  #          1. rule_id: "sfixed32.even.edition_2023"
   #             message: "sfixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED32}
   #             rule: "sfixed32.[buf.validate.conformance.cases.sfixed32_even_edition_2023]" elements:{field_number:11  field_name:"sfixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sfixed32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -334,7 +564,7 @@ predefined_constraints:
   - proto/2023/sint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.even.edition_2023"
+  #          1. rule_id: "sint32.even.edition_2023"
   #             message: "sint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -346,7 +576,7 @@ predefined_constraints:
   - proto/2023/standard_predefined_custom/custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleEdition2023]:{a:24}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "standard_predefined_and_custom_rule_scalar_edition_2023"
+  #          1. rule_id: "standard_predefined_and_custom_rule_scalar_edition_2023"
   #             message: "a must be greater than 24"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
@@ -354,7 +584,7 @@ predefined_constraints:
   - proto/2023/standard_predefined_custom/predefined/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleEdition2023]:{a:27}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.even.edition_2023"
+  #          1. rule_id: "sint32.even.edition_2023"
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -362,7 +592,7 @@ predefined_constraints:
   - proto/2023/standard_predefined_custom/standard/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleEdition2023]:{a:28}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.lt"
+  #          1. rule_id: "sint32.lt"
   #             message: "value must be less than 28"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.lt" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_SINT32}
@@ -374,7 +604,7 @@ predefined_constraints:
   - proto/2023/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.edition_2023"
+  #          1. rule_id: "uint32.even.edition_2023"
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT32}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_edition_2023]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -386,7 +616,7 @@ predefined_constraints:
   - proto/2023/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleEdition2023]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.edition_2023"
+  #          1. rule_id: "uint64.even.edition_2023"
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_edition_2023]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint64_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -398,7 +628,7 @@ predefined_constraints:
   - proto/2023/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBytesRuleEdition2023]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.edition_2023"
+  #          1. rule_id: "bytes.valid_path.edition_2023"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_edition_2023]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.bytes_valid_path_edition_2023]"  field_type:TYPE_BOOL}
@@ -406,7 +636,7 @@ predefined_constraints:
   - proto/2023/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedStringRuleEdition2023]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.edition_2023"
+  #          1. rule_id: "string.valid_path.edition_2023"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "string.[buf.validate.conformance.cases.string_valid_path_edition_2023]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.string_valid_path_edition_2023]"  field_type:TYPE_BOOL}
@@ -414,7 +644,7 @@ predefined_constraints:
   - proto/2023/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleEdition2023]:{val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.edition_2023"
+  #          1. rule_id: "uint32.even.edition_2023"
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_edition_2023]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -426,7 +656,7 @@ predefined_constraints:
   - proto/2023/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleEdition2023]:{val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.edition_2023"
+  #          1. rule_id: "uint64.even.edition_2023"
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_edition_2023]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.uint64_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -438,7 +668,7 @@ predefined_constraints:
   - proto2/fixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed32.even.proto2"
+  #          1. rule_id: "fixed32.even.proto2"
   #             message: "fixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED32}
   #             rule: "fixed32.[buf.validate.conformance.cases.fixed32_even_proto2]" elements:{field_number:9  field_name:"fixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed32_even_proto2]"  field_type:TYPE_BOOL}
@@ -450,7 +680,7 @@ predefined_constraints:
   - proto2/fixed64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleProto2]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed64.even.proto2"
+  #          1. rule_id: "fixed64.even.proto2"
   #             message: "fixed64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED64}
   #             rule: "fixed64.[buf.validate.conformance.cases.fixed64_even_proto2]" elements:{field_number:10  field_name:"fixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed64_even_proto2]"  field_type:TYPE_BOOL}
@@ -462,23 +692,23 @@ predefined_constraints:
   - proto2/predefined_and_custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleProto2]:{a:-1  b:{c:-1}}
   #        want: validation error (5 violations)
-  #          1. constraint_id: "predefined_and_custom_rule_embedded_proto2"
+  #          1. rule_id: "predefined_and_custom_rule_embedded_proto2"
   #             message: "b.c must be a multiple of 3"
   #             field: "b" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          2. constraint_id: "predefined_and_custom_rule_nested_proto2"
+  #          2. rule_id: "predefined_and_custom_rule_nested_proto2"
   #             message: "c must be positive"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          3. constraint_id: "predefined_and_custom_rule_scalar_proto2"
+  #          3. rule_id: "predefined_and_custom_rule_scalar_proto2"
   #             message: "a must be greater than 24"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          4. constraint_id: "sint32.even.proto2"
+  #          4. rule_id: "sint32.even.proto2"
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
-  #          5. constraint_id: "sint32.even.proto2"
+  #          5. rule_id: "sint32.even.proto2"
   #             message: "sint32 value is not even"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -490,7 +720,7 @@ predefined_constraints:
   - proto2/repeated/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBytesRuleProto2]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.proto2"
+  #          1. rule_id: "bytes.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -498,7 +728,7 @@ predefined_constraints:
   - proto2/repeated/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedStringRuleProto2]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.proto2"
+  #          1. rule_id: "string.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -506,7 +736,7 @@ predefined_constraints:
   - proto2/repeated/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleProto2]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.proto2"
+  #          1. rule_id: "uint32.even.proto2"
   #             message: "uint32 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -518,7 +748,7 @@ predefined_constraints:
   - proto2/repeated/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleProto2]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.proto2"
+  #          1. rule_id: "uint64.even.proto2"
   #             message: "uint64 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
@@ -530,7 +760,7 @@ predefined_constraints:
   - proto2/sfixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed32.even.proto2"
+  #          1. rule_id: "sfixed32.even.proto2"
   #             message: "sfixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED32}
   #             rule: "sfixed32.[buf.validate.conformance.cases.sfixed32_even_proto2]" elements:{field_number:11  field_name:"sfixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sfixed32_even_proto2]"  field_type:TYPE_BOOL}
@@ -542,7 +772,7 @@ predefined_constraints:
   - proto2/sint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.even.proto2"
+  #          1. rule_id: "sint32.even.proto2"
   #             message: "sint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -554,7 +784,7 @@ predefined_constraints:
   - proto2/standard_predefined_custom/custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto2]:{a:24}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "standard_predefined_and_custom_rule_scalar_proto2"
+  #          1. rule_id: "standard_predefined_and_custom_rule_scalar_proto2"
   #             message: "a must be greater than 24"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
@@ -562,7 +792,7 @@ predefined_constraints:
   - proto2/standard_predefined_custom/predefined/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto2]:{a:27}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.even.proto2"
+  #          1. rule_id: "sint32.even.proto2"
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -570,7 +800,7 @@ predefined_constraints:
   - proto2/standard_predefined_custom/standard/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto2]:{a:28}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.lt"
+  #          1. rule_id: "sint32.lt"
   #             message: "value must be less than 28"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.lt" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_SINT32}
@@ -582,7 +812,7 @@ predefined_constraints:
   - proto2/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleProto2]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.proto2"
+  #          1. rule_id: "uint32.even.proto2"
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT32}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -594,7 +824,7 @@ predefined_constraints:
   - proto2/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleProto2]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.proto2"
+  #          1. rule_id: "uint64.even.proto2"
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
@@ -606,7 +836,7 @@ predefined_constraints:
   - proto2/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBytesRuleProto2]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.proto2"
+  #          1. rule_id: "bytes.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -614,7 +844,7 @@ predefined_constraints:
   - proto2/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedStringRuleProto2]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.proto2"
+  #          1. rule_id: "string.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -622,7 +852,7 @@ predefined_constraints:
   - proto2/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleProto2]:{val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.proto2"
+  #          1. rule_id: "uint32.even.proto2"
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -634,7 +864,7 @@ predefined_constraints:
   - proto2/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleProto2]:{val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.proto2"
+  #          1. rule_id: "uint64.even.proto2"
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
@@ -646,7 +876,7 @@ predefined_constraints:
   - proto3/fixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed32.even.proto2"
+  #          1. rule_id: "fixed32.even.proto2"
   #             message: "fixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED32}
   #             rule: "fixed32.[buf.validate.conformance.cases.fixed32_even_proto2]" elements:{field_number:9  field_name:"fixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed32_even_proto2]"  field_type:TYPE_BOOL}
@@ -658,7 +888,7 @@ predefined_constraints:
   - proto3/fixed64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedFixed64RuleProto3]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed64.even.proto2"
+  #          1. rule_id: "fixed64.even.proto2"
   #             message: "fixed64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED64}
   #             rule: "fixed64.[buf.validate.conformance.cases.fixed64_even_proto2]" elements:{field_number:10  field_name:"fixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.fixed64_even_proto2]"  field_type:TYPE_BOOL}
@@ -670,7 +900,7 @@ predefined_constraints:
   - proto3/map/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedMapRuleProto3]:{val:{key:1  value:1}  val:{key:2  value:2}  val:{key:3  value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.at_least_five.edition_2023"
+  #          1. rule_id: "map.at_least_five.edition_2023"
   #             message: "map must have at least five pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.[buf.validate.conformance.cases.map_at_least_five_edition_2023]" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.map_at_least_five_edition_2023]"  field_type:TYPE_BOOL}
@@ -682,23 +912,23 @@ predefined_constraints:
   - proto3/predefined_and_custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedAndCustomRuleProto3]:{a:-1  b:{c:-1}}
   #        want: validation error (5 violations)
-  #          1. constraint_id: "predefined_and_custom_rule_embedded_proto3"
+  #          1. rule_id: "predefined_and_custom_rule_embedded_proto3"
   #             message: "b.c must be a multiple of 3"
   #             field: "b" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          2. constraint_id: "predefined_and_custom_rule_nested_proto3"
+  #          2. rule_id: "predefined_and_custom_rule_nested_proto3"
   #             message: "c must be positive"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          3. constraint_id: "predefined_and_custom_rule_scalar_proto3"
+  #          3. rule_id: "predefined_and_custom_rule_scalar_proto3"
   #             message: "a must be greater than 24"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
-  #          4. constraint_id: "sint32.even.edition_2023"
+  #          4. rule_id: "sint32.even.edition_2023"
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
-  #          5. constraint_id: "sint32.even.edition_2023"
+  #          5. rule_id: "sint32.even.edition_2023"
   #             message: "sint32 value is not even"
   #             field: "b.c" elements:{field_number:2  field_name:"b"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"c"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_edition_2023]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1162  field_name:"[buf.validate.conformance.cases.sint32_even_edition_2023]"  field_type:TYPE_BOOL}
@@ -710,7 +940,7 @@ predefined_constraints:
   - proto3/repeated/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedBytesRuleProto3]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.proto2"
+  #          1. rule_id: "bytes.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -718,7 +948,7 @@ predefined_constraints:
   - proto3/repeated/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedStringRuleProto3]:{val:{value:"valid/file.proto"}  val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.proto2"
+  #          1. rule_id: "string.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -726,7 +956,7 @@ predefined_constraints:
   - proto3/repeated/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt32RuleProto3]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.proto2"
+  #          1. rule_id: "uint32.even.proto2"
   #             message: "uint32 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -738,7 +968,7 @@ predefined_constraints:
   - proto3/repeated/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedRepeatedWrappedUInt64RuleProto3]:{val:{value:2}  val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.proto2"
+  #          1. rule_id: "uint64.even.proto2"
   #             message: "uint64 value is not even"
   #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  index:1}
   #             rule: "repeated.items.uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
@@ -750,7 +980,7 @@ predefined_constraints:
   - proto3/sfixed32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSFixed32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed32.even.proto2"
+  #          1. rule_id: "sfixed32.even.proto2"
   #             message: "sfixed32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED32}
   #             rule: "sfixed32.[buf.validate.conformance.cases.sfixed32_even_proto2]" elements:{field_number:11  field_name:"sfixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sfixed32_even_proto2]"  field_type:TYPE_BOOL}
@@ -762,7 +992,7 @@ predefined_constraints:
   - proto3/sint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedSInt32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.even.proto2"
+  #          1. rule_id: "sint32.even.proto2"
   #             message: "sint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -774,7 +1004,7 @@ predefined_constraints:
   - proto3/standard_predefined_custom/custom/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto3]:{a:24}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "standard_predefined_and_custom_rule_scalar_proto3"
+  #          1. rule_id: "standard_predefined_and_custom_rule_scalar_proto3"
   #             message: "a must be greater than 24"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "cel[0]" elements:{field_number:23  field_name:"cel"  field_type:TYPE_MESSAGE  index:0}
@@ -782,7 +1012,7 @@ predefined_constraints:
   - proto3/standard_predefined_custom/predefined/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto3]:{a:27}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.even.proto2"
+  #          1. rule_id: "sint32.even.proto2"
   #             message: "sint32 value is not even"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.[buf.validate.conformance.cases.sint32_even_proto2]" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.sint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -790,7 +1020,7 @@ predefined_constraints:
   - proto3/standard_predefined_custom/standard/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StandardPredefinedAndCustomRuleProto3]:{a:28}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.lt"
+  #          1. rule_id: "sint32.lt"
   #             message: "value must be less than 28"
   #             field: "a" elements:{field_number:1  field_name:"a"  field_type:TYPE_SINT32}
   #             rule: "sint32.lt" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"lt"  field_type:TYPE_SINT32}
@@ -802,7 +1032,7 @@ predefined_constraints:
   - proto3/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt32RuleProto3]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.proto2"
+  #          1. rule_id: "uint32.even.proto2"
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT32}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -814,7 +1044,7 @@ predefined_constraints:
   - proto3/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedUInt64RuleProto3]:{val:3}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.proto2"
+  #          1. rule_id: "uint64.even.proto2"
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
@@ -826,7 +1056,7 @@ predefined_constraints:
   - proto3/wrapped/bytes/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedBytesRuleProto3]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.valid_path.proto2"
+  #          1. rule_id: "bytes.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "bytes.[buf.validate.conformance.cases.bytes_valid_path_proto2]" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.bytes_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -834,7 +1064,7 @@ predefined_constraints:
   - proto3/wrapped/string/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedStringRuleProto3]:{val:{value:"../invalid/path"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.valid_path.proto2"
+  #          1. rule_id: "string.valid_path.proto2"
   #             message: "not a valid path: `../invalid/path`"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "string.[buf.validate.conformance.cases.string_valid_path_proto2]" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.string_valid_path_proto2]"  field_type:TYPE_BOOL}
@@ -842,7 +1072,7 @@ predefined_constraints:
   - proto3/wrapped/uint32/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt32RuleProto3]:{val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.even.proto2"
+  #          1. rule_id: "uint32.even.proto2"
   #             message: "uint32 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint32.[buf.validate.conformance.cases.uint32_even_proto2]" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint32_even_proto2]"  field_type:TYPE_BOOL}
@@ -854,7 +1084,7 @@ predefined_constraints:
   - proto3/wrapped/uint64/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleProto3]:{val:{value:3}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.even.proto2"
+  #          1. rule_id: "uint64.even.proto2"
   #             message: "uint64 value is not even"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "uint64.[buf.validate.conformance.cases.uint64_even_proto2]" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1161  field_name:"[buf.validate.conformance.cases.uint64_even_proto2]"  field_type:TYPE_BOOL}
@@ -863,45 +1093,11 @@ predefined_constraints:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.PredefinedWrappedUInt64RuleProto3]:{val:{value:2}}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for '_%_' applied to '(wrapper(uint), uint)'
-standard_constraints/bool:
-  - const/false/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.BoolConstFalse]:{val:true}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BOOL}
-  #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - const/false/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.BoolConstFalse]:{}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - const/true/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.BoolConstTrue]:{}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BOOL}
-  #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - const/true/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.BoolConstTrue]:{val:true}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/bytes:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.BytesConst]:{val:"bar"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
-  #             rule: "bytes.const" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BYTES}
-  #         got: compilation err: CompilationError: failed to compile bytes.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.BytesConst]:{val:"foo"}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bytes.const: parse error: <input>:1:15: reserved identifier
+standard_rules/bytes:
   - contains/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.BytesContains]:{val:"candy bazs"}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.contains"
+  #          1. rule_id: "bytes.contains"
   #             message: "value does not contain 626172"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
   #             rule: "bytes.contains" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:7  field_name:"contains"  field_type:TYPE_BYTES}
@@ -917,7 +1113,7 @@ standard_constraints/bytes:
   - prefix/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.BytesPrefix]:{val:"bar"}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.prefix"
+  #          1. rule_id: "bytes.prefix"
   #             message: "value does not have prefix 99"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
   #             rule: "bytes.prefix" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"prefix"  field_type:TYPE_BYTES}
@@ -933,7 +1129,7 @@ standard_constraints/bytes:
   - suffix/case_sensitive/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.BytesSuffix]:{val:"FooBaz"}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.suffix"
+  #          1. rule_id: "bytes.suffix"
   #             message: "value does not have suffix 62757a7a"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
   #             rule: "bytes.suffix" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"suffix"  field_type:TYPE_BYTES}
@@ -941,7 +1137,7 @@ standard_constraints/bytes:
   - suffix/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.BytesSuffix]:{val:"foobar"}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bytes.suffix"
+  #          1. rule_id: "bytes.suffix"
   #             message: "value does not have suffix 62757a7a"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_BYTES}
   #             rule: "bytes.suffix" elements:{field_number:15  field_name:"bytes"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"suffix"  field_type:TYPE_BYTES}
@@ -954,96 +1150,11 @@ standard_constraints/bytes:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.BytesSuffix]:{val:"buzz"}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for 'endsWith' applied to '(bytes, bytes)'
-standard_constraints/double:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.DoubleConst]:{val:4.56}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_DOUBLE}
-  #             rule: "double.const" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_DOUBLE}
-  #         got: compilation err: CompilationError: failed to compile double.const: parse error: <input>:1:15: reserved identifier
-  - const/invalid_nan
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.DoubleConst]:{val:nan}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "double.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_DOUBLE}
-  #             rule: "double.const" elements:{field_number:2  field_name:"double"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_DOUBLE}
-  #         got: compilation err: CompilationError: failed to compile double.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.DoubleConst]:{val:1.23}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile double.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/enum:
-  - alias/const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.EnumAliasConst]:{val:TEST_ENUM_ALIAS_C}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "enum.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_ENUM}
-  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #         got: compilation err: CompilationError: failed to compile enum.const: parse error: <input>:1:15: reserved identifier
-  - alias/const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.EnumAliasConst]:{val:TEST_ENUM_ALIAS_B}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile enum.const: parse error: <input>:1:15: reserved identifier
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.EnumConst]:{val:TEST_ENUM_ONE}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "enum.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_ENUM}
-  #             rule: "enum.const" elements:{field_number:16  field_name:"enum"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #         got: compilation err: CompilationError: failed to compile enum.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.EnumConst]:{val:TEST_ENUM_TWO}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile enum.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/fixed32:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Fixed32Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed32.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED32}
-  #             rule: "fixed32.const" elements:{field_number:9  field_name:"fixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_FIXED32}
-  #         got: compilation err: CompilationError: failed to compile fixed32.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Fixed32Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile fixed32.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/fixed64:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Fixed64Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "fixed64.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FIXED64}
-  #             rule: "fixed64.const" elements:{field_number:10  field_name:"fixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_FIXED64}
-  #         got: compilation err: CompilationError: failed to compile fixed64.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Fixed64Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile fixed64.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/float:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.FloatConst]:{val:4.56}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FLOAT}
-  #             rule: "float.const" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_FLOAT}
-  #         got: compilation err: CompilationError: failed to compile float.const: parse error: <input>:1:15: reserved identifier
-  - const/nan
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.FloatConst]:{val:nan}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "float.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_FLOAT}
-  #             rule: "float.const" elements:{field_number:1  field_name:"float"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_FLOAT}
-  #         got: compilation err: CompilationError: failed to compile float.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.FloatConst]:{val:1.23}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile float.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/ignore:
+standard_rules/ignore:
   - proto/2023/map/ignore_default/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.EditionsMapIgnoreDefault]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1054,7 +1165,7 @@ standard_constraints/ignore:
   - proto/2023/map/ignore_empty/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.EditionsMapIgnoreEmpty]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1065,7 +1176,7 @@ standard_constraints/ignore:
   - proto/2023/map/ignore_unspecified/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.EditionsMapIgnoreUnspecified]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1076,7 +1187,7 @@ standard_constraints/ignore:
   - proto2/map/ignore_default/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Proto2MapIgnoreDefault]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1087,7 +1198,7 @@ standard_constraints/ignore:
   - proto2/map/ignore_empty/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Proto2MapIgnoreEmpty]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1098,7 +1209,7 @@ standard_constraints/ignore:
   - proto2/map/ignore_unspecified/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Proto2MapIgnoreUnspecified]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1109,7 +1220,7 @@ standard_constraints/ignore:
   - proto3/map/ignore_default/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Proto3MapIgnoreDefault]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1120,7 +1231,7 @@ standard_constraints/ignore:
   - proto3/map/ignore_empty/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Proto3MapIgnoreEmpty]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1131,7 +1242,7 @@ standard_constraints/ignore:
   - proto3/map/ignore_unspecified/invalid/populated
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Proto3MapIgnoreUnspecified]:{val:{key:1  value:1}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1139,11 +1250,11 @@ standard_constraints/ignore:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Proto3MapIgnoreUnspecified]:{val:{key:1  value:1}  val:{key:2  value:2}  val:{key:3  value:3}}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
-standard_constraints/ignore_empty:
+standard_rules/ignore_empty:
   - proto/2023/map/nonempty/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.IgnoreEmptyEditionsMap]:{val:{key:0  value:0}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1154,7 +1265,7 @@ standard_constraints/ignore_empty:
   - proto2/map/nonempty/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.IgnoreEmptyProto2Map]:{val:{key:0  value:0}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1165,7 +1276,7 @@ standard_constraints/ignore_empty:
   - proto3/map/nonempty/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.IgnoreEmptyProto3Map]:{val:{key:0  value:0}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
@@ -1173,39 +1284,11 @@ standard_constraints/ignore_empty:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.IgnoreEmptyProto3Map]:{val:{key:1  value:2}  val:{key:3  value:4}  val:{key:5  value:6}}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
-standard_constraints/int32:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Int32Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int32.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT32}
-  #             rule: "int32.const" elements:{field_number:3  field_name:"int32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT32}
-  #         got: compilation err: CompilationError: failed to compile int32.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Int32Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile int32.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/int64:
-  - big_constraints/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Int64BigConstraints]:{lt_pos:-5666777888  lt_neg:-5666777888  gt_pos:5666777888  gt_neg:5666777888  lte_pos:-5666777888  lte_neg:-5666777888  gte_pos:5666777888  gte_neg:5666777888  constant_pos:5444333222  constant_neg:-5444333222  in:5444333222  notin:5666777888}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile int64.const: parse error: <input>:1:15: reserved identifier
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Int64Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "int64.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_INT64}
-  #             rule: "int64.const" elements:{field_number:4  field_name:"int64"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_INT64}
-  #         got: compilation err: CompilationError: failed to compile int64.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Int64Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile int64.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/map:
+standard_rules/map:
   - exact/above/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapExact]:{val:{key:1  value:"a"}  val:{key:2  value:"b"}  val:{key:3  value:"c"}  val:{key:4  value:"d"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.max_pairs"
+  #          1. rule_id: "map.max_pairs"
   #             message: "map must be at most 3 entries"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.max_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"max_pairs"  field_type:TYPE_UINT64}
@@ -1213,7 +1296,7 @@ standard_constraints/map:
   - exact/below/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapExact]:{val:{key:1  value:"a"}  val:{key:2  value:"b"}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             message: "map must be at least 3 entries"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
@@ -1229,7 +1312,7 @@ standard_constraints/map:
   - max_pairs/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapMax]:{val:{key:1  value:2}  val:{key:3  value:4}  val:{key:5  value:6}  val:{key:7  value:8}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.max_pairs"
+  #          1. rule_id: "map.max_pairs"
   #             message: "map must be at most 3 entries"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.max_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"max_pairs"  field_type:TYPE_UINT64}
@@ -1241,7 +1324,7 @@ standard_constraints/map:
   - min/max/above/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapMinMax]:{val:{key:"a"  value:true}  val:{key:"b"  value:false}  val:{key:"c"  value:true}  val:{key:"d"  value:false}  val:{key:"e"  value:true}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.max_pairs"
+  #          1. rule_id: "map.max_pairs"
   #             message: "map must be at most 4 entries"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.max_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"max_pairs"  field_type:TYPE_UINT64}
@@ -1265,7 +1348,7 @@ standard_constraints/map:
   - min_pairs/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapMin]:{val:{key:1  value:2}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "map.min_pairs"
+  #          1. rule_id: "map.min_pairs"
   #             message: "map must be at least 2 entries"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
   #             rule: "map.min_pairs" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"min_pairs"  field_type:TYPE_UINT64}
@@ -1274,197 +1357,57 @@ standard_constraints/map:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapMin]:{val:{key:1  value:2}  val:{key:3  value:4}  val:{key:5  value:6}}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
-standard_constraints/message:
-  - field/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Message]:{val:{}}
+standard_rules/repeated:
+  - items/in/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RepeatedItemIn]:{val:"baz"}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.const"
-  #             message: "value must equal `foo`"
-  #             field: "val.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - field/transitive/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Message]:{val:{const:"foo"  nested:{}}}
+  #          1. rule_id: "string.in"
+  #             message: "value must be in list [foo, bar]"
+  #             field: "val[0]" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING  index:0}
+  #             rule: "repeated.items.string.in" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"in"  field_type:TYPE_STRING}
+  #         got: validation error (1 violation)
+  #          1. rule_id: "string.in"
+  #             message: "value must be in list [\"foo\", \"bar\"]"
+  #             field: "val[0]" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING  index:0}
+  #             for_key: false
+  #             rule: "repeated.items.string.in" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:10  field_name:"in"  field_type:TYPE_STRING}
+  - items/not_in/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.RepeatedItemNotIn]:{val:"foo"}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "string.const"
-  #             message: "value must equal `foo`"
-  #             field: "val.nested.const" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"nested"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - field/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Message]:{val:{const:"foo"}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - optional/required/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequiredButOptional]:{val:{const:"foo"}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/oneof/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequiredOneof]:{val:{const:"foo"}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MessageRequired]:{val:{const:"foo"}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/oneof:
-  - field/Z/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{z:{val:true}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - filed/Z/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.Oneof]:{z:{}}
+  #          1. rule_id: "string.not_in"
+  #             message: "value must not be in list [foo, bar]"
+  #             field: "val[0]" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING  index:0}
+  #             rule: "repeated.items.string.not_in" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"not_in"  field_type:TYPE_STRING}
+  #         got: validation error (1 violation)
+  #          1. rule_id: "string.not_in"
+  #             message: "value must not be in list [\"foo\", \"bar\"]"
+  #             field: "val[0]" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING  index:0}
+  #             for_key: false
+  #             rule: "repeated.items.string.not_in" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:11  field_name:"not_in"  field_type:TYPE_STRING}
+standard_rules/well_known_types/duration:
+  - in/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.DurationIn]:{val:{}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.const"
-  #             field: "z.val" elements:{field_number:3  field_name:"z"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"val"  field_type:TYPE_BOOL}
-  #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/repeated:
-standard_constraints/sfixed32:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SFixed32Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed32.const"
-  #             message: "value must equal 1"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED32}
-  #             rule: "sfixed32.const" elements:{field_number:11  field_name:"sfixed32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_SFIXED32}
-  #         got: compilation err: CompilationError: failed to compile sfixed32.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SFixed32Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile sfixed32.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/sfixed64:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SFixed64Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "sfixed64.const"
-  #             message: "value must equal 1"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SFIXED64}
-  #             rule: "sfixed64.const" elements:{field_number:12  field_name:"sfixed64"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_SFIXED64}
-  #         got: compilation err: CompilationError: failed to compile sfixed64.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SFixed64Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile sfixed64.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/sint32:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SInt32Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "sint32.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT32}
-  #             rule: "sint32.const" elements:{field_number:7  field_name:"sint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_SINT32}
-  #         got: compilation err: CompilationError: failed to compile sint32.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SInt32Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile sint32.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/sint64:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SInt64Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "sint64.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_SINT64}
-  #             rule: "sint64.const" elements:{field_number:8  field_name:"sint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_SINT64}
-  #         got: compilation err: CompilationError: failed to compile sint64.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.SInt64Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile sint64.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/string:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.StringConst]:{val:"bar"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING}
-  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.StringConst]:{val:"foo"}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/uint32:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.UInt32Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "uint32.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT32}
-  #             rule: "uint32.const" elements:{field_number:5  field_name:"uint32"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_UINT32}
-  #         got: compilation err: CompilationError: failed to compile uint32.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.UInt32Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile uint32.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/uint64:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.UInt64Const]:{val:2}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "uint64.const"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_UINT64}
-  #             rule: "uint64.const" elements:{field_number:6  field_name:"uint64"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_UINT64}
-  #         got: compilation err: CompilationError: failed to compile uint64.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.UInt64Const]:{val:1}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile uint64.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/well_known_types/duration:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.DurationConst]:{val:{nanos:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "duration.const"
-  #             message: "value must equal 3s"
+  #          1. rule_id: "duration.in"
+  #             message: "value must be in list [1s, 0.000001s]"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "duration.const" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"const"  field_type:TYPE_MESSAGE}
-  #         got: compilation err: CompilationError: failed to compile duration.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.DurationConst]:{val:{seconds:3}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile duration.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/well_known_types/timestamp:
-  - const/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.TimestampConst]:{val:{nanos:3}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "timestamp.const"
+  #             rule: "duration.in" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:7  field_name:"in"  field_type:TYPE_MESSAGE}
+  #         got: validation error (1 violation)
+  #          1. rule_id: "duration.in"
+  #             message: "value must be in list [duration(\"1s\"), duration(\"0.000001s\")]"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "timestamp.const" elements:{field_number:22  field_name:"timestamp"  field_type:TYPE_MESSAGE}  elements:{field_number:2  field_name:"const"  field_type:TYPE_MESSAGE}
-  #         got: compilation err: CompilationError: failed to compile timestamp.const: parse error: <input>:1:15: reserved identifier
-  - const/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.TimestampConst]:{val:{seconds:3}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile timestamp.const: parse error: <input>:1:15: reserved identifier
-standard_constraints/well_known_types/wrapper:
-  - bool/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperBool]:{val:{}}
+  #             for_key: false
+  #             rule: "duration.in" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:7  field_name:"in"  field_type:TYPE_MESSAGE}
+  - not in/invalid
+  #       input: [type.googleapis.com/buf.validate.conformance.cases.DurationNotIn]:{val:{}}
   #        want: validation error (1 violation)
-  #          1. constraint_id: "bool.const"
-  #             message: "value must equal true"
+  #          1. rule_id: "duration.not_in"
+  #             message: "value must not be in list [0s]"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - bool/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperBool]:{val:{value:true}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
-  - required/empty/string/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredEmptyString]:{val:{value:"foo"}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.const"
-  #             message: "value must equal ``"
+  #             rule: "duration.not_in" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"not_in"  field_type:TYPE_MESSAGE}
+  #         got: validation error (1 violation)
+  #          1. rule_id: "duration.not_in"
+  #             message: "value must not be in list [duration(\"0s\")]"
   #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/empty/string/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredEmptyString]:{val:{}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/string/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredString]:{val:{value:"foo"}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.const"
-  #             message: "value must equal `bar`"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE}
-  #             rule: "string.const" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_STRING}
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - required/string/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.WrapperRequiredString]:{val:{value:"bar"}}
-  #        want: valid
-  #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
+  #             for_key: false
+  #             rule: "duration.not_in" elements:{field_number:21  field_name:"duration"  field_type:TYPE_MESSAGE}  elements:{field_number:8  field_name:"not_in"  field_type:TYPE_MESSAGE}

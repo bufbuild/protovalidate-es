@@ -2,7 +2,7 @@
 
 # protovalidate-es
 
-[Protovalidate][protovalidate] provides standard annotations to validate common constraints on messages and fields, as well as the ability to use [CEL][cel] to write custom constraints. It's the next generation of [protoc-gen-validate][protoc-gen-validate], the only widely used validation library for Protobuf.
+[Protovalidate][protovalidate] provides standard annotations to validate common rules on messages and fields, as well as the ability to use [CEL][cel] to write custom rules. It's the next generation of [protoc-gen-validate][protoc-gen-validate], the only widely used validation library for Protobuf.
 
 With Protovalidate, you can annotate your Protobuf messages with both standard and custom validation rules:
 
