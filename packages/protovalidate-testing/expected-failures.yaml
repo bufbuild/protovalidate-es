@@ -1222,19 +1222,6 @@ standard_constraints/map:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapExact]:{val:{key:1  value:"a"}  val:{key:2  value:"b"}  val:{key:3  value:"c"}}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
-  - keys/pattern/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MapKeysPattern]:{val:{key:"!@#$%^&*()"  value:"b"}  val:{key:"A"  value:"a"}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.pattern"
-  #             message: "value does not match regex pattern `(?i)^[a-z0-9]+$`"
-  #             field: "val[\"!@#$%^&*()\"]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  key_type:TYPE_STRING  value_type:TYPE_STRING  string_key:"!@#$%^&*()"}
-  #             for_key: true
-  #             rule: "map.keys.string.pattern" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"keys"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"pattern"  field_type:TYPE_STRING}
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
-  - keys/pattern/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MapKeysPattern]:{val:{key:"A"  value:"a"}}
-  #        want: valid
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
   - max_pairs/equal/valid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapMax]:{val:{key:1  value:2}  val:{key:3  value:4}  val:{key:5  value:6}}
   #        want: valid
@@ -1287,18 +1274,6 @@ standard_constraints/map:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.MapMin]:{val:{key:1  value:2}  val:{key:3  value:4}  val:{key:5  value:6}}
   #        want: valid
   #         got: runtime error: RuntimeError: found no matching overload for 'size' applied to '(map)'
-  - values/pattern/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MapValuesPattern]:{val:{key:"a"  value:"A"}  val:{key:"b"  value:"!@#$%^&*()"}}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.pattern"
-  #             message: "value does not match regex pattern `(?i)^[a-z0-9]+$`"
-  #             field: "val[\"b\"]" elements:{field_number:1  field_name:"val"  field_type:TYPE_MESSAGE  key_type:TYPE_STRING  value_type:TYPE_STRING  string_key:"b"}
-  #             rule: "map.values.string.pattern" elements:{field_number:19  field_name:"map"  field_type:TYPE_MESSAGE}  elements:{field_number:5  field_name:"values"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"pattern"  field_type:TYPE_STRING}
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
-  - values/pattern/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.MapValuesPattern]:{val:{key:"a"  value:"A"}}
-  #        want: valid
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
 standard_constraints/message:
   - field/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.Message]:{val:{}}
@@ -1345,18 +1320,6 @@ standard_constraints/oneof:
   #             rule: "bool.const" elements:{field_number:13  field_name:"bool"  field_type:TYPE_MESSAGE}  elements:{field_number:1  field_name:"const"  field_type:TYPE_BOOL}
   #         got: compilation err: CompilationError: failed to compile bool.const: parse error: <input>:1:15: reserved identifier
 standard_constraints/repeated:
-  - items/pattern/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.RepeatedItemPattern]:{val:"Alpha"  val:"!@#$%^&*()"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.pattern"
-  #             message: "value does not match regex pattern `(?i)^[a-z0-9]+$`"
-  #             field: "val[1]" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING  index:1}
-  #             rule: "repeated.items.string.pattern" elements:{field_number:18  field_name:"repeated"  field_type:TYPE_MESSAGE}  elements:{field_number:4  field_name:"items"  field_type:TYPE_MESSAGE}  elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"pattern"  field_type:TYPE_STRING}
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
-  - items/pattern/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.RepeatedItemPattern]:{val:"Alpha"  val:"Beta123"}
-  #        want: valid
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
 standard_constraints/sfixed32:
   - const/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.SFixed32Const]:{val:2}
@@ -1419,17 +1382,6 @@ standard_constraints/string:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.StringConst]:{val:"foo"}
   #        want: valid
   #         got: compilation err: CompilationError: failed to compile string.const: parse error: <input>:1:15: reserved identifier
-  - pattern/invalid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.StringPattern]:{val:"!#@$#$%"}
-  #        want: validation error (1 violation)
-  #          1. constraint_id: "string.pattern"
-  #             field: "val" elements:{field_number:1  field_name:"val"  field_type:TYPE_STRING}
-  #             rule: "string.pattern" elements:{field_number:14  field_name:"string"  field_type:TYPE_MESSAGE}  elements:{field_number:6  field_name:"pattern"  field_type:TYPE_STRING}
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
-  - pattern/valid
-  #       input: [type.googleapis.com/buf.validate.conformance.cases.StringPattern]:{val:"Foo123"}
-  #        want: valid
-  #         got: unexpected error: SyntaxError: Invalid regular expression: /(?i)^[a-z0-9]+$/: Invalid group
 standard_constraints/uint32:
   - const/invalid
   #       input: [type.googleapis.com/buf.validate.conformance.cases.UInt32Const]:{val:2}

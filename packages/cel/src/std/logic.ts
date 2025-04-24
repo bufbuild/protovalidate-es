@@ -351,9 +351,34 @@ const startsWithFunc = Func.binary(
   },
 );
 
+const flagPattern = new RegExp(/^\(\?(?<flags>[ims\-]+)\)/);
 const matchesStringOp: StrictBinaryOp = (_id: number, x: CelVal, y: CelVal) => {
   if (typeof x === "string" && typeof y === "string") {
-    const re = new RegExp(y);
+    // CEL use RE2 syntax which is a subset of Ecmascript RE except for
+    // the flags and the ability to change the flags mid sequence.
+    //
+    // The conformance tests use flags at the very beginning of the sequence, which
+    // is likely the most common place where this rare feature will be used.
+    //
+    // Instead of importing an RE2 engine to be able to support this niche, we
+    // can instead just check for the flags at the very beginning and apply them.
+    //
+    // Unsupported flags and flags mid sequence will fail with to compile the regex.
+    //
+    // Users can choose to override this function and provide an RE2 engine if they really
+    // need to.
+    let flags = "";
+    const flagMatches = y.match(flagPattern);
+    if (flagMatches) {
+      for (let flag of flagMatches?.groups?.["flags"] ?? "") {
+        if (flag == "-") {
+          break;
+        }
+        flags += flag;
+      }
+      y = y.substring(flagMatches[0].length);
+    }
+    const re = new RegExp(y, flags);
     return re.test(x);
   }
   return undefined;
