@@ -48,6 +48,9 @@ import type { Path } from "./path.js";
 import { Cursor } from "./cursor.js";
 import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
 import {
+  bytesContains,
+  bytesEndsWith,
+  bytesStartsWith,
   isEmail,
   isHostAndPort,
   isHostname,
@@ -85,8 +88,6 @@ export type CelCompiledRule =
       interpretable: ReturnType<CelEnv["plan"]>;
       rule: Rule;
     };
-
-// TODO contains, endsWith, startsWith for bytes
 
 function createCustomFuncs(): FuncRegistry {
   const reg = new FuncRegistry();
@@ -242,6 +243,51 @@ function createCustomFuncs(): FuncRegistry {
       (id: number, lhs: CelVal, rhs: CelVal): CelResult | undefined => {
         if (typeof rhs == "string" && lhs instanceof CelObject) {
           return lhs.accessByName(id, rhs);
+        }
+        return undefined;
+      },
+    ),
+  );
+  reg.add(
+    Func.binary(
+      "contains",
+      ["string_contains_string", "bytes_contains_bytes"],
+      (_id: number, x: CelVal, y: CelVal) => {
+        if (x instanceof Uint8Array && y instanceof Uint8Array) {
+          return bytesContains(x, y);
+        }
+        if (typeof x == "string" && typeof y == "string") {
+          return x.includes(y);
+        }
+        return undefined;
+      },
+    ),
+  );
+  reg.add(
+    Func.binary(
+      "endsWith",
+      ["string_ends_with_string", "bytes_ends_with_bytes"],
+      (_id: number, x: CelVal, y: CelVal) => {
+        if (x instanceof Uint8Array && y instanceof Uint8Array) {
+          return bytesEndsWith(x, y);
+        }
+        if (typeof x === "string" && typeof y === "string") {
+          return x.endsWith(y);
+        }
+        return undefined;
+      },
+    ),
+  );
+  reg.add(
+    Func.binary(
+      "startsWith",
+      ["string_starts_with_string", "bytes_starts_with_bytes"],
+      (_id: number, x: CelVal, y: CelVal) => {
+        if (x instanceof Uint8Array && y instanceof Uint8Array) {
+          return bytesStartsWith(x, y);
+        }
+        if (typeof x === "string" && typeof y === "string") {
+          return x.startsWith(y);
         }
         return undefined;
       },

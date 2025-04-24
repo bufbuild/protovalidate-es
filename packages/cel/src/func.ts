@@ -182,7 +182,7 @@ export class OrderedDispatcher implements Dispatcher {
   constructor(private readonly dispatchers: Dispatcher[]) {}
 
   public add(dispatcher: Dispatcher): void {
-    this.dispatchers.push(dispatcher);
+    this.dispatchers.unshift(dispatcher);
   }
 
   public find(name: string): CallDispatch | undefined {
