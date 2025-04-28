@@ -18,6 +18,7 @@
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
+    "update-readme": "node scripts/update-readme.js",
     "format": "biome format --write",
     "lint": "biome lint --error-on-warnings",
     "attw": "attw --pack",

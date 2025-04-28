@@ -19,6 +19,7 @@
     "postfetch-parser-comprehensions": "biome format --write src/testdata/parser-comprehensions.ts && license-header src/testdata/parser-comprehensions.ts",
     "update-exports": "node scripts/update-exports.js",
     "postupdate-exports": "biome format --write package.json",
+    "update-readme": "node scripts/update-readme.js",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
     "prebuild": "rm -rf ./dist/*",

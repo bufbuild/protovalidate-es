@@ -26,12 +26,15 @@ jobs:
           - attw
           - build
           - license-header
+          - update-readme
         include:
           - task: format
             diff-check: true
           - task: license-header
             diff-check: true
           - task: build
+            diff-check: true
+          - task: update-readme
             diff-check: true
     name: ${{ matrix.task }}
     steps:

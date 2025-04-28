@@ -11,6 +11,11 @@
       "dependsOn": ["fetch-proto"],
       "inputs": ["proto/**", "buf.gen.yaml"],
       "outputs": ["src/gen/**"]
+    },
+    "update-readme": {
+      "dependsOn": [],
+      "inputs": ["package.json", "scripts/**", "README.md"],
+      "outputs": ["README.md"]
     }
   }
 }

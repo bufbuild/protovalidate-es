@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "clean": "git clean -Xdf",
-    "all": "turbo run --ui tui build format test attw license-header",
+    "all": "turbo run --ui tui build format test attw license-header update-readme",
     "format": "biome format --write",
     "license-header": "license-header --ignore 'packages/**'",
     "lint": "biome lint --error-on-warnings"

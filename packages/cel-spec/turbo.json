@@ -24,8 +24,13 @@
     },
     "update-exports": {
       "dependsOn": ["generate", "fetch-parser", "fetch-parser-comprehensions"],
-      "inputs": ["src/**"],
+      "inputs": ["src/**", "scripts/**"],
       "outputs": ["package.json"]
+    },
+    "update-readme": {
+      "dependsOn": [],
+      "inputs": ["package.json", "scripts/**", "README.md"],
+      "outputs": ["README.md"]
     },
     "generate": {
       "dependsOn": ["fetch-proto"],
