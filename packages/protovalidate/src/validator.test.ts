@@ -108,5 +108,31 @@ void suite("Validator", () => {
       assert.equal(error.violations.length, 1);
       assert.equal(error.violations[0].toString(), "test-message1 [test-id1]");
     });
+    void test("option regexMatch", () => {
+      const descMessage = compileMessage(
+        `
+        syntax="proto3";
+        import "buf/validate/validate.proto";
+        message Example {
+          option (buf.validate.message).cel = {
+            id: "test-id",
+            expression: "'x'.matches('^x$')"
+          };
+        }`,
+        bufCompileOptions,
+      );
+      let gotPattern: string | undefined;
+      let gotAgainst: string | undefined;
+      const validator = createValidator({
+        regexMatch: (pattern, against) => {
+          gotPattern = pattern;
+          gotAgainst = against;
+          return true;
+        },
+      });
+      validator.validate(descMessage, create(descMessage));
+      assert.equal(gotPattern, "^x$");
+      assert.equal(gotAgainst, "x");
+    });
   });
 });

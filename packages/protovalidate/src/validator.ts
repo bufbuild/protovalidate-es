@@ -21,7 +21,7 @@ import {
 import { nestedTypes, reflect } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
 import { Planner } from "./planner.js";
-import { CelManager } from "./cel.js";
+import { CelManager, type RegexMatcher } from "./cel.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
 
 /**
@@ -30,6 +30,17 @@ import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
 export type ValidatorOptions = {
   registry?: Registry;
   failFast?: boolean;
+  /**
+   * RE2 compliant regex matcher to use.
+   *
+   * ECMAScript supports most, but not all RE expressions. You can use a custom
+   * regex engine to support the unsupported features of RE2.
+   *
+   * Know limitations of default RE (ECMAScript) matcher:
+   *  * Cannot change flags mid sequence e.g. 'John(?i)Doe'.
+   *  * Doesn't support the 'U' flag.
+   */
+  regexMatch?: RegexMatcher;
 };
 
 /**
@@ -65,7 +76,7 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
     : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
-  const celMan = new CelManager(registry);
+  const celMan = new CelManager(registry, opt?.regexMatch);
   const planner = new Planner(celMan);
   return {
     validate(schema, message) {

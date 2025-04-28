@@ -89,7 +89,9 @@ export type CelCompiledRule =
       rule: Rule;
     };
 
-function createCustomFuncs(): FuncRegistry {
+export type RegexMatcher = (pattern: string, against: string) => boolean;
+
+function createCustomFuncs(regexMatcher?: RegexMatcher): FuncRegistry {
   const reg = new FuncRegistry();
   reg.add(
     Func.unary(
@@ -293,6 +295,20 @@ function createCustomFuncs(): FuncRegistry {
       },
     ),
   );
+  if (regexMatcher) {
+    reg.add(
+      Func.binary(
+        "matches",
+        ["matches_string"],
+        (_id: number, x: CelVal, y: CelVal) => {
+          if (typeof x === "string" && typeof y === "string") {
+            return regexMatcher(y, x);
+          }
+          return undefined;
+        },
+      ),
+    );
+  }
   return reg;
 }
 
@@ -307,10 +323,13 @@ export class CelManager {
 
   private readonly rulesCache = new Map<string, CelCompiledRules>();
 
-  constructor(private readonly registry: Registry) {
+  constructor(
+    private readonly registry: Registry,
+    regexMatcher: RegexMatcher | undefined,
+  ) {
     this.now = timestampNow();
     this.env = createEnv("", registry);
-    this.env.addFuncs(createCustomFuncs());
+    this.env.addFuncs(createCustomFuncs(regexMatcher));
     this.env.set("now", this.now);
   }
 
