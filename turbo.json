@@ -22,6 +22,10 @@
     },
     "format": {},
     "license-header": {},
+    "lint": {
+      "dependsOn": ["format", "^build", "generate"],
+      "cache": false
+    },
     "attw": {
       "dependsOn": ["build"]
     },

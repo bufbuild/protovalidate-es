@@ -3,8 +3,9 @@
   "scripts": {
     "clean": "git clean -Xdf",
     "all": "turbo run --ui tui build format test attw license-header",
-    "format": "prettier --write --ignore-unknown '.' '!packages'",
-    "license-header": "license-header --ignore 'packages/**'"
+    "format": "biome format --write",
+    "license-header": "license-header --ignore 'packages/**'",
+    "lint": "biome lint --error-on-warnings"
   },
   "workspaces": [
     "packages/cel-spec",
@@ -21,14 +22,11 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.4",
+    "@biomejs/biome": "^1.9.4",
     "@bufbuild/buf": "^1.50.0",
     "@bufbuild/license-header": "^0.0.4",
     "@bufbuild/protoc-gen-es": "^2.2.5",
-    "@eslint/js": "^9.21.0",
-    "@types/eslint__js": "^9.14.0",
     "@types/node": "^22.13.8",
-    "eslint": "^9.21.0",
-    "prettier": "^3.5.3",
     "tsx": "^4.19.3",
     "turbo": "^2.4.4",
     "typescript": "^5.7.3",

@@ -45,7 +45,7 @@ import {
 } from "@bufbuild/protobuf/reflect";
 import type { Eval } from "./eval.js";
 import type { Path } from "./path.js";
-import { Cursor } from "./cursor.js";
+import type { Cursor } from "./cursor.js";
 import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
 import {
   bytesContains,
@@ -378,10 +378,8 @@ export class CelManager {
   compileRules(descMessage: DescMessage): CelCompiledRules {
     let compiled = this.rulesCache.get(descMessage.typeName);
     if (!compiled) {
-      this.rulesCache.set(
-        descMessage.typeName,
-        (compiled = this.compileRulesUncached(descMessage)),
-      );
+      compiled = this.compileRulesUncached(descMessage);
+      this.rulesCache.set(descMessage.typeName, compiled);
     }
     return compiled;
   }
@@ -407,7 +405,8 @@ export class CelManager {
       }
       let list = extensions.get(ext.number);
       if (!list) {
-        extensions.set(ext.number, (list = []));
+        list = [];
+        extensions.set(ext.number, list);
       }
       for (const rule of getOption(ext, predefined).cel) {
         list.push({

@@ -44,9 +44,9 @@ export function toDebugString(
 
 class Writer {
   adorner: Adorner;
-  content: string = "";
-  indent: number = 0;
-  lineStart: boolean = true;
+  content = "";
+  indent = 0;
+  lineStart = true;
 
   constructor(adorner: Adorner) {
     this.adorner = adorner;
@@ -265,7 +265,7 @@ export class KindAdorner implements Adorner {
   private constructor() {}
 
   GetMetadata(context: Message): string {
-    let valueType;
+    let valueType: string;
 
     if (isExpr(context)) {
       valueType = getExprType(context);
@@ -291,10 +291,9 @@ function formatLiteral(c: Constant): string {
       // these are the bounds where Go's default formatting switches to exponential
       if (kind.value < 1e6 && kind.value > -1e6) {
         return (Object.is(kind.value, -0) ? "-" : "") + kind.value.toString();
-      } else {
-        // workaround for https://github.com/golang/go/issues/70862
-        return kind.value.toExponential().replace(/e\+([0-9])$/, "e+0$1");
       }
+      // workaround for https://github.com/golang/go/issues/70862
+      return kind.value.toExponential().replace(/e\+([0-9])$/, "e+0$1");
     case "int64Value":
       return kind.value.toString();
     case "stringValue":
@@ -328,11 +327,14 @@ function quoteBytes(bytes: Uint8Array) {
         : bytes[i] < 0xc0
           ? "" // continuation
           : bytes[i] < 0xe0
-            ? decoder.decode(bytes.slice(i, i + (length = 2)))
+            ? // biome-ignore lint/suspicious/noAssignInExpressions: do not want to remove the ternary expression
+              decoder.decode(bytes.slice(i, i + (length = 2)))
             : bytes[i] < 0xf0
-              ? decoder.decode(bytes.slice(i, i + (length = 3)))
+              ? // biome-ignore lint/suspicious/noAssignInExpressions: do not want to remove the ternary expression
+                decoder.decode(bytes.slice(i, i + (length = 3)))
               : bytes[i] < 0xf5
-                ? decoder.decode(bytes.slice(i, i + (length = 4)))
+                ? // biome-ignore lint/suspicious/noAssignInExpressions: do not want to remove the ternary expression
+                  decoder.decode(bytes.slice(i, i + (length = 4)))
                 : ""; // unused
 
     // this is a bit subtle; either
@@ -372,25 +374,32 @@ function quoteString(text: string): string {
 function formatSpecial(c: string) {
   if (c === "\\x07" || c === "\\u0007") {
     return "\\a";
-  } else if (c === "\\x08" || c === "\\u0008") {
-    return "\\b";
-  } else if (c === "\\x0c" || c === "\\u000c") {
-    return "\\f";
-  } else if (c === "\\x0a" || c === "\\u000a") {
-    return "\\n";
-  } else if (c === "\\x0d" || c === "\\u000d") {
-    return "\\r";
-  } else if (c === "\\x09" || c === "\\u0009") {
-    return "\\t";
-  } else if (c === "\\x0b" || c === "\\u000b") {
-    return "\\v";
-  } else if (c === "\\") {
-    return "\\\\";
-  } else if (c === '"') {
-    return '\\"';
-  } else {
-    return c;
   }
+  if (c === "\\x08" || c === "\\u0008") {
+    return "\\b";
+  }
+  if (c === "\\x0c" || c === "\\u000c") {
+    return "\\f";
+  }
+  if (c === "\\x0a" || c === "\\u000a") {
+    return "\\n";
+  }
+  if (c === "\\x0d" || c === "\\u000d") {
+    return "\\r";
+  }
+  if (c === "\\x09" || c === "\\u0009") {
+    return "\\t";
+  }
+  if (c === "\\x0b" || c === "\\u000b") {
+    return "\\v";
+  }
+  if (c === "\\") {
+    return "\\\\";
+  }
+  if (c === '"') {
+    return '\\"';
+  }
+  return c;
 }
 
 function escapeString(text: string): string {
@@ -398,14 +407,13 @@ function escapeString(text: string): string {
     .map((s) => {
       if (isPrintable(s.segment)) {
         return formatSpecial(s.segment);
-      } else {
-        return formatSpecial(
-          s.segment.replaceAll(
-            unprintableExpGlobal,
-            (c) => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"),
-          ),
-        );
       }
+      return formatSpecial(
+        s.segment.replaceAll(
+          unprintableExpGlobal,
+          (c) => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"),
+        ),
+      );
     })
     .join("");
 }

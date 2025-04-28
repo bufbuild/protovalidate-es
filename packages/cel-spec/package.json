@@ -14,18 +14,19 @@
     "fetch-testdata": "node scripts/fetch-testdata.js",
     "postfetch-testdata": "license-header src/testdata-json.ts",
     "fetch-parser": "go run -C scripts gen_parser_tests.go -output ../src/testdata/parser.ts parser/parser_test.go",
-    "postfetch-parser": "prettier --write src/testdata/parser.ts && license-header src/testdata/parser.ts",
+    "postfetch-parser": "biome format --write src/testdata/parser.ts && license-header src/testdata/parser.ts",
     "fetch-parser-comprehensions": "go run -C scripts gen_parser_tests.go -output ../src/testdata/parser-comprehensions.ts ext/comprehensions_test.go",
-    "postfetch-parser-comprehensions": "prettier --write src/testdata/parser-comprehensions.ts && license-header src/testdata/parser-comprehensions.ts",
+    "postfetch-parser-comprehensions": "biome format --write src/testdata/parser-comprehensions.ts && license-header src/testdata/parser-comprehensions.ts",
     "update-exports": "node scripts/update-exports.js",
+    "postupdate-exports": "biome format --write package.json",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
     "prebuild": "rm -rf ./dist/*",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
-    "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen' '!src/testdata-json.ts'",
-    "lint": "eslint .",
+    "format": "biome format --write",
+    "lint": "biome lint --error-on-warnings",
     "attw": "attw --pack",
     "license-header": "license-header"
   },
@@ -103,36 +104,18 @@
       "testdata/parser-comprehensions.js": [
         "./dist/cjs/testdata/parser-comprehensions.d.ts"
       ],
-      "testdata/parser.js": [
-        "./dist/cjs/testdata/parser.d.ts"
-      ],
-      "testdata/registry.js": [
-        "./dist/cjs/testdata/registry.d.ts"
-      ],
-      "testdata/simple.js": [
-        "./dist/cjs/testdata/simple.d.ts"
-      ],
+      "testdata/parser.js": ["./dist/cjs/testdata/parser.d.ts"],
+      "testdata/registry.js": ["./dist/cjs/testdata/registry.d.ts"],
+      "testdata/simple.js": ["./dist/cjs/testdata/simple.d.ts"],
       "testdata/to-debug-string.js": [
         "./dist/cjs/testdata/to-debug-string.d.ts"
       ],
-      "cel/expr/checked_pb.js": [
-        "./dist/cjs/gen/cel/expr/checked_pb.d.ts"
-      ],
-      "cel/expr/eval_pb.js": [
-        "./dist/cjs/gen/cel/expr/eval_pb.d.ts"
-      ],
-      "cel/expr/explain_pb.js": [
-        "./dist/cjs/gen/cel/expr/explain_pb.d.ts"
-      ],
-      "cel/expr/syntax_pb.js": [
-        "./dist/cjs/gen/cel/expr/syntax_pb.d.ts"
-      ],
-      "cel/expr/value_pb.js": [
-        "./dist/cjs/gen/cel/expr/value_pb.d.ts"
-      ],
-      "google/rpc/status_pb.js": [
-        "./dist/cjs/gen/google/rpc/status_pb.d.ts"
-      ],
+      "cel/expr/checked_pb.js": ["./dist/cjs/gen/cel/expr/checked_pb.d.ts"],
+      "cel/expr/eval_pb.js": ["./dist/cjs/gen/cel/expr/eval_pb.d.ts"],
+      "cel/expr/explain_pb.js": ["./dist/cjs/gen/cel/expr/explain_pb.d.ts"],
+      "cel/expr/syntax_pb.js": ["./dist/cjs/gen/cel/expr/syntax_pb.d.ts"],
+      "cel/expr/value_pb.js": ["./dist/cjs/gen/cel/expr/value_pb.d.ts"],
+      "google/rpc/status_pb.js": ["./dist/cjs/gen/google/rpc/status_pb.d.ts"],
       "cel/expr/conformance/conformance_service_pb.js": [
         "./dist/cjs/gen/cel/expr/conformance/conformance_service_pb.d.ts"
       ],

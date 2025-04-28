@@ -94,7 +94,7 @@ export function isIpPrefix(
 
 export class Ipv4 {
   readonly str: string;
-  i: number = 0;
+  i = 0;
   readonly l: number;
   readonly octets: number[] = [];
   prefixLen = 0;
@@ -237,10 +237,10 @@ export class Ipv4 {
 
 export class Ipv6 {
   readonly str: string;
-  i: number = 0;
+  i = 0;
   readonly l: number;
   readonly pieces: number[] = []; // 16-bit pieces found
-  doubleColonAt: number = -1; // number of 16-bit pieces found when double colon was found
+  doubleColonAt = -1; // number of 16-bit pieces found when double colon was found
   doubleColonSeen = false;
   dottedRaw = ""; // dotted notation for right-most 32 bits
   dottedAddr: Ipv4 | undefined; // dotted notation successfully parsed as IPv4
@@ -346,7 +346,7 @@ export class Ipv6 {
 
   // Stores dotted notation for right-most 32 bits in `dottedRaw` / `dottedAddr` if found.
   addressPart(): boolean {
-    for (; this.i < this.l; ) {
+    while (this.i < this.l) {
       // dotted notation for right-most 32 bits, e.g. 0:0:0:0:0:ffff:192.1.56.10
       if ((this.doubleColonSeen || this.pieces.length == 6) && this.dotted()) {
         const dotted = new Ipv4(this.dottedRaw);
@@ -643,7 +643,7 @@ export function isUriRef(str: string): boolean {
 
 class Uri {
   readonly str: string;
-  i: number = 0;
+  i = 0;
   readonly l: number;
   pctEncodedFound = false;
 

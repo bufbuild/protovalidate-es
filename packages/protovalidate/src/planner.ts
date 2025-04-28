@@ -70,7 +70,7 @@ import {
   ignoreMessageValue,
 } from "./condition.js";
 import {
-  CelManager,
+  type CelManager,
   EvalCustomCel,
   EvalExtendedRulesCel,
   EvalStandardRulesCel,

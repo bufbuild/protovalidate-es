@@ -29,12 +29,11 @@ for (const line of lines) {
       line,
     );
   if (mSuite) {
-    suites.push(
-      (suite = {
-        name: mSuite[1],
-        cases: [],
-      }),
-    );
+    suite = {
+      name: mSuite[1],
+      cases: [],
+    };
+    suites.push(suite);
     continue;
   }
   //     --- FAIL: min/max/above/invalid
@@ -43,12 +42,11 @@ for (const line of lines) {
     if (!suite) {
       throw new Error();
     }
-    suite.cases.push(
-      (kase = {
-        name: mCase[1],
-        lines: [],
-      }),
-    );
+    kase = {
+      name: mCase[1],
+      lines: [],
+    };
+    suite.cases.push(kase);
     continue;
   }
   if (!kase) {
@@ -58,9 +56,9 @@ for (const line of lines) {
 }
 
 suites.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
-suites.forEach((suite) =>
-  suite.cases.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0)),
-);
+for (const suite of suites) {
+  suite.cases.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
+}
 
 const out = [];
 for (const suite of suites) {

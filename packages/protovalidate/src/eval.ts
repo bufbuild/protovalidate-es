@@ -12,19 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  type ReflectList,
-  type ReflectMap,
-  type ReflectMessage,
-  type ReflectMessageGet,
-  type ScalarValue,
+import type {
+  ReflectList,
+  ReflectMap,
+  ReflectMessage,
+  ReflectMessageGet,
+  ScalarValue,
 } from "@bufbuild/protobuf/reflect";
-import {
-  type DescEnum,
-  type DescField,
-  type DescOneof,
-} from "@bufbuild/protobuf";
-import { type Any } from "@bufbuild/protobuf/wkt";
+import type { DescEnum, DescField, DescOneof } from "@bufbuild/protobuf";
+import type { Any } from "@bufbuild/protobuf/wkt";
 import {
   type AnyRules,
   AnyRulesSchema,
@@ -32,7 +28,7 @@ import {
   EnumRulesSchema,
   FieldRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
-import { Cursor } from "./cursor.js";
+import type { Cursor } from "./cursor.js";
 import type { Condition } from "./condition.js";
 import type { PathBuilder } from "./path.js";
 
@@ -54,7 +50,7 @@ export type Eval<V> = {
 export class EvalNoop<T> implements Eval<T> {
   private static instance = new EvalNoop();
   static get<T>(): EvalNoop<T> {
-    return this.instance;
+    return EvalNoop.instance;
   }
   eval(): void {
     //
@@ -70,7 +66,7 @@ export class EvalNoop<T> implements Eval<T> {
 export class EvalMany<T> implements Eval<T> {
   private many: Eval<T>[];
   constructor(...evals: (Eval<T> | Eval<T>[])[]) {
-    this.many = evals.flatMap((e) => e);
+    this.many = evals.flat();
   }
   add(...evals: Eval<T>[]): this {
     this.many.push(...evals);

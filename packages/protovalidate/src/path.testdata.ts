@@ -19,7 +19,7 @@ import {
   type DescExtension,
   type DescMessage,
 } from "@bufbuild/protobuf";
-import { type Path } from "./path.js";
+import type { Path } from "./path.js";
 
 export function assertPathsEqual(got: Path, want: Path) {
   assert.equal(

@@ -10,14 +10,13 @@
   },
   "scripts": {
     "generate": "cd ./src && peggy cel.peggy --format bare --extra-options '{\"typescript\":true}' --plugin peggy-ts -o parser.ts",
-    "postgenerate": "prettier src/parser.ts --write && git apply src/parser.patch",
+    "postgenerate": "biome format src/parser.ts --write && git apply src/parser.patch",
     "test": "npx tsx --test ./src/*.test.ts ./src/*/*.test.ts",
     "prebuild": "rm -rf ./dist/*",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
-    "format": "prettier --write --ignore-unknown '.' '!dist' '!src/gen' '!src/grammar.ts'",
-    "lint": "eslint .",
+    "format": "biome format --write",
     "attw": "attw --pack",
     "license-header": "license-header --ignore 'src/parser.ts'"
   },

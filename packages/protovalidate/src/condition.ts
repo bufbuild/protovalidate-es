@@ -92,27 +92,26 @@ export function ignoreScalarOrEnumField(
       case Ignore.IF_DEFAULT_VALUE:
         return new FieldIsSet(field);
     }
-  } else {
-    // field presence EXPLICIT or LEGACY_REQUIRED
-    switch (ignore) {
-      case undefined:
-      case Ignore.UNSPECIFIED:
-      case Ignore.IF_UNPOPULATED:
-        return new FieldIsSet(field);
-      case Ignore.IF_DEFAULT_VALUE:
-        if (field.fieldKind == "scalar") {
-          return new FieldScalarNot(
-            field,
-            field.scalar,
-            field.getDefaultValue() ?? scalarZeroValue(field.scalar, false),
-          );
-        }
+  }
+  // field presence EXPLICIT or LEGACY_REQUIRED
+  switch (ignore) {
+    case undefined:
+    case Ignore.UNSPECIFIED:
+    case Ignore.IF_UNPOPULATED:
+      return new FieldIsSet(field);
+    case Ignore.IF_DEFAULT_VALUE:
+      if (field.fieldKind == "scalar") {
         return new FieldScalarNot(
           field,
-          ScalarType.INT32,
-          field.getDefaultValue() ?? field.enum.values[0].number,
+          field.scalar,
+          field.getDefaultValue() ?? scalarZeroValue(field.scalar, false),
         );
-    }
+      }
+      return new FieldScalarNot(
+        field,
+        ScalarType.INT32,
+        field.getDefaultValue() ?? field.enum.values[0].number,
+      );
   }
 }
 
