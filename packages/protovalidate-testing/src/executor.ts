@@ -56,10 +56,8 @@ for (const [name, any] of Object.entries(request.cases)) {
         value: violationsToProto(e.violations),
       };
     } else if (e instanceof CompilationError) {
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       r = { case: "compilationError", value: String(e) };
     } else if (e instanceof RuntimeError) {
-      // eslint-disable-next-line @typescript-eslint/no-base-to-string
       r = { case: "runtimeError", value: String(e) };
     } else {
       r = { case: "unexpectedError", value: String(e) };

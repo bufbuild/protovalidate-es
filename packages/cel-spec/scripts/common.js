@@ -59,9 +59,7 @@ export function writePackageJson(path, pkg) {
  */
 export async function fetchRepository(upstreamCelSpecRef) {
   const url = `https://github.com/google/cel-spec/archive/${upstreamCelSpecRef}.zip`;
-  // eslint-disable-next-line no-undef
   const response = await fetch(url, {
-    // eslint-disable-next-line no-undef
     signal: AbortSignal.timeout(10 * 1000),
   });
   if (!response.ok) {

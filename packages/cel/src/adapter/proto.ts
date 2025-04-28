@@ -365,7 +365,6 @@ export class ProtoValAdapter implements CelValAdapter {
           case ScalarType.BYTES:
             return new CelList(listValues, this, type.LIST_BYTES);
         }
-      // eslint-disable-next-line no-fallthrough -- linter is silly, we're exhausting all cases
       case "enum":
         return new CelList(
           listValues,

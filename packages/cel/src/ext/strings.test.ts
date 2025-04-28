@@ -210,7 +210,6 @@ const STRINGS_FORMAT_TEST_CASES: StringFormatTestCase[] = [
     expectedOutput:
       "unescaped unicode: 2.718280e+0, escaped unicode: 2.718280e+0",
     // expectedOutput:
-    // eslint-disable-next-line no-irregular-whitespace
     //   "unescaped unicode: 2.718280 × 10⁰⁰, escaped unicode: 2.718280\u202f\u00d7\u202f10\u2070\u2070",
     locale: "en_US",
   },

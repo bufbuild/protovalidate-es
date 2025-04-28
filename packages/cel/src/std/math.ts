@@ -37,7 +37,6 @@ import {
 } from "../value/value.js";
 
 const MAX_INT = 9223372036854775807n;
-// eslint-disable-next-line no-loss-of-precision
 const MAX_INT_NUM = 9223372036854775807.0;
 const MIN_INT = -9223372036854775808n;
 const MIN_INT_NUM = -9223372036854775808.0;
