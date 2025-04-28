@@ -351,9 +351,34 @@ const startsWithFunc = Func.binary(
   },
 );
 
+/**
+ * Patterns that are supported in ECMAScript RE and not in
+ * RE2.
+ *
+ * ECMAScript Ref: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions/Cheatsheet
+ * RE2: https://github.com/google/re2/wiki/syntax
+ */
+const invalidPatterns = [
+  /\\[1-9]/, // backreference eg: \1
+  /\\k<.>/, // backreference eg: \k<name>
+  /\(\?\=/, // lookahead eg: Jack(?=Sprat)
+  /\(\?\!/, // negative lookahead eg: Jack(?!Sprat)
+  /\(\?\<\=/, // lookbehind eg: (?<=Sprat)Jack
+  /\(\?\<\!/, // negative lookbehind eg: (?<!Sprat)Jack,
+  /\\c[A-Z]/, // control character eg: /\cM\cJ/
+  /\\u[0-9a-fA-F]{4}/, // UTF-16 code-unit
+  /\\0(?!\d)/, // NUL
+  /\[\\b.*\]/, // Backspace eg: [\b]
+];
+
 const flagPattern = new RegExp(/^\(\?(?<flags>[ims\-]+)\)/);
 const matchesStringOp: StrictBinaryOp = (_id: number, x: CelVal, y: CelVal) => {
   if (typeof x === "string" && typeof y === "string") {
+    for (const invalidPattern of invalidPatterns) {
+      if (invalidPattern.test(y)) {
+        throw new Error(`Error evaluating pattern ${y}, invalid RE2 syntax`);
+      }
+    }
     // CEL use RE2 syntax which is a subset of Ecmascript RE except for
     // the flags and the ability to change the flags mid sequence.
     //
