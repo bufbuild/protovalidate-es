@@ -3,6 +3,8 @@
   "scripts": {
     "clean": "git clean -Xdf",
     "all": "turbo run --ui tui build format test attw license-header update-readme",
+    "setversion": "node scripts/set-workspace-version.js",
+    "postsetversion": "npm run all",
     "format": "biome format --write",
     "license-header": "license-header --ignore 'packages/**'",
     "lint": "biome lint --error-on-warnings"
