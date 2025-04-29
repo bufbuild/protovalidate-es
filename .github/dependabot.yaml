@@ -22,17 +22,14 @@ updates:
           - "tsx"
           - "@bufbuild/buf"
           - "@bufbuild/license-header"
-          - "fflate"
-          - "@arethetypeswrong/cli"
           - "@types/node"
-      needs-format:
+      lint-and-format:
         patterns:
-          - "prettier"
-      needs-generate:
+          - "biome"
+          - "@bufbuild/license-header"
+          - "@arethetypeswrong/cli"
+      protobuf-es:
         patterns:
           - "@bufbuild/protobuf"
+          - "@bufbuild/protoplugin"
           - "@bufbuild/protoc-gen-es"
-          - "peggy*"
-      eslint:
-        patterns:
-          - "*eslint*"
