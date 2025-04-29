@@ -66,8 +66,7 @@ jobs:
       - uses: actions/setup-go@v5
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
-          cache: "npm"
+          node-version: ${{ matrix.node-version }}
       - uses: actions/cache@v4
         with:
           path: .turbo
