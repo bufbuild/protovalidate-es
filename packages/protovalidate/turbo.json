@@ -5,17 +5,20 @@
     "fetch-proto": {
       "inputs": ["package.json"],
       "outputs": ["proto/**"],
-      "dependsOn": []
+      "dependsOn": [],
+      "outputLogs": "new-only"
     },
     "generate": {
       "dependsOn": ["fetch-proto"],
       "inputs": ["proto/**", "buf.gen.yaml"],
-      "outputs": ["src/gen/**"]
+      "outputs": ["src/gen/**"],
+      "outputLogs": "new-only"
     },
     "update-readme": {
       "dependsOn": [],
       "inputs": ["package.json", "scripts/**", "README.md"],
-      "outputs": ["README.md"]
+      "outputs": ["README.md"],
+      "outputLogs": "new-only"
     }
   }
 }

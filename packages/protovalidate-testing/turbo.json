@@ -9,7 +9,8 @@
     "install-protovalidate-conformance": {
       "dependsOn": [],
       "inputs": ["package.json", "scripts/*"],
-      "outputs": ["gobin/*"]
+      "outputs": ["gobin/*"],
+      "outputLogs": "new-only"
     }
   }
 }
