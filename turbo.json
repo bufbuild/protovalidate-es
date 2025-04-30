@@ -3,7 +3,8 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build", "generate"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "outputLogs": "new-only"
     },
     "generate": {
       "dependsOn": ["^build"],
@@ -14,23 +15,34 @@
         "buf.lock",
         "package.json"
       ],
-      "outputs": ["src/gen/**"]
+      "outputs": ["src/gen/**"],
+      "outputLogs": "new-only"
     },
     "test": {
       "dependsOn": ["^build", "generate"],
       "cache": false
     },
-    "format": {},
-    "license-header": {},
+    "format": {
+      "outputLogs": "new-only"
+    },
+    "license-header": {
+      "outputLogs": "new-only"
+    },
     "lint": {
       "dependsOn": ["format", "^build", "generate"],
       "cache": false
     },
     "attw": {
-      "dependsOn": ["build"]
+      "dependsOn": ["build"],
+      "outputLogs": "new-only"
     },
     "//#format": {
-      "inputs": ["$TURBO_DEFAULT$", "!packages/**", "package-lock.json"]
+      "inputs": ["$TURBO_DEFAULT$", "!packages/**", "package-lock.json"],
+      "outputLogs": "new-only"
+    },
+    "//#lint": {
+      "dependsOn": ["format"],
+      "cache": false
     }
   }
 }
