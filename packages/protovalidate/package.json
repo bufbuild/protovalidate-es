@@ -2,6 +2,13 @@
   "name": "@bufbuild/protovalidate",
   "version": "0.0.1",
   "description": "Protocol Buffer Validation for ECMAScript",
+  "keywords": [
+    "javascript",
+    "typescript",
+    "protobuf",
+    "cel",
+    "common-expression-language"
+  ],
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
