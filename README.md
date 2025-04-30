@@ -55,10 +55,6 @@ try {
 
 - [@bufbuild/protovalidate](https://www.npmjs.com/package/@bufbuild/protovalidate):
   Validates Protobuf messages at runtime based on user-defined validation rules.
-- [@bufbuild/cel](https://www.npmjs.com/package/@bufbuild/cel):
-  Provides a [CEL](https://github.com/google/cel-spec) evaluator for ECMAScript.
-- [@bufbuild/cel-spec](https://www.npmjs.com/package/@bufbuild/cel-spec):
-  Provides [CEL](https://github.com/google/cel-spec) definitions and test data.
 
 ## Additional Languages and Repositories
 
