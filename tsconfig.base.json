@@ -1,14 +1,7 @@
 {
   "compilerOptions": {
-    // We target ES2020 because we (currently) use BigInt literals and require the Text Encoding API.
     "target": "es2020",
-    "lib": [
-      "ES2017",
-      // ES2020.BigInt for 64-bit integers
-      "ES2020.BigInt",
-      // ES2022.Error for Error.cause
-      "ES2022.Error"
-    ],
+    "lib": ["ES2020"],
     "declaration": true,
     "types": ["@types/node"],
     // We don't have dependencies that require interop
