@@ -28,6 +28,23 @@ void suite("buildPath() with just schema argument", () => {
   });
 });
 
+void suite("buildPath()", () => {
+  void suite("with schema argument only", () => {
+    test("returns PathBuilder", () => {
+      const builder = buildPath(schema);
+      assert.strictEqual(builder.schema, schema);
+    });
+  });
+  void suite("with Path argument", () => {
+    for (const { string, schema, golden } of cases) {
+      void test(`re-builds path "${string}"`, () => {
+        const path = buildPath(schema, golden).toPath();
+        assertPathsEqual(path, golden);
+      });
+    }
+  });
+});
+
 void suite("parsePath()", () => {
   for (const { schema, string, golden, usesExtension } of cases) {
     void test(`parses "${string}"`, () => {
@@ -43,15 +60,6 @@ void suite("parsePath()", () => {
         message: error,
         path: input,
       });
-    });
-  }
-});
-
-void suite("buildPath() with Path argument", () => {
-  for (const { string, schema, golden } of cases) {
-    void test(`re-builds path "${string}"`, () => {
-      const path = buildPath(schema, golden).toPath();
-      assertPathsEqual(path, golden);
     });
   }
 });
