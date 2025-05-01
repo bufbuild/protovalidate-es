@@ -18,6 +18,7 @@ import {
   createRegistry,
   type DescExtension,
   type DescMessage,
+  type Registry,
 } from "@bufbuild/protobuf";
 import type { Path } from "./path.js";
 
@@ -37,7 +38,24 @@ export function assertPathsEqual(got: Path, want: Path) {
   assert.deepStrictEqual(got, want);
 }
 
-export function getTestDataForPaths() {
+type TestDataForPaths = {
+  schema: DescMessage;
+  registry: Registry;
+  cases: {
+    schema: DescMessage;
+    string: string;
+    goldenString: string;
+    golden: Path;
+    usesExtension?: DescExtension;
+  }[];
+  invalid: {
+    schema: DescMessage;
+    input: string;
+    error: string | RegExp;
+  }[];
+};
+
+export function getTestDataForPaths(): TestDataForPaths {
   const file = compileFile(`
     syntax="proto2";
     message User {
@@ -57,13 +75,7 @@ export function getTestDataForPaths() {
   `);
   const schema = file.messages[0];
   const ext = file.extensions[0];
-  const cases: {
-    schema: DescMessage;
-    string: string;
-    goldenString: string;
-    golden: Path;
-    usesExtension?: DescExtension;
-  }[] = [
+  const cases: TestDataForPaths["cases"] = [
     {
       schema,
       string: "scalar",
@@ -137,11 +149,7 @@ export function getTestDataForPaths() {
       golden: [],
     },
   ];
-  const invalid: {
-    schema: DescMessage;
-    input: string;
-    error: string | RegExp;
-  }[] = [
+  const invalid: TestDataForPaths["invalid"] = [
     {
       schema,
       input: `.first_name`,
