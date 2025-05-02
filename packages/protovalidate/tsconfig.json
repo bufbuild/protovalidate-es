@@ -1,4 +1,10 @@
 {
   "include": ["src/index.ts", "src/**/*.test.ts"],
-  "extends": "../../tsconfig.base.json"
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": [
+      // For Error.cause in error.ts and error.test.ts
+      "ES2022.Error"
+    ]
+  }
 }
