@@ -19,13 +19,22 @@ import {
   getOption,
   hasOption,
   type Registry,
+  ScalarType,
 } from "@bufbuild/protobuf";
+import {
+  isReflectList,
+  isReflectMap,
+  isReflectMessage,
+  type ReflectMessageGet,
+} from "@bufbuild/protobuf/reflect";
+import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
 import {
   type CelEnv,
   CelError,
   CelList,
   CelObject,
   type CelResult,
+  CelUint,
   type CelVal,
   createEnv,
   Func,
@@ -37,16 +46,10 @@ import {
   predefined,
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError, RuntimeError } from "./error.js";
-import {
-  isReflectList,
-  isReflectMap,
-  isReflectMessage,
-  type ReflectMessageGet,
-} from "@bufbuild/protobuf/reflect";
 import type { Eval } from "./eval.js";
 import type { Path } from "./path.js";
 import type { Cursor } from "./cursor.js";
-import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
+import { getRuleScalarType } from "./rules.js";
 import {
   bytesContains,
   bytesEndsWith,
@@ -464,6 +467,7 @@ export class EvalCustomCel implements Eval<ReflectMessageGet> {
   constructor(
     private readonly celMan: CelManager,
     private readonly forMapKey: boolean,
+    private readonly thisScalarType: ScalarType | undefined,
   ) {}
 
   add(compiled: CelCompiledRule, rulePath: Path): void {
@@ -471,7 +475,7 @@ export class EvalCustomCel implements Eval<ReflectMessageGet> {
   }
 
   eval(val: ReflectMessageGet, cursor: Cursor): void {
-    this.celMan.setEnv("this", reflectToCel(val));
+    this.celMan.setEnv("this", reflectToCel(val, this.thisScalarType));
     this.celMan.setEnv("rules", undefined);
     this.celMan.setEnv("rule", undefined);
     for (const child of this.children) {
@@ -491,28 +495,37 @@ export class EvalExtendedRulesCel implements Eval<ReflectMessageGet> {
   private readonly children: {
     compiled: CelCompiledRule;
     rulePath: Path;
-    ruleValue: unknown;
+    ruleCelValue: unknown;
   }[] = [];
+
+  private readonly thisScalarType: ScalarType | undefined;
 
   constructor(
     private readonly celMan: CelManager,
     private readonly rules: Exclude<FieldRules["type"]["value"], undefined>,
     private readonly forMapKey: boolean,
-  ) {}
+  ) {
+    this.thisScalarType = getRuleScalarType(rules);
+  }
 
-  add(compiled: CelCompiledRule, rulePath: Path, ruleValue: unknown): void {
+  add(
+    compiled: CelCompiledRule,
+    rulePath: Path,
+    ruleValue: unknown,
+    ruleScalarType: ScalarType | undefined,
+  ): void {
     this.children.push({
       compiled,
       rulePath,
-      ruleValue: reflectToCel(ruleValue),
+      ruleCelValue: reflectToCel(ruleValue, ruleScalarType),
     });
   }
 
   eval(val: ReflectMessageGet, cursor: Cursor): void {
-    this.celMan.setEnv("this", reflectToCel(val));
     this.celMan.setEnv("rules", this.rules);
+    this.celMan.setEnv("this", reflectToCel(val, this.thisScalarType));
     for (const child of this.children) {
-      this.celMan.setEnv("rule", child.ruleValue);
+      this.celMan.setEnv("rule", child.ruleCelValue);
       const vio = this.celMan.eval(child.compiled);
       if (vio) {
         cursor.violate(vio.message, vio.ruleId, child.rulePath, this.forMapKey);
@@ -531,18 +544,22 @@ export class EvalStandardRulesCel implements Eval<ReflectMessageGet> {
     rulePath: Path;
   }[] = [];
 
+  private readonly thisScalarType: ScalarType | undefined;
+
   constructor(
     private readonly celMan: CelManager,
     private readonly rules: Exclude<FieldRules["type"]["value"], undefined>,
     private readonly forMapKey: boolean,
-  ) {}
+  ) {
+    this.thisScalarType = getRuleScalarType(rules);
+  }
 
   add(compiled: CelCompiledRule, rulePath: Path): void {
     this.children.push({ compiled, rulePath });
   }
 
   eval(val: ReflectMessageGet, cursor: Cursor): void {
-    this.celMan.setEnv("this", reflectToCel(val));
+    this.celMan.setEnv("this", reflectToCel(val, this.thisScalarType));
     this.celMan.setEnv("rules", this.rules);
     this.celMan.setEnv("rule", undefined);
     for (const child of this.children) {
@@ -558,7 +575,10 @@ export class EvalStandardRulesCel implements Eval<ReflectMessageGet> {
   }
 }
 
-function reflectToCel(val: unknown): unknown {
+function reflectToCel(
+  val: unknown,
+  scalarType: ScalarType | undefined,
+): unknown {
   if (isReflectMessage(val)) {
     return val.message;
   }
@@ -568,6 +588,46 @@ function reflectToCel(val: unknown): unknown {
   }
   if (isReflectMap(val)) {
     return val;
+  }
+  switch (scalarType) {
+    case ScalarType.DOUBLE:
+    case ScalarType.FLOAT:
+    case ScalarType.BOOL:
+    case ScalarType.STRING:
+    case ScalarType.BYTES:
+      break;
+    case ScalarType.UINT32:
+    case ScalarType.FIXED32:
+      if (typeof val == "number") {
+        return CelUint.of(BigInt(val));
+      }
+      break;
+    case ScalarType.UINT64:
+    case ScalarType.FIXED64:
+      switch (typeof val) {
+        case "bigint":
+          return CelUint.of(val);
+        case "number":
+        case "string":
+          return CelUint.of(BigInt(val));
+      }
+      break;
+    case ScalarType.INT32:
+    case ScalarType.SFIXED32:
+    case ScalarType.SINT32:
+      if (typeof val == "number") {
+        return BigInt(val);
+      }
+      break;
+    case ScalarType.INT64:
+    case ScalarType.SFIXED64:
+    case ScalarType.SINT64:
+      switch (typeof val) {
+        case "number":
+        case "string":
+          return BigInt(val);
+      }
+      break;
   }
   return val;
 }

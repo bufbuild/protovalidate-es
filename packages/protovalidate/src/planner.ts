@@ -21,7 +21,7 @@ import {
   getOption,
   isFieldSet,
   isMessage,
-  type ScalarType,
+  ScalarType,
 } from "@bufbuild/protobuf";
 import {
   type FieldRules,
@@ -179,7 +179,7 @@ export class Planner {
     baseRulePath: PathBuilder,
   ): Eval<ReflectList> {
     const evals = new EvalMany<ReflectList>(
-      this.fieldCel(fieldRules, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false, undefined),
     );
     const [rules, rulePath, rulePathItems] = getListRules(
       baseRulePath,
@@ -228,7 +228,7 @@ export class Planner {
     baseRulePath: PathBuilder,
   ): Eval<ReflectMap> {
     const evals = new EvalMany<ReflectMap>(
-      this.fieldCel(fieldRules, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false, undefined),
     );
     const [rules, rulePath, rulePathKeys, rulePathValues] = getMapRules(
       baseRulePath,
@@ -298,7 +298,7 @@ export class Planner {
     fieldContext: { toString(): string },
   ): Eval<number> {
     const evals = new EvalMany<number>(
-      this.fieldCel(fieldRules, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false, ScalarType.INT32),
     );
     const [rules, rulePath] = getEnumRules(
       baseRulePath,
@@ -320,7 +320,7 @@ export class Planner {
     fieldContext: { toString(): string },
   ): Eval<ScalarValue> {
     const evals = new EvalMany<ScalarValue>(
-      this.fieldCel(fieldRules, baseRulePath, forMapKey),
+      this.fieldCel(fieldRules, baseRulePath, forMapKey, scalar),
     );
     const [rules, rulePath] = getScalarRules(
       scalar,
@@ -341,7 +341,7 @@ export class Planner {
     fieldContext: { toString(): string },
   ): Eval<ReflectMessage> {
     const evals = new EvalMany<ReflectMessage>(
-      this.fieldCel(fieldRules, baseRulePath, false),
+      this.fieldCel(fieldRules, baseRulePath, false, undefined),
     );
     evals.add(this.plan(descMessage));
     const [rules, rulePath] = getMessageRules(
@@ -396,6 +396,7 @@ export class Planner {
             plan.compiled,
             rulePath.clone().extension(plan.ext).toPath(),
             getExtension(rules, plan.ext),
+            plan.ext.fieldKind == "scalar" ? plan.ext.scalar : undefined,
           );
         }
       }
@@ -404,7 +405,7 @@ export class Planner {
   }
 
   private messageCel(messageRules: MessageRules): Eval<ReflectMessage> {
-    const e = new EvalCustomCel(this.celMan, false);
+    const e = new EvalCustomCel(this.celMan, false, undefined);
     for (const rule of messageRules.cel) {
       e.add(this.celMan.compileRule(rule), []);
     }
@@ -415,11 +416,12 @@ export class Planner {
     fieldRules: FieldRules | undefined,
     baseRulePath: PathBuilder,
     forMapKey: boolean,
+    scalarType: ScalarType | undefined,
   ): Eval<ReflectMessageGet> {
     if (!fieldRules) {
       return EvalNoop.get();
     }
-    const e = new EvalCustomCel(this.celMan, forMapKey);
+    const e = new EvalCustomCel(this.celMan, forMapKey, scalarType);
     for (const [index, rule] of fieldRules.cel.entries()) {
       const rulePath = baseRulePath
         .clone()
