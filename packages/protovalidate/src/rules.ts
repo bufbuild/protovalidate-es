@@ -121,6 +121,32 @@ const scalarToRuleType = new Map<ScalarType, ruleTypeScalar>([
   [ScalarType.BYTES, "bytes"],
 ]);
 
+const ruleMessageTypeToScalarType = new Map<string, ScalarType>([
+  [DoubleRulesSchema.typeName, ScalarType.DOUBLE],
+  [FloatRulesSchema.typeName, ScalarType.FLOAT],
+  [Int64RulesSchema.typeName, ScalarType.INT64],
+  [UInt64RulesSchema.typeName, ScalarType.UINT64],
+  [Int32RulesSchema.typeName, ScalarType.INT32],
+  [Fixed64RulesSchema.typeName, ScalarType.FIXED64],
+  [Fixed32RulesSchema.typeName, ScalarType.FIXED32],
+  [BoolRulesSchema.typeName, ScalarType.BOOL],
+  [BytesRulesSchema.typeName, ScalarType.BYTES],
+  [UInt32RulesSchema.typeName, ScalarType.UINT32],
+  [SFixed32RulesSchema.typeName, ScalarType.SFIXED32],
+  [SFixed64RulesSchema.typeName, ScalarType.SFIXED64],
+  [SInt32RulesSchema.typeName, ScalarType.SINT32],
+  [SInt64RulesSchema.typeName, ScalarType.SINT64],
+]);
+
+/**
+ * Get the ScalarType for one of the buf.validate.*Rules messages.
+ */
+export function getRuleScalarType(
+  rule: Exclude<FieldRules["type"]["value"], undefined>,
+): ScalarType | undefined {
+  return ruleMessageTypeToScalarType.get(rule.$typeName);
+}
+
 /**
  * Get the descriptor for one of the buf.validate.*Rules messages.
  */
