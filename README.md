@@ -58,6 +58,9 @@ try {
 - [@bufbuild/protovalidate](https://www.npmjs.com/package/@bufbuild/protovalidate):
   Validates Protobuf messages at runtime based on user-defined validation rules.
 
+Note that protovalidate-es requires the Protobuf runtime [@bufbuild/protobuf](https://www.npmjs.com/package/@bufbuild/protobuf).
+
+
 ## Additional Languages and Repositories
 
 Protovalidate isn't just for ECMAScript! You might be interested in sibling repositories for other languages:
