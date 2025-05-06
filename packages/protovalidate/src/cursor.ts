@@ -18,8 +18,12 @@ import type {
   DescMessage,
   DescOneof,
 } from "@bufbuild/protobuf";
+import {
+  buildPath,
+  type PathBuilder,
+  type Path,
+} from "@bufbuild/protobuf/reflect";
 import { ValidationError, Violation } from "./error.js";
-import { buildPath, type PathBuilder, type Path } from "./path.js";
 
 /**
  * Cursor maintains a field path and tracks violations.
@@ -91,7 +95,7 @@ export class Cursor {
   }
 
   mapKey(key: string | number | bigint | boolean): Cursor {
-    return this.cloneWith(this.builder.clone().mapKey(key));
+    return this.cloneWith(this.builder.clone().map(key));
   }
 
   private cloneWith(path: PathBuilder) {

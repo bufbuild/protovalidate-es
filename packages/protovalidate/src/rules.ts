@@ -27,7 +27,7 @@ import {
   UInt32ValueSchema,
   UInt64ValueSchema,
 } from "@bufbuild/protobuf/wkt";
-import type { PathBuilder } from "./path.js";
+import type { PathBuilder } from "@bufbuild/protobuf/reflect";
 import {
   AnyRulesSchema,
   BoolRulesSchema,

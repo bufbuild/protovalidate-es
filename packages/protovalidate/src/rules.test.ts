@@ -26,7 +26,7 @@ import {
   StringValueSchema,
   TimestampSchema,
 } from "@bufbuild/protobuf/wkt";
-import { buildPath, pathToString } from "./path.js";
+import { buildPath, pathToString } from "@bufbuild/protobuf/reflect";
 import {
   AnyRulesSchema,
   DoubleRulesSchema,

@@ -25,6 +25,7 @@ import {
   isReflectList,
   isReflectMap,
   isReflectMessage,
+  type Path,
   type ReflectMessageGet,
 } from "@bufbuild/protobuf/reflect";
 import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
@@ -47,7 +48,6 @@ import {
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError, RuntimeError } from "./error.js";
 import type { Eval } from "./eval.js";
-import type { Path } from "./path.js";
 import type { Cursor } from "./cursor.js";
 import { getRuleScalarType } from "./rules.js";
 import {
