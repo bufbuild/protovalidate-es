@@ -18,6 +18,7 @@ import type {
   ReflectMessage,
   ReflectMessageGet,
   ScalarValue,
+  PathBuilder,
 } from "@bufbuild/protobuf/reflect";
 import type { DescEnum, DescField, DescOneof } from "@bufbuild/protobuf";
 import type { Any } from "@bufbuild/protobuf/wkt";
@@ -30,7 +31,6 @@ import {
 } from "./gen/buf/validate/validate_pb.js";
 import type { Cursor } from "./cursor.js";
 import type { Condition } from "./condition.js";
-import type { PathBuilder } from "./path.js";
 
 /**
  * Evaluate rules for a value.

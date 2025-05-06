@@ -33,14 +33,15 @@ import {
   FieldRulesSchema,
   AnyRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
-import type {
-  ReflectList,
-  ReflectMap,
-  ReflectMessage,
-  ReflectMessageGet,
-  ScalarValue,
+import {
+  type ReflectList,
+  type ReflectMap,
+  type ReflectMessage,
+  type ReflectMessageGet,
+  type ScalarValue,
+  buildPath,
+  type PathBuilder,
 } from "@bufbuild/protobuf/reflect";
-import { buildPath, type PathBuilder } from "./path.js";
 import {
   type Eval,
   EvalAnyRules,

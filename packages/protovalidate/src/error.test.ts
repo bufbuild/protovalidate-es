@@ -14,6 +14,7 @@
 
 import * as assert from "node:assert/strict";
 import { suite, test } from "node:test";
+import { buildPath, type Path, parsePath } from "@bufbuild/protobuf/reflect";
 import {
   CompilationError,
   pathFromViolationProto,
@@ -23,7 +24,6 @@ import {
   violationsToProto,
   violationToProto,
 } from "./error.js";
-import { buildPath, parsePath, type Path } from "./path.js";
 import {
   FieldRulesSchema,
   type FieldPath,
@@ -32,9 +32,9 @@ import {
   ViolationsSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { isFieldSet, isMessage } from "@bufbuild/protobuf";
-import { assertPathsEqual, getTestDataForPaths } from "./path.testdata.js";
 import { compileMessage } from "@bufbuild/protocompile";
 import { FieldDescriptorProto_Type } from "@bufbuild/protobuf/wkt";
+import { getTestDataForPaths } from "./error.testdata.js";
 
 void suite("Violation", () => {
   void test("constructor", () => {
@@ -143,7 +143,7 @@ void suite("violationToProto", () => {
     const violation = new Violation(
       "failure-message",
       "rule-id",
-      buildPath(descMessage).field(descMessage.field.m).mapKey(123).toPath(),
+      buildPath(descMessage).field(descMessage.field.m).map(123).toPath(),
       [],
       false,
     );
@@ -174,19 +174,19 @@ void suite("violationToProto", () => {
 });
 
 void suite("pathFromViolationProto", () => {
-  function toProto(path: Path): FieldPath | undefined {
-    return violationsToProto([new Violation("message", "id", path, [], false)])
-      .violations[0].field;
+  function toProto(path: Path): FieldPath {
+    const proto = violationsToProto([
+      new Violation("message", "id", path, [], false),
+    ]).violations[0].field;
+    assert.ok(proto !== undefined);
+    return proto;
   }
-  const { cases, registry } = getTestDataForPaths();
-  for (const { string, golden, schema } of cases) {
-    const proto = toProto(golden);
-    if (proto !== undefined) {
-      void test(string, () => {
-        const path = pathFromViolationProto(schema, proto, registry);
-        assertPathsEqual(path, golden);
-      });
-    }
+  for (const { string, golden, schema, registry } of getTestDataForPaths()) {
+    void test(string, () => {
+      const proto = toProto(golden);
+      const path = pathFromViolationProto(schema, proto, registry);
+      assert.deepStrictEqual(path, golden);
+    });
   }
 });
 
