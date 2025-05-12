@@ -17,6 +17,6 @@
   "sideEffects": false,
   "devDependencies": {
     "@bufbuild/protobuf": "^2.4.0",
-    "@bufbuild/protovalidate": "^0.1.0"
+    "@bufbuild/protovalidate": "^0.1.1"
   }
 }
