@@ -16,7 +16,7 @@ import * as assert from "node:assert";
 import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
 import { create } from "@bufbuild/protobuf";
-import { compileMessage } from "@bufbuild/protocompile";
+import { compileFile, compileMessage } from "@bufbuild/protocompile";
 import { createValidator, type Validator } from "./validator.js";
 import { ValidationError } from "./error.js";
 
@@ -133,6 +133,33 @@ void suite("Validator", () => {
       validator.validate(descMessage, create(descMessage));
       assert.equal(gotPattern, "^x$");
       assert.equal(gotAgainst, "x");
+    });
+    void test("issues #20", () => {
+      const descFile = compileFile(
+        `
+        syntax = "proto3";
+        import "buf/validate/validate.proto";
+        message Person {
+          string name = 1 [(buf.validate.field).required = true];
+          Address address = 2 [(buf.validate.field).required = true];
+        }
+        message Address {
+          string city = 2 [(buf.validate.field).required = true];
+        }
+      `,
+        bufCompileOptions,
+      );
+      const personSchema = descFile.messages[0];
+      const v = createValidator();
+      v.validate(
+        personSchema,
+        create(personSchema, {
+          name: "John Doe",
+          address: {
+            city: "Anytown",
+          },
+        }),
+      );
     });
   });
 });
