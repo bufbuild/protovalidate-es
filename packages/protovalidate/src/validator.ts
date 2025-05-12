@@ -84,6 +84,7 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     },
     for(schema) {
       registry.add(schema);
+      // TODO add all types referenced in the schema, not nested types defined in the schema
       for (const type of nestedTypes(schema)) {
         registry.add(type);
       }
