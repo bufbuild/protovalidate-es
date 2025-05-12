@@ -18,7 +18,7 @@ import {
   type MessageShape,
   type Registry,
 } from "@bufbuild/protobuf";
-import { nestedTypes, reflect } from "@bufbuild/protobuf/reflect";
+import { reflect, usedTypes } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
 import { Planner } from "./planner.js";
 import { CelManager, type RegexMatcher } from "./cel.js";
@@ -84,8 +84,7 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     },
     for(schema) {
       registry.add(schema);
-      // TODO add all types referenced in the schema, not nested types defined in the schema
-      for (const type of nestedTypes(schema)) {
+      for (const type of usedTypes(schema)) {
         registry.add(type);
       }
       const plan = planner.plan(schema);
