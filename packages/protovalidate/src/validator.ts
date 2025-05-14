@@ -28,8 +28,24 @@ import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
  * Options for creating a validator.
  */
 export type ValidatorOptions = {
+  /**
+   * To validate messages with user-defined predefined rules, pass the extensions
+   * to the validator via the registry.
+   *
+   * By default, the validator is unaware of any predefined rules, and will not
+   * validate them.
+   *
+   * The registry is also passed to the CEL environment, where it may be used to
+   * unpack google.protobuf.Any messages.
+   */
   registry?: Registry;
+
+  /**
+   * With this option enabled, validation fails on the first rule violation
+   * encountered. By default, all violations are accumulated.
+   */
   failFast?: boolean;
+
   /**
    * RE2 compliant regex matcher to use.
    *
@@ -37,10 +53,19 @@ export type ValidatorOptions = {
    * regex engine to support the unsupported features of RE2.
    *
    * Know limitations of default RE (ECMAScript) matcher:
-   *  * Cannot change flags mid sequence e.g. 'John(?i)Doe'.
+   *  * Cannot change flags mid-sequence e.g. 'John(?i)Doe'.
    *  * Doesn't support the 'U' flag.
    */
   regexMatch?: RegexMatcher;
+
+  /**
+   * With this option enabled, proto2 fields with the `required` label, and fields
+   * with the edition feature `field_presence=LEGACY_REQUIRED` are validated to
+   * be set.
+   *
+   * By default, legacy required field are not validated.
+   */
+  legacyRequired?: boolean;
 };
 
 /**
@@ -77,7 +102,7 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
   const celMan = new CelManager(registry, opt?.regexMatch);
-  const planner = new Planner(celMan);
+  const planner = new Planner(celMan, opt?.legacyRequired ?? false);
   return {
     validate(schema, message) {
       this.for(schema)(message);
