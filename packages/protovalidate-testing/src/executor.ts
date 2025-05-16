@@ -39,7 +39,6 @@ if (!request.fdset) {
   throw new Error(`Empty request field "fdset"`);
 }
 const registry = createFileRegistry(request.fdset);
-const validator = createValidator({ registry });
 
 for (const [name, any] of Object.entries(request.cases)) {
   let r: TestResult["result"];
@@ -48,7 +47,7 @@ for (const [name, any] of Object.entries(request.cases)) {
     if (!unpacked) {
       throw new Error(`Unable to unpack Any with type_url "${any.typeUrl}"`);
     }
-    validator.validate(unpacked.schema, unpacked.message);
+    createValidator({ registry }).validate(unpacked.schema, unpacked.message);
     r = { case: "success", value: true };
   } catch (e) {
     if (e instanceof ValidationError) {
