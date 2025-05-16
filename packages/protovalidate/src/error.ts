@@ -44,8 +44,9 @@ export class CompilationError extends Error {
 }
 
 /**
- * A RuntimeError is returned if a CEL expression errors or returns an
- * unexpected value.
+ * A RuntimeError is raised if a CEL expression errors or returns an
+ * unexpected value, or if the schema and message provided to the
+ * validator mismatch.
  */
 export class RuntimeError extends Error {
   override name = "RuntimeError";
