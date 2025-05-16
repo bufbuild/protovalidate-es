@@ -23,6 +23,7 @@ import {
   isMessage,
   ScalarType,
 } from "@bufbuild/protobuf";
+import { FeatureSet_FieldPresence } from "@bufbuild/protobuf/wkt";
 import {
   type FieldRules,
   type MessageRules,
@@ -53,6 +54,7 @@ import {
   EvalNoop,
   EvalOneofRequired,
   EvalField,
+  EvalFieldLegacyRequired,
 } from "./eval.js";
 import {
   getEnumRules,
@@ -80,7 +82,10 @@ import {
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
 
-  constructor(private readonly celMan: CelManager) {}
+  constructor(
+    private readonly celMan: CelManager,
+    private readonly legacyRequired: boolean,
+  ) {}
 
   plan(message: DescMessage): Eval<ReflectMessage> {
     const existing = this.messageCache.get(message);
@@ -116,6 +121,12 @@ export class Planner {
       const fieldRules = getOption(field, ext_field);
       if (fieldRules.required && fieldRules.ignore !== Ignore.ALWAYS) {
         evals.add(new EvalFieldRequired(field));
+      }
+      if (
+        this.legacyRequired &&
+        field.presence == FeatureSet_FieldPresence.LEGACY_REQUIRED
+      ) {
+        evals.add(new EvalFieldLegacyRequired(field));
       }
       const baseRulePath = buildPath(FieldRulesSchema);
       switch (field.fieldKind) {

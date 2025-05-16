@@ -175,6 +175,20 @@ export class EvalFieldRequired implements Eval<ReflectMessage> {
   }
 }
 
+export class EvalFieldLegacyRequired implements Eval<ReflectMessage> {
+  constructor(private readonly field: DescField) {}
+  eval(val: ReflectMessage, cursor: Cursor): void {
+    if (!val.isSet(this.field)) {
+      cursor
+        .field(this.field)
+        .violate("value is required", "legacy_required", []);
+    }
+  }
+  prune(): boolean {
+    return false;
+  }
+}
+
 export class EvalOneofRequired implements Eval<ReflectMessage> {
   constructor(private readonly oneof: DescOneof) {}
 
