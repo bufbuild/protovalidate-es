@@ -15,10 +15,11 @@
 import * as assert from "node:assert";
 import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
-import { create } from "@bufbuild/protobuf";
+import { create, type DescMessage } from "@bufbuild/protobuf";
 import { compileFile, compileMessage } from "@bufbuild/protocompile";
 import { createValidator, type Validator } from "./validator.js";
-import { ValidationError } from "./error.js";
+import { RuntimeError, ValidationError } from "./error.js";
+import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
 
 void suite("createValidator()", () => {
   void test("create()", () => {
@@ -209,10 +210,10 @@ void suite("Validator", () => {
         }`,
       bufCompileOptions,
     );
-    const validate = createValidator().for(descMessage);
+    const validator = createValidator();
     let error: ValidationError | undefined = undefined;
     try {
-      validate(create(descMessage));
+      validator.validate(descMessage, create(descMessage));
     } catch (e) {
       error = e instanceof ValidationError ? e : undefined;
     }
@@ -224,5 +225,22 @@ void suite("Validator", () => {
     assert.equal(error.violations.length, 2);
     assert.equal(error.violations[0].toString(), "test-message1 [test-id1]");
     assert.equal(error.violations[1].toString(), "test-message2 [test-id2]");
+  });
+  void test("throws RuntimeError if schema and message mismatch", () => {
+    const validator = createValidator();
+    let error: RuntimeError | undefined = undefined;
+    try {
+      validator.validate(
+        TimestampSchema as DescMessage,
+        create(DurationSchema),
+      );
+    } catch (e) {
+      error = e instanceof RuntimeError ? e : undefined;
+    }
+    assert.ok(error, "expected RuntimeError");
+    assert.equal(
+      error.message,
+      "Cannot validate message google.protobuf.Duration with schema google.protobuf.Timestamp",
+    );
   });
 });

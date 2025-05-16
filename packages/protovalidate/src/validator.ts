@@ -14,12 +14,14 @@
 
 import {
   createMutableRegistry,
+  isMessage,
   type DescMessage,
   type MessageShape,
   type Registry,
 } from "@bufbuild/protobuf";
 import { reflect, usedTypes } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
+import { RuntimeError } from "./error.js";
 import { Planner } from "./planner.js";
 import { CelManager, type RegexMatcher } from "./cel.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
@@ -108,12 +110,19 @@ export function createValidator(opt?: ValidatorOptions): Validator {
       this.for(schema)(message);
     },
     for(schema) {
-      registry.add(schema);
-      for (const type of usedTypes(schema)) {
-        registry.add(type);
+      if (!registry.get(schema.typeName)) {
+        registry.add(schema);
+        for (const type of usedTypes(schema)) {
+          registry.add(type);
+        }
       }
       const plan = planner.plan(schema);
       return function boundValidationFn(message) {
+        if (!isMessage(message, schema)) {
+          throw new RuntimeError(
+            `Cannot validate message ${message.$typeName} with schema ${schema.typeName}`,
+          );
+        }
         const msg = reflect(schema, message);
         const cursor = Cursor.create(schema, failFast);
         celMan.updateCelNow();
