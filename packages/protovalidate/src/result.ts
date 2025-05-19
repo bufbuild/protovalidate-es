@@ -21,6 +21,11 @@ import type {
 
 /**
  * The result of validating a Protobuf message with protovalidate.
+ *
+ * It is one of:
+ * - valid: The message passed all validation rules.
+ * - invalid: The message violated one or more validation rules.
+ * - error: An error occurred while compiling or evaluating a rule.
  */
 export type ValidationResult =
   | {
