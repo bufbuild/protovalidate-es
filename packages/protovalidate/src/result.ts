@@ -12,6 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./validator.js";
-export * from "./result.js";
-export * from "./error.js";
+import type {
+  CompilationError,
+  RuntimeError,
+  ValidationError,
+  Violation,
+} from "./error.js";
+
+/**
+ * The result of validating a Protobuf message with protovalidate.
+ */
+export type ValidationResult =
+  | {
+      kind: "valid";
+      error: undefined;
+      violations: undefined;
+    }
+  | {
+      kind: "invalid";
+      error: ValidationError;
+      violations: Violation[];
+    }
+  | {
+      kind: "error";
+      error: CompilationError | RuntimeError;
+      violations: undefined;
+    };

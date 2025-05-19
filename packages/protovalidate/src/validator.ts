@@ -18,13 +18,16 @@ import {
   type DescMessage,
   type MessageShape,
   type Registry,
+  type MutableRegistry,
+  type Message,
 } from "@bufbuild/protobuf";
 import { reflect, usedTypes } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
-import { RuntimeError } from "./error.js";
+import { CompilationError, RuntimeError, ValidationError } from "./error.js";
 import { Planner } from "./planner.js";
 import { CelManager, type RegexMatcher } from "./cel.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
+import type { ValidationResult } from "./result.js";
 
 /**
  * Options for creating a validator.
@@ -75,25 +78,21 @@ export type ValidatorOptions = {
  */
 export type Validator = {
   /**
-   * Checks that message satisfies its rules. Rules are defined within the
-   * Protobuf file as options from the buf.validate package.
+   * Validate the given message satisfies its rules, and return the result.
+   *
+   * Rules are defined within the Protobuf file as options from the
+   * buf.validate package.
+   *
+   * The result is one of:
+   * - valid: The message passed all validation rules.
+   * - invalid: The message violated one or more validation rules.
+   * - error: An error occurred while compiling or evaluating a rule.
    */
   validate<Desc extends DescMessage>(
     schema: Desc,
     message: MessageShape<Desc>,
-  ): void;
-  /**
-   * Returns a validation function for the given message type.
-   */
-  for<Desc extends DescMessage>(
-    schema: Desc,
-  ): BoundValidationFn<MessageShape<Desc>>;
+  ): ValidationResult;
 };
-
-/**
- * A validator for one specific message type.
- */
-export type BoundValidationFn<T> = (message: T) => void;
 
 /**
  * Create a validator.
@@ -107,28 +106,58 @@ export function createValidator(opt?: ValidatorOptions): Validator {
   const planner = new Planner(celMan, opt?.legacyRequired ?? false);
   return {
     validate(schema, message) {
-      this.for(schema)(message);
-    },
-    for(schema) {
-      if (!registry.get(schema.typeName)) {
-        registry.add(schema);
-        for (const type of usedTypes(schema)) {
-          registry.add(type);
+      try {
+        validateUnsafe(registry, celMan, planner, schema, message, failFast);
+      } catch (e) {
+        if (e instanceof ValidationError) {
+          return {
+            kind: "invalid",
+            error: e,
+            violations: e.violations,
+          };
         }
+        if (e instanceof CompilationError || e instanceof RuntimeError) {
+          return {
+            kind: "error",
+            error: e,
+          };
+        }
+        return {
+          kind: "error",
+          error: new RuntimeError("unexpected error: " + e, { cause: e }),
+        };
       }
-      const plan = planner.plan(schema);
-      return function boundValidationFn(message) {
-        if (!isMessage(message, schema)) {
-          throw new RuntimeError(
-            `Cannot validate message ${message.$typeName} with schema ${schema.typeName}`,
-          );
-        }
-        const msg = reflect(schema, message);
-        const cursor = Cursor.create(schema, failFast);
-        celMan.updateCelNow();
-        plan.eval(msg, cursor);
-        cursor.throwIfViolated();
+      return {
+        kind: "valid",
       };
     },
   };
+}
+
+function validateUnsafe(
+  registry: MutableRegistry,
+  celMan: CelManager,
+  planner: Planner,
+  schema: DescMessage,
+  message: Message,
+  failFast: boolean,
+) {
+  const messageTypeName = message.$typeName;
+  if (!isMessage(message, schema)) {
+    throw new RuntimeError(
+      `Cannot validate message ${messageTypeName} with schema ${schema.typeName}`,
+    );
+  }
+  if (!registry.get(schema.typeName)) {
+    registry.add(schema);
+    for (const type of usedTypes(schema)) {
+      registry.add(type);
+    }
+  }
+  const plan = planner.plan(schema);
+  const msg = reflect(schema, message);
+  const cursor = Cursor.create(schema, failFast);
+  celMan.updateCelNow();
+  plan.eval(msg, cursor);
+  cursor.throwIfViolated();
 }

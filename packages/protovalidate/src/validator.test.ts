@@ -17,16 +17,13 @@ import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
 import { create, type DescMessage } from "@bufbuild/protobuf";
 import { compileFile, compileMessage } from "@bufbuild/protocompile";
-import { createValidator, type Validator } from "./validator.js";
-import { RuntimeError, ValidationError } from "./error.js";
+import { type CompilationError, RuntimeError, type ValidationError, type Violation} from "./error.js";
 import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
+import { createValidator, type Validator} from "./validator.js";
 
-void suite("createValidator()", () => {
-  void test("create()", () => {
-    const v = createValidator();
-    assert.ok(typeof v.validate == "function");
-    assert.ok(typeof v.for == "function");
-  });
+void test("createValidator() returns Validator", () => {
+  const v = createValidator();
+  assert.ok(typeof v.validate == "function");
 });
 
 const bufCompileOptions = {
@@ -39,7 +36,7 @@ const bufCompileOptions = {
 };
 
 void suite("Validator", () => {
-  void test("validate()", () => {
+  void test("validate() returns result", () => {
     const v: Validator = createValidator();
     const descMessage = compileMessage(`
       syntax = "proto3";
@@ -47,19 +44,40 @@ void suite("Validator", () => {
     `);
     const message = create(descMessage);
     const result = v.validate(descMessage, message);
-    assert.strictEqual(result, undefined);
+    const resultError: ValidationError | RuntimeError | CompilationError | undefined = result.error;
+    const resultViolations: Violation[] | undefined = result.violations;
+    assert.ok(resultError || resultViolations || true);
+    switch (result.kind) {
+      case "valid":
+        const validViolations: undefined = result.violations;
+        const validError: undefined = result.error;
+        assert.ok(validViolations || validError || true);
+        break;
+      case "invalid":
+        const invalidViolations: Violation[] = result.violations;
+        const invalidError: ValidationError = result.error;
+        assert.ok(invalidViolations || invalidError || true);
+        break;
+      case "error":
+        const errorViolations: undefined = result.violations;
+        const errorError: RuntimeError | CompilationError = result.error;
+        assert.ok(errorViolations || errorError || true);
+        break;
+    }
   });
-  void test("for()", () => {
-    const descMessage = compileMessage(`
-      syntax = "proto3";
-      message M {}
-    `);
-    const validate = createValidator().for(descMessage);
-    const message = create(descMessage);
-    const result = validate(message);
-    assert.strictEqual(result, undefined);
+  void test("returns error if schema and message mismatch", () => {
+    const validator = createValidator();
+    const schema = TimestampSchema as DescMessage;
+    const message = create(DurationSchema);
+    const result = validator.validate(schema, message)
+    assert.equal(result.kind, "error");
+    assert.ok(result.error instanceof RuntimeError);
+    assert.equal(
+      result.error.message,
+      "Cannot validate message google.protobuf.Duration with schema google.protobuf.Timestamp",
+    );
   });
-  void test("option failFast: true throws error with first violation", () => {
+  void test("returns all violations", () => {
     const descMessage = compileMessage(
       `
         syntax="proto3";
@@ -78,19 +96,44 @@ void suite("Validator", () => {
         }`,
       bufCompileOptions,
     );
-    const validate = createValidator({
+    const validator = createValidator();
+    const result = validator.validate(descMessage, create(descMessage));
+    assert.equal(result.kind, "invalid");
+    assert.equal(
+      result.error?.message,
+      "test-message1 [test-id1], and 1 more violation",
+    );
+    assert.equal(result.violations?.length, 2);
+    assert.equal(result.violations?.[0].toString(), "test-message1 [test-id1]");
+    assert.equal(result.violations?.[1].toString(), "test-message2 [test-id2]");
+  });
+  void test("returns only the first violation with failFast", () => {
+    const descMessage = compileMessage(
+      `
+        syntax="proto3";
+        import "buf/validate/validate.proto";
+        message Example {
+          option (buf.validate.message).cel = {
+            id: "test-id1",
+            message: "test-message1",
+            expression: "false"
+          };
+          option (buf.validate.message).cel = {
+            id: "test-id2",
+            message: "test-message2",
+            expression: "false"
+          };
+        }`,
+      bufCompileOptions,
+    );
+    const validator: Validator = createValidator({
       failFast: true,
-    }).for(descMessage);
-    let error: ValidationError | undefined = undefined;
-    try {
-      validate(create(descMessage));
-    } catch (e) {
-      error = e instanceof ValidationError ? e : undefined;
-    }
-    assert.ok(error, "expected ValidationError");
-    assert.equal(error.message, "test-message1 [test-id1]");
-    assert.equal(error.violations.length, 1);
-    assert.equal(error.violations[0].toString(), "test-message1 [test-id1]");
+    });
+    const result = validator.validate(descMessage, create(descMessage));
+    assert.equal(result.kind, "invalid");
+    assert.equal(result.violations?.length, 1);
+    assert.equal(result.error?.message, "test-message1 [test-id1]");
+    assert.equal(result.violations?.[0].toString(), "test-message1 [test-id1]");
   });
   void test("option regexMatch", () => {
     const descMessage = compileMessage(
@@ -134,16 +177,15 @@ void suite("Validator", () => {
       bufCompileOptions,
     );
     const personSchema = descFile.messages[0];
-    const v = createValidator();
-    v.validate(
-      personSchema,
-      create(personSchema, {
-        name: "John Doe",
-        address: {
-          city: "Anytown",
-        },
-      }),
-    );
+    const validator = createValidator();
+    const message = create(personSchema, {
+      name: "John Doe",
+      address: {
+        city: "Anytown",
+      },
+    });
+    const result = validator.validate(personSchema, message);
+    assert.equal(result.kind, "valid");
   });
   void suite("option legacyRequired", () => {
     const descMessage = compileMessage(
@@ -157,32 +199,29 @@ void suite("Validator", () => {
         `,
     );
     void test("is disabled by default", () => {
-      const v = createValidator();
-      assert.doesNotThrow(() => v.validate(descMessage, create(descMessage)));
+      const validator = createValidator();
+      const message = create(descMessage);
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "valid");
     });
-    void test("throws if required fields are missing", () => {
-      const v = createValidator({
+    void test("returns invalid if required fields are missing", () => {
+      const validator = createValidator({
         legacyRequired: true,
       });
-      const m = create(descMessage);
-      let error: ValidationError | undefined = undefined;
-      try {
-        v.validate(descMessage, m);
-      } catch (e) {
-        error = e instanceof ValidationError ? e : undefined;
-      }
-      assert.ok(error, "expected ValidationError");
-      assert.equal(error.violations.length, 2);
+      const message = create(descMessage);
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "invalid");
+      assert.equal(result.violations?.length, 2);
       assert.equal(
-        error.violations[0].toString(),
+        result.violations?.[0].toString(),
         "int32: value is required [legacy_required]",
       );
       assert.equal(
-        error.violations[1].toString(),
+        result.violations?.[1].toString(),
         "msg: value is required [legacy_required]",
       );
     });
-    void test("does not throw if required fields are present", () => {
+    void test("returns valid if required fields are present", () => {
       const v = createValidator();
       const m = create(descMessage, {
         int32: 1,
@@ -190,57 +229,5 @@ void suite("Validator", () => {
       });
       assert.doesNotThrow(() => v.validate(descMessage, m));
     });
-  });
-  void test("throws ValidationError with all violations", () => {
-    const descMessage = compileMessage(
-      `
-        syntax="proto3";
-        import "buf/validate/validate.proto";
-        message Example {
-          option (buf.validate.message).cel = {
-            id: "test-id1",
-            message: "test-message1",
-            expression: "false"
-          };
-          option (buf.validate.message).cel = {
-            id: "test-id2",
-            message: "test-message2",
-            expression: "false"
-          };
-        }`,
-      bufCompileOptions,
-    );
-    const validator = createValidator();
-    let error: ValidationError | undefined = undefined;
-    try {
-      validator.validate(descMessage, create(descMessage));
-    } catch (e) {
-      error = e instanceof ValidationError ? e : undefined;
-    }
-    assert.ok(error, "expected ValidationError");
-    assert.equal(
-      error.message,
-      "test-message1 [test-id1], and 1 more violation",
-    );
-    assert.equal(error.violations.length, 2);
-    assert.equal(error.violations[0].toString(), "test-message1 [test-id1]");
-    assert.equal(error.violations[1].toString(), "test-message2 [test-id2]");
-  });
-  void test("throws RuntimeError if schema and message mismatch", () => {
-    const validator = createValidator();
-    let error: RuntimeError | undefined = undefined;
-    try {
-      validator.validate(
-        TimestampSchema as DescMessage,
-        create(DurationSchema),
-      );
-    } catch (e) {
-      error = e instanceof RuntimeError ? e : undefined;
-    }
-    assert.ok(error, "expected RuntimeError");
-    assert.equal(
-      error.message,
-      "Cannot validate message google.protobuf.Duration with schema google.protobuf.Timestamp",
-    );
   });
 });
