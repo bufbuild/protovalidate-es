@@ -17,9 +17,14 @@ import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
 import { create, type DescMessage } from "@bufbuild/protobuf";
 import { compileFile, compileMessage } from "@bufbuild/protocompile";
-import { type CompilationError, RuntimeError, type ValidationError, type Violation} from "./error.js";
+import {
+  type CompilationError,
+  RuntimeError,
+  type ValidationError,
+  type Violation,
+} from "./error.js";
 import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
-import { createValidator, type Validator} from "./validator.js";
+import { createValidator, type Validator } from "./validator.js";
 
 void test("createValidator() returns Validator", () => {
   const v = createValidator();
@@ -44,7 +49,11 @@ void suite("Validator", () => {
     `);
     const message = create(descMessage);
     const result = v.validate(descMessage, message);
-    const resultError: ValidationError | RuntimeError | CompilationError | undefined = result.error;
+    const resultError:
+      | ValidationError
+      | RuntimeError
+      | CompilationError
+      | undefined = result.error;
     const resultViolations: Violation[] | undefined = result.violations;
     assert.ok(resultError || resultViolations || true);
     switch (result.kind) {
@@ -69,7 +78,7 @@ void suite("Validator", () => {
     const validator = createValidator();
     const schema = TimestampSchema as DescMessage;
     const message = create(DurationSchema);
-    const result = validator.validate(schema, message)
+    const result = validator.validate(schema, message);
     assert.equal(result.kind, "error");
     assert.ok(result.error instanceof RuntimeError);
     assert.equal(
