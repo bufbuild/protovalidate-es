@@ -44,11 +44,9 @@ import { MoneyTransferSchema } from "./gen/banking_pb";
 
 const transfer = create(MoneyTransferSchema);
 
-const v = createValidator();
-
-try {
-  v.validate(MoneyTransferSchema, transfer);
-} catch (e) {
+const validator = createValidator();
+const result = validator.validate(MoneyTransferSchema, transfer);
+if (result.kind !== "valid") {
   // Handle failure.
 }
 ```

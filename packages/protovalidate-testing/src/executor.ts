@@ -22,7 +22,7 @@ import {
 import {
   TestConformanceRequestSchema,
   TestConformanceResponseSchema,
-  type TestResult,
+  TestResultSchema,
 } from "./gen/buf/validate/conformance/harness/harness_pb.js";
 import { type Any, anyUnpack } from "@bufbuild/protobuf/wkt";
 import * as process from "node:process";
@@ -30,7 +30,6 @@ import {
   createValidator,
   CompilationError,
   RuntimeError,
-  ValidationError,
   violationsToProto,
 } from "@bufbuild/protovalidate";
 
@@ -40,40 +39,45 @@ if (!request.fdset) {
 }
 const registry = createFileRegistry(request.fdset);
 const validator = createValidator({ registry });
-
+const response = create(TestConformanceResponseSchema);
 for (const [name, any] of Object.entries(request.cases)) {
-  let r: TestResult["result"];
-  try {
-    const unpacked = unpackTest(any, registry);
-    if (!unpacked) {
-      throw new Error(`Unable to unpack Any with type_url "${any.typeUrl}"`);
+  const testResult = create(TestResultSchema);
+  const unpacked = unpackTest(any, registry);
+  if (unpacked) {
+    const result = validator.validate(unpacked.schema, unpacked.message);
+    switch (result.kind) {
+      case "valid":
+        testResult.result = { case: "success", value: true };
+        break;
+      case "invalid":
+        testResult.result = {
+          case: "validationError",
+          value: violationsToProto(result.violations),
+        };
+        break;
+      case "error":
+        if (result.error instanceof CompilationError) {
+          testResult.result = {
+            case: "compilationError",
+            value: String(result.error),
+          };
+        } else if (result.error instanceof RuntimeError) {
+          testResult.result = {
+            case: "runtimeError",
+            value: String(result.error),
+          };
+        }
+        break;
     }
-    validator.validate(unpacked.schema, unpacked.message);
-    r = { case: "success", value: true };
-  } catch (e) {
-    if (e instanceof ValidationError) {
-      r = {
-        case: "validationError",
-        value: violationsToProto(e.violations),
-      };
-    } else if (e instanceof CompilationError) {
-      r = { case: "compilationError", value: String(e) };
-    } else if (e instanceof RuntimeError) {
-      r = { case: "runtimeError", value: String(e) };
-    } else {
-      r = { case: "unexpectedError", value: String(e) };
-    }
+  } else {
+    testResult.result = {
+      case: "unexpectedError",
+      value: `Unable to unpack Any with type_url "${any.typeUrl}"`,
+    };
   }
-  // Write a TestConformanceResponse with the test results just for this case.
-  const response = create(TestConformanceResponseSchema, {
-    results: {
-      [name]: {
-        result: r,
-      },
-    },
-  });
-  process.stdout.write(toBinary(TestConformanceResponseSchema, response));
+  response.results[name] = testResult;
 }
+process.stdout.write(toBinary(TestConformanceResponseSchema, response));
 
 function unpackTest(any: Any, registry: Registry) {
   const message = anyUnpack(any, registry);
