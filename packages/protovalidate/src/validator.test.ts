@@ -42,13 +42,13 @@ const bufCompileOptions = {
 
 void suite("Validator", () => {
   void test("validate() returns result", () => {
-    const v: Validator = createValidator();
+    const validator: Validator = createValidator();
     const descMessage = compileMessage(`
       syntax = "proto3";
       message M {}
     `);
     const message = create(descMessage);
-    const result = v.validate(descMessage, message);
+    const result = validator.validate(descMessage, message);
     const resultError:
       | ValidationError
       | RuntimeError
