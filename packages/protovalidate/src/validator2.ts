@@ -120,7 +120,7 @@ export type Validator = {
     Valid extends Shape & MessageValidType<Desc>,
   >(schema: Desc, message: Shape): asserts message is Valid;
 
-  // TODO throwIfInvalid() ?  / throwIfNotValid() ?
+  // TODO document difference to assertValid - no type assertions
   throwIfNotValid<Desc extends DescMessage>(
     schema: Desc,
     message: MessageShape<Desc>,
