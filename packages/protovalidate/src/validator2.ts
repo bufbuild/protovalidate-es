@@ -74,19 +74,6 @@ export type ValidatorOptions = {
   legacyRequired?: boolean;
 };
 
-// TODO the type assertion function forces users to annotation every validator if they call assertValid - should we have an alternative version without?
-// TODO better to have a method throwIfInvalid ?
-export type ValidatorWithoutTypeGuard = {
-  validate<Desc extends DescMessage, Shape extends MessageShape<Desc>>(
-    schema: Desc,
-    message: Shape,
-  ): void;
-  isValid<Desc extends DescMessage, Shape extends MessageShape<Desc>>(
-    schema: Desc,
-    message: Shape,
-  ): boolean;
-};
-
 /**
  * A validator.
  */
