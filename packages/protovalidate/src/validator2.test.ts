@@ -24,12 +24,7 @@ import {
   type Violation,
 } from "./error.js";
 import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
-import {
-  assertValid,
-  createValidator,
-  isValid,
-  type Validator,
-} from "./validator.js";
+import { createValidator, type Validator } from "./validator2.js";
 import { type VTypes_OtherValid, VTypesSchema } from "./valid_types_pb.js";
 
 void test("createValidator() returns Validator", () => {
@@ -46,111 +41,15 @@ const bufCompileOptions = {
   },
 };
 
-void suite("isValid()", () => {
-  const validSchema = compileMessage(`
-    syntax = "proto3";
-    message M {}
-  `);
-  const invalidSchema = compileMessage(
-    `
-    syntax="proto3";
-    import "buf/validate/validate.proto";
-    message Example {
-      option (buf.validate.message).cel = {
-        id: "test-id1",
-        message: "test-message1",
-        expression: "false"
-      };
-      }`,
-    bufCompileOptions,
-  );
-  const validMessage = create(validSchema);
-  const invalidMessage = create(invalidSchema);
-  void test("returns true for valid message", () => {
-    const validator = createValidator();
-    assert.strictEqual(isValid(validator, validSchema, validMessage), true);
-  });
-  void test("returns false for invalid message", () => {
-    const validator = createValidator();
-    assert.strictEqual(
-      isValid(validator, invalidSchema, invalidMessage),
-      false,
-    );
-  });
-  void test("narrows the type", () => {
-    const validator = createValidator();
-    const message = create(VTypesSchema);
-
-    // @ts-expect-error - property is optional in the regular type
-    let m: VTypes_OtherValid = message.requiredMsg;
-
-    if (isValid(validator, VTypesSchema, message)) {
-      // property is non-optional in the Valid type
-      m = message.requiredMsg;
-      assert.ok(m || true);
-    }
-  });
-});
-
-void suite("assertValid()", () => {
-  const validSchema = compileMessage(`
-    syntax = "proto3";
-    message M {}
-  `);
-  const invalidSchema = compileMessage(
-    `
-    syntax="proto3";
-    import "buf/validate/validate.proto";
-    message Example {
-      option (buf.validate.message).cel = {
-        id: "test-id1",
-        message: "test-message1",
-        expression: "false"
-      };
-      }`,
-    bufCompileOptions,
-  );
-  const validMessage = create(validSchema);
-  const invalidMessage = create(invalidSchema);
-  void test("does not throw for valid message", () => {
-    const validator = createValidator();
-    assert.doesNotThrow(() =>
-      assertValid(validator, validSchema, validMessage),
-    );
-  });
-  void test("throws for invalid message", () => {
-    const validator = createValidator();
-    assert.throws(() => assertValid(validator, invalidSchema, invalidMessage), {
-      name: "ValidationError",
-    });
-  });
-  void test("narrows the type", () => {
-    const validator = createValidator();
-    const message = create(VTypesSchema);
-
-    // @ts-expect-error - property is optional in the regular type
-    let m: VTypes_OtherValid = message.requiredMsg;
-
-    try {
-      assertValid(validator, VTypesSchema, message);
-      // property is non-optional in the Valid type
-      m = message.requiredMsg;
-    } catch (_) {
-      //
-    }
-    assert.ok(m || true);
-  });
-});
-
 void suite("Validator", () => {
   void test("validate() returns result", () => {
-    const validator: Validator = createValidator();
+    const v: Validator = createValidator();
     const descMessage = compileMessage(`
       syntax = "proto3";
       message M {}
     `);
     const message = create(descMessage);
-    const result = validator.validate(descMessage, message);
+    const result = v.validate(descMessage, message);
     const resultError:
       | ValidationError
       | RuntimeError
@@ -175,6 +74,160 @@ void suite("Validator", () => {
         assert.ok(errorViolations || errorError || true);
         break;
     }
+  });
+  void suite("isValid()", () => {
+    const validSchema = compileMessage(`
+    syntax = "proto3";
+    message M {}
+  `);
+    const invalidSchema = compileMessage(
+      `
+    syntax="proto3";
+    import "buf/validate/validate.proto";
+    message Example {
+      option (buf.validate.message).cel = {
+        id: "test-id1",
+        message: "test-message1",
+        expression: "false"
+      };
+      }`,
+      bufCompileOptions,
+    );
+    const validMessage = create(validSchema);
+    const invalidMessage = create(invalidSchema);
+    void test("returns true for valid message", () => {
+      const validator = createValidator();
+      assert.strictEqual(validator.isValid(validSchema, validMessage), true);
+    });
+    void test("returns false for invalid message", () => {
+      const validator = createValidator();
+      assert.strictEqual(
+        validator.isValid(invalidSchema, invalidMessage),
+        false,
+      );
+    });
+    void test("narrows the type", () => {
+      const validator = createValidator();
+      const message = create(VTypesSchema);
+
+      // @ts-expect-error - property is optional in the regular type
+      let m: VTypes_OtherValid = message.requiredMsg;
+
+      if (validator.isValid(VTypesSchema, message)) {
+        // property is non-optional in the Valid type
+        m = message.requiredMsg;
+        assert.ok(m || true);
+      }
+    });
+  });
+  void suite("assertValid()", () => {
+    const validSchema = compileMessage(`
+    syntax = "proto3";
+    message M {}
+  `);
+    const invalidSchema = compileMessage(
+      `
+    syntax="proto3";
+    import "buf/validate/validate.proto";
+    message Example {
+      option (buf.validate.message).cel = {
+        id: "test-id1",
+        message: "test-message1",
+        expression: "false"
+      };
+      }`,
+      bufCompileOptions,
+    );
+    const validMessage = create(validSchema);
+    const invalidMessage = create(invalidSchema);
+    void test("does not throw for valid message", () => {
+      const validator = createValidator();
+      assert.doesNotThrow(() =>
+        validator.assertValid(validSchema, validMessage),
+      );
+    });
+    void test("throws for invalid message", () => {
+      const validator = createValidator();
+      assert.throws(
+        () => validator.assertValid(invalidSchema, invalidMessage),
+        {
+          name: "ValidationError",
+        },
+      );
+    });
+    void test("validator type must be fully defined for assertion function", () => {
+      const validator = createValidator();
+      // @ts-expect-error - TS2775: Assertions require every name in the call target to be declared with an explicit type annotation.
+      validator.assertValid(validSchema, validMessage);
+    });
+    void test("narrows the type", () => {
+      const validator: Validator = createValidator();
+      const message = create(VTypesSchema);
+
+      // @ts-expect-error - property is optional in the regular type
+      let m: VTypes_OtherValid = message.requiredMsg;
+
+      try {
+        validator.assertValid(VTypesSchema, message);
+        // property is non-optional in the Valid type
+        m = message.requiredMsg;
+      } catch (_) {
+        //
+      }
+      assert.ok(m || true);
+    });
+  });
+  void suite("throwIfNotValid()", () => {
+    const validSchema = compileMessage(`
+    syntax = "proto3";
+    message M {}
+  `);
+    const invalidSchema = compileMessage(
+      `
+    syntax="proto3";
+    import "buf/validate/validate.proto";
+    message Example {
+      option (buf.validate.message).cel = {
+        id: "test-id1",
+        message: "test-message1",
+        expression: "false"
+      };
+      }`,
+      bufCompileOptions,
+    );
+    const validMessage = create(validSchema);
+    const invalidMessage = create(invalidSchema);
+    void test("does not throw for valid message", () => {
+      const validator = createValidator();
+      assert.doesNotThrow(() =>
+        validator.throwIfNotValid(validSchema, validMessage),
+      );
+    });
+    void test("throws for invalid message", () => {
+      const validator = createValidator();
+      assert.throws(
+        () => validator.throwIfNotValid(invalidSchema, invalidMessage),
+        {
+          name: "ValidationError",
+        },
+      );
+    });
+    void test("does not narrow the type", () => {
+      const validator = createValidator();
+      const message = create(VTypesSchema);
+
+      // @ts-expect-error - property is optional in the regular type
+      let m: VTypes_OtherValid = message.requiredMsg;
+
+      try {
+        validator.throwIfNotValid(VTypesSchema, message);
+        // @ts-expect-error - property is still optional
+        m = message.requiredMsg;
+      } catch (_) {
+        //
+      }
+      assert.ok(m || true);
+    });
   });
   void test("returns error if schema and message mismatch", () => {
     const validator = createValidator();

@@ -14,21 +14,21 @@
 
 import {
   createMutableRegistry,
-  isMessage,
   type DescMessage,
-  type MessageShape,
-  type Registry,
-  type MutableRegistry,
+  isMessage,
   type Message,
+  type MessageShape,
   type MessageValidType,
+  type MutableRegistry,
+  type Registry,
 } from "@bufbuild/protobuf";
 import { reflect, usedTypes } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
+import { CompilationError, RuntimeError, ValidationError } from "./error.js";
 import { Planner } from "./planner.js";
 import { CelManager, type RegexMatcher } from "./cel.js";
-import { CompilationError, RuntimeError, ValidationError } from "./error.js";
-import type { ValidationResult } from "./result.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
+import type { ValidationResult } from "./result.js";
 
 /**
  * Options for creating a validator.
@@ -74,6 +74,19 @@ export type ValidatorOptions = {
   legacyRequired?: boolean;
 };
 
+// TODO the type assertion function forces users to annotation every validator if they call assertValid - should we have an alternative version without?
+// TODO better to have a method throwIfInvalid ?
+export type ValidatorWithoutTypeGuard = {
+  validate<Desc extends DescMessage, Shape extends MessageShape<Desc>>(
+    schema: Desc,
+    message: Shape,
+  ): void;
+  isValid<Desc extends DescMessage, Shape extends MessageShape<Desc>>(
+    schema: Desc,
+    message: Shape,
+  ): boolean;
+};
+
 /**
  * A validator.
  */
@@ -92,39 +105,37 @@ export type Validator = {
   validate<Desc extends DescMessage>(
     schema: Desc,
     message: MessageShape<Desc>,
-    opt?: {
-      failFast?: boolean;
-    },
   ): ValidationResult;
+
+  /**
+   * Asserts that the given message satisfies its rules, and throws an error
+   * otherwise.
+   *
+   * The error thrown may be a ValidationError, CompilationError, or RuntimeError.
+   */
+  assertValid<
+    Desc extends DescMessage,
+    Shape extends MessageShape<Desc>,
+    // TODO safe to use intersection type?
+    Valid extends Shape & MessageValidType<Desc>,
+  >(schema: Desc, message: Shape): asserts message is Valid;
+
+  // TODO throwIfInvalid() ?  / throwIfNotValid() ?
+  throwIfNotValid<Desc extends DescMessage>(
+    schema: Desc,
+    message: MessageShape<Desc>,
+  ): void;
+
+  /**
+   * Returns true if the given message satisfies its rules.
+   */
+  isValid<
+    Desc extends DescMessage,
+    Shape extends MessageShape<Desc>,
+    // TODO safe to use intersection type?
+    Valid extends Shape & MessageValidType<Desc>,
+  >(schema: Desc, message: Shape): message is Valid;
 };
-
-// TODO document
-export function isValid<
-  Desc extends DescMessage,
-  Shape extends MessageShape<Desc>,
-  // TODO safe to use intersection type?
-  Valid extends Shape & MessageValidType<Desc>,
->(validator: Validator, schema: Desc, message: Shape): message is Valid {
-  return validator.validate(schema, message).kind == "valid";
-}
-
-// TODO document
-export function assertValid<
-  Desc extends DescMessage,
-  Shape extends MessageShape<Desc>,
-  // TODO safe to use intersection type?
-  Valid extends Shape & MessageValidType<Desc>,
->(
-  validator: Validator,
-  schema: Desc,
-  message: Shape,
-): asserts message is Valid {
-  const result = validator.validate(schema, message);
-  if (result.kind == "valid") {
-    return;
-  }
-  throw result.error;
-}
 
 /**
  * Create a validator.
@@ -133,20 +144,31 @@ export function createValidator(opt?: ValidatorOptions): Validator {
   const registry = opt?.registry
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
     : createMutableRegistry(file_buf_validate_validate);
-  const failFastDefault = opt?.failFast ?? false;
+  const failFast = opt?.failFast ?? false;
   const celMan = new CelManager(registry, opt?.regexMatch);
   const planner = new Planner(celMan, opt?.legacyRequired ?? false);
   return {
-    validate(schema, message, opt) {
+    assertValid(schema, message) {
+      validateUnsafe(registry, celMan, planner, schema, message, failFast);
+    },
+    isValid<
+      Desc extends DescMessage,
+      Shape extends MessageShape<Desc>,
+      Valid extends Shape & MessageValidType<Desc>,
+    >(schema: Desc, message: Shape): message is Valid {
       try {
-        validateUnsafe(
-          registry,
-          celMan,
-          planner,
-          schema,
-          message,
-          opt?.failFast ?? failFastDefault,
-        );
+        validateUnsafe(registry, celMan, planner, schema, message, true);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    },
+    throwIfNotValid(schema, message): void {
+      validateUnsafe(registry, celMan, planner, schema, message, failFast);
+    },
+    validate(schema, message) {
+      try {
+        validateUnsafe(registry, celMan, planner, schema, message, failFast);
       } catch (e) {
         if (e instanceof ValidationError) {
           return {
