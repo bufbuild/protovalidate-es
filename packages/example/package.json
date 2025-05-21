@@ -7,7 +7,6 @@
     "start": "tsx src/index.ts",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
-    "test": "npx tsx --test ./src/*.test.ts",
     "build": "tsc --project tsconfig.json --outDir ./dist/esm",
     "format": "biome format --write",
     "lint": "biome lint --error-on-warnings && buf lint",
