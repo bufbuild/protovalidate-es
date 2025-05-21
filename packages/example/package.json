@@ -1,0 +1,24 @@
+{
+  "name": "protovalidate-example",
+  "version": "0.1.1",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "generate": "buf generate",
+    "postgenerate": "license-header src/gen",
+    "build": "tsc --project tsconfig.json --outDir ./dist/esm",
+    "format": "biome format --write",
+    "lint": "biome lint --error-on-warnings && buf lint",
+    "license-header": "license-header"
+  },
+  "type": "module",
+  "dependencies": {
+    "@bufbuild/protovalidate": "^0.1.0",
+    "@bufbuild/protobuf": "^2.4.0"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.53.0",
+    "@bufbuild/protoc-gen-es": "^2.4.0"
+  }
+}

@@ -35,8 +35,8 @@ import { FieldDescriptorProto_Type } from "@bufbuild/protobuf/wkt";
  * invalid standard rules are applied.
  */
 export class CompilationError extends Error {
-  override name = "CompilationError" as const;
-  constructor(message: string, options?: ErrorOptions) {
+  override name = "CompilationError";
+  constructor(message: string, options?: { cause?: unknown }) {
     super(message, options);
     // see https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#example
     Object.setPrototypeOf(this, new.target.prototype);
@@ -49,8 +49,8 @@ export class CompilationError extends Error {
  * validator mismatch.
  */
 export class RuntimeError extends Error {
-  override name = "RuntimeError" as const;
-  constructor(message: string, options?: ErrorOptions) {
+  override name = "RuntimeError";
+  constructor(message: string, options?: { cause?: unknown }) {
     super(message, options);
     // see https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#example
     Object.setPrototypeOf(this, new.target.prototype);
