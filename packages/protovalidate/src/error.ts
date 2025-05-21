@@ -36,7 +36,7 @@ import { FieldDescriptorProto_Type } from "@bufbuild/protobuf/wkt";
  */
 export class CompilationError extends Error {
   override name = "CompilationError";
-  constructor(message: string, options?: ErrorOptions) {
+  constructor(message: string, options?: { cause?: unknown }) {
     super(message, options);
     // see https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#example
     Object.setPrototypeOf(this, new.target.prototype);
@@ -50,7 +50,7 @@ export class CompilationError extends Error {
  */
 export class RuntimeError extends Error {
   override name = "RuntimeError";
-  constructor(message: string, options?: ErrorOptions) {
+  constructor(message: string, options?: { cause?: unknown }) {
     super(message, options);
     // see https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-2.html#example
     Object.setPrototypeOf(this, new.target.prototype);

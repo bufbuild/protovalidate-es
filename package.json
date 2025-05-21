@@ -10,7 +10,11 @@
     "license-header": "license-header --ignore 'packages/**'",
     "lint": "biome lint --error-on-warnings"
   },
-  "workspaces": ["packages/protovalidate", "packages/protovalidate-testing"],
+  "workspaces": [
+    "packages/protovalidate",
+    "packages/protovalidate-testing",
+    "packages/example"
+  ],
   "type": "module",
   "packageManager": "npm@10.9.0",
   "licenseHeader": {

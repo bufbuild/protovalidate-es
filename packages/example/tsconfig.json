@@ -1,0 +1,9 @@
+{
+  "include": ["src/index.ts", "src/**/*.test.ts"],
+  "compilerOptions": {
+    "target": "es2020",
+    "moduleResolution": "Node10",
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
