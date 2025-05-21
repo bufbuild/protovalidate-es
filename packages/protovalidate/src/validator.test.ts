@@ -17,6 +17,7 @@ import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
 import { expectTypeOf } from "expect-type";
 import { create, type DescMessage, type Message } from "@bufbuild/protobuf";
+import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
 import type { GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { compileFile, compileMessage } from "@bufbuild/protocompile";
 import {
@@ -25,8 +26,7 @@ import {
   type ValidationError,
   type Violation,
 } from "./error.js";
-import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
-import { createValidator, type Validator } from "./validator.js";
+import { createValidator } from "./validator.js";
 
 void test("createValidator() returns Validator", () => {
   const v = createValidator();
@@ -126,119 +126,6 @@ void suite("Validator", () => {
       const validator = createValidator();
       const result = validator.validate(invalidSchema, invalidMessage);
       assert.equal(result.kind, "invalid");
-    });
-  });
-  void suite("isValid()", () => {
-    const validSchema = compileMessage(`
-      syntax = "proto3";
-      message M {}
-    `);
-    const invalidSchema = compileMessage(
-      `
-      syntax="proto3";
-      import "buf/validate/validate.proto";
-      message Example {
-        option (buf.validate.message).cel = {
-          id: "test-id1",
-          message: "test-message1",
-          expression: "false"
-        };
-      }`,
-      bufCompileOptions,
-    );
-    const validMessage = create(validSchema);
-    const invalidMessage = create(invalidSchema);
-    void test("returns true for valid message", () => {
-      const validator = createValidator();
-      assert.strictEqual(validator.isValid(validSchema, validMessage), true);
-    });
-    void test("returns false for invalid message", () => {
-      const validator = createValidator();
-      assert.strictEqual(
-        validator.isValid(invalidSchema, invalidMessage),
-        false,
-      );
-    });
-    void test("narrows the type", () => {
-      type Invalid = Message<"M"> & {
-        valid: boolean;
-      };
-      type Valid = Message<"M"> & {
-        valid: true;
-      };
-      const schema = compileMessage(`
-        syntax = "proto2";
-        message M {}
-      `) as GenMessage<Invalid, { validType: Valid }>;
-      const validator = createValidator();
-      const message = create(schema);
-      if (validator.isValid(schema, message)) {
-        expectTypeOf(message.valid).toEqualTypeOf(true);
-      } else {
-        expectTypeOf(message.valid).toEqualTypeOf<boolean>();
-      }
-    });
-  });
-  void suite("assertValid()", () => {
-    const validSchema = compileMessage(`
-    syntax = "proto3";
-    message M {}
-  `);
-    const invalidSchema = compileMessage(
-      `
-    syntax="proto3";
-    import "buf/validate/validate.proto";
-    message Example {
-      option (buf.validate.message).cel = {
-        id: "test-id1",
-        message: "test-message1",
-        expression: "false"
-      };
-      }`,
-      bufCompileOptions,
-    );
-    const validMessage = create(validSchema);
-    const invalidMessage = create(invalidSchema);
-    void test("does not throw for valid message", () => {
-      const validator = createValidator();
-      assert.doesNotThrow(() =>
-        validator.assertValid(validSchema, validMessage),
-      );
-    });
-    void test("throws for invalid message", () => {
-      const validator = createValidator();
-      assert.throws(
-        () => validator.assertValid(invalidSchema, invalidMessage),
-        {
-          name: "ValidationError",
-        },
-      );
-    });
-    void test("validator type must be fully defined for assertion function", () => {
-      const validator = createValidator();
-      // @ts-expect-error - TS2775: Assertions require every name in the call target to be declared with an explicit type annotation.
-      validator.assertValid(validSchema, validMessage);
-    });
-    void test("narrows the type", () => {
-      type Invalid = Message<"M"> & {
-        valid: boolean;
-      };
-      type Valid = Message<"M"> & {
-        valid: true;
-      };
-      const schema = compileMessage(`
-        syntax = "proto2";
-        message M {}
-      `) as GenMessage<Invalid, { validType: Valid }>;
-      const validator: Validator = createValidator();
-      const message = create(schema);
-      expectTypeOf(message.valid).toEqualTypeOf<boolean>();
-      try {
-        validator.assertValid(schema, message);
-        expectTypeOf(message.valid).toEqualTypeOf(true);
-      } catch (_) {
-        //
-      }
     });
   });
   void suite("option failFast", () => {

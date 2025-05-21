@@ -97,40 +97,6 @@ export type Validator = {
     schema: Desc,
     message: MessageShape<Desc>,
   ): ValidationResult<MessageValidType<Desc>, MessageShape<Desc>>;
-
-  /**
-   * Asserts that the given message satisfies its rules, and throws an error
-   * otherwise.
-   *
-   * The error thrown may be a ValidationError, CompilationError, or RuntimeError.
-   *
-   * Note: TypeScript requires an explicit type annotation on the validator,
-   * for example:
-   *
-   * ```ts
-   * const validator: Validator = createValidator();
-   * validator.assertValid(schema, message);
-   * ```
-   *
-   * Do not use:
-   *
-   * ```ts
-   * const validator = createValidator();
-   * validator.assertValid(schema, message); // type error
-   * ```
-   */
-  assertValid<Desc extends DescMessage, Valid extends MessageValidType<Desc>>(
-    schema: Desc,
-    message: Message,
-  ): asserts message is Valid;
-
-  /**
-   * Returns true if the given message satisfies its rules.
-   */
-  isValid<Desc extends DescMessage, Valid extends MessageValidType<Desc>>(
-    schema: Desc,
-    message: Message,
-  ): message is Valid;
 };
 
 /**
@@ -172,20 +138,6 @@ export function createValidator(opt?: ValidatorOptions): Validator {
   const celMan = new CelManager(registry, opt?.regexMatch);
   const planner = new Planner(celMan, opt?.legacyRequired ?? false);
   return {
-    assertValid(schema, message) {
-      validateUnsafe(registry, celMan, planner, schema, message, failFast);
-    },
-    isValid<Desc extends DescMessage, Valid extends MessageValidType<Desc>>(
-      schema: Desc,
-      message: Message,
-    ): message is Valid {
-      try {
-        validateUnsafe(registry, celMan, planner, schema, message, true);
-        return true;
-      } catch (e) {
-        return false;
-      }
-    },
     validate<
       Desc extends DescMessage,
       Shape extends MessageShape<Desc>,
