@@ -27,7 +27,7 @@
     "@biomejs/biome": "^1.9.4",
     "@bufbuild/buf": "^1.53.0",
     "@bufbuild/license-header": "^0.0.4",
-    "@bufbuild/protoc-gen-es": "^2.4.0",
+    "@bufbuild/protoc-gen-es": "^2.5.0",
     "@types/node": "^22.15.3",
     "tsx": "^4.19.4",
     "turbo": "^2.5.2",
