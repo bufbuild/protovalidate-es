@@ -1,5 +1,5 @@
 {
-  "include": ["src/index.ts", "src/**/*.test.ts"],
+  "include": ["src/*.ts", "src/**/*.test.ts"],
   "compilerOptions": {
     "target": "es2020",
     "moduleResolution": "Node10",

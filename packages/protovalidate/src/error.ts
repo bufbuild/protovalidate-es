@@ -62,7 +62,7 @@ export class RuntimeError extends Error {
  * detected.
  */
 export class ValidationError extends Error {
-  override name = "ValidationError";
+  override name = "ValidationError" as const;
   public readonly violations: Violation[];
   constructor(violations: Violation[]) {
     super(validationErrorMessage(violations));

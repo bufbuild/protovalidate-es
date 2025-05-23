@@ -13,5 +13,4 @@
 // limitations under the License.
 
 export * from "./validator.js";
-export * from "./result.js";
 export * from "./error.js";
