@@ -23,7 +23,7 @@
     "copyrightHolder": "Buf Technologies, Inc."
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.17.4",
+    "@arethetypeswrong/cli": "^0.18.1",
     "@biomejs/biome": "^1.9.4",
     "@bufbuild/buf": "^1.53.0",
     "@bufbuild/license-header": "^0.0.4",
