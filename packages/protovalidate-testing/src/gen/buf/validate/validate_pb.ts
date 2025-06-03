@@ -212,6 +212,7 @@ export type FieldRules = Message<"buf.validate.FieldRules"> & {
    *   - proto2 scalar fields (both optional and required)
    * - proto3 scalar fields must be non-zero to be considered populated
    * - repeated and map fields must be non-empty to be considered populated
+   * - map keys/values and repeated items are always considered populated
    *
    * ```proto
    * message MyMessage {
@@ -588,7 +589,7 @@ export type FloatRules = Message<"buf.validate.FloatRules"> & {
    * message MyFloat {
    *   float value = 1 [
    *     (buf.validate.field).float.example = 1.0,
-   *     (buf.validate.field).float.example = "Infinity"
+   *     (buf.validate.field).float.example = inf
    *   ];
    * }
    * ```
@@ -770,7 +771,7 @@ export type DoubleRules = Message<"buf.validate.DoubleRules"> & {
    * message MyDouble {
    *   double value = 1 [
    *     (buf.validate.field).double.example = 1.0,
-   *     (buf.validate.field).double.example = "Infinity"
+   *     (buf.validate.field).double.example = inf
    *   ];
    * }
    * ```
@@ -3661,6 +3662,9 @@ export type RepeatedRules = Message<"buf.validate.RepeatedRules"> & {
    * in the field. Even for repeated message fields, validation is executed
    * against each item unless skip is explicitly specified.
    *
+   * Note that repeated items are always considered populated. The `required`
+   * rule does not apply.
+   *
    * ```proto
    * message MyRepeated {
    *   // The items in the field `value` must follow the specified rules.
@@ -3724,6 +3728,9 @@ export type MapRules = Message<"buf.validate.MapRules"> & {
   /**
    * Specifies the rules to be applied to each key in the field.
    *
+   * Note that map keys are always considered populated. The `required`
+   * rule does not apply.
+   *
    * ```proto
    * message MyMap {
    *   // The keys in the field `value` must follow the specified rules.
@@ -3744,6 +3751,9 @@ export type MapRules = Message<"buf.validate.MapRules"> & {
    * Specifies the rules to be applied to the value of each key in the
    * field. Message values will still have their validations evaluated unless
    * skip is specified here.
+   *
+   * Note that map values are always considered populated. The `required`
+   * rule does not apply.
    *
    * ```proto
    * message MyMap {
@@ -3783,7 +3793,9 @@ export type AnyRules = Message<"buf.validate.AnyRules"> & {
    * ```proto
    * message MyAny {
    *   //  The `value` field must have a `type_url` equal to one of the specified values.
-   *   google.protobuf.Any value = 1 [(buf.validate.field).any.in = ["type.googleapis.com/MyType1", "type.googleapis.com/MyType2"]];
+   *   google.protobuf.Any value = 1 [(buf.validate.field).any = {
+   *       in: ["type.googleapis.com/MyType1", "type.googleapis.com/MyType2"]
+   *   }];
    * }
    * ```
    *
@@ -3796,8 +3808,10 @@ export type AnyRules = Message<"buf.validate.AnyRules"> & {
    *
    * ```proto
    * message MyAny {
-   *   // The field `value` must not have a `type_url` equal to any of the specified values.
-   *   google.protobuf.Any value = 1 [(buf.validate.field).any.not_in = ["type.googleapis.com/ForbiddenType1", "type.googleapis.com/ForbiddenType2"]];
+   *   //  The `value` field must not have a `type_url` equal to any of the specified values.
+   *   google.protobuf.Any value = 1 [(buf.validate.field).any = {
+   *       not_in: ["type.googleapis.com/ForbiddenType1", "type.googleapis.com/ForbiddenType2"]
+   *   }];
    * }
    * ```
    *
@@ -4143,6 +4157,19 @@ export type TimestampRules = Message<"buf.validate.TimestampRules"> & {
   within?: Duration;
 
   /**
+   * `example` specifies values that the field may have. These values SHOULD
+   * conform to other rules. `example` values will not impact validation
+   * but may be used as helpful guidance on how to populate the given field.
+   *
+   * ```proto
+   * message MyTimestamp {
+   *   google.protobuf.Timestamp value = 1 [
+   *     (buf.validate.field).timestamp.example = { seconds: 1672444800 },
+   *     (buf.validate.field).timestamp.example = { seconds: 1672531200 },
+   *   ];
+   * }
+   * ```
+   *
    * @generated from field: repeated google.protobuf.Timestamp example = 10;
    */
   example: Timestamp[];

@@ -19,15 +19,15 @@
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../validate_pb.js";
-import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import { file_google_protobuf_timestamp } from "@bufbuild/protobuf/wkt";
+import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_duration, file_google_protobuf_timestamp, file_google_protobuf_wrappers } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file buf/validate/conformance/cases/wkt_timestamp.proto.
  */
 export const file_buf_validate_conformance_cases_wkt_timestamp: GenFile = /*@__PURE__*/
-  fileDesc("CjJidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvd2t0X3RpbWVzdGFtcC5wcm90bxIeYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzIjgKDVRpbWVzdGFtcE5vbmUSJwoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJEChFUaW1lc3RhbXBSZXF1aXJlZBIvCgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQga6SAPIAQEiRQoOVGltZXN0YW1wQ29uc3QSMwoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIKukgHsgEEEgIIAyJACgtUaW1lc3RhbXBMVBIxCgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgi6SAWyAQIaACJDCgxUaW1lc3RhbXBMVEUSMwoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIKukgHsgEEIgIIASJDCgtUaW1lc3RhbXBHVBI0CgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgu6SAiyAQUqAxDoByJFCgxUaW1lc3RhbXBHVEUSNQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIMukgJsgEGMgQQwIQ9IkYKDVRpbWVzdGFtcEdUTFQSNQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIMukgJsgEGGgIIASoAIkgKD1RpbWVzdGFtcEV4TFRHVBI1CgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgy6SAmyAQYaACoCCAEiSwoPVGltZXN0YW1wR1RFTFRFEjgKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCD7pIDLIBCSIDCJAcMgIIPCJNChFUaW1lc3RhbXBFeEdURUxURRI4CgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQg+6SAyyAQkiAgg8MgMIkBwiQwoOVGltZXN0YW1wTFROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECOAEiRgoRVGltZXN0YW1wTm90TFROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECOAAiQwoOVGltZXN0YW1wR1ROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECQAEiRgoRVGltZXN0YW1wTm90R1ROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECQAAiRwoPVGltZXN0YW1wV2l0aGluEjQKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCC7pICLIBBUoDCJAcIk4KFFRpbWVzdGFtcExUTm93V2l0aGluEjYKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCDbpICrIBB0oDCJAcOAEiTgoUVGltZXN0YW1wR1ROb3dXaXRoaW4SNgoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEINukgKsgEHSgMIkBxAASJHChBUaW1lc3RhbXBFeGFtcGxlEjMKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCCrpIB7IBBFICCANiBnByb3RvMw", [file_buf_validate_validate, file_google_protobuf_timestamp]);
+  fileDesc("CjJidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvd2t0X3RpbWVzdGFtcC5wcm90bxIeYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzIjgKDVRpbWVzdGFtcE5vbmUSJwoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJEChFUaW1lc3RhbXBSZXF1aXJlZBIvCgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQga6SAPIAQEiRQoOVGltZXN0YW1wQ29uc3QSMwoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIKukgHsgEEEgIIAyJACgtUaW1lc3RhbXBMVBIxCgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgi6SAWyAQIaACJDCgxUaW1lc3RhbXBMVEUSMwoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIKukgHsgEEIgIIASJDCgtUaW1lc3RhbXBHVBI0CgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgu6SAiyAQUqAxDoByJFCgxUaW1lc3RhbXBHVEUSNQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIMukgJsgEGMgQQwIQ9IkYKDVRpbWVzdGFtcEdUTFQSNQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIMukgJsgEGGgIIASoAIkgKD1RpbWVzdGFtcEV4TFRHVBI1CgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQgy6SAmyAQYaACoCCAEiSwoPVGltZXN0YW1wR1RFTFRFEjgKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCD7pIDLIBCSIDCJAcMgIIPCJNChFUaW1lc3RhbXBFeEdURUxURRI4CgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQg+6SAyyAQkiAgg8MgMIkBwiQwoOVGltZXN0YW1wTFROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECOAEiRgoRVGltZXN0YW1wTm90TFROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECOAAiQwoOVGltZXN0YW1wR1ROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECQAEiRgoRVGltZXN0YW1wTm90R1ROb3cSMQoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEIIukgFsgECQAAiRwoPVGltZXN0YW1wV2l0aGluEjQKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCC7pICLIBBUoDCJAcIk4KFFRpbWVzdGFtcExUTm93V2l0aGluEjYKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCDbpICrIBB0oDCJAcOAEiTgoUVGltZXN0YW1wR1ROb3dXaXRoaW4SNgoDdmFsGAEgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcEINukgKsgEHSgMIkBxAASJHChBUaW1lc3RhbXBFeGFtcGxlEjMKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCCrpIB7IBBFICCAMiMQoYVGltZXN0YW1wV3JvbmdUeXBlU2NhbGFyEhUKA3ZhbBgBIAEoBUIIukgFsgECOAEikQEKGVRpbWVzdGFtcFdyb25nVHlwZU1lc3NhZ2USWgoDdmFsGAEgASgLMkMuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRpbWVzdGFtcFdyb25nVHlwZU1lc3NhZ2UuV3JvbmdUeXBlQgi6SAWyAQI4ARoYCglXcm9uZ1R5cGUSCwoDdmFsGAEgASgFIk8KGVRpbWVzdGFtcFdyb25nVHlwZVdyYXBwZXISMgoDdmFsGAEgASgLMhsuZ29vZ2xlLnByb3RvYnVmLkludDMyVmFsdWVCCLpIBbIBAjgBIkkKFVRpbWVzdGFtcFdyb25nVHlwZVdLVBIwCgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBbIBAjgBYgZwcm90bzM", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_google_protobuf_wrappers]);
 
 /**
  * @generated from message buf.validate.conformance.cases.TimestampNone
@@ -351,4 +351,91 @@ export type TimestampExample = Message<"buf.validate.conformance.cases.Timestamp
  */
 export const TimestampExampleSchema: GenMessage<TimestampExample> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_wkt_timestamp, 18);
+
+/**
+ * The below messages should throw compilation errors due to rules being applied toincorrect types.
+ *
+ * @generated from message buf.validate.conformance.cases.TimestampWrongTypeScalar
+ */
+export type TimestampWrongTypeScalar = Message<"buf.validate.conformance.cases.TimestampWrongTypeScalar"> & {
+  /**
+   * @generated from field: int32 val = 1;
+   */
+  val: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.TimestampWrongTypeScalar.
+ * Use `create(TimestampWrongTypeScalarSchema)` to create a new message.
+ */
+export const TimestampWrongTypeScalarSchema: GenMessage<TimestampWrongTypeScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_timestamp, 19);
+
+/**
+ * @generated from message buf.validate.conformance.cases.TimestampWrongTypeMessage
+ */
+export type TimestampWrongTypeMessage = Message<"buf.validate.conformance.cases.TimestampWrongTypeMessage"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.TimestampWrongTypeMessage.WrongType val = 1;
+   */
+  val?: TimestampWrongTypeMessage_WrongType;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.TimestampWrongTypeMessage.
+ * Use `create(TimestampWrongTypeMessageSchema)` to create a new message.
+ */
+export const TimestampWrongTypeMessageSchema: GenMessage<TimestampWrongTypeMessage> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_timestamp, 20);
+
+/**
+ * @generated from message buf.validate.conformance.cases.TimestampWrongTypeMessage.WrongType
+ */
+export type TimestampWrongTypeMessage_WrongType = Message<"buf.validate.conformance.cases.TimestampWrongTypeMessage.WrongType"> & {
+  /**
+   * @generated from field: int32 val = 1;
+   */
+  val: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.TimestampWrongTypeMessage.WrongType.
+ * Use `create(TimestampWrongTypeMessage_WrongTypeSchema)` to create a new message.
+ */
+export const TimestampWrongTypeMessage_WrongTypeSchema: GenMessage<TimestampWrongTypeMessage_WrongType> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_timestamp, 20, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.TimestampWrongTypeWrapper
+ */
+export type TimestampWrongTypeWrapper = Message<"buf.validate.conformance.cases.TimestampWrongTypeWrapper"> & {
+  /**
+   * @generated from field: google.protobuf.Int32Value val = 1;
+   */
+  val?: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.TimestampWrongTypeWrapper.
+ * Use `create(TimestampWrongTypeWrapperSchema)` to create a new message.
+ */
+export const TimestampWrongTypeWrapperSchema: GenMessage<TimestampWrongTypeWrapper> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_timestamp, 21);
+
+/**
+ * @generated from message buf.validate.conformance.cases.TimestampWrongTypeWKT
+ */
+export type TimestampWrongTypeWKT = Message<"buf.validate.conformance.cases.TimestampWrongTypeWKT"> & {
+  /**
+   * @generated from field: google.protobuf.Duration val = 1;
+   */
+  val?: Duration;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.TimestampWrongTypeWKT.
+ * Use `create(TimestampWrongTypeWKTSchema)` to create a new message.
+ */
+export const TimestampWrongTypeWKTSchema: GenMessage<TimestampWrongTypeWKT> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_timestamp, 22);
 

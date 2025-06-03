@@ -50,7 +50,7 @@ if (result.kind !== "valid") {
 
 > [!NOTE]
 > 
-> This version is compatible with [buf.build/bufbuild/protovalidate](https://buf.build/bufbuild/protovalidate) <!-- upstreamProtovalidateRef -->v0.11.1<!-- upstreamProtovalidateRef -->
+> This version is compatible with [buf.build/bufbuild/protovalidate](https://buf.build/bufbuild/protovalidate) <!-- upstreamProtovalidateRef -->v0.12.0<!-- upstreamProtovalidateRef -->
 >
 > It requires the Protobuf runtime [@bufbuild/protobuf](https://www.npmjs.com/package/@bufbuild/protobuf).
 
