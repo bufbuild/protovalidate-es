@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/required_field_proto3.proto.
  */
 export const file_buf_validate_conformance_cases_required_field_proto3: GenFile = /*@__PURE__*/
-  fileDesc("CjpidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvcmVxdWlyZWRfZmllbGRfcHJvdG8zLnByb3RvEh5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMiKwoUUmVxdWlyZWRQcm90bzNTY2FsYXISEwoDdmFsGAEgASgJQga6SAPIAQEiOgogUmVxdWlyZWRQcm90bzNTY2FsYXJJZ25vcmVBbHdheXMSFgoDdmFsGAEgASgJQgm6SAbIAQHYAQMiQAocUmVxdWlyZWRQcm90bzNPcHRpb25hbFNjYWxhchIYCgN2YWwYASABKAlCBrpIA8gBAUgAiAEBQgYKBF92YWwiTwooUmVxdWlyZWRQcm90bzNPcHRpb25hbFNjYWxhcklnbm9yZUFsd2F5cxIbCgN2YWwYASABKAlCCbpIBsgBAdgBA0gAiAEBQgYKBF92YWwiewoVUmVxdWlyZWRQcm90bzNNZXNzYWdlEk4KA3ZhbBgBIAEoCzI5LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvM01lc3NhZ2UuTXNnQga6SAPIAQEaEgoDTXNnEgsKA3ZhbBgBIAEoCSKWAQohUmVxdWlyZWRQcm90bzNNZXNzYWdlSWdub3JlQWx3YXlzEl0KA3ZhbBgBIAEoCzJFLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvM01lc3NhZ2VJZ25vcmVBbHdheXMuTXNnQgm6SAbIAQHYAQMaEgoDTXNnEgsKA3ZhbBgBIAEoCSI+ChNSZXF1aXJlZFByb3RvM09uZU9mEhMKAWEYASABKAlCBrpIA8gBAUgAEgsKAWIYAiABKAlIAEIFCgN2YWwiTQofUmVxdWlyZWRQcm90bzNPbmVPZklnbm9yZUFsd2F5cxIWCgFhGAEgASgJQgm6SAbIAQHYAQNIABILCgFiGAIgASgJSABCBQoDdmFsIi0KFlJlcXVpcmVkUHJvdG8zUmVwZWF0ZWQSEwoDdmFsGAEgAygJQga6SAPIAQEiPAoiUmVxdWlyZWRQcm90bzNSZXBlYXRlZElnbm9yZUFsd2F5cxIWCgN2YWwYASADKAlCCbpIBsgBAdgBAyKQAQoRUmVxdWlyZWRQcm90bzNNYXASTwoDdmFsGAEgAygLMjouYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkUHJvdG8zTWFwLlZhbEVudHJ5Qga6SAPIAQEaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKrAQodUmVxdWlyZWRQcm90bzNNYXBJZ25vcmVBbHdheXMSXgoDdmFsGAEgAygLMkYuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkUHJvdG8zTWFwSWdub3JlQWx3YXlzLlZhbEVudHJ5Qgm6SAbIAQHYAQMaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4AWIGcHJvdG8z", [file_buf_validate_validate]);
+  fileDesc("CjpidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvcmVxdWlyZWRfZmllbGRfcHJvdG8zLnByb3RvEh5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMiKwoUUmVxdWlyZWRQcm90bzNTY2FsYXISEwoDdmFsGAEgASgJQga6SAPIAQEiOgogUmVxdWlyZWRQcm90bzNTY2FsYXJJZ25vcmVBbHdheXMSFgoDdmFsGAEgASgJQgm6SAbIAQHYAQMiQAocUmVxdWlyZWRQcm90bzNPcHRpb25hbFNjYWxhchIYCgN2YWwYASABKAlCBrpIA8gBAUgAiAEBQgYKBF92YWwiTwooUmVxdWlyZWRQcm90bzNPcHRpb25hbFNjYWxhcklnbm9yZUFsd2F5cxIbCgN2YWwYASABKAlCCbpIBsgBAdgBA0gAiAEBQgYKBF92YWwiewoVUmVxdWlyZWRQcm90bzNNZXNzYWdlEk4KA3ZhbBgBIAEoCzI5LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvM01lc3NhZ2UuTXNnQga6SAPIAQEaEgoDTXNnEgsKA3ZhbBgBIAEoCSKWAQohUmVxdWlyZWRQcm90bzNNZXNzYWdlSWdub3JlQWx3YXlzEl0KA3ZhbBgBIAEoCzJFLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvM01lc3NhZ2VJZ25vcmVBbHdheXMuTXNnQgm6SAbIAQHYAQMaEgoDTXNnEgsKA3ZhbBgBIAEoCSI+ChNSZXF1aXJlZFByb3RvM09uZU9mEhMKAWEYASABKAlCBrpIA8gBAUgAEgsKAWIYAiABKAlIAEIFCgN2YWwiTQofUmVxdWlyZWRQcm90bzNPbmVPZklnbm9yZUFsd2F5cxIWCgFhGAEgASgJQgm6SAbIAQHYAQNIABILCgFiGAIgASgJSABCBQoDdmFsIi0KFlJlcXVpcmVkUHJvdG8zUmVwZWF0ZWQSEwoDdmFsGAEgAygJQga6SAPIAQEiPAoiUmVxdWlyZWRQcm90bzNSZXBlYXRlZElnbm9yZUFsd2F5cxIWCgN2YWwYASADKAlCCbpIBsgBAdgBAyKQAQoRUmVxdWlyZWRQcm90bzNNYXASTwoDdmFsGAEgAygLMjouYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkUHJvdG8zTWFwLlZhbEVudHJ5Qga6SAPIAQEaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKrAQodUmVxdWlyZWRQcm90bzNNYXBJZ25vcmVBbHdheXMSXgoDdmFsGAEgAygLMkYuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkUHJvdG8zTWFwSWdub3JlQWx3YXlzLlZhbEVudHJ5Qgm6SAbIAQHYAQMaKgoIVmFsRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKbAQoUUmVxdWlyZWRQcm90bzNNYXBLZXkSVwoDdmFsGAEgAygLMj0uYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlJlcXVpcmVkUHJvdG8zTWFwS2V5LlZhbEVudHJ5Qgu6SAiaAQUiA8gBARoqCghWYWxFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIp8BChZSZXF1aXJlZFByb3RvM01hcFZhbHVlElkKA3ZhbBgBIAMoCzI/LmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5SZXF1aXJlZFByb3RvM01hcFZhbHVlLlZhbEVudHJ5Qgu6SAiaAQUqA8gBARoqCghWYWxFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIjYKGlJlcXVpcmVkUHJvdG8zUmVwZWF0ZWRJdGVtEhgKA3ZhbBgBIAMoCUILukgIkgEFIgPIAQFiBnByb3RvMw", [file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.RequiredProto3Scalar
@@ -288,4 +288,55 @@ export type RequiredProto3MapIgnoreAlways = Message<"buf.validate.conformance.ca
  */
 export const RequiredProto3MapIgnoreAlwaysSchema: GenMessage<RequiredProto3MapIgnoreAlways> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_required_field_proto3, 11);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto3MapKey
+ */
+export type RequiredProto3MapKey = Message<"buf.validate.conformance.cases.RequiredProto3MapKey"> & {
+  /**
+   * @generated from field: map<string, string> val = 1;
+   */
+  val: { [key: string]: string };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto3MapKey.
+ * Use `create(RequiredProto3MapKeySchema)` to create a new message.
+ */
+export const RequiredProto3MapKeySchema: GenMessage<RequiredProto3MapKey> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto3, 12);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto3MapValue
+ */
+export type RequiredProto3MapValue = Message<"buf.validate.conformance.cases.RequiredProto3MapValue"> & {
+  /**
+   * @generated from field: map<string, string> val = 1;
+   */
+  val: { [key: string]: string };
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto3MapValue.
+ * Use `create(RequiredProto3MapValueSchema)` to create a new message.
+ */
+export const RequiredProto3MapValueSchema: GenMessage<RequiredProto3MapValue> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto3, 13);
+
+/**
+ * @generated from message buf.validate.conformance.cases.RequiredProto3RepeatedItem
+ */
+export type RequiredProto3RepeatedItem = Message<"buf.validate.conformance.cases.RequiredProto3RepeatedItem"> & {
+  /**
+   * @generated from field: repeated string val = 1;
+   */
+  val: string[];
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.RequiredProto3RepeatedItem.
+ * Use `create(RequiredProto3RepeatedItemSchema)` to create a new message.
+ */
+export const RequiredProto3RepeatedItemSchema: GenMessage<RequiredProto3RepeatedItem> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_required_field_proto3, 14);
 

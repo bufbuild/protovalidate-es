@@ -19,15 +19,15 @@
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../validate_pb.js";
-import type { Duration } from "@bufbuild/protobuf/wkt";
-import { file_google_protobuf_duration } from "@bufbuild/protobuf/wkt";
+import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_duration, file_google_protobuf_timestamp, file_google_protobuf_wrappers } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file buf/validate/conformance/cases/wkt_duration.proto.
  */
 export const file_buf_validate_conformance_cases_wkt_duration: GenFile = /*@__PURE__*/
-  fileDesc("CjFidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvd2t0X2R1cmF0aW9uLnByb3RvEh5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMiNgoMRHVyYXRpb25Ob25lEiYKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiJCChBEdXJhdGlvblJlcXVpcmVkEi4KA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIGukgDyAEBIkMKDUR1cmF0aW9uQ29uc3QSMgoDdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQgq6SAeqAQQSAggDIkUKCkR1cmF0aW9uSW4SNwoDdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQg+6SAyqAQk6AggBOgMQ6AciQQoNRHVyYXRpb25Ob3RJbhIwCgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBaoBAkIAIj4KCkR1cmF0aW9uTFQSMAoDdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQgi6SAWqAQIaACJBCgtEdXJhdGlvbkxURRIyCgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCrpIB6oBBCICCAEiQQoKRHVyYXRpb25HVBIzCgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CC7pICKoBBSoDEOgHIkMKC0R1cmF0aW9uR1RFEjQKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIMukgJqgEGMgQQwIQ9IkQKDER1cmF0aW9uR1RMVBI0CgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CDLpICaoBBhoCCAEqACJGCg5EdXJhdGlvbkV4TFRHVBI0CgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CDLpICaoBBhoAKgIIASJJCg5EdXJhdGlvbkdURUxURRI3CgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CD7pIDKoBCSIDCJAcMgIIPCJLChBEdXJhdGlvbkV4R1RFTFRFEjcKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIPukgMqgEJIgIIPDIDCJAcInUKHER1cmF0aW9uRmllbGRXaXRoT3RoZXJGaWVsZHMSOwoMZHVyYXRpb25fdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQgq6SAeqAQQiAggBEhgKB2ludF92YWwYAiABKAVCB7pIBBoCIBAiRQoPRHVyYXRpb25FeGFtcGxlEjIKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIKukgHqgEESgIIA2IGcHJvdG8z", [file_buf_validate_validate, file_google_protobuf_duration]);
+  fileDesc("CjFidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvd2t0X2R1cmF0aW9uLnByb3RvEh5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMiNgoMRHVyYXRpb25Ob25lEiYKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiJCChBEdXJhdGlvblJlcXVpcmVkEi4KA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIGukgDyAEBIkMKDUR1cmF0aW9uQ29uc3QSMgoDdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQgq6SAeqAQQSAggDIkUKCkR1cmF0aW9uSW4SNwoDdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQg+6SAyqAQk6AggBOgMQ6AciQQoNRHVyYXRpb25Ob3RJbhIwCgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCLpIBaoBAkIAIj4KCkR1cmF0aW9uTFQSMAoDdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQgi6SAWqAQIaACJBCgtEdXJhdGlvbkxURRIyCgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CCrpIB6oBBCICCAEiQQoKRHVyYXRpb25HVBIzCgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CC7pICKoBBSoDEOgHIkMKC0R1cmF0aW9uR1RFEjQKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIMukgJqgEGMgQQwIQ9IkQKDER1cmF0aW9uR1RMVBI0CgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CDLpICaoBBhoCCAEqACJGCg5EdXJhdGlvbkV4TFRHVBI0CgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CDLpICaoBBhoAKgIIASJJCg5EdXJhdGlvbkdURUxURRI3CgN2YWwYASABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb25CD7pIDKoBCSIDCJAcMgIIPCJLChBEdXJhdGlvbkV4R1RFTFRFEjcKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIPukgMqgEJIgIIPDIDCJAcInUKHER1cmF0aW9uRmllbGRXaXRoT3RoZXJGaWVsZHMSOwoMZHVyYXRpb25fdmFsGAEgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uQgq6SAeqAQQiAggBEhgKB2ludF92YWwYAiABKAVCB7pIBBoCIBAiRQoPRHVyYXRpb25FeGFtcGxlEjIKA3ZhbBgBIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbkIKukgHqgEESgIIAyI2ChdEdXJhdGlvbldyb25nVHlwZVNjYWxhchIbCgdzZWNvbmRzGAEgASgFQgq6SAeqAQQiAggBIpUBChhEdXJhdGlvbldyb25nVHlwZU1lc3NhZ2USWwoDdmFsGAEgASgLMkIuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLkR1cmF0aW9uV3JvbmdUeXBlTWVzc2FnZS5Xcm9uZ1R5cGVCCrpIB6oBBCICCAEaHAoJV3JvbmdUeXBlEg8KB3NlY29uZHMYASABKAUiUAoYRHVyYXRpb25Xcm9uZ1R5cGVXcmFwcGVyEjQKA3ZhbBgBIAEoCzIbLmdvb2dsZS5wcm90b2J1Zi5JbnQzMlZhbHVlQgq6SAeqAQRKAggDIksKFER1cmF0aW9uV3JvbmdUeXBlV0tUEjMKA3ZhbBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXBCCrpIB6oBBEoCCANiBnByb3RvMw", [file_buf_validate_validate, file_google_protobuf_duration, file_google_protobuf_timestamp, file_google_protobuf_wrappers]);
 
 /**
  * @generated from message buf.validate.conformance.cases.DurationNone
@@ -291,4 +291,91 @@ export type DurationExample = Message<"buf.validate.conformance.cases.DurationEx
  */
 export const DurationExampleSchema: GenMessage<DurationExample> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_wkt_duration, 14);
+
+/**
+ * The below messages should throw compilation errors due to incorrect types.
+ *
+ * @generated from message buf.validate.conformance.cases.DurationWrongTypeScalar
+ */
+export type DurationWrongTypeScalar = Message<"buf.validate.conformance.cases.DurationWrongTypeScalar"> & {
+  /**
+   * @generated from field: int32 seconds = 1;
+   */
+  seconds: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.DurationWrongTypeScalar.
+ * Use `create(DurationWrongTypeScalarSchema)` to create a new message.
+ */
+export const DurationWrongTypeScalarSchema: GenMessage<DurationWrongTypeScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_duration, 15);
+
+/**
+ * @generated from message buf.validate.conformance.cases.DurationWrongTypeMessage
+ */
+export type DurationWrongTypeMessage = Message<"buf.validate.conformance.cases.DurationWrongTypeMessage"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.DurationWrongTypeMessage.WrongType val = 1;
+   */
+  val?: DurationWrongTypeMessage_WrongType;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.DurationWrongTypeMessage.
+ * Use `create(DurationWrongTypeMessageSchema)` to create a new message.
+ */
+export const DurationWrongTypeMessageSchema: GenMessage<DurationWrongTypeMessage> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_duration, 16);
+
+/**
+ * @generated from message buf.validate.conformance.cases.DurationWrongTypeMessage.WrongType
+ */
+export type DurationWrongTypeMessage_WrongType = Message<"buf.validate.conformance.cases.DurationWrongTypeMessage.WrongType"> & {
+  /**
+   * @generated from field: int32 seconds = 1;
+   */
+  seconds: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.DurationWrongTypeMessage.WrongType.
+ * Use `create(DurationWrongTypeMessage_WrongTypeSchema)` to create a new message.
+ */
+export const DurationWrongTypeMessage_WrongTypeSchema: GenMessage<DurationWrongTypeMessage_WrongType> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_duration, 16, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.DurationWrongTypeWrapper
+ */
+export type DurationWrongTypeWrapper = Message<"buf.validate.conformance.cases.DurationWrongTypeWrapper"> & {
+  /**
+   * @generated from field: google.protobuf.Int32Value val = 1;
+   */
+  val?: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.DurationWrongTypeWrapper.
+ * Use `create(DurationWrongTypeWrapperSchema)` to create a new message.
+ */
+export const DurationWrongTypeWrapperSchema: GenMessage<DurationWrongTypeWrapper> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_duration, 17);
+
+/**
+ * @generated from message buf.validate.conformance.cases.DurationWrongTypeWKT
+ */
+export type DurationWrongTypeWKT = Message<"buf.validate.conformance.cases.DurationWrongTypeWKT"> & {
+  /**
+   * @generated from field: google.protobuf.Timestamp val = 1;
+   */
+  val?: Timestamp;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.DurationWrongTypeWKT.
+ * Use `create(DurationWrongTypeWKTSchema)` to create a new message.
+ */
+export const DurationWrongTypeWKTSchema: GenMessage<DurationWrongTypeWKT> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_duration, 18);
 

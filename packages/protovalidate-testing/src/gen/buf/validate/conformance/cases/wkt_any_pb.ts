@@ -19,15 +19,15 @@
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
 import { file_buf_validate_validate } from "../../validate_pb.js";
-import type { Any } from "@bufbuild/protobuf/wkt";
-import { file_google_protobuf_any } from "@bufbuild/protobuf/wkt";
+import type { Any, Timestamp } from "@bufbuild/protobuf/wkt";
+import { file_google_protobuf_any, file_google_protobuf_timestamp, file_google_protobuf_wrappers } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
  * Describes the file buf/validate/conformance/cases/wkt_any.proto.
  */
 export const file_buf_validate_conformance_cases_wkt_any: GenFile = /*@__PURE__*/
-  fileDesc("CixidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvd2t0X2FueS5wcm90bxIeYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzIiwKB0FueU5vbmUSIQoDdmFsGAEgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueSI4CgtBbnlSZXF1aXJlZBIpCgN2YWwYASABKAsyFC5nb29nbGUucHJvdG9idWYuQW55Qga6SAPIAQEiYAoFQW55SW4SVwoDdmFsGAEgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueUI0ukgxogEuEix0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiJkCghBbnlOb3RJbhJYCgN2YWwYASABKAsyFC5nb29nbGUucHJvdG9idWYuQW55QjW6SDKiAS8aLXR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcGIGcHJvdG8z", [file_buf_validate_validate, file_google_protobuf_any]);
+  fileDesc("CixidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvd2t0X2FueS5wcm90bxIeYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzIiwKB0FueU5vbmUSIQoDdmFsGAEgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueSI4CgtBbnlSZXF1aXJlZBIpCgN2YWwYASABKAsyFC5nb29nbGUucHJvdG9idWYuQW55Qga6SAPIAQEiYAoFQW55SW4SVwoDdmFsGAEgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueUI0ukgxogEuEix0eXBlLmdvb2dsZWFwaXMuY29tL2dvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbiJkCghBbnlOb3RJbhJYCgN2YWwYASABKAsyFC5nb29nbGUucHJvdG9idWYuQW55QjW6SDKiAS8aLXR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCJYChJBbnlXcm9uZ1R5cGVTY2FsYXISQgoDdmFsGAEgASgJQjW6SDKiAS8aLXR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcCKzAQoTQW55V3JvbmdUeXBlTWVzc2FnZRKBAQoDdmFsGAEgASgLMj0uYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLkFueVdyb25nVHlwZU1lc3NhZ2UuV3JvbmdUeXBlQjW6SDKiAS8aLXR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBoYCglXcm9uZ1R5cGUSCwoDdmFsGAEgASgFInYKE0FueVdyb25nVHlwZVdyYXBwZXISXwoDdmFsGAEgASgLMhsuZ29vZ2xlLnByb3RvYnVmLkludDMyVmFsdWVCNbpIMqIBLxotdHlwZS5nb29nbGVhcGlzLmNvbS9nb29nbGUucHJvdG9idWYuVGltZXN0YW1wInEKD0FueVdyb25nVHlwZVdLVBJeCgN2YWwYASABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wQjW6SDKiAS8aLXR5cGUuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcGIGcHJvdG8z", [file_buf_validate_validate, file_google_protobuf_any, file_google_protobuf_timestamp, file_google_protobuf_wrappers]);
 
 /**
  * @generated from message buf.validate.conformance.cases.AnyNone
@@ -96,4 +96,91 @@ export type AnyNotIn = Message<"buf.validate.conformance.cases.AnyNotIn"> & {
  */
 export const AnyNotInSchema: GenMessage<AnyNotIn> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_wkt_any, 3);
+
+/**
+ * The below messages should throw compilation errors due to incorrect types.
+ *
+ * @generated from message buf.validate.conformance.cases.AnyWrongTypeScalar
+ */
+export type AnyWrongTypeScalar = Message<"buf.validate.conformance.cases.AnyWrongTypeScalar"> & {
+  /**
+   * @generated from field: string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.AnyWrongTypeScalar.
+ * Use `create(AnyWrongTypeScalarSchema)` to create a new message.
+ */
+export const AnyWrongTypeScalarSchema: GenMessage<AnyWrongTypeScalar> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_any, 4);
+
+/**
+ * @generated from message buf.validate.conformance.cases.AnyWrongTypeMessage
+ */
+export type AnyWrongTypeMessage = Message<"buf.validate.conformance.cases.AnyWrongTypeMessage"> & {
+  /**
+   * @generated from field: buf.validate.conformance.cases.AnyWrongTypeMessage.WrongType val = 1;
+   */
+  val?: AnyWrongTypeMessage_WrongType;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.AnyWrongTypeMessage.
+ * Use `create(AnyWrongTypeMessageSchema)` to create a new message.
+ */
+export const AnyWrongTypeMessageSchema: GenMessage<AnyWrongTypeMessage> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_any, 5);
+
+/**
+ * @generated from message buf.validate.conformance.cases.AnyWrongTypeMessage.WrongType
+ */
+export type AnyWrongTypeMessage_WrongType = Message<"buf.validate.conformance.cases.AnyWrongTypeMessage.WrongType"> & {
+  /**
+   * @generated from field: int32 val = 1;
+   */
+  val: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.AnyWrongTypeMessage.WrongType.
+ * Use `create(AnyWrongTypeMessage_WrongTypeSchema)` to create a new message.
+ */
+export const AnyWrongTypeMessage_WrongTypeSchema: GenMessage<AnyWrongTypeMessage_WrongType> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_any, 5, 0);
+
+/**
+ * @generated from message buf.validate.conformance.cases.AnyWrongTypeWrapper
+ */
+export type AnyWrongTypeWrapper = Message<"buf.validate.conformance.cases.AnyWrongTypeWrapper"> & {
+  /**
+   * @generated from field: google.protobuf.Int32Value val = 1;
+   */
+  val?: number;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.AnyWrongTypeWrapper.
+ * Use `create(AnyWrongTypeWrapperSchema)` to create a new message.
+ */
+export const AnyWrongTypeWrapperSchema: GenMessage<AnyWrongTypeWrapper> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_any, 6);
+
+/**
+ * @generated from message buf.validate.conformance.cases.AnyWrongTypeWKT
+ */
+export type AnyWrongTypeWKT = Message<"buf.validate.conformance.cases.AnyWrongTypeWKT"> & {
+  /**
+   * @generated from field: google.protobuf.Timestamp val = 1;
+   */
+  val?: Timestamp;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.AnyWrongTypeWKT.
+ * Use `create(AnyWrongTypeWKTSchema)` to create a new message.
+ */
+export const AnyWrongTypeWKTSchema: GenMessage<AnyWrongTypeWKT> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_wkt_any, 7);
 
