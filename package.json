@@ -23,14 +23,14 @@
     "copyrightHolder": "Buf Technologies, Inc."
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.17.4",
+    "@arethetypeswrong/cli": "^0.18.1",
     "@biomejs/biome": "^1.9.4",
-    "@bufbuild/buf": "^1.53.0",
+    "@bufbuild/buf": "^1.54.0",
     "@bufbuild/license-header": "^0.0.4",
-    "@bufbuild/protoc-gen-es": "^2.5.0",
-    "@types/node": "^22.15.3",
+    "@bufbuild/protoc-gen-es": "^2.5.1",
+    "@types/node": "^22.15.29",
     "tsx": "^4.19.4",
-    "turbo": "^2.5.2",
+    "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   }
 }
