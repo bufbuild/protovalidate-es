@@ -14,20 +14,25 @@
 
 import {
   createMutableRegistry,
-  isMessage,
   type DescMessage,
-  type MessageShape,
-  type Registry,
-  type MutableRegistry,
+  isMessage,
   type Message,
+  type MessageShape,
+  type MessageValidType,
+  type MutableRegistry,
+  type Registry,
 } from "@bufbuild/protobuf";
 import { reflect, usedTypes } from "@bufbuild/protobuf/reflect";
 import { Cursor } from "./cursor.js";
-import { CompilationError, RuntimeError, ValidationError } from "./error.js";
+import {
+  CompilationError,
+  RuntimeError,
+  ValidationError,
+  type Violation,
+} from "./error.js";
 import { Planner } from "./planner.js";
 import { CelManager, type RegexMatcher } from "./cel.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
-import type { ValidationResult } from "./result.js";
 
 /**
  * Options for creating a validator.
@@ -91,8 +96,36 @@ export type Validator = {
   validate<Desc extends DescMessage>(
     schema: Desc,
     message: MessageShape<Desc>,
-  ): ValidationResult;
+  ): ValidationResult<MessageValidType<Desc>, MessageShape<Desc>>;
 };
+
+/**
+ * The result of validating a Protobuf message with protovalidate.
+ *
+ * It is one of:
+ * - valid: The message passed all validation rules.
+ * - invalid: The message violated one or more validation rules.
+ * - error: An error occurred while compiling or evaluating a rule.
+ */
+export type ValidationResult<Valid = Message, Invalid = Message> =
+  | {
+      kind: "valid";
+      message: Valid;
+      error: undefined;
+      violations: undefined;
+    }
+  | {
+      kind: "invalid";
+      message: Invalid;
+      error: ValidationError;
+      violations: Violation[];
+    }
+  | {
+      kind: "error";
+      message: Invalid;
+      error: CompilationError | RuntimeError;
+      violations: undefined;
+    };
 
 /**
  * Create a validator.
@@ -105,13 +138,18 @@ export function createValidator(opt?: ValidatorOptions): Validator {
   const celMan = new CelManager(registry, opt?.regexMatch);
   const planner = new Planner(celMan, opt?.legacyRequired ?? false);
   return {
-    validate(schema, message) {
+    validate<
+      Desc extends DescMessage,
+      Shape extends MessageShape<Desc>,
+      Valid extends MessageValidType<Desc>,
+    >(schema: Desc, message: Shape) {
       try {
         validateUnsafe(registry, celMan, planner, schema, message, failFast);
       } catch (e) {
         if (e instanceof ValidationError) {
           return {
             kind: "invalid",
+            message,
             error: e,
             violations: e.violations,
           };
@@ -119,16 +157,19 @@ export function createValidator(opt?: ValidatorOptions): Validator {
         if (e instanceof CompilationError || e instanceof RuntimeError) {
           return {
             kind: "error",
+            message,
             error: e,
           };
         }
         return {
           kind: "error",
+          message,
           error: new RuntimeError("unexpected error: " + e, { cause: e }),
         };
       }
       return {
         kind: "valid",
+        message: message as unknown as Valid,
       };
     },
   };

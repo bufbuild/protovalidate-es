@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@bufbuild/protobuf": "^2.5.0",
-    "@bufbuild/protocompile": "^0.0.1"
+    "@bufbuild/protocompile": "^0.0.1",
+    "expect-type": "^1.2.1"
   }
 }
