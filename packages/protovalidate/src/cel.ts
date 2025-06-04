@@ -21,13 +21,7 @@ import {
   type Registry,
   ScalarType,
 } from "@bufbuild/protobuf";
-import {
-  isReflectList,
-  isReflectMap,
-  isReflectMessage,
-  type Path,
-  type ReflectMessageGet,
-} from "@bufbuild/protobuf/reflect";
+import { type Path, type ReflectMessageGet } from "@bufbuild/protobuf/reflect";
 import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
 import {
   type CelEnv,
@@ -579,16 +573,6 @@ function reflectToCel(
   val: unknown,
   scalarType: ScalarType | undefined,
 ): unknown {
-  if (isReflectMessage(val)) {
-    return val.message;
-  }
-  if (isReflectList(val)) {
-    // @ts-expect-error -- TODO provide public access in protobuf-es, or support reflection types in CEL
-    return val[Symbol.for("reflect unsafe local")];
-  }
-  if (isReflectMap(val)) {
-    return val;
-  }
   switch (scalarType) {
     case ScalarType.DOUBLE:
     case ScalarType.FLOAT:
