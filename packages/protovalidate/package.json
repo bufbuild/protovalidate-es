@@ -42,7 +42,7 @@
     }
   },
   "dependencies": {
-    "@bufbuild/cel": "file:bufbuild-cel-0.2.0.tgz"
+    "@bufbuild/cel": "0.2.0"
   },
   "peerDependencies": {
     "@bufbuild/protobuf": "^2.5.0"
