@@ -71,7 +71,7 @@ function readUpstreamVersionFromPackageJsonScript(path) {
   if (typeof generate !== "string") {
     throw new Error(`Missing 'scripts.generate' in ${path}`);
   }
-  const r = /protovalidate-testing:(v\d+\.\d+\.\d+)/.exec(generate);
+  const r = /protovalidate-testing:(v\d+\.\d+\.\d+.*)/.exec(generate);
   if (!r) {
     throw new Error(
       `Unexpected value for 'scripts.generate' in ${path}: ${generate}`,
