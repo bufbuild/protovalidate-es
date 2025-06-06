@@ -17,7 +17,7 @@
 import { readFileSync, writeFileSync, existsSync, globSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-if (process.argv.length !== 3 || !/^\d+\.\d+\.\d+$/.test(process.argv[2])) {
+if (process.argv.length !== 3 || !/^\d+\.\d+\.\d+.*$/.test(process.argv[2])) {
   process.stderr.write(
     [
       `USAGE: ${process.argv[1]} <new-version>`,
