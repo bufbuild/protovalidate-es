@@ -1,6 +1,6 @@
 {
   "name": "@bufbuild/protovalidate",
-  "version": "0.2.1",
+  "version": "1.0.0-rc.1",
   "description": "Protocol Buffer Validation for ECMAScript",
   "keywords": [
     "javascript",
