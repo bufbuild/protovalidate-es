@@ -271,3 +271,33 @@ export class EvalAnyRules implements Eval<ReflectMessage> {
     return this.in.length + this.notIn.length == 0;
   }
 }
+
+/**
+ * buf.validate.MessageOneofRule does not use CEL expressions. This implements custom logic for this rule.
+ */
+export class EvalMessageOneofRule implements Eval<ReflectMessage> {
+  constructor(
+    private readonly fields: DescField[],
+    private readonly required: boolean,
+  ) {}
+  eval(val: ReflectMessage, cursor: Cursor) {
+    const setFields = this.fields.filter(field => val.isSet(field));
+    if (setFields.length > 1) {
+      cursor.violate(
+        `more than one field selected: ${setFields.map(f => f.name).join(", ")}`,
+        "oneof.fields",
+        [],
+      );
+    }
+    if (this.required && setFields.length == 0) {
+      cursor.violate(
+        `one field must be selected`,
+        "oneof.fields",
+        [],
+      );
+    }
+  }
+  prune(): boolean {
+    return this.fields.length == 0;
+  }
+}

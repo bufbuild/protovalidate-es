@@ -32,7 +32,7 @@ import {
   message as ext_message,
   oneof as ext_oneof,
   FieldRulesSchema,
-  AnyRulesSchema,
+  AnyRulesSchema, type MessageOneofRule,
 } from "./gen/buf/validate/validate_pb.js";
 import {
   type ReflectList,
@@ -54,7 +54,7 @@ import {
   EvalNoop,
   EvalOneofRequired,
   EvalField,
-  EvalFieldLegacyRequired,
+  EvalFieldLegacyRequired, EvalMessageOneofRule,
 } from "./eval.js";
 import {
   getEnumRules,
@@ -78,6 +78,7 @@ import {
   EvalExtendedRulesCel,
   EvalStandardRulesCel,
 } from "./cel.js";
+import {CompilationError} from "./error.js";
 
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
@@ -101,6 +102,7 @@ export class Planner {
     if (!messageRules.disabled) {
       e.add(this.fields(message.fields));
       e.add(this.messageCel(messageRules));
+      e.add(this.messageOneofs(message, messageRules.oneof));
       e.add(this.oneofs(message.oneofs));
     }
     e.prune();
@@ -112,6 +114,22 @@ export class Planner {
       ...oneofs
         .filter((o) => getOption(o, ext_oneof).required)
         .map((o) => new EvalOneofRequired(o)),
+    );
+  }
+
+  private messageOneofs(message: DescMessage, oneofRules: MessageOneofRule[]): Eval<ReflectMessage> {
+    return new EvalMany<ReflectMessage>(
+      ...oneofRules
+        .map((rule) => {
+          const fields = rule.fields.map(fieldName => {
+            const descField = message.fields.find(descField => descField.name === fieldName);
+            if (!descField) {
+              throw new CompilationError(`bad rule: field name "${fieldName}" not found in ${message.toString()}`);
+            }
+            return descField;
+          });
+          return new EvalMessageOneofRule(fields, rule.required);
+        }),
     );
   }
 
