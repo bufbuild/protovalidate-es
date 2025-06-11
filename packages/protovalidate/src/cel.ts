@@ -21,7 +21,7 @@ import {
   type Registry,
   ScalarType,
 } from "@bufbuild/protobuf";
-import { type Path, type ReflectMessageGet } from "@bufbuild/protobuf/reflect";
+import type { Path, ReflectMessageGet } from "@bufbuild/protobuf/reflect";
 import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
 import {
   type CelEnv,

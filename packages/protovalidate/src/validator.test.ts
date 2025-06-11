@@ -42,100 +42,6 @@ const bufCompileOptions = {
   },
 };
 
-void test("message oneof happy path", () => {
-  const validator = createValidator();
-  const schema = compileMessage(
-    `
-      syntax="proto3";
-      import "buf/validate/validate.proto";
-      message Example {
-        string a = 1;
-        string b = 2;
-        option (buf.validate.message).oneof = {
-          fields: ["a", "b"]
-        };
-      }`,
-    bufCompileOptions,
-  );
-  const message =create(schema, {
-    a: "A",
-  });
-  const result = validator.validate(schema, message);
-  assert.equal(result.kind, "valid");
-});
-
-void test("message oneof violate", () => {
-  const validator = createValidator();
-  const schema = compileMessage(
-    `
-      syntax="proto3";
-      import "buf/validate/validate.proto";
-      message Example {
-        string a = 1;
-        string b = 2;
-        option (buf.validate.message).oneof = {
-          fields: ["a", "b"]
-        };
-      }`,
-    bufCompileOptions,
-  );
-  const message = create(schema, {
-    a: "A",
-    b: "B",
-  });
-  const result = validator.validate(schema, message);
-  assert.equal(result.kind, "invalid");
-  assert.equal(result.error?.name, "ValidationError");
-  assert.equal(result.error?.message, `more than one field selected: a, b [oneof.fields]`);
-});
-
-void test("message oneof required violate", () => {
-  const validator = createValidator();
-  const schema = compileMessage(
-    `
-      syntax="proto3";
-      import "buf/validate/validate.proto";
-      message Example {
-        string a = 1;
-        string b = 2;
-        option (buf.validate.message).oneof = {
-          fields: ["a", "b"],
-          required: true
-        };
-      }`,
-    bufCompileOptions,
-  );
-  const message = create(schema);
-  const result = validator.validate(schema, message);
-  assert.equal(result.kind, "invalid");
-  assert.equal(result.error?.name, "ValidationError");
-  assert.equal(result.error?.message, `one field must be selected [oneof.fields]`);
-});
-
-void test("message oneof bad field name", () => {
-  const validator = createValidator();
-  const schema = compileMessage(
-    `
-      syntax="proto3";
-      import "buf/validate/validate.proto";
-      message Example {
-        string a = 1;
-        string b = 2;
-        option (buf.validate.message).oneof = {
-          fields: ["a", "b", "xxx"]
-        };
-      }`,
-    bufCompileOptions,
-  );
-  const message =create(schema, {
-    a: "A",
-  });
-  const result = validator.validate(schema, message);
-  assert.equal(result.kind, "error");
-  assert.equal(result.error?.name, "CompilationError");
-  assert.equal(result.error?.message, `bad rule: field name "xxx" not found in message Example`);
-});
-
 void suite("Validator", () => {
   void suite("validate()", () => {
     void test("returns result", () => {
@@ -363,5 +269,150 @@ void suite("Validator", () => {
       const result = validatorLegacyRequired.validate(schema, validMessage);
       assert.equal(result.kind, "valid");
     });
+  });
+});
+
+void suite("MessageOneofRule", () => {
+  void suite("without required", () => {
+    const descMessage = compileMessage(
+      `
+      syntax="proto3";
+      import "buf/validate/validate.proto";
+      message Example {
+        string a = 1;
+        string b = 2;
+        bool unrelated = 3;
+        option (buf.validate.message).oneof = {
+          fields: ["a", "b"]
+        };
+      }`,
+      bufCompileOptions,
+    );
+    void test("no fields set is valid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, { unrelated: true });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "valid");
+    });
+    void test("one field set is valid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, {
+        a: "A",
+      });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "valid");
+    });
+    void test("unrelated field set is valid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, {
+        unrelated: true,
+      });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "valid");
+    });
+    void test("two fields set is invalid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, {
+        a: "A",
+        b: "B",
+      });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "invalid");
+      assert.equal(result.error?.name, "ValidationError");
+      assert.equal(
+        result.error?.message,
+        `only one of a, b can be set [message.oneof]`,
+      );
+    });
+  });
+  void suite("with required = true", () => {
+    const descMessage = compileMessage(
+      `
+      syntax="proto3";
+      import "buf/validate/validate.proto";
+      message Example {
+        string a = 1;
+        string b = 2;
+        bool unrelated = 3;
+        option (buf.validate.message).oneof = {
+          fields: ["a", "b"],
+          required: true,
+        };
+      }`,
+      bufCompileOptions,
+    );
+    void test("no fields set is invalid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, { unrelated: true });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "invalid");
+      assert.equal(result.error?.name, "ValidationError");
+      assert.equal(
+        result.error?.message,
+        `one of a, b must be set [message.oneof]`,
+      );
+    });
+    void test("one field set is valid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, {
+        a: "A",
+      });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "valid");
+    });
+    void test("unrelated field set is invalid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, {
+        unrelated: true,
+      });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "invalid");
+      assert.equal(result.error?.name, "ValidationError");
+      assert.equal(
+        result.error?.message,
+        `one of a, b must be set [message.oneof]`,
+      );
+    });
+    void test("two fields set is invalid", () => {
+      const validator = createValidator();
+      const message = create(descMessage, {
+        a: "A",
+        b: "B",
+      });
+      const result = validator.validate(descMessage, message);
+      assert.equal(result.kind, "invalid");
+      assert.equal(result.error?.name, "ValidationError");
+      assert.equal(
+        result.error?.message,
+        `only one of a, b can be set [message.oneof]`,
+      );
+    });
+  });
+
+  void test("message oneof bad field name", () => {
+    const validator = createValidator();
+    const schema = compileMessage(
+      `
+      syntax="proto3";
+      import "buf/validate/validate.proto";
+      message Example {
+        string a = 1;
+        string b = 2;
+        option (buf.validate.message).oneof = {
+          fields: ["a", "b", "xxx"]
+        };
+      }`,
+      bufCompileOptions,
+    );
+    const message = create(schema, {
+      a: "A",
+    });
+    const result = validator.validate(schema, message);
+    assert.equal(result.kind, "error");
+    assert.equal(result.error?.name, "CompilationError");
+    assert.equal(
+      result.error?.message,
+      `field name "xxx" not found in message Example`,
+    );
   });
 });

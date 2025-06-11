@@ -281,20 +281,18 @@ export class EvalMessageOneofRule implements Eval<ReflectMessage> {
     private readonly required: boolean,
   ) {}
   eval(val: ReflectMessage, cursor: Cursor) {
-    const setFields = this.fields.filter(field => val.isSet(field));
+    const setFields = this.fields.filter((field) => val.isSet(field));
     if (setFields.length > 1) {
+      const oneofNames = this.fields.map((f) => f.name).join(", ");
       cursor.violate(
-        `more than one field selected: ${setFields.map(f => f.name).join(", ")}`,
-        "oneof.fields",
+        `only one of ${oneofNames} can be set`,
+        "message.oneof",
         [],
       );
     }
     if (this.required && setFields.length == 0) {
-      cursor.violate(
-        `one field must be selected`,
-        "oneof.fields",
-        [],
-      );
+      const oneofNames = this.fields.map((f) => f.name).join(", ");
+      cursor.violate(`one of ${oneofNames} must be set`, "message.oneof", []);
     }
   }
   prune(): boolean {
