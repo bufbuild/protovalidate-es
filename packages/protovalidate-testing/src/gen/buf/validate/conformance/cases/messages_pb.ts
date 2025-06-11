@@ -27,7 +27,7 @@ import type { Message as Message$1 } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/messages.proto.
  */
 export const file_buf_validate_conformance_cases_messages: GenFile = /*@__PURE__*/
-  fileDesc("Ci1idWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvbWVzc2FnZXMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyJdCgdUZXN0TXNnEhkKBWNvbnN0GAEgASgJQgq6SAdyBQoDZm9vEjcKBm5lc3RlZBgCIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnIloKC01lc3NhZ2VOb25lEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5NZXNzYWdlTm9uZS5Ob25lTXNnGgkKB05vbmVNc2ciLgoPTWVzc2FnZURpc2FibGVkEhQKA3ZhbBgBIAEoBEIHukgEMgIgezoFukgCCAEiPwoHTWVzc2FnZRI0CgN2YWwYASABKAsyJy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuVGVzdE1zZyJXChNNZXNzYWdlQ3Jvc3NQYWNrYWdlEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5vdGhlcl9wYWNrYWdlLkVtYmVkIksKC01lc3NhZ2VTa2lwEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPYAQMiTwoPTWVzc2FnZVJlcXVpcmVkEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPIAQEiZwoaTWVzc2FnZVJlcXVpcmVkQnV0T3B0aW9uYWwSQQoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAiAEBQgYKBF92YWwiZAoUTWVzc2FnZVJlcXVpcmVkT25lb2YSPgoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAQgwKA29uZRIFukgCCAEiFQoTTWVzc2FnZVdpdGgzZEluc2lkZWIGcHJvdG8z", [file_buf_validate_conformance_cases_other_package_embed, file_buf_validate_validate]);
+  fileDesc("Ci1idWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvbWVzc2FnZXMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyJdCgdUZXN0TXNnEhkKBWNvbnN0GAEgASgJQgq6SAdyBQoDZm9vEjcKBm5lc3RlZBgCIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnIloKC01lc3NhZ2VOb25lEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5NZXNzYWdlTm9uZS5Ob25lTXNnGgkKB05vbmVNc2ciLgoPTWVzc2FnZURpc2FibGVkEhQKA3ZhbBgBIAEoBEIHukgEMgIgezoFukgCCAEiPwoHTWVzc2FnZRI0CgN2YWwYASABKAsyJy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuVGVzdE1zZyJXChNNZXNzYWdlQ3Jvc3NQYWNrYWdlEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5vdGhlcl9wYWNrYWdlLkVtYmVkIksKC01lc3NhZ2VTa2lwEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPYAQMiTwoPTWVzc2FnZVJlcXVpcmVkEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPIAQEiZwoaTWVzc2FnZVJlcXVpcmVkQnV0T3B0aW9uYWwSQQoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAiAEBQgYKBF92YWwiZAoUTWVzc2FnZVJlcXVpcmVkT25lb2YSPgoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAQgwKA29uZRIFukgCCAEiFQoTTWVzc2FnZVdpdGgzZEluc2lkZSJSChdNZXNzYWdlT25lb2ZTaW5nbGVGaWVsZBIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDoQukgNIgsKCXN0cl9maWVsZCJhChpNZXNzYWdlT25lb2ZNdWx0aXBsZUZpZWxkcxIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDocukgZIhcKCXN0cl9maWVsZAoKYm9vbF9maWVsZCJrCiJNZXNzYWdlT25lb2ZNdWx0aXBsZUZpZWxkc1JlcXVpcmVkEhEKCXN0cl9maWVsZBgBIAEoCRISCgpib29sX2ZpZWxkGAIgASgIOh66SBsiGQoJc3RyX2ZpZWxkCgpib29sX2ZpZWxkEAEiPQocTWVzc2FnZU9uZW9mVW5rbm93bkZpZWxkTmFtZRIRCglzdHJfZmllbGQYASABKAk6CrpIByIFCgN4eHhiBnByb3RvMw", [file_buf_validate_conformance_cases_other_package_embed, file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.TestMsg
@@ -218,4 +218,87 @@ export type MessageWith3dInside = Message$1<"buf.validate.conformance.cases.Mess
  */
 export const MessageWith3dInsideSchema: GenMessage<MessageWith3dInside> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_messages, 9);
+
+/**
+ * @generated from message buf.validate.conformance.cases.MessageOneofSingleField
+ */
+export type MessageOneofSingleField = Message$1<"buf.validate.conformance.cases.MessageOneofSingleField"> & {
+  /**
+   * @generated from field: string str_field = 1;
+   */
+  strField: string;
+
+  /**
+   * @generated from field: bool bool_field = 2;
+   */
+  boolField: boolean;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.MessageOneofSingleField.
+ * Use `create(MessageOneofSingleFieldSchema)` to create a new message.
+ */
+export const MessageOneofSingleFieldSchema: GenMessage<MessageOneofSingleField> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_messages, 10);
+
+/**
+ * @generated from message buf.validate.conformance.cases.MessageOneofMultipleFields
+ */
+export type MessageOneofMultipleFields = Message$1<"buf.validate.conformance.cases.MessageOneofMultipleFields"> & {
+  /**
+   * @generated from field: string str_field = 1;
+   */
+  strField: string;
+
+  /**
+   * @generated from field: bool bool_field = 2;
+   */
+  boolField: boolean;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.MessageOneofMultipleFields.
+ * Use `create(MessageOneofMultipleFieldsSchema)` to create a new message.
+ */
+export const MessageOneofMultipleFieldsSchema: GenMessage<MessageOneofMultipleFields> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_messages, 11);
+
+/**
+ * @generated from message buf.validate.conformance.cases.MessageOneofMultipleFieldsRequired
+ */
+export type MessageOneofMultipleFieldsRequired = Message$1<"buf.validate.conformance.cases.MessageOneofMultipleFieldsRequired"> & {
+  /**
+   * @generated from field: string str_field = 1;
+   */
+  strField: string;
+
+  /**
+   * @generated from field: bool bool_field = 2;
+   */
+  boolField: boolean;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.MessageOneofMultipleFieldsRequired.
+ * Use `create(MessageOneofMultipleFieldsRequiredSchema)` to create a new message.
+ */
+export const MessageOneofMultipleFieldsRequiredSchema: GenMessage<MessageOneofMultipleFieldsRequired> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_messages, 12);
+
+/**
+ * @generated from message buf.validate.conformance.cases.MessageOneofUnknownFieldName
+ */
+export type MessageOneofUnknownFieldName = Message$1<"buf.validate.conformance.cases.MessageOneofUnknownFieldName"> & {
+  /**
+   * @generated from field: string str_field = 1;
+   */
+  strField: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.MessageOneofUnknownFieldName.
+ * Use `create(MessageOneofUnknownFieldNameSchema)` to create a new message.
+ */
+export const MessageOneofUnknownFieldNameSchema: GenMessage<MessageOneofUnknownFieldName> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_messages, 13);
 

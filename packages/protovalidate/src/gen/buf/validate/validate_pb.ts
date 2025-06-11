@@ -32,7 +32,7 @@ export const file_buf_validate_validate: GenFile = /*@__PURE__*/
  * `Rule` represents a validation rule written in the Common Expression
  * Language (CEL) syntax. Each Rule includes a unique identifier, an
  * optional error message, and the CEL expression to evaluate. For more
- * information on CEL, [see our documentation](https://github.com/bufbuild/protovalidate/blob/main/docs/cel.md).
+ * information, [see our documentation](https://buf.build/docs/protovalidate/schemas/custom-rules/).
  *
  * ```proto
  * message Foo {
@@ -108,8 +108,8 @@ export type MessageRules = Message<"buf.validate.MessageRules"> & {
 
   /**
    * `cel` is a repeated field of type Rule. Each Rule specifies a validation rule to be applied to this message.
-   * These rules are written in Common Expression Language (CEL) syntax. For more information on
-   * CEL, [see our documentation](https://github.com/bufbuild/protovalidate/blob/main/docs/cel.md).
+   * These rules are written in Common Expression Language (CEL) syntax. For more information,
+   * [see our documentation](https://buf.build/docs/protovalidate/schemas/custom-rules/).
    *
    *
    * ```proto
@@ -129,10 +129,36 @@ export type MessageRules = Message<"buf.validate.MessageRules"> & {
   cel: Rule[];
 
   /**
+   * `oneof` is a repeated field of type MessageOneofRule that specifies a list of fields
+   * of which at most one can be present. If `required` is also specified, then exactly one
+   * of the specified fields _must_ be present.
+   *
+   * This will enforce oneof-like constraints with a few features not provided by
+   * actual Protobuf oneof declarations:
+   *   1. Repeated and map fields are allowed in this validation. In a Protobuf oneof,
+   *      only scalar fields are allowed.
+   *   2. Fields with implicit presence are allowed. In a Protobuf oneof, all member
+   *      fields have explicit presence. This means that, for the purpose of determining
+   *      how many fields are set, explicitly setting such a field to its zero value is
+   *      effectively the same as not setting it at all.
+   *   3. This will generate validation errors when unmarshalling, even from the binary
+   *      format. With a Protobuf oneof, if multiple fields are present in the serialized
+   *      form, earlier values are usually silently ignored when unmarshalling, with only
+   *      the last field being present when unmarshalling completes.
+   *
+   *
+   * ```proto
    * message MyMessage {
+   *   // Only one of `field1` or `field2` _can_ be present in this message.
    *   option (buf.validate.message).oneof = { fields: ["field1", "field2"] };
+   *   // Only one of `field3` or `field4` _must_ be present in this message.
    *   option (buf.validate.message).oneof = { fields: ["field3", "field4"], required: true };
+   *   string field1 = 1;
+   *   bytes field2 = 2;
+   *   bool field3 = 3;
+   *   int32 field4 = 4;
    * }
+   * ```
    *
    * @generated from field: repeated buf.validate.MessageOneofRule oneof = 4;
    */
@@ -151,11 +177,16 @@ export const MessageRulesSchema: GenMessage<MessageRules> = /*@__PURE__*/
  */
 export type MessageOneofRule = Message<"buf.validate.MessageOneofRule"> & {
   /**
+   * A list of field names to include in the oneof. All field names must be
+   * defined in the message.
+   *
    * @generated from field: repeated string fields = 1;
    */
   fields: string[];
 
   /**
+   * If true, one of the fields specified _must_ be set.
+   *
    * @generated from field: optional bool required = 2;
    */
   required: boolean;
@@ -215,8 +246,8 @@ export const OneofRulesSchema: GenMessage<OneofRules> = /*@__PURE__*/
 export type FieldRules = Message<"buf.validate.FieldRules"> & {
   /**
    * `cel` is a repeated field used to represent a textual expression
-   * in the Common Expression Language (CEL) syntax. For more information on
-   * CEL, [see our documentation](https://github.com/bufbuild/protovalidate/blob/main/docs/cel.md).
+   * in the Common Expression Language (CEL) syntax. For more information,
+   * [see our documentation](https://buf.build/docs/protovalidate/schemas/custom-rules/).
    *
    * ```proto
    * message MyMessage {
@@ -430,8 +461,8 @@ export const FieldRulesSchema: GenMessage<FieldRules> = /*@__PURE__*/
 export type PredefinedRules = Message<"buf.validate.PredefinedRules"> & {
   /**
    * `cel` is a repeated field used to represent a textual expression
-   * in the Common Expression Language (CEL) syntax. For more information on
-   * CEL, [see our documentation](https://github.com/bufbuild/protovalidate/blob/main/docs/cel.md).
+   * in the Common Expression Language (CEL) syntax. For more information,
+   * [see our documentation](https://buf.build/docs/protovalidate/schemas/predefined-rules/).
    *
    * ```proto
    * message MyMessage {
@@ -4216,7 +4247,7 @@ export const TimestampRulesSchema: GenMessage<TimestampRules> = /*@__PURE__*/
 
 /**
  * `Violations` is a collection of `Violation` messages. This message type is returned by
- * protovalidate when a proto message fails to meet the requirements set by the `Rule` validation rules.
+ * Protovalidate when a proto message fails to meet the requirements set by the `Rule` validation rules.
  * Each individual violation is represented by a `Violation` message.
  *
  * @generated from message buf.validate.Violations
@@ -4243,11 +4274,42 @@ export const ViolationsSchema: GenMessage<Violations> = /*@__PURE__*/
  * caused the violation, the specific rule that wasn't fulfilled, and a
  * human-readable error message.
  *
+ * For example, consider the following message:
+ *
+ * ```proto
+ * message User {
+ *     int32 age = 1 [(buf.validate.field).cel = {
+ *         id: "user.age",
+ *         expression: "this < 18 ? 'User must be at least 18 years old' : ''",
+ *     }];
+ * }
+ * ```
+ *
+ * It could produce the following violation:
+ *
  * ```json
  * {
- *   "fieldPath": "bar",
- *   "ruleId": "foo.bar",
- *   "message": "bar must be greater than 0"
+ *   "ruleId": "user.age",
+ *   "message": "User must be at least 18 years old",
+ *   "field": {
+ *     "elements": [
+ *       {
+ *         "fieldNumber": 1,
+ *         "fieldName": "age",
+ *         "fieldType": "TYPE_INT32"
+ *       }
+ *     ]
+ *   },
+ *   "rule": {
+ *     "elements": [
+ *       {
+ *         "fieldNumber": 23,
+ *         "fieldName": "cel",
+ *         "fieldType": "TYPE_MESSAGE",
+ *         "index": "0"
+ *       }
+ *     ]
+ *   }
  * }
  * ```
  *
@@ -4280,7 +4342,7 @@ export type Violation = Message<"buf.validate.Violation"> & {
   field?: FieldPath;
 
   /**
-   * `rule` is a machine-readable path that points to the specific rule rule that failed validation.
+   * `rule` is a machine-readable path that points to the specific rule that failed validation.
    * This will be a nested field starting from the FieldRules of the field that failed validation.
    * For custom rules, this will provide the path of the rule, e.g. `cel[0]`.
    *
@@ -4489,7 +4551,7 @@ export const FieldPathElementSchema: GenMessage<FieldPathElement> = /*@__PURE__*
  */
 export enum Ignore {
   /**
-   * Validation is only skipped if it's an unpopulated nullable fields.
+   * Validation is only skipped if it's an unpopulated nullable field.
    *
    * ```proto
    * syntax="proto3";
@@ -4654,7 +4716,7 @@ export const IgnoreSchema: GenEnum<Ignore> = /*@__PURE__*/
   enumDesc(file_buf_validate_validate, 0);
 
 /**
- * WellKnownRegex contain some well-known patterns.
+ * KnownRegex contains some well-known patterns.
  *
  * @generated from enum buf.validate.KnownRegex
  */
