@@ -133,7 +133,7 @@ export class Planner {
               );
               if (!found) {
                 throw new CompilationError(
-                  `field name "${fieldName}" not found in ${message.toString()}`,
+                  `field "${fieldName}" not found in ${message.toString()}`,
                 );
               }
               return found;

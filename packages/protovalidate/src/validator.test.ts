@@ -411,7 +411,7 @@ void suite("MessageOneofRule", () => {
     assert.equal(result.error?.name, "CompilationError");
     assert.equal(
       result.error?.message,
-      `field name "xxx" not found in message Example`,
+      `field "xxx" not found in message Example`,
     );
   });
 });
