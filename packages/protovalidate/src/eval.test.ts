@@ -44,6 +44,7 @@ void suite("check buf.validate.*Rules fields", () => {
     StringRulesSchema.field.strict,
     MessageRulesSchema.field.cel,
     MessageRulesSchema.field.disabled,
+    MessageRulesSchema.field.oneof,
     OneofRulesSchema.field.required,
     FieldRulesSchema.field.cel,
     FieldRulesSchema.field.required,
