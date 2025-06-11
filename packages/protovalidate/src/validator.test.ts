@@ -388,8 +388,7 @@ void suite("MessageOneofRule", () => {
       );
     });
   });
-
-  void test("message oneof bad field name", () => {
+  void test("with unknown field name", () => {
     const validator = createValidator();
     const schema = compileMessage(
       `
