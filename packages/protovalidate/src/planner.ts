@@ -124,23 +124,34 @@ export class Planner {
     oneofRules: MessageOneofRule[],
   ): Eval<ReflectMessage> {
     return new EvalMany<ReflectMessage>(
-      ...oneofRules.map(
-        (rule) =>
-          new EvalMessageOneofRule(
-            rule.fields.map((fieldName) => {
-              const found = message.fields.find(
-                (descField) => descField.name === fieldName,
+      ...oneofRules.map((rule) => {
+        if (rule.fields.length == 0) {
+          throw new CompilationError(
+            `at least one field must be specified in oneof rule for the ${message}`,
+          );
+        }
+        const seen = new Set<string>();
+        return new EvalMessageOneofRule(
+          rule.fields.map((fieldName) => {
+            if (seen.has(fieldName)) {
+              throw new CompilationError(
+                `duplicate ${fieldName} in oneof rule for the ${message}`,
               );
-              if (!found) {
-                throw new CompilationError(
-                  `field "${fieldName}" not found in ${message.toString()}`,
-                );
-              }
-              return found;
-            }),
-            rule.required,
-          ),
-      ),
+            }
+            seen.add(fieldName);
+            const found = message.fields.find(
+              (descField) => descField.name === fieldName,
+            );
+            if (!found) {
+              throw new CompilationError(
+                `field "${fieldName}" not found in ${message}`,
+              );
+            }
+            return found;
+          }),
+          rule.required,
+        );
+      }),
     );
   }
 
