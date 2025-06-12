@@ -127,7 +127,7 @@ export class Planner {
       ...oneofRules.map((rule) => {
         if (rule.fields.length == 0) {
           throw new CompilationError(
-            `at least one field must be specified in oneof rule for the message ${message}`,
+            `at least one field must be specified in oneof rule for the ${message}`,
           );
         }
         const seen = new Set<string>();
@@ -135,7 +135,7 @@ export class Planner {
           rule.fields.map((fieldName) => {
             if (seen.has(fieldName)) {
               throw new CompilationError(
-                `duplicate ${fieldName} in oneof rule for the message ${message}`,
+                `duplicate ${fieldName} in oneof rule for the ${message}`,
               );
             }
             seen.add(fieldName);
