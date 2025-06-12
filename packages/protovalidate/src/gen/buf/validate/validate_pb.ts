@@ -141,17 +141,18 @@ export type MessageRules = Message<"buf.validate.MessageRules"> & {
    *      fields have explicit presence. This means that, for the purpose of determining
    *      how many fields are set, explicitly setting such a field to its zero value is
    *      effectively the same as not setting it at all.
-   *   3. This will generate validation errors when unmarshalling, even from the binary
-   *      format. With a Protobuf oneof, if multiple fields are present in the serialized
-   *      form, earlier values are usually silently ignored when unmarshalling, with only
-   *      the last field being present when unmarshalling completes.
+   *   3. This will always generate validation errors for a message unmarshalled from
+   *      serialized data that sets more than one field. With a Protobuf oneof, when
+   *      multiple fields are present in the serialized form, earlier values are usually
+   *      silently ignored when unmarshalling, with only the last field being set when
+   *      unmarshalling completes.
    *
    *
    * ```proto
    * message MyMessage {
    *   // Only one of `field1` or `field2` _can_ be present in this message.
    *   option (buf.validate.message).oneof = { fields: ["field1", "field2"] };
-   *   // Only one of `field3` or `field4` _must_ be present in this message.
+   *   // Exactly one of `field3` or `field4` _must_ be present in this message.
    *   option (buf.validate.message).oneof = { fields: ["field3", "field4"], required: true };
    *   string field1 = 1;
    *   bytes field2 = 2;
@@ -178,7 +179,8 @@ export const MessageRulesSchema: GenMessage<MessageRules> = /*@__PURE__*/
 export type MessageOneofRule = Message<"buf.validate.MessageOneofRule"> & {
   /**
    * A list of field names to include in the oneof. All field names must be
-   * defined in the message.
+   * defined in the message. At least one field must be specified, and
+   * duplicates are not permitted.
    *
    * @generated from field: repeated string fields = 1;
    */
