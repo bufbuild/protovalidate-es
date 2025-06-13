@@ -147,6 +147,8 @@ export type MessageRules = Message<"buf.validate.MessageRules"> & {
    *      silently ignored when unmarshalling, with only the last field being set when
    *      unmarshalling completes.
    *
+   * Note that adding a field to a `oneof` will also set the IGNORE_IF_UNPOPULATED on the fields. This means
+   * only the field that os set will be validated and the unset fields are not validated according to the field rules.
    *
    * ```proto
    * message MyMessage {
