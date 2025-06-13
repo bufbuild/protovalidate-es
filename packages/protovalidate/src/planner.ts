@@ -102,7 +102,7 @@ export class Planner {
     const e = new EvalMany<ReflectMessage>();
     this.messageCache.set(message, e);
     if (!messageRules.disabled) {
-      e.add(this.fields(message.fields));
+      e.add(this.fields(messageRules, message.fields));
       e.add(this.messageCel(messageRules));
       e.add(this.messageOneofs(message, messageRules.oneof));
       e.add(this.oneofs(message.oneofs));
@@ -155,11 +155,21 @@ export class Planner {
     );
   }
 
-  private fields(fields: DescField[]): Eval<ReflectMessage> {
+  private fields(
+    msgRules: MessageRules,
+    fields: DescField[],
+  ): Eval<ReflectMessage> {
     const evals = new EvalMany<ReflectMessage>();
     for (const field of fields) {
       const fieldRules = getOption(field, ext_field);
-      if (fieldRules.required && fieldRules.ignore !== Ignore.ALWAYS) {
+      let ignore = fieldRules.ignore;
+      if (
+        !isFieldSet(fieldRules, field) &&
+        msgRules.oneof.some((oneof) => oneof.fields.includes(field.name))
+      ) {
+        ignore = Ignore.IF_UNPOPULATED;
+      }
+      if (fieldRules.required && ignore !== Ignore.ALWAYS) {
         evals.add(new EvalFieldRequired(field));
       }
       if (
@@ -174,7 +184,7 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreMessageField(field, fieldRules.ignore),
+              ignoreMessageField(field, ignore),
               this.message(field.message, fieldRules, baseRulePath, field),
             ),
           );
@@ -184,7 +194,7 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreListOrMapField(field, fieldRules.ignore),
+              ignoreListOrMapField(field, ignore),
               this.planList(field, fieldRules, baseRulePath),
             ),
           );
@@ -194,7 +204,7 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreListOrMapField(field, fieldRules.ignore),
+              ignoreListOrMapField(field, ignore),
               this.map(field, fieldRules, baseRulePath),
             ),
           );
@@ -204,7 +214,7 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreScalarOrEnumField(field, fieldRules.ignore),
+              ignoreScalarOrEnumField(field, ignore),
               this.enumeration(field.enum, fieldRules, baseRulePath, field),
             ),
           );
@@ -214,7 +224,7 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
-              ignoreScalarOrEnumField(field, fieldRules.ignore),
+              ignoreScalarOrEnumField(field, ignore),
               this.scalar(field.scalar, fieldRules, baseRulePath, false, field),
             ),
           );
