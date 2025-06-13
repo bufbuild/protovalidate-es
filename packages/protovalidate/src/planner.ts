@@ -102,7 +102,7 @@ export class Planner {
     const e = new EvalMany<ReflectMessage>();
     this.messageCache.set(message, e);
     if (!messageRules.disabled) {
-      e.add(this.fields(messageRules, message.fields));
+      e.add(this.fields(messageRules.oneof, message.fields));
       e.add(this.messageCel(messageRules));
       e.add(this.messageOneofs(message, messageRules.oneof));
       e.add(this.oneofs(message.oneofs));
@@ -156,7 +156,7 @@ export class Planner {
   }
 
   private fields(
-    msgRules: MessageRules,
+    oneofs: MessageOneofRule[],
     fields: DescField[],
   ): Eval<ReflectMessage> {
     const evals = new EvalMany<ReflectMessage>();
@@ -164,8 +164,8 @@ export class Planner {
       const fieldRules = getOption(field, ext_field);
       let ignore = fieldRules.ignore;
       if (
-        !isFieldSet(fieldRules, field) &&
-        msgRules.oneof.some((oneof) => oneof.fields.includes(field.name))
+        !isFieldSet(fieldRules, FieldRulesSchema.field.ignore) &&
+        oneofs.some((oneof) => oneof.fields.includes(field.name))
       ) {
         ignore = Ignore.IF_UNPOPULATED;
       }
