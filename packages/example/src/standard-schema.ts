@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {create} from "@bufbuild/protobuf";
-import {createStandardSchema} from "@bufbuild/protovalidate";
+import { create } from "@bufbuild/protobuf";
+import { createStandardSchema } from "@bufbuild/protovalidate";
 import {
   OrderSchema,
   type OrderValid,
   type User,
 } from "./gen/store/v1/order_pb.js";
-import {StandardSchemaV1} from "@standard-schema/spec";
+import { StandardSchemaV1 } from "@standard-schema/spec";
 
 async function standardValidate<T extends StandardSchemaV1>(
   schema: T,
