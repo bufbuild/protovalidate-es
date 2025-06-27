@@ -120,6 +120,11 @@ export function createStandardSchema<Desc extends DescMessage>(
             };
         }
       },
+      // Standard Schema types property for static analysis and type inference.
+      // This property provides type information to external tools and libraries
+      // for extracting input/output types using InferInput<T> and InferOutput<T>.
+      // Runtime values are intentionally set to undefined to minimize overhead
+      // while maintaining full TypeScript type information.
       types: {
         input: undefined as unknown as MessageShape<Desc>,
         output: undefined as unknown as MessageValidType<Desc>,
