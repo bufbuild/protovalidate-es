@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { create } from "@bufbuild/protobuf";
+import {create} from "@bufbuild/protobuf";
+import {createStandardSchema} from "@bufbuild/protovalidate";
 import {
-  createStandardSchema,
-  type StandardSchemaV1,
-} from "@bufbuild/protovalidate";
-import { MoneyTransferSchema } from "./gen/banking/v1/money_transfer_pb.js";
+  OrderSchema,
+  type OrderValid,
+  type User,
+} from "./gen/store/v1/order_pb.js";
+import {StandardSchemaV1} from "@standard-schema/spec";
 
 async function standardValidate<T extends StandardSchemaV1>(
   schema: T,
@@ -28,26 +30,37 @@ async function standardValidate<T extends StandardSchemaV1>(
   return Promise.resolve(result);
 }
 
-async function validate() {
-  const schema = createStandardSchema(MoneyTransferSchema);
+const order = create(OrderSchema, {
+  id: "ed1cb800-75cb-4e4c-95ab-e093a7f23e55",
+  user: {
+    // This field is required. Once validation passes, it will always be defined.
+    name: "John Doe",
+  },
+});
 
-  const transfer = create(MoneyTransferSchema, {
-    toAccountId: "550e8400-e29b-41d4-a716-446655440000",
-    fromAccountId: "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-  });
+async function main() {
+  const schema = createStandardSchema(OrderSchema);
+  const result = await standardValidate(schema, order);
 
-  const result = await standardValidate(schema, transfer);
-
-  if ("issues" in result) {
-    console.log("❌ Invalid! Found", result.issues?.length || 0, "issues:");
-    result.issues?.forEach((issue, i) => {
-      // Issues have a message and optional path
-      const path = issue.path ? issue.path.join(".") : "root";
-      console.log(`  ${i + 1}. [${path}] ${issue.message}`);
-    });
-  } else {
-    console.log("✅ Valid! The validated value is:", result.value);
+  if (result.issues !== undefined) {
+    console.log(`invalid order ${result.issues}`);
+    return;
   }
+
+  // If there are no issues, the result is valid.
+  processOrder(result.value);
 }
 
-validate();
+main();
+
+function processOrder(order: OrderValid) {
+  console.log(`processing order ${order.id}`);
+  // On the Valid type, the `user` property isn't optional, because
+  // the field is annotated with the protovalidate required rule.
+  setUserActive(order.user);
+  return true;
+}
+
+function setUserActive(user: User) {
+  console.log(`user ${user.name} has ordered something`);
+}
