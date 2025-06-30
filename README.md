@@ -69,7 +69,7 @@ if (result.kind !== "valid") {
 Note that protovalidate-es requires the Protobuf runtime [@bufbuild/protobuf](https://www.npmjs.com/package/@bufbuild/protobuf).
 
 
-## Additional Languages and Repositories
+## Additional languages and repositories
 
 Protovalidate isn't just for ECMAScript! You might be interested in sibling repositories for other languages:
 
