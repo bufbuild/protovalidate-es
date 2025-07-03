@@ -54,6 +54,6 @@ if (result.kind !== "valid") {
 >
 > It requires the Protobuf runtime [@bufbuild/protobuf](https://www.npmjs.com/package/@bufbuild/protobuf).
 
-[protovalidate]: https://buf.build/docs/protovalidate
+[protovalidate]: https://protovalidate.com
 [cel]: https://cel.dev
 [protoc-gen-validate]: https://github.com/bufbuild/protoc-gen-validate
