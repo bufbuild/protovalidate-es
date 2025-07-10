@@ -23,6 +23,7 @@ jobs:
       matrix:
         task:
           - format
+          - lint
           - attw
           - build
           - license-header
