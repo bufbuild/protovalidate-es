@@ -19,7 +19,7 @@ import {
   type OrderValid,
   type User,
 } from "./gen/store/v1/order_pb.js";
-import { StandardSchemaV1 } from "@standard-schema/spec";
+import type { StandardSchemaV1 } from "@standard-schema/spec";
 
 async function standardValidate<T extends StandardSchemaV1>(
   schema: T,
