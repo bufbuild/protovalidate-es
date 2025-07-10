@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package banking.v1;
+package store.v1;
 
 import "buf/validate/validate.proto";
 
