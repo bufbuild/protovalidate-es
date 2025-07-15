@@ -52,8 +52,7 @@ export function ignoreListOrMapField(
     case undefined:
     case Ignore.UNSPECIFIED:
       return always as Condition<ReflectMessage>;
-    case Ignore.IF_UNPOPULATED:
-    case Ignore.IF_DEFAULT_VALUE:
+    case Ignore.IF_ZERO_VALUE:
       return new FieldIsSet(field);
     case Ignore.ALWAYS:
       return never as Condition<ReflectMessage>;
@@ -67,10 +66,8 @@ export function ignoreMessageField(
   switch (ignore) {
     case undefined:
     case Ignore.UNSPECIFIED:
-    case Ignore.IF_UNPOPULATED:
+    case Ignore.IF_ZERO_VALUE:
       return new FieldIsSet(field);
-    case Ignore.IF_DEFAULT_VALUE:
-      return new FieldMessageNotEmpty(field);
     case Ignore.ALWAYS:
       return never as Condition<ReflectMessage>;
   }
@@ -88,31 +85,12 @@ export function ignoreScalarOrEnumField(
       case undefined:
       case Ignore.UNSPECIFIED:
         return always as Condition<ReflectMessage>;
-      case Ignore.IF_UNPOPULATED:
-      case Ignore.IF_DEFAULT_VALUE:
+      case Ignore.IF_ZERO_VALUE:
         return new FieldIsSet(field);
     }
   }
   // field presence EXPLICIT or LEGACY_REQUIRED
-  switch (ignore) {
-    case undefined:
-    case Ignore.UNSPECIFIED:
-    case Ignore.IF_UNPOPULATED:
-      return new FieldIsSet(field);
-    case Ignore.IF_DEFAULT_VALUE:
-      if (field.fieldKind == "scalar") {
-        return new FieldScalarNot(
-          field,
-          field.scalar,
-          field.getDefaultValue() ?? scalarZeroValue(field.scalar, false),
-        );
-      }
-      return new FieldScalarNot(
-        field,
-        ScalarType.INT32,
-        field.getDefaultValue() ?? field.enum.values[0].number,
-      );
-  }
+  return new FieldIsSet(field);
 }
 
 export function ignoreEnumValue(
@@ -123,8 +101,7 @@ export function ignoreEnumValue(
     case undefined:
     case Ignore.UNSPECIFIED:
       return always as Condition<ScalarValue>;
-    case Ignore.IF_DEFAULT_VALUE:
-    case Ignore.IF_UNPOPULATED:
+    case Ignore.IF_ZERO_VALUE:
       return new ScalarNot(ScalarType.INT32, enu.values[0].number);
     case Ignore.ALWAYS:
       return never as Condition<ScalarValue>;
@@ -139,8 +116,7 @@ export function ignoreScalarValue(
     case undefined:
     case Ignore.UNSPECIFIED:
       return always as Condition<ScalarValue>;
-    case Ignore.IF_DEFAULT_VALUE:
-    case Ignore.IF_UNPOPULATED:
+    case Ignore.IF_ZERO_VALUE:
       return new ScalarNot(scalar, scalarZeroValue(scalar, false));
     case Ignore.ALWAYS:
       return never as Condition<ScalarValue>;
@@ -153,20 +129,10 @@ export function ignoreMessageValue(
   switch (ignore) {
     case undefined:
     case Ignore.UNSPECIFIED:
-    case Ignore.IF_UNPOPULATED:
+    case Ignore.IF_ZERO_VALUE:
       return always as Condition<ReflectMessage>;
-    case Ignore.IF_DEFAULT_VALUE:
-      return new MessageNotEmpty();
     case Ignore.ALWAYS:
       return never as Condition<ReflectMessage>;
-  }
-}
-
-class MessageNotEmpty implements Condition<ReflectMessage> {
-  readonly always = false;
-  readonly never = false;
-  check(val: ReflectMessage): boolean {
-    return val.fields.some((f) => val.isSet(f));
   }
 }
 
@@ -188,34 +154,5 @@ class FieldIsSet implements Condition<ReflectMessage> {
   constructor(private readonly field: DescField) {}
   check(val: ReflectMessage): boolean {
     return val.isSet(this.field);
-  }
-}
-
-class FieldMessageNotEmpty implements Condition<ReflectMessage> {
-  readonly always = false;
-  readonly never = false;
-  constructor(private readonly field: DescField & { fieldKind: "message" }) {}
-  check(val: ReflectMessage): boolean {
-    if (!val.isSet(this.field)) {
-      return false;
-    }
-    const fieldVal = val.get(this.field);
-    return fieldVal.fields.some((f) => fieldVal.isSet(f));
-  }
-}
-
-class FieldScalarNot implements Condition<ReflectMessage> {
-  readonly always = false;
-  readonly never = false;
-  constructor(
-    private readonly field: DescField & { fieldKind: "scalar" | "enum" },
-    private readonly scalar: ScalarType,
-    private readonly not: ScalarValue,
-  ) {}
-  check(val: ReflectMessage): boolean {
-    return (
-      val.isSet(this.field) &&
-      !scalarEquals(this.scalar, this.not, val.get(this.field))
-    );
   }
 }
