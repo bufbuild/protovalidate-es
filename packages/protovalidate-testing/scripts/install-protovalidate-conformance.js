@@ -19,9 +19,11 @@ import { join } from "node:path";
 import { URL } from "node:url";
 
 const packageDir = new URL("../", import.meta.url).pathname;
-const version = readUpstreamVersionFromPackageJsonScript(
-  join(packageDir, "package.json"),
-);
+// TODO remove temporary override for testing
+// const version = readUpstreamVersionFromPackageJsonScript(
+//   join(packageDir, "package.json"),
+// );
+const version = "next";
 
 goInstall(
   `github.com/bufbuild/protovalidate/tools/protovalidate-conformance@${version}`,

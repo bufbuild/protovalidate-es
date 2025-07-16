@@ -16,7 +16,7 @@
     "directory": "packages/protovalidate"
   },
   "scripts": {
-    "fetch-proto": "buf export buf.build/bufbuild/protovalidate:v0.13.3 --output proto",
+    "fetch-proto": "buf export https://github.com/bufbuild/protovalidate.git#branch=next,subdir=proto/protovalidate --output proto",
     "postfetch-proto": "license-header proto",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",

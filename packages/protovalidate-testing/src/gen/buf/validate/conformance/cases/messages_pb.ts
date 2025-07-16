@@ -27,7 +27,7 @@ import type { Message as Message$1 } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/messages.proto.
  */
 export const file_buf_validate_conformance_cases_messages: GenFile = /*@__PURE__*/
-  fileDesc("Ci1idWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvbWVzc2FnZXMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyJdCgdUZXN0TXNnEhkKBWNvbnN0GAEgASgJQgq6SAdyBQoDZm9vEjcKBm5lc3RlZBgCIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnIloKC01lc3NhZ2VOb25lEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5NZXNzYWdlTm9uZS5Ob25lTXNnGgkKB05vbmVNc2ciLgoPTWVzc2FnZURpc2FibGVkEhQKA3ZhbBgBIAEoBEIHukgEMgIgezoFukgCCAEiPwoHTWVzc2FnZRI0CgN2YWwYASABKAsyJy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuVGVzdE1zZyJXChNNZXNzYWdlQ3Jvc3NQYWNrYWdlEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5vdGhlcl9wYWNrYWdlLkVtYmVkIksKC01lc3NhZ2VTa2lwEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPYAQMiTwoPTWVzc2FnZVJlcXVpcmVkEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPIAQEiZwoaTWVzc2FnZVJlcXVpcmVkQnV0T3B0aW9uYWwSQQoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAiAEBQgYKBF92YWwiZAoUTWVzc2FnZVJlcXVpcmVkT25lb2YSPgoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAQgwKA29uZRIFukgCCAEiFQoTTWVzc2FnZVdpdGgzZEluc2lkZSJSChdNZXNzYWdlT25lb2ZTaW5nbGVGaWVsZBIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDoQukgNIgsKCXN0cl9maWVsZCJcCh9NZXNzYWdlT25lb2ZTaW5nbGVGaWVsZFJlcXVpcmVkEhEKCXN0cl9maWVsZBgBIAEoCRISCgpib29sX2ZpZWxkGAIgASgIOhK6SA8iDQoJc3RyX2ZpZWxkEAEiYQoaTWVzc2FnZU9uZW9mTXVsdGlwbGVGaWVsZHMSEQoJc3RyX2ZpZWxkGAEgASgJEhIKCmJvb2xfZmllbGQYAiABKAg6HLpIGSIXCglzdHJfZmllbGQKCmJvb2xfZmllbGQiawoiTWVzc2FnZU9uZW9mTXVsdGlwbGVGaWVsZHNSZXF1aXJlZBIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDoeukgbIhkKCXN0cl9maWVsZAoKYm9vbF9maWVsZBABIpYBCiBNZXNzYWdlT25lb2ZNdWx0aXBsZVNoYXJlZEZpZWxkcxIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCBIRCglpbnRfZmllbGQYAyABKAU6OLpINSIZCglzdHJfZmllbGQKCmJvb2xfZmllbGQQASIYCglzdHJfZmllbGQKCWludF9maWVsZBABIj0KHE1lc3NhZ2VPbmVvZlVua25vd25GaWVsZE5hbWUSEQoJc3RyX2ZpZWxkGAEgASgJOgq6SAciBQoDeHh4ImwKGk1lc3NhZ2VPbmVvZkR1cGxpY2F0ZUZpZWxkEhEKCXN0cl9maWVsZBgBIAEoCRISCgpib29sX2ZpZWxkGAIgASgIOie6SCQiIgoJc3RyX2ZpZWxkCgpib29sX2ZpZWxkCglzdHJfZmllbGQiRgoWTWVzc2FnZU9uZW9mWmVyb0ZpZWxkcxIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDoFukgCIgAiXwoZTWVzc2FnZU9uZW9mVW5zYXRpc2ZpYWJsZRIJCgFhGAEgASgIEgkKAWIYAiABKAgSCQoBYxgDIAEoCDohukgeIggKAWEKAWIQASIICgFiCgFjEAEiCAoBYQoBYxABIm0KHU1lc3NhZ2VPbmVvZklnbm9yZVVucG9wdWxhdGVkEhEKCXN0cl9maWVsZBgBIAEoCRIbCgpib29sX2ZpZWxkGAIgASgIQge6SARqAggBOhy6SBkiFwoJc3RyX2ZpZWxkCgpib29sX2ZpZWxkIncKJU1lc3NhZ2VPbmVvZklnbm9yZVVucG9wdWxhdGVkUmVxdWlyZWQSEQoJc3RyX2ZpZWxkGAEgASgJEhsKCmJvb2xfZmllbGQYAiABKAhCB7pIBGoCCAE6HrpIGyIZCglzdHJfZmllbGQKCmJvb2xfZmllbGQQASKSAQoaTWVzc2FnZU9uZW9mSWdub3JlT3ZlcnJpZGUSQgoJbXNnX2ZpZWxkGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA9gBAxISCgpib29sX2ZpZWxkGAIgASgIOhy6SBkiFwoJbXNnX2ZpZWxkCgpib29sX2ZpZWxkYgZwcm90bzM", [file_buf_validate_conformance_cases_other_package_embed, file_buf_validate_validate]);
+  fileDesc("Ci1idWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvbWVzc2FnZXMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyJdCgdUZXN0TXNnEhkKBWNvbnN0GAEgASgJQgq6SAdyBQoDZm9vEjcKBm5lc3RlZBgCIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnIloKC01lc3NhZ2VOb25lEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5NZXNzYWdlTm9uZS5Ob25lTXNnGgkKB05vbmVNc2ciPwoHTWVzc2FnZRI0CgN2YWwYASABKAsyJy5idWYudmFsaWRhdGUuY29uZm9ybWFuY2UuY2FzZXMuVGVzdE1zZyJXChNNZXNzYWdlQ3Jvc3NQYWNrYWdlEkAKA3ZhbBgBIAEoCzIzLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5vdGhlcl9wYWNrYWdlLkVtYmVkIksKC01lc3NhZ2VTa2lwEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPYAQMiTwoPTWVzc2FnZVJlcXVpcmVkEjwKA3ZhbBgBIAEoCzInLmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcy5UZXN0TXNnQga6SAPIAQEiZwoaTWVzc2FnZVJlcXVpcmVkQnV0T3B0aW9uYWwSQQoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAiAEBQgYKBF92YWwiZAoUTWVzc2FnZVJlcXVpcmVkT25lb2YSPgoDdmFsGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA8gBAUgAQgwKA29uZRIFukgCCAEiFQoTTWVzc2FnZVdpdGgzZEluc2lkZSJSChdNZXNzYWdlT25lb2ZTaW5nbGVGaWVsZBIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDoQukgNIgsKCXN0cl9maWVsZCJcCh9NZXNzYWdlT25lb2ZTaW5nbGVGaWVsZFJlcXVpcmVkEhEKCXN0cl9maWVsZBgBIAEoCRISCgpib29sX2ZpZWxkGAIgASgIOhK6SA8iDQoJc3RyX2ZpZWxkEAEiYQoaTWVzc2FnZU9uZW9mTXVsdGlwbGVGaWVsZHMSEQoJc3RyX2ZpZWxkGAEgASgJEhIKCmJvb2xfZmllbGQYAiABKAg6HLpIGSIXCglzdHJfZmllbGQKCmJvb2xfZmllbGQiawoiTWVzc2FnZU9uZW9mTXVsdGlwbGVGaWVsZHNSZXF1aXJlZBIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDoeukgbIhkKCXN0cl9maWVsZAoKYm9vbF9maWVsZBABIpYBCiBNZXNzYWdlT25lb2ZNdWx0aXBsZVNoYXJlZEZpZWxkcxIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCBIRCglpbnRfZmllbGQYAyABKAU6OLpINSIZCglzdHJfZmllbGQKCmJvb2xfZmllbGQQASIYCglzdHJfZmllbGQKCWludF9maWVsZBABIj0KHE1lc3NhZ2VPbmVvZlVua25vd25GaWVsZE5hbWUSEQoJc3RyX2ZpZWxkGAEgASgJOgq6SAciBQoDeHh4ImwKGk1lc3NhZ2VPbmVvZkR1cGxpY2F0ZUZpZWxkEhEKCXN0cl9maWVsZBgBIAEoCRISCgpib29sX2ZpZWxkGAIgASgIOie6SCQiIgoJc3RyX2ZpZWxkCgpib29sX2ZpZWxkCglzdHJfZmllbGQiRgoWTWVzc2FnZU9uZW9mWmVyb0ZpZWxkcxIRCglzdHJfZmllbGQYASABKAkSEgoKYm9vbF9maWVsZBgCIAEoCDoFukgCIgAiXwoZTWVzc2FnZU9uZW9mVW5zYXRpc2ZpYWJsZRIJCgFhGAEgASgIEgkKAWIYAiABKAgSCQoBYxgDIAEoCDohukgeIggKAWEKAWIQASIICgFiCgFjEAEiCAoBYQoBYxABIm0KHU1lc3NhZ2VPbmVvZklnbm9yZVVucG9wdWxhdGVkEhEKCXN0cl9maWVsZBgBIAEoCRIbCgpib29sX2ZpZWxkGAIgASgIQge6SARqAggBOhy6SBkiFwoJc3RyX2ZpZWxkCgpib29sX2ZpZWxkIncKJU1lc3NhZ2VPbmVvZklnbm9yZVVucG9wdWxhdGVkUmVxdWlyZWQSEQoJc3RyX2ZpZWxkGAEgASgJEhsKCmJvb2xfZmllbGQYAiABKAhCB7pIBGoCCAE6HrpIGyIZCglzdHJfZmllbGQKCmJvb2xfZmllbGQQASKSAQoaTWVzc2FnZU9uZW9mSWdub3JlT3ZlcnJpZGUSQgoJbXNnX2ZpZWxkGAEgASgLMicuYnVmLnZhbGlkYXRlLmNvbmZvcm1hbmNlLmNhc2VzLlRlc3RNc2dCBrpIA9gBAxISCgpib29sX2ZpZWxkGAIgASgIOhy6SBkiFwoJbXNnX2ZpZWxkCgpib29sX2ZpZWxkYgZwcm90bzM", [file_buf_validate_conformance_cases_other_package_embed, file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.TestMsg
@@ -82,23 +82,6 @@ export const MessageNone_NoneMsgSchema: GenMessage<MessageNone_NoneMsg> = /*@__P
   messageDesc(file_buf_validate_conformance_cases_messages, 1, 0);
 
 /**
- * @generated from message buf.validate.conformance.cases.MessageDisabled
- */
-export type MessageDisabled = Message$1<"buf.validate.conformance.cases.MessageDisabled"> & {
-  /**
-   * @generated from field: uint64 val = 1;
-   */
-  val: bigint;
-};
-
-/**
- * Describes the message buf.validate.conformance.cases.MessageDisabled.
- * Use `create(MessageDisabledSchema)` to create a new message.
- */
-export const MessageDisabledSchema: GenMessage<MessageDisabled> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 2);
-
-/**
  * @generated from message buf.validate.conformance.cases.Message
  */
 export type Message = Message$1<"buf.validate.conformance.cases.Message"> & {
@@ -113,7 +96,7 @@ export type Message = Message$1<"buf.validate.conformance.cases.Message"> & {
  * Use `create(MessageSchema)` to create a new message.
  */
 export const MessageSchema: GenMessage<Message> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 3);
+  messageDesc(file_buf_validate_conformance_cases_messages, 2);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageCrossPackage
@@ -130,7 +113,7 @@ export type MessageCrossPackage = Message$1<"buf.validate.conformance.cases.Mess
  * Use `create(MessageCrossPackageSchema)` to create a new message.
  */
 export const MessageCrossPackageSchema: GenMessage<MessageCrossPackage> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 4);
+  messageDesc(file_buf_validate_conformance_cases_messages, 3);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageSkip
@@ -147,7 +130,7 @@ export type MessageSkip = Message$1<"buf.validate.conformance.cases.MessageSkip"
  * Use `create(MessageSkipSchema)` to create a new message.
  */
 export const MessageSkipSchema: GenMessage<MessageSkip> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 5);
+  messageDesc(file_buf_validate_conformance_cases_messages, 4);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageRequired
@@ -164,7 +147,7 @@ export type MessageRequired = Message$1<"buf.validate.conformance.cases.MessageR
  * Use `create(MessageRequiredSchema)` to create a new message.
  */
 export const MessageRequiredSchema: GenMessage<MessageRequired> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 6);
+  messageDesc(file_buf_validate_conformance_cases_messages, 5);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageRequiredButOptional
@@ -181,7 +164,7 @@ export type MessageRequiredButOptional = Message$1<"buf.validate.conformance.cas
  * Use `create(MessageRequiredButOptionalSchema)` to create a new message.
  */
 export const MessageRequiredButOptionalSchema: GenMessage<MessageRequiredButOptional> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 7);
+  messageDesc(file_buf_validate_conformance_cases_messages, 6);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageRequiredOneof
@@ -204,7 +187,7 @@ export type MessageRequiredOneof = Message$1<"buf.validate.conformance.cases.Mes
  * Use `create(MessageRequiredOneofSchema)` to create a new message.
  */
 export const MessageRequiredOneofSchema: GenMessage<MessageRequiredOneof> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 8);
+  messageDesc(file_buf_validate_conformance_cases_messages, 7);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageWith3dInside
@@ -217,7 +200,7 @@ export type MessageWith3dInside = Message$1<"buf.validate.conformance.cases.Mess
  * Use `create(MessageWith3dInsideSchema)` to create a new message.
  */
 export const MessageWith3dInsideSchema: GenMessage<MessageWith3dInside> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 9);
+  messageDesc(file_buf_validate_conformance_cases_messages, 8);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofSingleField
@@ -239,7 +222,7 @@ export type MessageOneofSingleField = Message$1<"buf.validate.conformance.cases.
  * Use `create(MessageOneofSingleFieldSchema)` to create a new message.
  */
 export const MessageOneofSingleFieldSchema: GenMessage<MessageOneofSingleField> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 10);
+  messageDesc(file_buf_validate_conformance_cases_messages, 9);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofSingleFieldRequired
@@ -261,7 +244,7 @@ export type MessageOneofSingleFieldRequired = Message$1<"buf.validate.conformanc
  * Use `create(MessageOneofSingleFieldRequiredSchema)` to create a new message.
  */
 export const MessageOneofSingleFieldRequiredSchema: GenMessage<MessageOneofSingleFieldRequired> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 11);
+  messageDesc(file_buf_validate_conformance_cases_messages, 10);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofMultipleFields
@@ -283,7 +266,7 @@ export type MessageOneofMultipleFields = Message$1<"buf.validate.conformance.cas
  * Use `create(MessageOneofMultipleFieldsSchema)` to create a new message.
  */
 export const MessageOneofMultipleFieldsSchema: GenMessage<MessageOneofMultipleFields> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 12);
+  messageDesc(file_buf_validate_conformance_cases_messages, 11);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofMultipleFieldsRequired
@@ -305,7 +288,7 @@ export type MessageOneofMultipleFieldsRequired = Message$1<"buf.validate.conform
  * Use `create(MessageOneofMultipleFieldsRequiredSchema)` to create a new message.
  */
 export const MessageOneofMultipleFieldsRequiredSchema: GenMessage<MessageOneofMultipleFieldsRequired> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 13);
+  messageDesc(file_buf_validate_conformance_cases_messages, 12);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofMultipleSharedFields
@@ -332,7 +315,7 @@ export type MessageOneofMultipleSharedFields = Message$1<"buf.validate.conforman
  * Use `create(MessageOneofMultipleSharedFieldsSchema)` to create a new message.
  */
 export const MessageOneofMultipleSharedFieldsSchema: GenMessage<MessageOneofMultipleSharedFields> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 14);
+  messageDesc(file_buf_validate_conformance_cases_messages, 13);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofUnknownFieldName
@@ -349,7 +332,7 @@ export type MessageOneofUnknownFieldName = Message$1<"buf.validate.conformance.c
  * Use `create(MessageOneofUnknownFieldNameSchema)` to create a new message.
  */
 export const MessageOneofUnknownFieldNameSchema: GenMessage<MessageOneofUnknownFieldName> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 15);
+  messageDesc(file_buf_validate_conformance_cases_messages, 14);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofDuplicateField
@@ -371,7 +354,7 @@ export type MessageOneofDuplicateField = Message$1<"buf.validate.conformance.cas
  * Use `create(MessageOneofDuplicateFieldSchema)` to create a new message.
  */
 export const MessageOneofDuplicateFieldSchema: GenMessage<MessageOneofDuplicateField> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 16);
+  messageDesc(file_buf_validate_conformance_cases_messages, 15);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofZeroFields
@@ -393,7 +376,7 @@ export type MessageOneofZeroFields = Message$1<"buf.validate.conformance.cases.M
  * Use `create(MessageOneofZeroFieldsSchema)` to create a new message.
  */
 export const MessageOneofZeroFieldsSchema: GenMessage<MessageOneofZeroFields> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 17);
+  messageDesc(file_buf_validate_conformance_cases_messages, 16);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofUnsatisfiable
@@ -420,7 +403,7 @@ export type MessageOneofUnsatisfiable = Message$1<"buf.validate.conformance.case
  * Use `create(MessageOneofUnsatisfiableSchema)` to create a new message.
  */
 export const MessageOneofUnsatisfiableSchema: GenMessage<MessageOneofUnsatisfiable> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 18);
+  messageDesc(file_buf_validate_conformance_cases_messages, 17);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofIgnoreUnpopulated
@@ -442,7 +425,7 @@ export type MessageOneofIgnoreUnpopulated = Message$1<"buf.validate.conformance.
  * Use `create(MessageOneofIgnoreUnpopulatedSchema)` to create a new message.
  */
 export const MessageOneofIgnoreUnpopulatedSchema: GenMessage<MessageOneofIgnoreUnpopulated> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 19);
+  messageDesc(file_buf_validate_conformance_cases_messages, 18);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofIgnoreUnpopulatedRequired
@@ -464,7 +447,7 @@ export type MessageOneofIgnoreUnpopulatedRequired = Message$1<"buf.validate.conf
  * Use `create(MessageOneofIgnoreUnpopulatedRequiredSchema)` to create a new message.
  */
 export const MessageOneofIgnoreUnpopulatedRequiredSchema: GenMessage<MessageOneofIgnoreUnpopulatedRequired> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 20);
+  messageDesc(file_buf_validate_conformance_cases_messages, 19);
 
 /**
  * @generated from message buf.validate.conformance.cases.MessageOneofIgnoreOverride
@@ -486,5 +469,5 @@ export type MessageOneofIgnoreOverride = Message$1<"buf.validate.conformance.cas
  * Use `create(MessageOneofIgnoreOverrideSchema)` to create a new message.
  */
 export const MessageOneofIgnoreOverrideSchema: GenMessage<MessageOneofIgnoreOverride> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_messages, 21);
+  messageDesc(file_buf_validate_conformance_cases_messages, 20);
 
