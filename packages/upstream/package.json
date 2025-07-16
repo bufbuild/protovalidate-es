@@ -1,0 +1,21 @@
+{
+  "name": "upstream",
+  "private": true,
+  "license": "Apache-2.0",
+  "bin": {
+    "protovalidate-conformance": "bin/protovalidate-conformance.cjs",
+    "export-proto": "./bin/export-proto.mjs",
+    "update-readme": "./bin/update-readme.mjs",
+    "update-bufgenyaml": "./bin/update-bufgenyaml.mjs"
+  },
+  "scripts": {
+    "build": "node scripts/install-protovalidate-conformance.js",
+    "format": "biome format --write",
+    "lint": "biome lint --error-on-warnings",
+    "license-header": "license-header"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@bufbuild/buf": "^1.55.1"
+  }
+}

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Copyright 2024-2025 Buf Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +15,19 @@
 // limitations under the License.
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { readReference } from "../scripts/lib.mjs";
 
 /*
  * Write the protovalidate upstream version to README.md
  */
 
-const upstreamVersion = readProtovalidateVersionFromPackageJson("package.json");
-const readmePath = "README.md";
+if (process.argv.length != 3) {
+  console.error("USAGE: update-readme README.md");
+  process.exit(1);
+}
+
+const upstreamRef = readReference();
+const readmePath = process.argv[2];
 const readme = readFileSync(readmePath, "utf-8");
 const match = readme.match(
   /<!-- upstreamProtovalidateRef -->(.*)<!-- upstreamProtovalidateRef -->/,
@@ -32,35 +40,10 @@ const tail = readme.substring(match.index + match[0].length);
 const newReadme =
   head +
   "<!-- upstreamProtovalidateRef -->" +
-  upstreamVersion +
+  upstreamRef.value +
   "<!-- upstreamProtovalidateRef -->" +
   tail;
 if (newReadme !== readme) {
   writeFileSync(readmePath, newReadme);
   console.log(`Updated ${readmePath}`);
-}
-
-function readProtovalidateVersionFromPackageJson(path) {
-  const data = readFileSync(path, "utf8");
-  const pkg = JSON.parse(data);
-  if (typeof pkg !== "object" || pkg === null) {
-    throw new Error(`Failed to parse ${path}`);
-  }
-  if (
-    typeof pkg.scripts !== "object" ||
-    pkg.scripts === null ||
-    typeof pkg.scripts["fetch-proto"] !== "string"
-  ) {
-    throw new Error(`Missing scripts.fetch-proto in ${path}.`);
-  }
-  const match = pkg.scripts["fetch-proto"].match(
-    /buf export buf\.build\/bufbuild\/protovalidate:(.+) --output proto/,
-  );
-  if (match == null) {
-    throw new Error(
-      `Unable to find version in scripts.fetch-proto in ${path}.`,
-    );
-  }
-  console.log(match[1]);
-  return match[1];
 }
