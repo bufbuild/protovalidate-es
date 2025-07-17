@@ -18,9 +18,6 @@ import { readFileSync, writeFileSync } from "node:fs";
  * Write the protovalidate upstream version to README.md
  */
 
-// TODO remove temporary early exit for testing
-process.exit(0);
-
 const upstreamVersion = readProtovalidateVersionFromPackageJson("package.json");
 const readmePath = "README.md";
 const readme = readFileSync(readmePath, "utf-8");
