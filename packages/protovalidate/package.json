@@ -45,10 +45,10 @@
     "@bufbuild/cel": "0.2.0"
   },
   "peerDependencies": {
-    "@bufbuild/protobuf": "^2.5.0"
+    "@bufbuild/protobuf": "^2.6.1"
   },
   "devDependencies": {
-    "@bufbuild/protobuf": "^2.5.0",
+    "@bufbuild/protobuf": "^2.6.1",
     "@bufbuild/protocompile": "^0.0.1",
     "expect-type": "^1.2.1",
     "upstream": "*"
