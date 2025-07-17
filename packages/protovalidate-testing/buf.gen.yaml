@@ -1,6 +1,9 @@
 # buf.gen.yaml
 version: v2
 clean: true
+inputs:
+  - module: buf.build/bufbuild/protovalidate:v0.13.3
+  - module: buf.build/bufbuild/protovalidate-testing:v0.13.3
 plugins:
   - local: protoc-gen-es
     out: src/gen
