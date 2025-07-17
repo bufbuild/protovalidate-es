@@ -2,12 +2,8 @@
 version: v2
 clean: true
 inputs:
-  - git_repo: https://github.com/bufbuild/protovalidate.git
-    ref: next
-    subdir: proto/protovalidate
-  - git_repo: https://github.com/bufbuild/protovalidate.git
-    ref: next
-    subdir: proto/protovalidate-testing
+  - module: buf.build/bufbuild/protovalidate:v0.14.0
+  - module: buf.build/bufbuild/protovalidate-testing:v0.14.0
 plugins:
   - local: protoc-gen-es
     out: src/gen

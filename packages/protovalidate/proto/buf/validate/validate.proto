@@ -424,6 +424,7 @@ enum Ignore {
   // ```
   IGNORE_ALWAYS = 3;
 
+  reserved 2;
   reserved "IGNORE_EMPTY", "IGNORE_DEFAULT", "IGNORE_IF_DEFAULT_VALUE", "IGNORE_IF_UNPOPULATED";
 }
 
