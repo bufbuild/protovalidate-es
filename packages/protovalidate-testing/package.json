@@ -1,12 +1,10 @@
 {
   "name": "@bufbuild/protovalidate-testing",
   "private": true,
-  "bin": {
-    "protovalidate-conformance": "bin/protovalidate-conformance.cjs"
-  },
   "scripts": {
     "install-protovalidate-conformance": "node scripts/install-protovalidate-conformance.js",
-    "generate": "buf generate buf.build/bufbuild/protovalidate-testing:v0.13.3",
+    "update-bufgenyaml": "update-bufgenyaml buf.gen.yaml",
+    "generate": "buf generate",
     "postgenerate": "license-header src/gen",
     "test": "protovalidate-conformance --strict_message --strict_error --expected_failures=expected-failures.yaml -- tsx src/executor.ts",
     "format": "biome format --write",
@@ -17,6 +15,7 @@
   "sideEffects": false,
   "devDependencies": {
     "@bufbuild/protobuf": "^2.5.0",
-    "@bufbuild/protovalidate": "^0.5.0"
+    "@bufbuild/protovalidate": "^0.5.0",
+    "upstream": "*"
   }
 }

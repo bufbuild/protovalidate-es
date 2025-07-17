@@ -15,8 +15,8 @@
       "outputLogs": "new-only"
     },
     "update-readme": {
-      "dependsOn": [],
-      "inputs": ["package.json", "scripts/**", "README.md"],
+      "dependsOn": ["^build"],
+      "inputs": ["README.md"],
       "outputs": ["README.md"],
       "outputLogs": "new-only"
     }
