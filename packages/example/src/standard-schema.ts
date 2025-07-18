@@ -14,13 +14,36 @@
 
 import { create } from "@bufbuild/protobuf";
 import { createStandardSchema } from "@bufbuild/protovalidate";
-import {
-  OrderSchema,
-  type OrderValid,
-  type User,
-} from "./gen/store/v1/order_pb.js";
+import { OrderSchema, type OrderValid } from "./gen/store/v1/order_pb.js";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 
+async function main() {
+  const order = create(OrderSchema, {
+    id: "ed1cb800-75cb-4e4c-95ab-e093a7f23e55",
+    // The field `user` is required. Once validation passes, it will always be defined.
+    // user: {
+    //   name: "John Doe",
+    // },
+  });
+
+  const schema = createStandardSchema(OrderSchema);
+  const result = await standardValidate(schema, order);
+
+  if (result.issues !== undefined) {
+    console.error(`invalid order: ${result.issues[0].message}`);
+    process.exit(1);
+  }
+
+  // If there are no issues, the result is valid.
+  const validOrder: OrderValid = result.value;
+  // On the Valid type, the `user` property isn't optional, because
+  // the field is annotated with the protovalidate required rule.
+  console.log(`user ${validOrder.user.name} has ordered something`);
+}
+
+void main();
+
+// Placeholder for any framework that support the standard schema.
 async function standardValidate<T extends StandardSchemaV1>(
   schema: T,
   input: StandardSchemaV1.InferInput<T>,
@@ -28,39 +51,4 @@ async function standardValidate<T extends StandardSchemaV1>(
   const result = schema["~standard"].validate(input);
   // Handle both sync and async results
   return Promise.resolve(result);
-}
-
-const order = create(OrderSchema, {
-  id: "ed1cb800-75cb-4e4c-95ab-e093a7f23e55",
-  user: {
-    // This field is required. Once validation passes, it will always be defined.
-    name: "John Doe",
-  },
-});
-
-async function main() {
-  const schema = createStandardSchema(OrderSchema);
-  const result = await standardValidate(schema, order);
-
-  if (result.issues !== undefined) {
-    console.log(`invalid order ${result.issues}`);
-    return;
-  }
-
-  // If there are no issues, the result is valid.
-  processOrder(result.value);
-}
-
-main();
-
-function processOrder(order: OrderValid) {
-  console.log(`processing order ${order.id}`);
-  // On the Valid type, the `user` property isn't optional, because
-  // the field is annotated with the protovalidate required rule.
-  setUserActive(order.user);
-  return true;
-}
-
-function setUserActive(user: User) {
-  console.log(`user ${user.name} has ordered something`);
 }

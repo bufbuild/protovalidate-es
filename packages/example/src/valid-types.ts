@@ -14,19 +14,16 @@
 
 import { create } from "@bufbuild/protobuf";
 import { createValidator } from "@bufbuild/protovalidate";
-import {
-  OrderSchema,
-  type OrderValid,
-  type User,
-} from "./gen/store/v1/order_pb";
+import { OrderSchema, type OrderValid } from "./gen/store/v1/order_pb";
 
 const validator = createValidator({
-  // This option enabled validation of the proto2 `required` label.
+  // This option enables validation of the proto2 `required` label.
   legacyRequired: true,
 });
 
 const order = create(OrderSchema, {
   id: "ed1cb800-75cb-4e4c-95ab-e093a7f23e55",
+  // The field `user` is required. Once validation passes, it will always be defined.
   user: {
     name: "John Doe",
   },
@@ -36,20 +33,11 @@ const result = validator.validate(OrderSchema, order);
 
 switch (result.kind) {
   case "valid":
-    processOrder(result.message);
+    const validOrder: OrderValid = result.message;
+    // On the Valid type, the `user` property isn't optional, because
+    // the field is annotated with the protovalidate required rule.
+    console.log(`user ${validOrder.user.name} has ordered something`);
     break;
   default:
     throw result.error;
-}
-
-function processOrder(order: OrderValid) {
-  console.log(`processing order ${order.id}`);
-  // On the Valid type, the `user` property isn't optional, because
-  // the field is annotated with the protovalidate required rule.
-  setUserActive(order.user);
-  return true;
-}
-
-function setUserActive(user: User) {
-  console.log(`user ${user.name} has ordered something`);
 }

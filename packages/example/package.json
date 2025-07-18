@@ -4,7 +4,7 @@
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "start": "tsx src/index.ts",
+    "start": "tsx src/basic.ts",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
     "build": "tsc --project tsconfig.json --outDir ./dist/esm",
