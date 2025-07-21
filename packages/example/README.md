@@ -34,7 +34,7 @@ Modify the transfer in [src/basic.ts](./src/index.ts) and re-run the example to 
 
 ### Valid types
 
-Protovalidate rules can modify TypeScript types. A message field annotated with protovalidate's [`required` rule](https://buf.build/docs/reference/protovalidate/rules/field_rules/#required) becomes a required property.
+Protovalidate rules can modify TypeScript types. A message field annotated with Protovalidate's [`required` rule](https://protovalidate.com/reference/rules/field_rules/#required) becomes a required property.
 
 See [order.proto](./proto/store/v1/order.proto) and [src/valid-types.ts](./src/valid-types.ts) for an example,
 and take a look at the [Valid types](https://github.com/bufbuild/protobuf-es/blob/v2.6.1/MANUAL.md#valid-types)
