@@ -452,7 +452,7 @@ export class Planner {
           evalExtended.add(
             plan.compiled,
             rulePath.clone().extension(plan.ext).toPath(),
-            getExtension(rules, plan.ext),
+            getExtension(rules, plan.ext) as ReflectMessageGet,
             plan.ext.fieldKind == "scalar" ? plan.ext.scalar : undefined,
           );
         }

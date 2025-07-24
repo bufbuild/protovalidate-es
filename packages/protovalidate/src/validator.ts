@@ -31,7 +31,8 @@ import {
   type Violation,
 } from "./error.js";
 import { Planner } from "./planner.js";
-import { CelManager, type RegexMatcher } from "./cel.js";
+import { CelManager } from "./cel.js";
+import type { RegexMatcher } from "./func.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
 
 /**

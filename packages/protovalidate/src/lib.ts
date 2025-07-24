@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { type CelResult, CelUint } from "@bufbuild/cel";
+import { type CelList, isCelUint } from "@bufbuild/cel";
 import { scalarEquals } from "@bufbuild/protobuf/reflect";
 import { ScalarType } from "@bufbuild/protobuf";
 
@@ -1298,15 +1298,15 @@ class Uri {
  * Returns true if the array only contains values that are distinct from each
  * other by strict comparison.
  */
-export function unique(list: { getItems(): CelResult[] }): boolean {
-  return list.getItems().every((a, index, arr) => {
-    if (a instanceof CelUint) {
+export function unique(list: CelList): boolean {
+  return Array.from(list.values()).every((a, index, arr) => {
+    if (isCelUint(a)) {
       for (let i = 0; i < arr.length; i++) {
         if (i == index) {
           continue;
         }
         const b = arr[i];
-        if (b instanceof CelUint && b.value === a.value) {
+        if (isCelUint(b) && b.value === a.value) {
           return false;
         }
       }
