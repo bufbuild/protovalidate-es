@@ -19,21 +19,22 @@ import {
   getOption,
   hasOption,
   type Registry,
-  ScalarType,
+  type ScalarType,
 } from "@bufbuild/protobuf";
-import type { Path, ReflectMessageGet } from "@bufbuild/protobuf/reflect";
-import { type Timestamp, timestampNow } from "@bufbuild/protobuf/wkt";
+import type {
+  Path,
+  ReflectMessageGet,
+  ScalarValue,
+} from "@bufbuild/protobuf/reflect";
+import { timestampNow } from "@bufbuild/protobuf/wkt";
 import {
+  celEnv,
   type CelEnv,
-  CelError,
-  CelList,
-  CelObject,
-  type CelResult,
-  CelUint,
-  type CelVal,
-  createEnv,
-  Func,
-  FuncRegistry,
+  celFromScalar,
+  type CelInput,
+  isCelError,
+  parse,
+  plan,
 } from "@bufbuild/cel";
 import {
   type Rule,
@@ -44,20 +45,9 @@ import { CompilationError, RuntimeError } from "./error.js";
 import type { Eval } from "./eval.js";
 import type { Cursor } from "./cursor.js";
 import { getRuleScalarType } from "./rules.js";
-import {
-  bytesContains,
-  bytesEndsWith,
-  bytesStartsWith,
-  isEmail,
-  isHostAndPort,
-  isHostname,
-  isInf,
-  isIp,
-  isIpPrefix,
-  isUri,
-  isUriRef,
-  unique,
-} from "./lib.js";
+import { createCustomFuncions, type RegexMatcher } from "./func.js";
+import { STRINGS_EXT_FUNCS } from "@bufbuild/cel/ext/strings";
+import { isReflectMessage } from "@bufbuild/protobuf/reflect";
 
 type CelCompiledRules = {
   standard: {
@@ -82,265 +72,47 @@ export type CelCompiledRule =
     }
   | {
       kind: "interpretable";
-      interpretable: ReturnType<CelEnv["plan"]>;
+      interpretable: ReturnType<typeof plan>;
       rule: Rule;
     };
-
-export type RegexMatcher = (pattern: string, against: string) => boolean;
-
-function createCustomFuncs(regexMatcher?: RegexMatcher): FuncRegistry {
-  const reg = new FuncRegistry();
-  reg.add(
-    Func.unary(
-      "isNan",
-      ["double_is_nan_bool"],
-      (_id: number, arg: CelVal): CelResult | undefined => {
-        return typeof arg == "number" && Number.isNaN(arg);
-      },
-    ),
-  );
-  reg.add(
-    Func.newStrict(
-      "isInf",
-      ["double_is_inf_bool", "double_int_is_inf_bool"],
-      (_id: number, args: CelVal[]): CelResult | undefined => {
-        if (args.length == 1) {
-          return typeof args[0] == "number" && isInf(args[0]);
-        }
-        if (args.length == 2) {
-          return (
-            typeof args[0] == "number" &&
-            (typeof args[1] == "number" || typeof args[1] == "bigint") &&
-            isInf(args[0], args[1])
-          );
-        }
-        return false;
-      },
-    ),
-  );
-  reg.add(
-    Func.unary(
-      "isHostname",
-      ["string_is_hostname_bool"],
-      (_id: number, arg: CelVal): CelResult | undefined => {
-        if (typeof arg != "string") {
-          return false;
-        }
-        return isHostname(arg);
-      },
-    ),
-  );
-  reg.add(
-    Func.binary(
-      "isHostAndPort",
-      ["string_bool_is_host_and_port_bool"],
-      (_id: number, lhs: CelVal, rhs: CelVal): CelResult | undefined => {
-        if (typeof lhs != "string" || typeof rhs != "boolean") {
-          return false;
-        }
-        return isHostAndPort(lhs, rhs);
-      },
-    ),
-  );
-  reg.add(
-    Func.unary(
-      "isEmail",
-      ["string_is_email_bool"],
-      (_id: number, arg: CelVal): CelResult | undefined => {
-        if (typeof arg != "string") {
-          return false;
-        }
-        return isEmail(arg);
-      },
-    ),
-  );
-  reg.add(
-    Func.newStrict(
-      "isIp",
-      ["string_is_ip_bool", "string_int_is_ip_bool"],
-      (_id: number, args: CelVal[]): CelResult | undefined => {
-        if (args.length == 1) {
-          return typeof args[0] == "string" && isIp(args[0]);
-        }
-        if (args.length == 2) {
-          return (
-            typeof args[0] == "string" &&
-            (typeof args[1] == "number" || typeof args[1] == "bigint") &&
-            isIp(args[0], args[1])
-          );
-        }
-        return false;
-      },
-    ),
-  );
-  reg.add(
-    Func.newStrict(
-      "isIpPrefix",
-      [
-        "string_is_ip_prefix_bool",
-        "string_int_is_ip_prefix_bool",
-        "string_bool_is_ip_prefix_bool",
-        "string_int_bool_is_ip_prefix_bool",
-      ],
-      (_id: number, args: CelVal[]): CelResult | undefined => {
-        if (args.length < 1 || typeof args[0] != "string") {
-          return undefined;
-        }
-        if (args.length == 1) {
-          return isIpPrefix(args[0]);
-        }
-        if (args.length == 2) {
-          if (typeof args[1] == "boolean") {
-            return isIpPrefix(args[0], undefined, args[1]);
-          }
-          if (typeof args[1] == "number" || typeof args[1] == "bigint") {
-            return isIpPrefix(args[0], args[1]);
-          }
-        }
-        if (
-          args.length == 3 &&
-          (typeof args[1] == "number" || typeof args[1] == "bigint") &&
-          typeof args[2] == "boolean"
-        ) {
-          return isIpPrefix(args[0], args[1], args[2]);
-        }
-        return undefined;
-      },
-    ),
-  );
-  reg.add(
-    Func.unary(
-      "isUri",
-      ["string_is_uri_bool"],
-      (_id: number, arg: CelVal): CelResult | undefined => {
-        return typeof arg == "string" && isUri(arg);
-      },
-    ),
-  );
-  reg.add(
-    Func.unary(
-      "isUriRef",
-      ["string_is_uri_ref_bool"],
-      (_id: number, arg: CelVal): CelResult | undefined => {
-        return typeof arg == "string" && isUriRef(arg);
-      },
-    ),
-  );
-  reg.add(
-    Func.unary(
-      "unique",
-      ["list_unique_bool"],
-      (_id: number, arg: CelVal): CelResult | undefined => {
-        return arg instanceof CelList && unique(arg);
-      },
-    ),
-  );
-  reg.add(
-    Func.binary(
-      "getField",
-      ["dyn_string_get_field_dyn"],
-      (id: number, lhs: CelVal, rhs: CelVal): CelResult | undefined => {
-        if (typeof rhs == "string" && lhs instanceof CelObject) {
-          return lhs.accessByName(id, rhs);
-        }
-        return undefined;
-      },
-    ),
-  );
-  reg.add(
-    Func.binary(
-      "contains",
-      ["string_contains_string", "bytes_contains_bytes"],
-      (_id: number, x: CelVal, y: CelVal) => {
-        if (x instanceof Uint8Array && y instanceof Uint8Array) {
-          return bytesContains(x, y);
-        }
-        if (typeof x == "string" && typeof y == "string") {
-          return x.includes(y);
-        }
-        return undefined;
-      },
-    ),
-  );
-  reg.add(
-    Func.binary(
-      "endsWith",
-      ["string_ends_with_string", "bytes_ends_with_bytes"],
-      (_id: number, x: CelVal, y: CelVal) => {
-        if (x instanceof Uint8Array && y instanceof Uint8Array) {
-          return bytesEndsWith(x, y);
-        }
-        if (typeof x === "string" && typeof y === "string") {
-          return x.endsWith(y);
-        }
-        return undefined;
-      },
-    ),
-  );
-  reg.add(
-    Func.binary(
-      "startsWith",
-      ["string_starts_with_string", "bytes_starts_with_bytes"],
-      (_id: number, x: CelVal, y: CelVal) => {
-        if (x instanceof Uint8Array && y instanceof Uint8Array) {
-          return bytesStartsWith(x, y);
-        }
-        if (typeof x === "string" && typeof y === "string") {
-          return x.startsWith(y);
-        }
-        return undefined;
-      },
-    ),
-  );
-  if (regexMatcher) {
-    reg.add(
-      Func.binary(
-        "matches",
-        ["matches_string"],
-        (_id: number, x: CelVal, y: CelVal) => {
-          if (typeof x === "string" && typeof y === "string") {
-            return regexMatcher(y, x);
-          }
-          return undefined;
-        },
-      ),
-    );
-  }
-  return reg;
-}
 
 export class CelManager {
   // CEL environment with extensions for Protovalidate.
   // This includes the variable "now", which must be updated before each evaluation
   // by calling updateCelNow().
   private readonly env: CelEnv;
-
-  // Value of the CEL variable "now"
-  private readonly now: Timestamp;
-
   private readonly rulesCache = new Map<string, CelCompiledRules>();
+  private readonly bindings: Partial<
+    Record<"this" | "rules" | "rule" | "now", CelInput>
+  > = {};
 
   constructor(
     private readonly registry: Registry,
     regexMatcher: RegexMatcher | undefined,
   ) {
-    this.now = timestampNow();
-    this.env = createEnv("", registry);
-    this.env.addFuncs(createCustomFuncs(regexMatcher));
-    this.env.set("now", this.now);
+    this.env = celEnv({
+      registry,
+      funcs: [...STRINGS_EXT_FUNCS, ...createCustomFuncions(regexMatcher)],
+    });
+    this.bindings.now = timestampNow();
   }
 
   /**
    * Update the CEL variable "now" to the current time.
    */
   updateCelNow(): void {
-    const n2 = timestampNow();
-    this.now.seconds = n2.seconds;
-    this.now.nanos = n2.nanos;
+    this.bindings.now = timestampNow();
   }
 
-  setEnv(key: "this" | "rules" | "rule", value: unknown): void {
-    this.env.set(key, value);
+  setEnv(
+    key: Exclude<keyof typeof this.bindings, "now">,
+    value: CelInput | undefined,
+  ): void {
+    if (value === undefined) {
+      delete this.bindings[key];
+      return;
+    }
+    this.bindings[key] = value;
   }
 
   eval(compiled: CelCompiledRule) {
@@ -348,7 +120,7 @@ export class CelManager {
       throw compiled.error;
     }
     const rule = compiled.rule;
-    const result = this.env.eval(compiled.interpretable);
+    const result = compiled.interpretable(this.bindings);
     if (typeof result == "string" || typeof result == "boolean") {
       const success = typeof result == "boolean" ? result : result.length == 0;
       if (success) {
@@ -365,7 +137,7 @@ export class CelManager {
         ruleId: rule.id,
       };
     }
-    if (result instanceof CelError) {
+    if (isCelError(result)) {
       throw new RuntimeError(result.message, { cause: result });
     }
     throw new RuntimeError(
@@ -377,7 +149,7 @@ export class CelManager {
     try {
       return {
         kind: "interpretable",
-        interpretable: this.env.plan(this.env.parse(rule.expression)),
+        interpretable: plan(this.env, parse(rule.expression)),
         rule,
       };
     } catch (cause) {
@@ -489,7 +261,7 @@ export class EvalExtendedRulesCel implements Eval<ReflectMessageGet> {
   private readonly children: {
     compiled: CelCompiledRule;
     rulePath: Path;
-    ruleCelValue: unknown;
+    ruleCelValue: CelInput;
   }[] = [];
 
   private readonly thisScalarType: ScalarType | undefined;
@@ -505,7 +277,7 @@ export class EvalExtendedRulesCel implements Eval<ReflectMessageGet> {
   add(
     compiled: CelCompiledRule,
     rulePath: Path,
-    ruleValue: unknown,
+    ruleValue: ReflectMessageGet,
     ruleScalarType: ScalarType | undefined,
   ): void {
     this.children.push({
@@ -570,48 +342,15 @@ export class EvalStandardRulesCel implements Eval<ReflectMessageGet> {
 }
 
 function reflectToCel(
-  val: unknown,
+  val: CelInput,
   scalarType: ScalarType | undefined,
-): unknown {
-  switch (scalarType) {
-    case ScalarType.DOUBLE:
-    case ScalarType.FLOAT:
-    case ScalarType.BOOL:
-    case ScalarType.STRING:
-    case ScalarType.BYTES:
-      break;
-    case ScalarType.UINT32:
-    case ScalarType.FIXED32:
-      if (typeof val == "number") {
-        return CelUint.of(BigInt(val));
-      }
-      break;
-    case ScalarType.UINT64:
-    case ScalarType.FIXED64:
-      switch (typeof val) {
-        case "bigint":
-          return CelUint.of(val);
-        case "number":
-        case "string":
-          return CelUint.of(BigInt(val));
-      }
-      break;
-    case ScalarType.INT32:
-    case ScalarType.SFIXED32:
-    case ScalarType.SINT32:
-      if (typeof val == "number") {
-        return BigInt(val);
-      }
-      break;
-    case ScalarType.INT64:
-    case ScalarType.SFIXED64:
-    case ScalarType.SINT64:
-      switch (typeof val) {
-        case "number":
-        case "string":
-          return BigInt(val);
-      }
-      break;
+): CelInput {
+  // Wrappers are treated as scalars in standard rules so we let CEL handle them.
+  if (isReflectMessage(val)) {
+    return val;
+  }
+  if (scalarType) {
+    return celFromScalar(scalarType, val as ScalarValue);
   }
   return val;
 }
