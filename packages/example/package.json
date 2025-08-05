@@ -1,6 +1,6 @@
 {
   "name": "protovalidate-example",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
@@ -15,7 +15,7 @@
   "type": "module",
   "dependencies": {
     "@bufbuild/protobuf": "^2.6.2",
-    "@bufbuild/protovalidate": "^0.6.0"
+    "@bufbuild/protovalidate": "^0.7.0"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.55.1",
