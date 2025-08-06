@@ -52,7 +52,7 @@ for (const [name, any] of Object.entries(request.cases)) {
       case "invalid":
         testResult.result = {
           case: "validationError",
-          value: violationsToProto(result.violations),
+          value: violationsToProto(result.violations)[0],
         };
         break;
       case "error":

@@ -18,6 +18,8 @@ import {
   type FieldPathElement,
   FieldPathElementSchema,
   FieldPathSchema,
+  type Violations,
+  type Violation as ViolationProto,
   ViolationSchema,
   ViolationsSchema,
 } from "./gen/buf/validate/validate_pb.js";
@@ -153,26 +155,38 @@ export class Violation {
 }
 
 /**
- * Convert an array of Violation[] to the Protobuf message buf.validate.Violations.
+ * Convert an array of Violation[] to the Protobuf message buf.validate.Violations
+ * and return the message along with its descriptor.
  */
-export function violationsToProto(violation: Violation[]) {
-  return create(ViolationsSchema, {
-    violations: violation.map(violationToProto),
-  });
+export function violationsToProto(
+  violation: Violation[],
+): [Violations, typeof ViolationsSchema] {
+  return [
+    create(ViolationsSchema, {
+      violations: violation.map((v) => violationToProto(v)[0]),
+    }),
+    ViolationsSchema,
+  ];
 }
 
 /**
- * Convert a Violation to the Protobuf message buf.validate.Violation.
+ * Convert a Violation to the Protobuf message buf.validate.Violation
+ * and return the message along with its descriptor.
  */
-export function violationToProto(violation: Violation) {
-  return create(ViolationSchema, {
-    field:
-      violation.field.length > 0 ? pathToProto(violation.field) : undefined,
-    rule: violation.rule.length > 0 ? pathToProto(violation.rule) : undefined,
-    ruleId: violation.ruleId,
-    message: violation.message.length > 0 ? violation.message : undefined,
-    forKey: violation.forKey,
-  });
+export function violationToProto(
+  violation: Violation,
+): [ViolationProto, typeof ViolationSchema] {
+  return [
+    create(ViolationSchema, {
+      field:
+        violation.field.length > 0 ? pathToProto(violation.field) : undefined,
+      rule: violation.rule.length > 0 ? pathToProto(violation.rule) : undefined,
+      ruleId: violation.ruleId,
+      message: violation.message.length > 0 ? violation.message : undefined,
+      forKey: violation.forKey,
+    }),
+    ViolationSchema,
+  ];
 }
 
 /**
