@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "clean": "git clean -Xdf",
-    "all": "turbo run --ui tui build format test attw license-header update-readme",
+    "all": "turbo run --ui tui build format test lint attw license-header update-readme",
     "setversion": "node scripts/set-workspace-version.js",
     "postsetversion": "npm run all",
     "release": "npm run all && node scripts/release.js",
@@ -13,7 +13,8 @@
   "workspaces": [
     "packages/protovalidate",
     "packages/protovalidate-testing",
-    "packages/example"
+    "packages/example",
+    "packages/upstream"
   ],
   "type": "module",
   "packageManager": "npm@10.9.0",
@@ -23,14 +24,14 @@
     "copyrightHolder": "Buf Technologies, Inc."
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.1",
+    "@arethetypeswrong/cli": "^0.18.2",
     "@biomejs/biome": "^1.9.4",
-    "@bufbuild/buf": "^1.54.0",
+    "@bufbuild/buf": "^1.56.0",
     "@bufbuild/license-header": "^0.0.4",
-    "@bufbuild/protoc-gen-es": "^2.5.1",
-    "@types/node": "^22.15.29",
-    "tsx": "^4.19.4",
-    "turbo": "^2.5.4",
-    "typescript": "^5.8.3"
+    "@bufbuild/protoc-gen-es": "^2.6.2",
+    "@types/node": "^24.2.0",
+    "tsx": "^4.20.3",
+    "turbo": "^2.5.5",
+    "typescript": "^5.9.2"
   }
 }

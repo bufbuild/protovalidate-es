@@ -1,18 +1,10 @@
-# protovalidate example
+# Protovalidate examples
 
-This directory contains an example that uses protovalidate to validate a money
-transfer. 
+This package contains examples for using `@bufbuild/protovalidate`.
 
-The transfer is defined as a Protobuf message in [money_transfer.proto](./proto/banking/v1/money_transfer.proto). It uses annotations to set up protovalidate rules on the message.
+### Requirements
 
-After generating code for the Protobuf message, it can be validated with 
-`createValidator()` from `@bufbuild/protovalidate`. [src/index.ts](./src/index.ts)
-creates a money transfer, validates it, and prints the results on the terminal.
-
-
-### Run the example
-
-You need [Node](https://nodejs.org/en/download/) version 20 or later installed. Download the example project
+You need [Node.js](https://nodejs.org/en/download/) version 20 or later installed. Download the example project
 and install its dependencies:
 
 ```shell
@@ -22,6 +14,10 @@ unzip protovalidate-es-main.zip 'protovalidate-es-main/packages/example/*'
 cd protovalidate-es-main/packages/example
 npm install
 ```
+
+### Basic example
+
+This example shows basic usage. We're validating a money transfer, defined as a Protobuf message in [money_transfer.proto](./proto/banking/v1/money_transfer.proto).
 
 Run the example:
 
@@ -33,14 +29,7 @@ This prints the following result:
 
 > Transfer is valid!
 
-Modify the transfer in [src/index.ts](./src/index.ts) and re-run the example to see different results.
-
-
-### Generate code
-
-If you want to use the [Buf CLI](https://github.com/bufbuild/buf) to generate the code,
-simply run `npx buf generate` in this directory. [`buf.gen.yaml`](./buf.gen.yaml)
-contains the plugin configuration.
+Modify the transfer in [src/basic.ts](./src/index.ts) and re-run the example to see different results.
 
 
 ### Valid types
@@ -48,5 +37,19 @@ contains the plugin configuration.
 Protovalidate rules can modify TypeScript types. A message field annotated with Protovalidate's [`required` rule](https://protovalidate.com/reference/rules/field_rules/#required) becomes a required property.
 
 See [order.proto](./proto/store/v1/order.proto) and [src/valid-types.ts](./src/valid-types.ts) for an example,
-and take a look at the [Valid types](https://github.com/bufbuild/protobuf-es/blob/v2.5.0/MANUAL.md#valid-types)
+and take a look at the [Valid types](https://github.com/bufbuild/protobuf-es/blob/v2.6.1/MANUAL.md#valid-types)
 section in the Protobuf-ES manual.
+
+
+### Standard Schema v1
+
+Protovalidate-ES supports [Standard Schema v1](https://github.com/standard-schema/standard-schema). See [src/standard-schema](./src/standard-schema.ts) for an example.
+
+
+### Generate code
+
+If you modify the rules of one of the Protobuf messages, make sure to re-generate the code. 
+
+With the [Buf CLI](https://github.com/bufbuild/buf), simply run `npx buf generate` in this directory. [`buf.gen.yaml`](./buf.gen.yaml)
+contains the plugin configuration.
+

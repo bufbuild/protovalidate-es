@@ -28,7 +28,7 @@ import {
   isUriRef,
   unique,
 } from "./lib.js";
-import { type CelResult, CelUint } from "@bufbuild/cel";
+import { celList, celUint, type CelValue, isCelUint } from "@bufbuild/cel";
 
 void suite("isHostname", () => {
   function t(name: string, val: string) {
@@ -1199,15 +1199,10 @@ void suite("unique", () => {
 
   // CelUint
   t(true, []);
-  t(true, [new CelUint(1n)]);
-  t(true, [new CelUint(1n), new CelUint(2n)]);
-  t(false, [new CelUint(1n), new CelUint(1n)]);
-  t(false, [
-    new CelUint(1n),
-    new CelUint(2n),
-    new CelUint(3n),
-    new CelUint(1n),
-  ]);
+  t(true, [celUint(1n)]);
+  t(true, [celUint(1n), celUint(2n)]);
+  t(false, [celUint(1n), celUint(1n)]);
+  t(false, [celUint(1n), celUint(2n), celUint(3n), celUint(1n)]);
 
   // bool
   t(true, []);
@@ -1244,16 +1239,9 @@ void suite("unique", () => {
   // mixed
   t(true, [true, 1n, 1, 3.14, "a", "1", false, new Uint8Array(0)]);
 
-  function t(expect: boolean, val: CelResult[], comment = "") {
+  function t(expect: boolean, val: CelValue[], comment = "") {
     void test(`${arrayLiteral(val)} ${expect}${comment.length ? `, ${comment}` : ""}`, () => {
-      assert.strictEqual(
-        unique({
-          getItems(): CelResult[] {
-            return val;
-          },
-        }),
-        expect,
-      );
+      assert.strictEqual(unique(celList(val)), expect);
     });
   }
 
@@ -1272,7 +1260,7 @@ void suite("unique", () => {
             case "boolean":
               return v.toString();
             default:
-              if (v instanceof CelUint) {
+              if (isCelUint(v)) {
                 return `CelUint(${v.value})`;
               }
               if (v instanceof Uint8Array) {

@@ -1,6 +1,6 @@
 {
   "name": "@bufbuild/protovalidate",
-  "version": "0.5.0",
+  "version": "0.8.0",
   "description": "Protocol Buffer Validation for ECMAScript",
   "keywords": [
     "javascript",
@@ -16,7 +16,7 @@
     "directory": "packages/protovalidate"
   },
   "scripts": {
-    "fetch-proto": "buf export buf.build/bufbuild/protovalidate:v0.13.3 --output proto",
+    "fetch-proto": "export-proto protovalidate",
     "postfetch-proto": "license-header proto",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
@@ -25,7 +25,7 @@
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",
     "build:esm": "tsc --project tsconfig.json --outDir ./dist/esm",
-    "update-readme": "node scripts/update-readme.js",
+    "update-readme": "update-readme README.md",
     "format": "biome format --write",
     "lint": "biome lint --error-on-warnings",
     "attw": "attw --pack",
@@ -42,14 +42,15 @@
     }
   },
   "dependencies": {
-    "@bufbuild/cel": "0.2.0"
+    "@bufbuild/cel": "0.3.0"
   },
   "peerDependencies": {
-    "@bufbuild/protobuf": "^2.5.0"
+    "@bufbuild/protobuf": "^2.6.2"
   },
   "devDependencies": {
-    "@bufbuild/protobuf": "^2.5.0",
+    "@bufbuild/protobuf": "^2.6.2",
     "@bufbuild/protocompile": "^0.0.1",
-    "expect-type": "^1.2.1"
+    "expect-type": "^1.2.2",
+    "upstream": "*"
   }
 }

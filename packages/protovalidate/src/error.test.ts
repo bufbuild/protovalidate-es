@@ -70,7 +70,8 @@ void suite("violationToProto", () => {
       [],
       false,
     );
-    const proto = violationToProto(violation);
+    const [proto, desc] = violationToProto(violation);
+    assert.equal(desc, ViolationSchema);
     assert.ok(isMessage(proto, ViolationSchema));
     assert.equal(proto.message, violation.message);
     assert.equal(proto.ruleId, violation.ruleId);
@@ -95,7 +96,8 @@ void suite("violationToProto", () => {
       [],
       false,
     );
-    const proto = violationToProto(violation);
+    const [proto, desc] = violationToProto(violation);
+    assert.equal(desc, ViolationSchema);
     assert.ok(proto.field);
     assert.equal(proto.field.elements.length, 1);
     assert.equal(proto.field.elements[0].fieldName, "val");
@@ -118,7 +120,8 @@ void suite("violationToProto", () => {
       [],
       false,
     );
-    const proto = violationToProto(violation);
+    const [proto, desc] = violationToProto(violation);
+    assert.equal(desc, ViolationSchema);
     assert.ok(proto.field);
     assert.equal(proto.field.elements.length, 1);
     assert.equal(
@@ -147,7 +150,8 @@ void suite("violationToProto", () => {
       [],
       false,
     );
-    const proto = violationToProto(violation);
+    const [proto, desc] = violationToProto(violation);
+    assert.equal(desc, ViolationSchema);
     assert.ok(proto.field);
     assert.equal(proto.field.elements.length, 1);
     assert.equal(
@@ -167,7 +171,7 @@ void suite("violationToProto", () => {
       new Violation("message-1", "id-1", [], [], false),
       new Violation("message-2", "id-2", [], [], false),
     ];
-    const proto = violationsToProto(violations);
+    const [proto] = violationsToProto(violations);
     assert.ok(isMessage(proto, ViolationsSchema));
     assert.equal(proto.violations.length, violations.length);
   });
@@ -175,11 +179,12 @@ void suite("violationToProto", () => {
 
 void suite("pathFromViolationProto", () => {
   function toProto(path: Path): FieldPath {
-    const proto = violationsToProto([
+    const [proto] = violationsToProto([
       new Violation("message", "id", path, [], false),
-    ]).violations[0].field;
-    assert.ok(proto !== undefined);
-    return proto;
+    ]);
+    const field = proto.violations[0].field;
+    assert.ok(field !== undefined);
+    return field;
   }
   for (const { string, golden, schema, registry } of getTestDataForPaths()) {
     void test(string, () => {

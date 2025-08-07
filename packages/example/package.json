@@ -1,10 +1,10 @@
 {
   "name": "protovalidate-example",
-  "version": "0.5.0",
+  "version": "0.8.0",
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
-    "start": "tsx src/index.ts",
+    "start": "tsx src/basic.ts",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
     "build": "tsc --project tsconfig.json --outDir ./dist/esm",
@@ -14,12 +14,12 @@
   },
   "type": "module",
   "dependencies": {
-    "@bufbuild/protobuf": "^2.5.0",
-    "@bufbuild/protovalidate": "^0.5.0"
+    "@bufbuild/protobuf": "^2.6.2",
+    "@bufbuild/protovalidate": "^0.8.0"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.54.0",
-    "@bufbuild/protoc-gen-es": "^2.5.1",
+    "@bufbuild/buf": "^1.56.0",
+    "@bufbuild/protoc-gen-es": "^2.6.2",
     "@standard-schema/spec": "^1.0.0"
   }
 }

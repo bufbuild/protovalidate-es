@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": [],
+      "inputs": ["package.json", "scripts/*", "version.txt"],
+      "outputs": ["gobin/*"],
+      "outputLogs": "new-only"
+    }
+  }
+}

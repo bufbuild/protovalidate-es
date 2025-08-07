@@ -96,17 +96,12 @@ export class Planner {
       return existing;
     }
     const messageRules = getOption(message, ext_message);
-    if (messageRules.disabled) {
-      return EvalNoop.get();
-    }
     const e = new EvalMany<ReflectMessage>();
     this.messageCache.set(message, e);
-    if (!messageRules.disabled) {
-      e.add(this.fields(messageRules.oneof, message.fields));
-      e.add(this.messageCel(messageRules));
-      e.add(this.messageOneofs(message, messageRules.oneof));
-      e.add(this.oneofs(message.oneofs));
-    }
+    e.add(this.fields(messageRules.oneof, message.fields));
+    e.add(this.messageCel(messageRules));
+    e.add(this.messageOneofs(message, messageRules.oneof));
+    e.add(this.oneofs(message.oneofs));
     e.prune();
     return e;
   }
@@ -167,7 +162,7 @@ export class Planner {
         !isFieldSet(fieldRules, FieldRulesSchema.field.ignore) &&
         oneofs.some((oneof) => oneof.fields.includes(field.name))
       ) {
-        ignore = Ignore.IF_UNPOPULATED;
+        ignore = Ignore.IF_ZERO_VALUE;
       }
       if (fieldRules.required && ignore !== Ignore.ALWAYS) {
         evals.add(new EvalFieldRequired(field));
@@ -457,7 +452,7 @@ export class Planner {
           evalExtended.add(
             plan.compiled,
             rulePath.clone().extension(plan.ext).toPath(),
-            getExtension(rules, plan.ext),
+            getExtension(rules, plan.ext) as ReflectMessageGet,
             plan.ext.fieldKind == "scalar" ? plan.ext.scalar : undefined,
           );
         }
