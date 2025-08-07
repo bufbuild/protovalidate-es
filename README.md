@@ -105,8 +105,8 @@ Offered under the [Apache 2 license][license].
 [license]: LICENSE
 [contributing]: .github/CONTRIBUTING.md
 [protoc-gen-validate]: https://github.com/bufbuild/protoc-gen-validate
-[protovalidate]: https://buf.build/docs/protovalidate
-[quickstart]: https://buf.build/docs/protovalidate/quickstart/
+[protovalidate]: https://protovalidate.com
+[quickstart]: https://protovalidate.com/quickstart/
 [conformance-executable]: ./packages/protovalidate-testing/README.md
 [validate-proto]: https://buf.build/bufbuild/protovalidate/docs/main:buf.validate
 [conformance]: https://github.com/bufbuild/protovalidate/blob/main/docs/conformance.md
