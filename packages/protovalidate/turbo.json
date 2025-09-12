@@ -5,7 +5,7 @@
     "fetch-proto": {
       "inputs": ["package.json"],
       "outputs": ["proto/**"],
-      "dependsOn": [],
+      "dependsOn": ["^build"],
       "outputLogs": "new-only"
     },
     "generate": {
