@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.2.5",
     "@bufbuild/buf": "^1.57.2",
     "@bufbuild/license-header": "^0.0.4",
     "@bufbuild/protoc-gen-es": "^2.8.0",
