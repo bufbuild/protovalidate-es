@@ -236,6 +236,33 @@ void suite("createStandardSchema", () => {
       assert.deepEqual(result.issues[0].path, ["address", "street"]);
     });
 
+    void test("converts oneof field paths", () => {
+      const descMessage = compileMessage(
+        `
+        syntax = "proto3";
+        import "buf/validate/validate.proto";
+        message Contact {
+          oneof method {
+            option (buf.validate.oneof).required = true;
+            string email = 1;
+            string phone = 2;
+          }
+        }
+      `,
+        bufCompileOptions,
+      );
+
+      const schema = createStandardSchema(descMessage);
+      const message = create(descMessage, {
+        phone: "123", // Invalid: too short
+      });
+      const result = schema["~standard"].validate(message);
+
+      assert.ok("issues" in result && result.issues);
+      assert.equal(result.issues.length, 1);
+      assert.deepEqual(result.issues[0].path, ["method"]);
+    });
+
     void test("converts repeated field paths", () => {
       const descMessage = compileMessage(
         `
@@ -322,6 +349,42 @@ void suite("createStandardSchema", () => {
       assert.ok(paths.includes("email"));
       assert.ok(paths.includes("age"));
       assert.ok(paths.includes("username"));
+    });
+
+    void test("converts field names with underscores to camelCase", () => {
+      const descMessage = compileMessage(
+        `  
+        syntax = "proto3";  
+        import "buf/validate/validate.proto";  
+        message User {  
+          string user_name = 1 [(buf.validate.field).string.min_len = 1];  
+          int32 user_age = 2 [(buf.validate.field).int32.gte = 18];  
+          
+          oneof contact_method {  
+            option (buf.validate.oneof).required = true;  
+            string email_address = 3 [(buf.validate.field).string.email = true];  
+            string phone_number = 4 [(buf.validate.field).string.min_len = 10];  
+          }  
+        }  
+      `,
+        bufCompileOptions,
+      );
+
+      const schema = createStandardSchema(descMessage);
+
+      // Test field name conversion
+      const messageInvalidFields = create(descMessage, {
+        userName: "",
+        userAge: 15,
+        emailAddress: "test@example.com",
+      });
+      const resultFields = schema["~standard"].validate(messageInvalidFields);
+
+      assert.ok("issues" in resultFields && resultFields.issues);
+      const fieldPaths = resultFields.issues.map((issue) => issue.path?.[0]);
+      assert.ok(fieldPaths.includes("userName"));
+      assert.ok(fieldPaths.includes("userAge"));
+      assert.ok(fieldPaths.includes("contactMethod"));
     });
 
     void test("handles CEL compilation errors", () => {
