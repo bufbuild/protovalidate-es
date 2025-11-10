@@ -254,7 +254,10 @@ void suite("createStandardSchema", () => {
 
       const schema = createStandardSchema(descMessage);
       const message = create(descMessage, {
-        phone: "123", // Invalid: too short
+        method: {
+          case: 'email',
+          value: '123'
+        }
       });
       const result = schema["~standard"].validate(message);
 
@@ -370,11 +373,12 @@ void suite("createStandardSchema", () => {
 
       const schema = createStandardSchema(descMessage);
 
-      // Test field name conversion
       const messageInvalidFields = create(descMessage, {
         userName: "",
-        userAge: 15,
-        emailAddress: "test@example.com",
+        contactMethod: {
+          case: 'emailAddress',
+          value: '123'
+        }
       });
       const resultFields = schema["~standard"].validate(messageInvalidFields);
 
