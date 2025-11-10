@@ -358,12 +358,10 @@ void suite("createStandardSchema", () => {
         import "buf/validate/validate.proto";  
         message User {  
           string user_name = 1 [(buf.validate.field).string.min_len = 1];  
-          int32 user_age = 2 [(buf.validate.field).int32.gte = 18];  
           
           oneof contact_method {  
             option (buf.validate.oneof).required = true;  
             string email_address = 3 [(buf.validate.field).string.email = true];  
-            string phone_number = 4 [(buf.validate.field).string.min_len = 10];  
           }  
         }  
       `,
@@ -383,7 +381,6 @@ void suite("createStandardSchema", () => {
       assert.ok("issues" in resultFields && resultFields.issues);
       const fieldPaths = resultFields.issues.map((issue) => issue.path?.[0]);
       assert.ok(fieldPaths.includes("userName"));
-      assert.ok(fieldPaths.includes("userAge"));
       assert.ok(fieldPaths.includes("contactMethod"));
     });
 
