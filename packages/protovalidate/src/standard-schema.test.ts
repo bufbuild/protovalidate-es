@@ -245,7 +245,29 @@ void suite("createStandardSchema", () => {
           oneof method {
             option (buf.validate.oneof).required = true;
             string email = 1;
-            string phone = 2;
+          }
+        }
+      `,
+        bufCompileOptions,
+      );
+
+      const schema = createStandardSchema(descMessage);
+      const message = create(descMessage, {});
+      const result = schema["~standard"].validate(message);
+
+      assert.ok("issues" in result && result.issues);
+      assert.equal(result.issues.length, 1);
+      assert.deepEqual(result.issues[0].path, ["method"]);
+    });
+
+    void test("converts oneof member field paths", () => {
+      const descMessage = compileMessage(
+        `
+        syntax = "proto3";
+        import "buf/validate/validate.proto";
+        message Contact {
+          oneof method {
+            string email = 1 [(buf.validate.field).string.email = true];
           }
         }
       `,
@@ -255,15 +277,15 @@ void suite("createStandardSchema", () => {
       const schema = createStandardSchema(descMessage);
       const message = create(descMessage, {
         method: {
-          case: 'email',
-          value: '123'
-        }
+          case: "email",
+          value: "123",
+        },
       });
       const result = schema["~standard"].validate(message);
 
       assert.ok("issues" in result && result.issues);
       assert.equal(result.issues.length, 1);
-      assert.deepEqual(result.issues[0].path, ["method"]);
+      assert.deepEqual(result.issues[0].path, ["method", "email"]);
     });
 
     void test("converts repeated field paths", () => {
@@ -356,17 +378,21 @@ void suite("createStandardSchema", () => {
 
     void test("converts field names with underscores to camelCase", () => {
       const descMessage = compileMessage(
-        `  
-        syntax = "proto3";  
-        import "buf/validate/validate.proto";  
-        message User {  
-          string user_name = 1 [(buf.validate.field).string.min_len = 1];  
+        `
+        syntax = "proto3";
+        import "buf/validate/validate.proto";
+        message User {
+          string user_name = 1 [(buf.validate.field).string.min_len = 1];
+
+          oneof contact_method {
+            option (buf.validate.oneof).required = true;
+            string email_address = 2;
+          }
           
-          oneof contact_method {  
-            option (buf.validate.oneof).required = true;  
-            string email_address = 3 [(buf.validate.field).string.email = true];  
-          }  
-        }  
+          oneof profile_detail {
+            string company_name = 3 [(buf.validate.field).string.min_len = 1];
+          }
+        }
       `,
         bufCompileOptions,
       );
@@ -375,17 +401,30 @@ void suite("createStandardSchema", () => {
 
       const messageInvalidFields = create(descMessage, {
         userName: "",
-        contactMethod: {
-          case: 'emailAddress',
-          value: '123'
-        }
+        profileDetail: {
+          case: "companyName",
+          value: "",
+        },
       });
-      const resultFields = schema["~standard"].validate(messageInvalidFields);
+      const result = schema["~standard"].validate(messageInvalidFields);
 
-      assert.ok("issues" in resultFields && resultFields.issues);
-      const fieldPaths = resultFields.issues.map((issue) => issue.path?.[0]);
-      assert.ok(fieldPaths.includes("userName"));
-      assert.ok(fieldPaths.includes("contactMethod"));
+      assert.ok("issues" in result && result.issues);
+      assert.equal(result.issues.length, 3);
+
+      const assertIssuePath = (
+        issues: ReadonlyArray<StandardSchemaV1.Issue>,
+        expectedPaths: string[],
+      ) => {
+        assert.ok(
+          issues.some((issue) => {
+            return JSON.stringify(issue.path) === JSON.stringify(expectedPaths);
+          }),
+        );
+      };
+
+      assertIssuePath(result.issues, ["userName"]);
+      assertIssuePath(result.issues, ["contactMethod"]);
+      assertIssuePath(result.issues, ["profileDetail", "companyName"]);
     });
 
     void test("handles CEL compilation errors", () => {

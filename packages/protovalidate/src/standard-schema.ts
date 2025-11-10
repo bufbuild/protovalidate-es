@@ -29,6 +29,9 @@ function violationToIssue(violation: Violation): StandardSchemaV1.Issue {
   for (const segment of violation.field) {
     switch (segment.kind) {
       case "field":
+        if (segment.oneof !== undefined) {
+          path.push(segment.oneof.localName);
+        }
         path.push(segment.localName);
         continue;
       case "oneof":
