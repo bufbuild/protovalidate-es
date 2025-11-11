@@ -35,7 +35,8 @@ async function main() {
 
   if (result.issues !== undefined) {
     console.error(`invalid order: ${result.issues[0].message}`);
-    console.log(result.issues[0].path);
+    console.log(result.issues[0].path); // user.number_field
+    console.log(order.user?.resultOneof.value); // 55
     process.exit(1);
   }
 
