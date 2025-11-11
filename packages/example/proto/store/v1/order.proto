@@ -37,4 +37,7 @@ message Order {
 
 message User {
   string name = 1;
+  oneof result_oneof {
+    int32 number_field = 2 [(buf.validate.field).int32.gt = 66];
+  }
 }

@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file store/v1/order.proto.
  */
 export const file_store_v1_order: GenFile = /*@__PURE__*/
-  fileDesc("ChRzdG9yZS92MS9vcmRlci5wcm90bxIIc3RvcmUudjEiOQoFT3JkZXISCgoCaWQYASABKAkSJAoEdXNlchgCIAEoCzIOLnN0b3JlLnYxLlVzZXJCBrpIA8gBASIUCgRVc2VyEgwKBG5hbWUYASABKAliBnByb3RvMw", [file_buf_validate_validate]);
+  fileDesc("ChRzdG9yZS92MS9vcmRlci5wcm90bxIIc3RvcmUudjEiOQoFT3JkZXISCgoCaWQYASABKAkSJAoEdXNlchgCIAEoCzIOLnN0b3JlLnYxLlVzZXJCBrpIA8gBASJFCgRVc2VyEgwKBG5hbWUYASABKAkSHwoMbnVtYmVyX2ZpZWxkGAIgASgFQge6SAQaAiBCSABCDgoMcmVzdWx0X29uZW9mYgZwcm90bzM", [file_buf_validate_validate]);
 
 /**
  * @generated from message store.v1.Order
@@ -92,6 +92,17 @@ export type User = Message<"store.v1.User"> & {
    * @generated from field: string name = 1;
    */
   name: string;
+
+  /**
+   * @generated from oneof store.v1.User.result_oneof
+   */
+  resultOneof: {
+    /**
+     * @generated from field: int32 number_field = 2;
+     */
+    value: number;
+    case: "numberField";
+  } | { case: undefined; value?: undefined };
 };
 
 export type UserValid = User;

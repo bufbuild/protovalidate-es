@@ -21,9 +21,13 @@ async function main() {
   const order = create(OrderSchema, {
     id: "ed1cb800-75cb-4e4c-95ab-e093a7f23e55",
     // The field `user` is required. Once validation passes, it will always be defined.
-    // user: {
-    //   name: "John Doe",
-    // },
+    user: {
+      name: "John Doe",
+      resultOneof: {
+        case: "numberField",
+        value: 55,
+      },
+    },
   });
 
   const schema = createStandardSchema(OrderSchema);
@@ -31,6 +35,7 @@ async function main() {
 
   if (result.issues !== undefined) {
     console.error(`invalid order: ${result.issues[0].message}`);
+    console.log(result.issues[0].path);
     process.exit(1);
   }
 
