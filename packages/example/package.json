@@ -18,7 +18,7 @@
     "@bufbuild/protovalidate": "^1.0.0"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.57.2",
+    "@bufbuild/buf": "^1.59.0",
     "@bufbuild/protoc-gen-es": "^2.8.0",
     "@standard-schema/spec": "^1.0.0"
   }
