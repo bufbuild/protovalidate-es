@@ -16,6 +16,6 @@
   },
   "type": "module",
   "devDependencies": {
-    "@bufbuild/buf": "^1.57.2"
+    "@bufbuild/buf": "^1.59.0"
   }
 }
