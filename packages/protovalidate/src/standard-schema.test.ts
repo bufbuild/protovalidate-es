@@ -424,7 +424,7 @@ void suite("createStandardSchema", () => {
 
       assertIssuePath(result.issues, ["userName"]);
       assertIssuePath(result.issues, ["contactMethod"]);
-      assertIssuePath(result.issues, ["profileDetail", "companyName"]);
+      assertIssuePath(result.issues, ["profileDetail", "value"]);
     });
 
     void test("handles CEL compilation errors", () => {
