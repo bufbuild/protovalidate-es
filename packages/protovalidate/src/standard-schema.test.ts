@@ -285,7 +285,7 @@ void suite("createStandardSchema", () => {
 
       assert.ok("issues" in result && result.issues);
       assert.equal(result.issues.length, 1);
-      assert.deepEqual(result.issues[0].path, ["method", "email"]);
+      assert.deepEqual(result.issues[0].path, ["method", "value"]);
     });
 
     void test("converts repeated field paths", () => {

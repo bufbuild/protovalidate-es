@@ -31,8 +31,10 @@ function violationToIssue(violation: Violation): StandardSchemaV1.Issue {
       case "field":
         if (segment.oneof !== undefined) {
           path.push(segment.oneof.localName);
+          path.push("value");
+        } else {
+          path.push(segment.localName);
         }
-        path.push(segment.localName);
         continue;
       case "oneof":
         path.push(segment.localName);
