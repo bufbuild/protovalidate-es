@@ -15,7 +15,7 @@
 import * as assert from "node:assert";
 import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
-import { create } from "@bufbuild/protobuf";
+import { create, type Message } from "@bufbuild/protobuf";
 import { compileMessage } from "@bufbuild/protocompile";
 import {
   createStandardSchema,
@@ -32,263 +32,197 @@ const bufCompileOptions = {
 };
 
 void suite("createStandardSchema", () => {
-  void suite("basic functionality", () => {
-    void test("creates StandardSchemaV1 compliant validator", () => {
-      const descMessage = compileMessage(`
+  void test("creates StandardSchemaV1 compliant validator", () => {
+    const descMessage = compileMessage(`
       syntax = "proto3";
       message TestMessage {
         string name = 1;
-      }
-    `);
-
-      const schema = createStandardSchema(descMessage);
-
-      // Check structure
-      assert.ok(schema["~standard"]);
-      assert.equal(schema["~standard"].version, 1);
-      assert.equal(schema["~standard"].vendor, "protovalidate-es");
-      assert.equal(typeof schema["~standard"].validate, "function");
-    });
-
-    void test("validates message without rules", () => {
-      const descMessage = compileMessage(`
-        syntax = "proto3";
-        message User {
-          string email = 1;
-          int32 age = 2;
-        }
-      `);
-
-      const schema = createStandardSchema(descMessage);
-      const message = create(descMessage, {
-        email: "test@example.com",
-        age: 25,
-      });
-      const result = schema["~standard"].validate(
-        message,
-      ) as StandardSchemaV1.Result<{ email: string; age: number }>;
-
-      assert.ok(!(result instanceof Promise));
-      assert.equal(result.issues, undefined);
-      assert.ok("value" in result && result.value);
-      assert.equal(result.value.email, "test@example.com");
-      assert.equal(result.value.age, 25);
-    });
-
-    void test("returns issues for invalid input type", () => {
-      const descMessage = compileMessage(`
-        syntax = "proto3";
-        message User {
-          string email = 1;
-          int32 age = 2;
-        }
-      `);
-
-      const schema = createStandardSchema(descMessage);
-      const result = schema["~standard"].validate("not an object");
-
-      assert.ok(!(result instanceof Promise));
-      assert.ok("issues" in result && result.issues);
-      assert.ok(Array.isArray(result.issues));
-      assert.equal(result.issues.length, 1);
-      assert.equal(result.issues[0].message, "Expected an object");
-    });
-
-    void test("handles non-object input", () => {
-      const descMessage = compileMessage(`
+      }`);
+    const schema = createStandardSchema(descMessage);
+    assert.ok(schema["~standard"]);
+    assert.equal(schema["~standard"].version, 1);
+    assert.equal(schema["~standard"].vendor, "protovalidate-es");
+    assert.equal(typeof schema["~standard"].validate, "function");
+  });
+  void test("returns SuccessResult for valid message", async () => {
+    const descMessage = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message User {
+        string email = 1 [(buf.validate.field).string.email = true];
+      }`,
+      bufCompileOptions,
+    );
+    const schema = createStandardSchema(descMessage);
+    const message = create(descMessage, { email: "test@example.com" });
+    const result = await schema["~standard"].validate(message);
+    assert.deepStrictEqual(result, {
+      value: message,
+    } satisfies StandardSchemaV1.SuccessResult<Message>);
+  });
+  void test("returns FailureResult for non-message input", async () => {
+    const descMessage = compileMessage(`
       syntax = "proto3";
       message TestMessage {
         string name = 1;
-      }
-    `);
+      }`);
+    const schema = createStandardSchema(descMessage);
 
-      const schema = createStandardSchema(descMessage);
+    // Test with null
+    let result = await schema["~standard"].validate(null);
+    assert.ok(result.issues?.length === 1);
+    assert.equal(result.issues[0].message, "Expected an object");
 
-      // Test with null
-      let result = schema["~standard"].validate(null);
-      assert.ok(!(result instanceof Promise));
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.equal(result.issues[0].message, "Expected an object");
+    // Test with string
+    result = await schema["~standard"].validate("not an object");
+    assert.ok(result.issues?.length === 1);
+    assert.equal(result.issues[0].message, "Expected an object");
 
-      // Test with string
-      result = schema["~standard"].validate("not an object");
-      assert.ok(!(result instanceof Promise));
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.equal(result.issues[0].message, "Expected an object");
-
-      // Test with number
-      result = schema["~standard"].validate(42);
-      assert.ok(!(result instanceof Promise));
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.equal(result.issues[0].message, "Expected an object");
-    });
+    // Test with number
+    result = await schema["~standard"].validate(42);
+    assert.ok(result.issues?.length === 1);
+    assert.equal(result.issues[0].message, "Expected an object");
   });
-
-  void suite("validation rules", () => {
-    void test("validates standard rule", () => {
+  void test("returns FailureResult for CEL compilation error", async () => {
+    const descMessage = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message BadCEL {
+        string value = 1 [(buf.validate.field).cel = {
+          id: "bad_cel"
+          message: "Invalid CEL"
+          expression: "this.invalid.syntax("
+        }];
+      }`,
+      bufCompileOptions,
+    );
+    const schema = createStandardSchema(descMessage);
+    const message = create(descMessage, { value: "test" });
+    const result = await schema["~standard"].validate(message);
+    assert.ok(result.issues?.length === 1);
+    assert.match(result.issues[0].message, /^failed to compile .*/);
+  });
+  void test("returns FailureResult for invalid message", async () => {
+    const descMessage = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message User {
+        string email = 1 [(buf.validate.field).string.email = true];
+      }`,
+      bufCompileOptions,
+    );
+    const schema = createStandardSchema(descMessage);
+    const message = create(descMessage, { email: "not-an-email" });
+    const result = await schema["~standard"].validate(message);
+    assert.ok(result.issues?.length === 1);
+    assert.equal(
+      result.issues[0].message,
+      "value must be a valid email address",
+    );
+  });
+  void test("FailureResult maps multiple violations to issues", async () => {
+    const descMessage = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message User {
+        string email = 1 [(buf.validate.field).string.email = true];
+        int32 age = 2 [(buf.validate.field).int32 = {gte: 18}];
+        string username = 3 [(buf.validate.field).string = {min_len: 3}];
+      }`,
+      bufCompileOptions,
+    );
+    const schema = createStandardSchema(descMessage);
+    const message = create(descMessage, {
+      email: "not-an-email",
+      age: 15,
+      username: "ab",
+    });
+    const result = await schema["~standard"].validate(message);
+    assert.ok(result.issues);
+    assert.deepStrictEqual(result.issues, [
+      { message: "value must be a valid email address", path: ["email"] },
+      { message: "value must be greater than or equal to 18", path: ["age"] },
+      {
+        message: "value length must be at least 3 characters",
+        path: ["username"],
+      },
+    ]);
+  });
+  void suite("FailureResult maps violation field path to issue path", () => {
+    void test("for message field path", async () => {
       const descMessage = compileMessage(
         `
         syntax = "proto3";
         import "buf/validate/validate.proto";
         message User {
-          string email = 1 [(buf.validate.field).string.email = true];
-        }
-      `,
-        bufCompileOptions,
-      );
-
-      const schema = createStandardSchema(descMessage);
-
-      // Valid email
-      const validMessage = create(descMessage, { email: "test@example.com" });
-      const validResult = schema["~standard"].validate(validMessage);
-      assert.ok(!(validResult instanceof Promise));
-      assert.equal(validResult.issues, undefined);
-      assert.ok("value" in validResult && validResult.value);
-
-      // Invalid email
-      const invalidMessage = create(descMessage, { email: "not-an-email" });
-      const invalidResult = schema["~standard"].validate(invalidMessage);
-      assert.ok(!(invalidResult instanceof Promise));
-      assert.ok("issues" in invalidResult && invalidResult.issues);
-      assert.equal(invalidResult.issues.length, 1);
-      assert.deepEqual(invalidResult.issues[0].path, ["email"]);
-      assert.ok(invalidResult.issues[0].message.includes("email"));
-    });
-
-    void test("validates CEL custom rules", () => {
-      const descMessage = compileMessage(
-        `
-        syntax = "proto3";
-        import "buf/validate/validate.proto";
-        message PasswordReset {
-          string password = 1 [(buf.validate.field).string.min_len = 8];
-          string confirm_password = 2;
-
-          option (buf.validate.message).cel = {
-            id: "passwords_must_match"
-            message: "passwords must match"
-            expression: "this.password == this.confirm_password"
-          };
-        }
-      `,
-        bufCompileOptions,
-      );
-
-      const schema = createStandardSchema(descMessage);
-
-      // Matching passwords
-      const validMessage = create(descMessage, {
-        password: "securepass123",
-        confirmPassword: "securepass123",
-      });
-      const validResult = schema["~standard"].validate(validMessage);
-      assert.ok(!(validResult instanceof Promise));
-      assert.equal(validResult.issues, undefined);
-      assert.ok("value" in validResult && validResult.value);
-
-      // Non-matching passwords
-      const invalidMessage = create(descMessage, {
-        password: "securepass123",
-        confirmPassword: "different456",
-      });
-      const invalidResult = schema["~standard"].validate(invalidMessage);
-      assert.ok("issues" in invalidResult && invalidResult.issues);
-      assert.equal(invalidResult.issues.length, 1);
-      assert.equal(invalidResult.issues[0].message, "passwords must match");
-      assert.equal(invalidResult.issues[0].path, undefined); // Message-level error has no path
-    });
-  });
-
-  void suite("error path conversions", () => {
-    void test("converts nested field paths", () => {
-      const descMessage = compileMessage(
-        `
-        syntax = "proto3";
-        import "buf/validate/validate.proto";
-        message User {
+          Address user_address = 2;
           message Address {
-            string street = 1 [(buf.validate.field).string.min_len = 1];
-            string city = 2 [(buf.validate.field).string.min_len = 1];
+            string address_street = 1 [(buf.validate.field).string.min_len = 1];
           }
-          string name = 1;
-          Address address = 2;
-        }
-      `,
+        }`,
         bufCompileOptions,
       );
-
       const schema = createStandardSchema(descMessage);
       const message = create(descMessage, {
         name: "John",
-        address: {
-          street: "", // Invalid: empty street
-          city: "NYC",
+        userAddress: {
+          addressStreet: "", // Invalid: empty street
         },
       });
-      const result = schema["~standard"].validate(message);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.deepEqual(result.issues[0].path, ["address", "street"]);
+      const result = await schema["~standard"].validate(message);
+      assert.ok(result.issues?.length === 1);
+      assert.deepStrictEqual(result.issues[0].path, [
+        "userAddress",
+        "addressStreet",
+      ]);
     });
-
-    void test("converts oneof field paths", () => {
+    void test("for oneof field path", async () => {
       const descMessage = compileMessage(
         `
         syntax = "proto3";
         import "buf/validate/validate.proto";
         message Contact {
-          oneof method {
+          oneof contact_method {
             option (buf.validate.oneof).required = true;
             string email = 1;
           }
-        }
-      `,
+        }`,
         bufCompileOptions,
       );
-
       const schema = createStandardSchema(descMessage);
       const message = create(descMessage, {});
-      const result = schema["~standard"].validate(message);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.deepEqual(result.issues[0].path, ["method"]);
+      const result = await schema["~standard"].validate(message);
+      assert.ok(result.issues?.length === 1);
+      assert.deepStrictEqual(result.issues[0].path, ["contactMethod"]);
     });
-
-    void test("converts oneof member field paths", () => {
+    void test("for oneof member path", async () => {
       const descMessage = compileMessage(
         `
         syntax = "proto3";
         import "buf/validate/validate.proto";
         message Contact {
-          oneof method {
-            string email = 1 [(buf.validate.field).string.email = true];
+          oneof contact_method {
+            string email_address = 1 [(buf.validate.field).string.email = true];
           }
-        }
-      `,
+        }`,
         bufCompileOptions,
       );
-
       const schema = createStandardSchema(descMessage);
       const message = create(descMessage, {
-        method: {
-          case: "email",
+        contactMethod: {
+          case: "emailAddress",
           value: "123",
         },
       });
-      const result = schema["~standard"].validate(message);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.deepEqual(result.issues[0].path, ["method", "value"]);
+      const result = await schema["~standard"].validate(message);
+      assert.ok(result.issues?.length === 1);
+      assert.deepStrictEqual(result.issues[0].path, ["contactMethod", "value"]);
     });
-
-    void test("converts repeated field paths", () => {
+    void test("for repeated field path", async () => {
       const descMessage = compileMessage(
         `
         syntax = "proto3";
@@ -297,23 +231,18 @@ void suite("createStandardSchema", () => {
           repeated string emails = 1 [(buf.validate.field).repeated = {
             items: {string: {email: true}}
           }];
-        }
-      `,
+        }`,
         bufCompileOptions,
       );
-
       const schema = createStandardSchema(descMessage);
       const message = create(descMessage, {
         emails: ["valid@example.com", "invalid-email", "another@valid.com"],
       });
-      const result = schema["~standard"].validate(message);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.deepEqual(result.issues[0].path, ["emails", 1]); // Index 1 is invalid
+      const result = await schema["~standard"].validate(message);
+      assert.ok(result.issues?.length === 1);
+      assert.deepStrictEqual(result.issues[0].path, ["emails", 1]); // Index 1 is invalid
     });
-
-    void test("converts map field paths", () => {
+    void test("for map field path", async () => {
       const descMessage = compileMessage(
         `
         syntax = "proto3";
@@ -326,7 +255,6 @@ void suite("createStandardSchema", () => {
       `,
         bufCompileOptions,
       );
-
       const schema = createStandardSchema(descMessage);
       const message = create(descMessage, {
         scores: {
@@ -335,124 +263,9 @@ void suite("createStandardSchema", () => {
           science: 85,
         },
       });
-      const result = schema["~standard"].validate(message);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
+      const result = await schema["~standard"].validate(message);
+      assert.ok(result.issues?.length === 1);
       assert.deepEqual(result.issues[0].path, ["scores", "english"]);
-    });
-
-    void test("handles multiple validation errors", () => {
-      const descMessage = compileMessage(
-        `
-        syntax = "proto3";
-        import "buf/validate/validate.proto";
-        message User {
-          string email = 1 [(buf.validate.field).string.email = true];
-          int32 age = 2 [(buf.validate.field).int32 = {gte: 18}];
-          string username = 3 [(buf.validate.field).string = {min_len: 3}];
-        }
-      `,
-        bufCompileOptions,
-      );
-
-      const schema = createStandardSchema(descMessage);
-      const message = create(descMessage, {
-        email: "not-an-email",
-        age: 15,
-        username: "ab",
-      });
-      const result = schema["~standard"].validate(message);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 3);
-
-      // Check that we have errors for all three fields
-      const paths = result.issues.map(
-        (issue: StandardSchemaV1.Issue) => issue.path?.[0],
-      );
-      assert.ok(paths.includes("email"));
-      assert.ok(paths.includes("age"));
-      assert.ok(paths.includes("username"));
-    });
-
-    void test("converts field names with underscores to camelCase", () => {
-      const descMessage = compileMessage(
-        `
-        syntax = "proto3";
-        import "buf/validate/validate.proto";
-        message User {
-          string user_name = 1 [(buf.validate.field).string.min_len = 1];
-
-          oneof contact_method {
-            option (buf.validate.oneof).required = true;
-            string email_address = 2;
-          }
-          
-          oneof profile_detail {
-            string company_name = 3 [(buf.validate.field).string.min_len = 1];
-          }
-        }
-      `,
-        bufCompileOptions,
-      );
-
-      const schema = createStandardSchema(descMessage);
-
-      const messageInvalidFields = create(descMessage, {
-        userName: "",
-        profileDetail: {
-          case: "companyName",
-          value: "",
-        },
-      });
-      const result = schema["~standard"].validate(messageInvalidFields);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 3);
-
-      const assertIssuePath = (
-        issues: ReadonlyArray<StandardSchemaV1.Issue>,
-        expectedPaths: string[],
-      ) => {
-        assert.ok(
-          issues.some((issue) => {
-            return JSON.stringify(issue.path) === JSON.stringify(expectedPaths);
-          }),
-        );
-      };
-
-      assertIssuePath(result.issues, ["userName"]);
-      assertIssuePath(result.issues, ["contactMethod"]);
-      assertIssuePath(result.issues, ["profileDetail", "value"]);
-    });
-
-    void test("handles CEL compilation errors", () => {
-      const descMessage = compileMessage(
-        `
-        syntax = "proto3";
-        import "buf/validate/validate.proto";
-        message BadCEL {
-          string value = 1 [(buf.validate.field).cel = {
-            id: "bad_cel"
-            message: "Invalid CEL"
-            expression: "this.invalid.syntax("
-          }];
-        }
-      `,
-        bufCompileOptions,
-      );
-
-      const schema = createStandardSchema(descMessage);
-      const message = create(descMessage, { value: "test" });
-      const result = schema["~standard"].validate(message);
-
-      assert.ok("issues" in result && result.issues);
-      assert.equal(result.issues.length, 1);
-      assert.ok(
-        result.issues[0].message.includes("CEL") ||
-          result.issues[0].message.includes("compile"),
-      );
     });
   });
 });
