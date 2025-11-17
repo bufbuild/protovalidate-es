@@ -446,7 +446,9 @@ export class Planner {
       for (const uf of rules.$unknown) {
         const plans = prepared.extensions.get(uf.no);
         if (!plans) {
-          continue;
+          throw new CompilationError(
+            `Unknown extension for ${rules.$typeName} with number ${uf.no}. If this is a predefined rule, register the extension with a registry in createValidator().`,
+          );
         }
         for (const plan of plans) {
           evalExtended.add(
