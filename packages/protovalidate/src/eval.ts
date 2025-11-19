@@ -145,47 +145,36 @@ export class EvalMapEntries<V extends ReflectMessageGet>
 export class EvalField<F extends DescField> implements Eval<ReflectMessage> {
   constructor(
     private readonly field: F,
+    private readonly required: boolean,
+    private readonly legacyRequired: boolean,
     private readonly condition: Condition<ReflectMessage>,
     private readonly pass: Eval<ReflectMessageGet<F>>,
   ) {}
   eval(val: ReflectMessage, cursor: Cursor): void {
+    if (this.required || this.legacyRequired) {
+      if (!val.isSet(this.field)) {
+        if (this.required) {
+          cursor
+            .field(this.field)
+            .violate("value is required", "required", [
+              FieldRulesSchema.field.required,
+            ]);
+        } else {
+          cursor
+            .field(this.field)
+            .violate("value is required", "legacy_required", []);
+        }
+        // Stop evaluation of field rules if the `required` rule is violated.
+        return;
+      }
+    }
     if (this.condition.check(val)) {
       const fieldVal = val.get(this.field);
       this.pass.eval(fieldVal, cursor.field(this.field));
     }
   }
   prune(): boolean {
-    return this.condition.never;
-  }
-}
-
-export class EvalFieldRequired implements Eval<ReflectMessage> {
-  constructor(private readonly field: DescField) {}
-  eval(val: ReflectMessage, cursor: Cursor): void {
-    if (!val.isSet(this.field)) {
-      cursor
-        .field(this.field)
-        .violate("value is required", "required", [
-          FieldRulesSchema.field.required,
-        ]);
-    }
-  }
-  prune(): boolean {
-    return false;
-  }
-}
-
-export class EvalFieldLegacyRequired implements Eval<ReflectMessage> {
-  constructor(private readonly field: DescField) {}
-  eval(val: ReflectMessage, cursor: Cursor): void {
-    if (!val.isSet(this.field)) {
-      cursor
-        .field(this.field)
-        .violate("value is required", "legacy_required", []);
-    }
-  }
-  prune(): boolean {
-    return false;
+    return this.condition.never && !this.required && !this.legacyRequired;
   }
 }
 
