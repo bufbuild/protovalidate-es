@@ -48,14 +48,12 @@ import {
   type Eval,
   EvalAnyRules,
   EvalEnumDefinedOnly,
-  EvalFieldRequired,
   EvalListItems,
   EvalMany,
   EvalMapEntries,
   EvalNoop,
   EvalOneofRequired,
   EvalField,
-  EvalFieldLegacyRequired,
   EvalMessageOneofRule,
 } from "./eval.js";
 import {
@@ -164,21 +162,18 @@ export class Planner {
       ) {
         ignore = Ignore.IF_ZERO_VALUE;
       }
-      if (fieldRules.required && ignore !== Ignore.ALWAYS) {
-        evals.add(new EvalFieldRequired(field));
-      }
-      if (
+      const required = fieldRules.required && ignore !== Ignore.ALWAYS;
+      const legacyRequired =
         this.legacyRequired &&
-        field.presence == FeatureSet_FieldPresence.LEGACY_REQUIRED
-      ) {
-        evals.add(new EvalFieldLegacyRequired(field));
-      }
+        field.presence == FeatureSet_FieldPresence.LEGACY_REQUIRED;
       const baseRulePath = buildPath(FieldRulesSchema);
       switch (field.fieldKind) {
         case "message": {
           evals.add(
             new EvalField(
               field,
+              required,
+              legacyRequired,
               ignoreMessageField(field, ignore),
               this.message(field.message, fieldRules, baseRulePath, field),
             ),
@@ -189,6 +184,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
+              required,
+              legacyRequired,
               ignoreListOrMapField(field, ignore),
               this.planList(field, fieldRules, baseRulePath),
             ),
@@ -199,6 +196,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
+              required,
+              legacyRequired,
               ignoreListOrMapField(field, ignore),
               this.map(field, fieldRules, baseRulePath),
             ),
@@ -209,6 +208,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
+              required,
+              legacyRequired,
               ignoreScalarOrEnumField(field, ignore),
               this.enumeration(field.enum, fieldRules, baseRulePath, field),
             ),
@@ -219,6 +220,8 @@ export class Planner {
           evals.add(
             new EvalField(
               field,
+              required,
+              legacyRequired,
               ignoreScalarOrEnumField(field, ignore),
               this.scalar(field.scalar, fieldRules, baseRulePath, false, field),
             ),

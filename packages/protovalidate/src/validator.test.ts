@@ -202,7 +202,7 @@ void suite("Validator", () => {
     assert.equal(gotPattern, "^x$");
     assert.equal(gotAgainst, "x");
   });
-  void test("issues #20", () => {
+  void test("issue #20", () => {
     const descFile = compileFile(
       `
         syntax = "proto3";
@@ -227,6 +227,27 @@ void suite("Validator", () => {
     });
     const result = validator.validate(personSchema, person);
     assert.equal(result.kind, "valid");
+  });
+  void test("issue #107", () => {
+    const descMessage = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message Message {
+        string hello = 1 [
+          (buf.validate.field).required = true,
+          (buf.validate.field).string.min_len = 1
+        ];
+      }`,
+      bufCompileOptions,
+    );
+    const validator = createValidator();
+    const msg = create(descMessage);
+    const result = validator.validate(descMessage, msg);
+    assert.equal(result.kind, "invalid");
+    assert.equal(result.violations?.length, 1);
+    assert.equal(result.violations?.[0].ruleId, "required");
+    assert.equal(result.violations?.[0].message, "value is required");
   });
   void suite("option legacyRequired", () => {
     const schema = compileMessage(
