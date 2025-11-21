@@ -43,8 +43,8 @@ export type ValidatorOptions = {
    * To validate messages with user-defined predefined rules, pass the extensions
    * to the validator via the registry.
    *
-   * By default, the validator is unaware of any predefined rules, and will not
-   * validate them.
+   * By default, the validator is unaware of any predefined rules, and will raise
+   * a compilation error if it sees an unknown extension.
    *
    * The registry is also passed to the CEL environment, where it may be used to
    * unpack google.protobuf.Any messages.

@@ -16,12 +16,17 @@ import * as assert from "node:assert";
 import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
 import { expectTypeOf } from "expect-type";
-import { create, type DescMessage, type Message } from "@bufbuild/protobuf";
+import {
+  create,
+  createRegistry,
+  type DescMessage,
+  type Message,
+} from "@bufbuild/protobuf";
 import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
 import type { GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { compileFile, compileMessage } from "@bufbuild/protocompile";
 import {
-  type CompilationError,
+  CompilationError,
   RuntimeError,
   type ValidationError,
   type Violation,
@@ -289,6 +294,52 @@ void suite("Validator", () => {
     void test("returns valid if required fields are present", () => {
       const result = validatorLegacyRequired.validate(schema, validMessage);
       assert.equal(result.kind, "valid");
+    });
+  });
+  void suite("predefined rules", () => {
+    const descFile = compileFile(
+      `
+      syntax = "proto2";
+      import "buf/validate/validate.proto";
+      message Person {
+        optional string name = 1 [(buf.validate.field).string.(abc) = true];
+      }
+      extend buf.validate.StringRules {
+        optional bool abc = 81048952 [(buf.validate.predefined).cel = {
+          id: "string.abc"
+          message: "value must be abc"
+          expression: "this == 'abc'"
+        }];
+      }
+    `,
+      bufCompileOptions,
+    );
+    const personSchema = descFile.messages[0];
+    const ext_abc = descFile.extensions[0];
+    void test("unknown extension raises error", () => {
+      const validator = createValidator();
+      const person = create(personSchema, {
+        name: "John Doe",
+      });
+      const result = validator.validate(personSchema, person);
+      assert.equal(result.kind, "error");
+      assert.equal(
+        result.error?.message,
+        "Unknown extension for buf.validate.StringRules with number 81048952. If this is a predefined rule, register the extension with a registry in createValidator().",
+      );
+      assert.ok(result.error instanceof CompilationError);
+    });
+    void test("registered extension validates", () => {
+      const validator = createValidator({
+        registry: createRegistry(ext_abc),
+      });
+      const person = create(personSchema, {
+        name: "John Doe",
+      });
+      const result = validator.validate(personSchema, person);
+      assert.equal(result.kind, "invalid");
+      assert.equal(result.violations?.[0].ruleId, "string.abc");
+      assert.equal(result.violations?.[0].message, "value must be abc");
     });
   });
 });
