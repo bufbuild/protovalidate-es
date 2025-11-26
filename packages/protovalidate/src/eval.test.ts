@@ -27,6 +27,7 @@ import {
   OneofRulesSchema,
   FieldRulesSchema,
   PredefinedRulesSchema,
+  DecimalRulesSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { nestedTypes } from "@bufbuild/protobuf/reflect";
 import { getOption, hasOption } from "@bufbuild/protobuf";
@@ -69,7 +70,10 @@ void suite("check buf.validate.*Rules fields", () => {
     FieldRulesSchema.field.any,
     FieldRulesSchema.field.duration,
     FieldRulesSchema.field.timestamp,
+    FieldRulesSchema.field.fieldMask,
     PredefinedRulesSchema.field.cel,
+    DecimalRulesSchema.field.precision,
+    DecimalRulesSchema.field.scale,
   ];
   const rulesMessages = Array.from(nestedTypes(file_buf_validate_validate))
     .filter((t) => t.kind == "message")

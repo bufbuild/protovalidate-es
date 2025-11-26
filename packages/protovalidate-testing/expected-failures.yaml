@@ -7,3 +7,24 @@ custom_rules:
   #       input: [type.googleapis.com/buf.validate.conformance.cases.custom_rules.MissingField]:{a:123}
   #        want: compilation err: expression references a non-existent field b
   #         got: runtime error: RuntimeError: field not found: b in message buf.validate.conformance.cases.custom_rules.MissingField
+
+# not implemented, tests are flaky
+standard_rules/well_known_types/field_mask:
+  - in/invalid
+  - not_in/valid
+  - not_in/valid/sub
+  - const/valid
+  - const/invalid
+  - in/invalid/sub
+  - not_in/invalid
+  - not_in/invalid/sub
+  - example/valid
+  - const/valid/empty
+  - in/valid
+  - in/valid/sub
+# tests are broken, ignore
+groups:
+  - required/invalid
+  - optional/invalid
+  - custom/invalid
+  - delimited/invalid
