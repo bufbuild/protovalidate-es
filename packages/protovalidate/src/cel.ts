@@ -129,11 +129,15 @@ export class CelManager {
       // From field buf.validate.Rule.message:
       // > If a non-empty message is provided, any strings resulting from the CEL
       // > expression evaluation are ignored.
-      return {
-        message:
-          rule.message.length == 0 && typeof result == "string"
+      let message = rule.message;
+      if (message === "") {
+        message =
+          typeof result === "string"
             ? result
-            : rule.message,
+            : `"${rule.expression}" returned false`;
+      }
+      return {
+        message,
         ruleId: rule.id,
       };
     }
