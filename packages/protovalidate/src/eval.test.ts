@@ -69,6 +69,7 @@ void suite("check buf.validate.*Rules fields", () => {
     FieldRulesSchema.field.any,
     FieldRulesSchema.field.duration,
     FieldRulesSchema.field.timestamp,
+    FieldRulesSchema.field.fieldMask,
     PredefinedRulesSchema.field.cel,
   ];
   const rulesMessages = Array.from(nestedTypes(file_buf_validate_validate))
