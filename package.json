@@ -26,11 +26,11 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
     "@biomejs/biome": "^1.9.4",
-    "@bufbuild/buf": "^1.59.0",
+    "@bufbuild/buf": "^1.61.0",
     "@bufbuild/license-header": "^0.0.4",
     "@bufbuild/protoc-gen-es": "^2.10.1",
     "@types/node": "^24.10.1",
-    "tsx": "^4.20.6",
+    "tsx": "^4.21.0",
     "turbo": "^2.6.0",
     "typescript": "^5.9.3"
   }
