@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  create,
   type DescExtension,
   type DescField,
   type DescMessage,
@@ -40,6 +41,7 @@ import {
   type Rule,
   type FieldRules,
   predefined,
+  RuleSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError, RuntimeError } from "./error.js";
 import type { Eval } from "./eval.js";
@@ -149,7 +151,9 @@ export class CelManager {
     );
   }
 
-  compileRule(rule: Rule): CelCompiledRule {
+  compileRule(rule: Rule | string): CelCompiledRule {
+    rule =
+      typeof rule == "string" ? create(RuleSchema, { expression: rule }) : rule;
     try {
       return {
         kind: "interpretable",
@@ -160,7 +164,7 @@ export class CelManager {
       return {
         kind: "compilation_error",
         error: new CompilationError(
-          `failed to compile ${rule.id}: ${String(cause)}`,
+          `failed to compile ${rule.id !== "" ? rule.id : rule.expression.replace(/\n/g, "\\n")}: ${String(cause)}`,
           { cause },
         ),
       };
