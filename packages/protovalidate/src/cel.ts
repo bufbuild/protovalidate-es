@@ -151,9 +151,11 @@ export class CelManager {
     );
   }
 
-  compileRule(rule: Rule | string): CelCompiledRule {
-    rule =
-      typeof rule == "string" ? create(RuleSchema, { expression: rule }) : rule;
+  compileRule(ruleOrExpr: Rule | string): CelCompiledRule {
+    const rule =
+      typeof ruleOrExpr == "string"
+        ? create(RuleSchema, { id: ruleOrExpr, expression: ruleOrExpr })
+        : ruleOrExpr;
     try {
       return {
         kind: "interpretable",
@@ -164,7 +166,7 @@ export class CelManager {
       return {
         kind: "compilation_error",
         error: new CompilationError(
-          `failed to compile ${rule.id !== "" ? rule.id : rule.expression.replace(/\n/g, "\\n")}: ${String(cause)}`,
+          `failed to compile ${rule.id}: ${String(cause)}`,
           { cause },
         ),
       };

@@ -70,6 +70,7 @@ void suite("check buf.validate.*Rules fields", () => {
     FieldRulesSchema.field.map,
     FieldRulesSchema.field.any,
     FieldRulesSchema.field.duration,
+    FieldRulesSchema.field.fieldMask,
     FieldRulesSchema.field.timestamp,
     PredefinedRulesSchema.field.cel,
   ];
