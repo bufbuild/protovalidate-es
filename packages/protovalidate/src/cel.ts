@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {
+  create,
   type DescExtension,
   type DescField,
   type DescMessage,
@@ -40,6 +41,7 @@ import {
   type Rule,
   type FieldRules,
   predefined,
+  RuleSchema,
 } from "./gen/buf/validate/validate_pb.js";
 import { CompilationError, RuntimeError } from "./error.js";
 import type { Eval } from "./eval.js";
@@ -149,7 +151,11 @@ export class CelManager {
     );
   }
 
-  compileRule(rule: Rule): CelCompiledRule {
+  compileRule(ruleOrExpr: Rule | string): CelCompiledRule {
+    const rule =
+      typeof ruleOrExpr == "string"
+        ? create(RuleSchema, { id: ruleOrExpr, expression: ruleOrExpr })
+        : ruleOrExpr;
     try {
       return {
         kind: "interpretable",

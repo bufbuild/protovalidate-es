@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/bytes.proto.
  */
 export const file_buf_validate_conformance_cases_bytes: GenFile = /*@__PURE__*/
-  fileDesc("CipidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvYnl0ZXMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyIYCglCeXRlc05vbmUSCwoDdmFsGAEgASgMIiUKCkJ5dGVzQ29uc3QSFwoDdmFsGAEgASgMQgq6SAd6BQoDZm9vIicKB0J5dGVzSW4SHAoDdmFsGAEgASgMQg+6SAx6CkIDYmFyQgNiYXoiLAoKQnl0ZXNOb3RJbhIeCgN2YWwYASABKAxCEbpIDnoMSgRmaXp6SgRidXp6IiAKCEJ5dGVzTGVuEhQKA3ZhbBgBIAEoDEIHukgEegJoAyIjCgtCeXRlc01pbkxlbhIUCgN2YWwYASABKAxCB7pIBHoCEAMiIwoLQnl0ZXNNYXhMZW4SFAoDdmFsGAEgASgMQge6SAR6AhgFIigKDkJ5dGVzTWluTWF4TGVuEhYKA3ZhbBgBIAEoDEIJukgGegQQAxgFIi0KE0J5dGVzRXF1YWxNaW5NYXhMZW4SFgoDdmFsGAEgASgMQgm6SAZ6BBAFGAUiMgoMQnl0ZXNQYXR0ZXJuEiIKA3ZhbBgBIAEoDEIVukgSehAiDl5bXHgwMC1ceDdGXSskIiQKC0J5dGVzUHJlZml4EhUKA3ZhbBgBIAEoDEIIukgFegMqAZkiKAoNQnl0ZXNDb250YWlucxIXCgN2YWwYASABKAxCCrpIB3oFOgNiYXIiJwoLQnl0ZXNTdWZmaXgSGAoDdmFsGAEgASgMQgu6SAh6BjIEYnV6eiIfCgdCeXRlc0lQEhQKA3ZhbBgBIAEoDEIHukgEegJQASIiCgpCeXRlc05vdElQEhQKA3ZhbBgBIAEoDEIHukgEegJQACIhCglCeXRlc0lQdjQSFAoDdmFsGAEgASgMQge6SAR6AlgBIiQKDEJ5dGVzTm90SVB2NBIUCgN2YWwYASABKAxCB7pIBHoCWAAiIQoJQnl0ZXNJUHY2EhQKA3ZhbBgBIAEoDEIHukgEegJgASIkCgxCeXRlc05vdElQdjYSFAoDdmFsGAEgASgMQge6SAR6AmAAIioKD0J5dGVzSVB2Nklnbm9yZRIXCgN2YWwYASABKAxCCrpIB9gBAXoCYAEiJQoMQnl0ZXNFeGFtcGxlEhUKA3ZhbBgBIAEoDEIIukgFegNyAZliBnByb3RvMw", [file_buf_validate_validate]);
+  fileDesc("CipidWYvdmFsaWRhdGUvY29uZm9ybWFuY2UvY2FzZXMvYnl0ZXMucHJvdG8SHmJ1Zi52YWxpZGF0ZS5jb25mb3JtYW5jZS5jYXNlcyIYCglCeXRlc05vbmUSCwoDdmFsGAEgASgMIiUKCkJ5dGVzQ29uc3QSFwoDdmFsGAEgASgMQgq6SAd6BQoDZm9vIicKB0J5dGVzSW4SHAoDdmFsGAEgASgMQg+6SAx6CkIDYmFyQgNiYXoiLAoKQnl0ZXNOb3RJbhIeCgN2YWwYASABKAxCEbpIDnoMSgRmaXp6SgRidXp6IiAKCEJ5dGVzTGVuEhQKA3ZhbBgBIAEoDEIHukgEegJoAyIjCgtCeXRlc01pbkxlbhIUCgN2YWwYASABKAxCB7pIBHoCEAMiIwoLQnl0ZXNNYXhMZW4SFAoDdmFsGAEgASgMQge6SAR6AhgFIigKDkJ5dGVzTWluTWF4TGVuEhYKA3ZhbBgBIAEoDEIJukgGegQQAxgFIi0KE0J5dGVzRXF1YWxNaW5NYXhMZW4SFgoDdmFsGAEgASgMQgm6SAZ6BBAFGAUiMgoMQnl0ZXNQYXR0ZXJuEiIKA3ZhbBgBIAEoDEIVukgSehAiDl5bXHgwMC1ceDdGXSskIiQKC0J5dGVzUHJlZml4EhUKA3ZhbBgBIAEoDEIIukgFegMqAZkiKAoNQnl0ZXNDb250YWlucxIXCgN2YWwYASABKAxCCrpIB3oFOgNiYXIiJwoLQnl0ZXNTdWZmaXgSGAoDdmFsGAEgASgMQgu6SAh6BjIEYnV6eiIfCgdCeXRlc0lQEhQKA3ZhbBgBIAEoDEIHukgEegJQASIiCgpCeXRlc05vdElQEhQKA3ZhbBgBIAEoDEIHukgEegJQACIhCglCeXRlc0lQdjQSFAoDdmFsGAEgASgMQge6SAR6AlgBIiQKDEJ5dGVzTm90SVB2NBIUCgN2YWwYASABKAxCB7pIBHoCWAAiIQoJQnl0ZXNJUHY2EhQKA3ZhbBgBIAEoDEIHukgEegJgASIkCgxCeXRlc05vdElQdjYSFAoDdmFsGAEgASgMQge6SAR6AmAAIioKD0J5dGVzSVB2Nklnbm9yZRIXCgN2YWwYASABKAxCCrpIB9gBAXoCYAEiIQoJQnl0ZXNVVUlEEhQKA3ZhbBgBIAEoDEIHukgEegJ4ASIkCgxCeXRlc05vdFVVSUQSFAoDdmFsGAEgASgMQge6SAR6AngAIioKD0J5dGVzVVVJRElnbm9yZRIXCgN2YWwYASABKAxCCrpIB9gBAXoCeAEiJQoMQnl0ZXNFeGFtcGxlEhUKA3ZhbBgBIAEoDEIIukgFegNyAZliBnByb3RvMw", [file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.BytesNone
@@ -368,6 +368,57 @@ export const BytesIPv6IgnoreSchema: GenMessage<BytesIPv6Ignore> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_bytes, 19);
 
 /**
+ * @generated from message buf.validate.conformance.cases.BytesUUID
+ */
+export type BytesUUID = Message<"buf.validate.conformance.cases.BytesUUID"> & {
+  /**
+   * @generated from field: bytes val = 1;
+   */
+  val: Uint8Array;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.BytesUUID.
+ * Use `create(BytesUUIDSchema)` to create a new message.
+ */
+export const BytesUUIDSchema: GenMessage<BytesUUID> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_bytes, 20);
+
+/**
+ * @generated from message buf.validate.conformance.cases.BytesNotUUID
+ */
+export type BytesNotUUID = Message<"buf.validate.conformance.cases.BytesNotUUID"> & {
+  /**
+   * @generated from field: bytes val = 1;
+   */
+  val: Uint8Array;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.BytesNotUUID.
+ * Use `create(BytesNotUUIDSchema)` to create a new message.
+ */
+export const BytesNotUUIDSchema: GenMessage<BytesNotUUID> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_bytes, 21);
+
+/**
+ * @generated from message buf.validate.conformance.cases.BytesUUIDIgnore
+ */
+export type BytesUUIDIgnore = Message<"buf.validate.conformance.cases.BytesUUIDIgnore"> & {
+  /**
+   * @generated from field: bytes val = 1;
+   */
+  val: Uint8Array;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.BytesUUIDIgnore.
+ * Use `create(BytesUUIDIgnoreSchema)` to create a new message.
+ */
+export const BytesUUIDIgnoreSchema: GenMessage<BytesUUIDIgnore> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_bytes, 22);
+
+/**
  * @generated from message buf.validate.conformance.cases.BytesExample
  */
 export type BytesExample = Message<"buf.validate.conformance.cases.BytesExample"> & {
@@ -382,5 +433,5 @@ export type BytesExample = Message<"buf.validate.conformance.cases.BytesExample"
  * Use `create(BytesExampleSchema)` to create a new message.
  */
 export const BytesExampleSchema: GenMessage<BytesExample> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_bytes, 20);
+  messageDesc(file_buf_validate_conformance_cases_bytes, 23);
 

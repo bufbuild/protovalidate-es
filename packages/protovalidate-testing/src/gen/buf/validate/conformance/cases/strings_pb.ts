@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file buf/validate/conformance/cases/strings.proto.
  */
 export const file_buf_validate_conformance_cases_strings: GenFile = /*@__PURE__*/
-  fileDesc("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", [file_buf_validate_validate]);
+  fileDesc("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UHY0UHJlZml4EhUKA3ZhbBgBIAEoCUIIukgFcgPwAQEiLAoTU3RyaW5nTm90SVB2NFByZWZpeBIVCgN2YWwYASABKAlCCLpIBXID8AEAIikKEFN0cmluZ0lQdjZQcmVmaXgSFQoDdmFsGAEgASgJQgi6SAVyA/gBASIsChNTdHJpbmdOb3RJUHY2UHJlZml4EhUKA3ZhbBgBIAEoCUIIukgFcgP4AQAiIgoJU3RyaW5nVVJJEhUKA3ZhbBgBIAEoCUIIukgFcgOIAQEiJQoMU3RyaW5nTm90VVJJEhUKA3ZhbBgBIAEoCUIIukgFcgOIAQAiJQoMU3RyaW5nVVJJUmVmEhUKA3ZhbBgBIAEoCUIIukgFcgOQAQEiKAoPU3RyaW5nTm90VVJJUmVmEhUKA3ZhbBgBIAEoCUIIukgFcgOQAQAiIwoKU3RyaW5nVVVJRBIVCgN2YWwYASABKAlCCLpIBXIDsAEBIiYKDVN0cmluZ05vdFVVSUQSFQoDdmFsGAEgASgJQgi6SAVyA7ABACIkCgtTdHJpbmdUVVVJRBIVCgN2YWwYASABKAlCCLpIBXIDiAIBIicKDlN0cmluZ05vdFRVVUlEEhUKA3ZhbBgBIAEoCUIIukgFcgOIAgAiIwoKU3RyaW5nVUxJRBIVCgN2YWwYASABKAlCCLpIBXIDmAIBIiYKDVN0cmluZ05vdFVMSUQSFQoDdmFsGAEgASgJQgi6SAVyA5gCACIsChBTdHJpbmdVTElESWdub3JlEhgKA3ZhbBgBIAEoCUILukgI2AEBcgOYAgEiLQoUU3RyaW5nSHR0cEhlYWRlck5hbWUSFQoDdmFsGAEgASgJQgi6SAVyA8ABASIuChVTdHJpbmdIdHRwSGVhZGVyVmFsdWUSFQoDdmFsGAEgASgJQgi6SAVyA8ABAiI1ChlTdHJpbmdIdHRwSGVhZGVyTmFtZUxvb3NlEhgKA3ZhbBgBIAEoCUILukgIcgbIAQDAAQEiNgoaU3RyaW5nSHR0cEhlYWRlclZhbHVlTG9vc2USGAoDdmFsGAEgASgJQgu6SAhyBsgBAMABAiIsChBTdHJpbmdVVUlESWdub3JlEhgKA3ZhbBgBIAEoCUILukgI2AEBcgOwAQEiMgoNU3RyaW5nSW5PbmVvZhIaCgNiYXIYASABKAlCC7pICHIGUgFhUgFiSABCBQoDZm9vIioKEVN0cmluZ0hvc3RBbmRQb3J0EhUKA3ZhbBgBIAEoCUIIukgFcgOAAgEinwEKGVN0cmluZ0hvc3RBbmRPcHRpb25hbFBvcnQSgQEKA3ZhbBgBIAEoCUJ0ukhxugFuCiJzdHJpbmcuaG9zdF9hbmRfcG9ydC5vcHRpb25hbF9wb3J0Ei12YWx1ZSBtdXN0IGJlIGEgaG9zdCBhbmQgKG9wdGlvbmFsKSBwb3J0IHBhaXIaGXRoaXMuaXNIb3N0QW5kUG9ydChmYWxzZSkiKQoNU3RyaW5nRXhhbXBsZRIYCgN2YWwYASABKAlCC7pICHIGkgIDZm9vYgZwcm90bzM", [file_buf_validate_validate]);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringNone
@@ -912,6 +912,57 @@ export const StringNotTUUIDSchema: GenMessage<StringNotTUUID> = /*@__PURE__*/
   messageDesc(file_buf_validate_conformance_cases_strings, 51);
 
 /**
+ * @generated from message buf.validate.conformance.cases.StringULID
+ */
+export type StringULID = Message<"buf.validate.conformance.cases.StringULID"> & {
+  /**
+   * @generated from field: string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.StringULID.
+ * Use `create(StringULIDSchema)` to create a new message.
+ */
+export const StringULIDSchema: GenMessage<StringULID> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_strings, 52);
+
+/**
+ * @generated from message buf.validate.conformance.cases.StringNotULID
+ */
+export type StringNotULID = Message<"buf.validate.conformance.cases.StringNotULID"> & {
+  /**
+   * @generated from field: string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.StringNotULID.
+ * Use `create(StringNotULIDSchema)` to create a new message.
+ */
+export const StringNotULIDSchema: GenMessage<StringNotULID> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_strings, 53);
+
+/**
+ * @generated from message buf.validate.conformance.cases.StringULIDIgnore
+ */
+export type StringULIDIgnore = Message<"buf.validate.conformance.cases.StringULIDIgnore"> & {
+  /**
+   * @generated from field: string val = 1;
+   */
+  val: string;
+};
+
+/**
+ * Describes the message buf.validate.conformance.cases.StringULIDIgnore.
+ * Use `create(StringULIDIgnoreSchema)` to create a new message.
+ */
+export const StringULIDIgnoreSchema: GenMessage<StringULIDIgnore> = /*@__PURE__*/
+  messageDesc(file_buf_validate_conformance_cases_strings, 54);
+
+/**
  * @generated from message buf.validate.conformance.cases.StringHttpHeaderName
  */
 export type StringHttpHeaderName = Message<"buf.validate.conformance.cases.StringHttpHeaderName"> & {
@@ -926,7 +977,7 @@ export type StringHttpHeaderName = Message<"buf.validate.conformance.cases.Strin
  * Use `create(StringHttpHeaderNameSchema)` to create a new message.
  */
 export const StringHttpHeaderNameSchema: GenMessage<StringHttpHeaderName> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 52);
+  messageDesc(file_buf_validate_conformance_cases_strings, 55);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringHttpHeaderValue
@@ -943,7 +994,7 @@ export type StringHttpHeaderValue = Message<"buf.validate.conformance.cases.Stri
  * Use `create(StringHttpHeaderValueSchema)` to create a new message.
  */
 export const StringHttpHeaderValueSchema: GenMessage<StringHttpHeaderValue> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 53);
+  messageDesc(file_buf_validate_conformance_cases_strings, 56);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringHttpHeaderNameLoose
@@ -960,7 +1011,7 @@ export type StringHttpHeaderNameLoose = Message<"buf.validate.conformance.cases.
  * Use `create(StringHttpHeaderNameLooseSchema)` to create a new message.
  */
 export const StringHttpHeaderNameLooseSchema: GenMessage<StringHttpHeaderNameLoose> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 54);
+  messageDesc(file_buf_validate_conformance_cases_strings, 57);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringHttpHeaderValueLoose
@@ -977,7 +1028,7 @@ export type StringHttpHeaderValueLoose = Message<"buf.validate.conformance.cases
  * Use `create(StringHttpHeaderValueLooseSchema)` to create a new message.
  */
 export const StringHttpHeaderValueLooseSchema: GenMessage<StringHttpHeaderValueLoose> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 55);
+  messageDesc(file_buf_validate_conformance_cases_strings, 58);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringUUIDIgnore
@@ -994,7 +1045,7 @@ export type StringUUIDIgnore = Message<"buf.validate.conformance.cases.StringUUI
  * Use `create(StringUUIDIgnoreSchema)` to create a new message.
  */
 export const StringUUIDIgnoreSchema: GenMessage<StringUUIDIgnore> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 56);
+  messageDesc(file_buf_validate_conformance_cases_strings, 59);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringInOneof
@@ -1017,7 +1068,7 @@ export type StringInOneof = Message<"buf.validate.conformance.cases.StringInOneo
  * Use `create(StringInOneofSchema)` to create a new message.
  */
 export const StringInOneofSchema: GenMessage<StringInOneof> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 57);
+  messageDesc(file_buf_validate_conformance_cases_strings, 60);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringHostAndPort
@@ -1034,7 +1085,7 @@ export type StringHostAndPort = Message<"buf.validate.conformance.cases.StringHo
  * Use `create(StringHostAndPortSchema)` to create a new message.
  */
 export const StringHostAndPortSchema: GenMessage<StringHostAndPort> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 58);
+  messageDesc(file_buf_validate_conformance_cases_strings, 61);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringHostAndOptionalPort
@@ -1051,7 +1102,7 @@ export type StringHostAndOptionalPort = Message<"buf.validate.conformance.cases.
  * Use `create(StringHostAndOptionalPortSchema)` to create a new message.
  */
 export const StringHostAndOptionalPortSchema: GenMessage<StringHostAndOptionalPort> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 59);
+  messageDesc(file_buf_validate_conformance_cases_strings, 62);
 
 /**
  * @generated from message buf.validate.conformance.cases.StringExample
@@ -1068,5 +1119,5 @@ export type StringExample = Message<"buf.validate.conformance.cases.StringExampl
  * Use `create(StringExampleSchema)` to create a new message.
  */
 export const StringExampleSchema: GenMessage<StringExample> = /*@__PURE__*/
-  messageDesc(file_buf_validate_conformance_cases_strings, 60);
+  messageDesc(file_buf_validate_conformance_cases_strings, 63);
 

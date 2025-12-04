@@ -468,7 +468,7 @@ export class Planner {
 
   private messageCel(messageRules: MessageRules): Eval<ReflectMessage> {
     const e = new EvalCustomCel(this.celMan, false, undefined);
-    for (const rule of messageRules.cel) {
+    for (const rule of [...messageRules.celExpression, ...messageRules.cel]) {
       e.add(this.celMan.compileRule(rule), []);
     }
     return e;
@@ -484,13 +484,14 @@ export class Planner {
       return EvalNoop.get();
     }
     const e = new EvalCustomCel(this.celMan, forMapKey, scalarType);
-    for (const [index, rule] of fieldRules.cel.entries()) {
-      const rulePath = baseRulePath
-        .clone()
-        .field(FieldRulesSchema.field.cel)
-        .list(index)
-        .toPath();
-      e.add(this.celMan.compileRule(rule), rulePath);
+    for (const [field, rules] of [
+      [FieldRulesSchema.field.cel, fieldRules.cel],
+      [FieldRulesSchema.field.celExpression, fieldRules.celExpression],
+    ] as const) {
+      for (const [index, rule] of rules.entries()) {
+        const rulePath = baseRulePath.clone().field(field).list(index).toPath();
+        e.add(this.celMan.compileRule(rule), rulePath);
+      }
     }
     return e;
   }
