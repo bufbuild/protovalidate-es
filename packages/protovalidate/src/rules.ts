@@ -19,6 +19,7 @@ import {
   BytesValueSchema,
   DoubleValueSchema,
   DurationSchema,
+  FieldMaskSchema,
   FloatValueSchema,
   Int32ValueSchema,
   Int64ValueSchema,
@@ -35,6 +36,7 @@ import {
   DoubleRulesSchema,
   DurationRulesSchema,
   EnumRulesSchema,
+  FieldMaskRulesSchema,
   type FieldRules,
   FieldRulesSchema,
   Fixed32RulesSchema,
@@ -69,6 +71,7 @@ type ruleTypeMessage =
   | "sint32"
   | "bool"
   | "string"
+  | "fieldMask"
   | "bytes";
 
 type ruleTypeScalar =
@@ -100,6 +103,7 @@ const messageToRuleType = new Map<string, ruleTypeMessage>([
   [UInt64ValueSchema.typeName, "uint64"],
   [BoolValueSchema.typeName, "bool"],
   [StringValueSchema.typeName, "string"],
+  [FieldMaskSchema.typeName, "fieldMask"],
   [BytesValueSchema.typeName, "bytes"],
 ]);
 
@@ -174,6 +178,7 @@ export function getRuleDescriptor(
     MapRulesSchema,
     AnyRulesSchema,
     DurationRulesSchema,
+    FieldMaskRulesSchema,
     TimestampRulesSchema,
   ]) {
     if (typeName == d.typeName) {
@@ -276,7 +281,7 @@ function getRulePath(base: PathBuilder, type: ruleType | undefined) {
   if (type == undefined) {
     return base;
   }
-  const field = FieldRulesSchema.fields.find((f) => f.name === type);
+  const field = FieldRulesSchema.field[type];
   if (field == undefined) {
     throw new CompilationError(`cannot find rule "${type}"`);
   }

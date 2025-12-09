@@ -2,8 +2,8 @@
 version: v2
 clean: true
 inputs:
-  - module: buf.build/bufbuild/protovalidate:v1.0.0
-  - module: buf.build/bufbuild/protovalidate-testing:v1.0.0
+  - module: buf.build/bufbuild/protovalidate:v1.1.0
+  - module: buf.build/bufbuild/protovalidate-testing:v1.1.0
 plugins:
   - local: protoc-gen-es
     out: src/gen
