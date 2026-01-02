@@ -20,7 +20,7 @@
   "packageManager": "npm@10.9.0",
   "licenseHeader": {
     "licenseType": "apache",
-    "yearRange": "2024-2025",
+    "yearRange": "2024-2026",
     "copyrightHolder": "Buf Technologies, Inc."
   },
   "devDependencies": {
