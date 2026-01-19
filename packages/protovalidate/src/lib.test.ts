@@ -36,7 +36,7 @@ void suite("isHostname", () => {
     assert.ok(m !== null);
     const expect = m[1] === "valid";
     void test(name, () => {
-      assert.strictEqual(isHostname(val), expect);
+      assert.strictEqual(isHostname.call(val), expect);
     });
   }
 
@@ -122,10 +122,10 @@ void suite("isHostAndPort", () => {
     const portRequired = m[1] === "true";
     const expect = m[2] === "valid";
     void test(name, () => {
-      assert.strictEqual(isHostAndPort(val, portRequired), expect);
+      assert.strictEqual(isHostAndPort.call(val, portRequired), expect);
       if (expect && portRequired) {
         // A valid host with required port must be a valid host with optional port
-        assert.strictEqual(isHostAndPort(val, false), expect);
+        assert.strictEqual(isHostAndPort.call(val, false), expect);
       }
     });
   }
@@ -213,22 +213,25 @@ void suite("isIpPrefix", () => {
     const strict = m[2] === "omitted" ? undefined : m[2] === "true";
     const expect = m[3] === "valid";
     void test(name, () => {
-      assert.strictEqual(isIpPrefix(val, version, strict), expect);
+      assert.strictEqual(isIpPrefix.call(val, version, strict), expect);
       if (typeof version == "number") {
         // Version given as number or bigint must have same result
-        assert.strictEqual(isIpPrefix(val, BigInt(version), strict), expect);
+        assert.strictEqual(
+          isIpPrefix.call(val, BigInt(version), strict),
+          expect,
+        );
       }
       if (expect && strict === true) {
         // A valid strict prefix must be a valid unstrict prefix
-        assert.strictEqual(isIpPrefix(val, version, false), true);
+        assert.strictEqual(isIpPrefix.call(val, version, false), true);
       }
       if (expect && version === 4) {
         // A valid IPv4 prefix cannot be a valid IPv6 prefix
-        assert.strictEqual(isIpPrefix(val, 6, strict), false);
+        assert.strictEqual(isIpPrefix.call(val, 6, strict), false);
       }
       if (expect && version === 6) {
         // A valid IPv6 prefix cannot be a valid IPv4 prefix
-        assert.strictEqual(isIpPrefix(val, 4, strict), false);
+        assert.strictEqual(isIpPrefix.call(val, 4, strict), false);
       }
     });
   }
@@ -533,18 +536,18 @@ void suite("isIp", () => {
     const version = m[1] === "omitted" ? undefined : parseInt(m[1]);
     const expect = m[2] === "valid";
     void test(name, () => {
-      assert.strictEqual(isIp(val, version), expect);
+      assert.strictEqual(isIp.call(val, version), expect);
       if (typeof version == "number") {
         // Version given as number or bigint must have same result
-        assert.strictEqual(isIp(val, BigInt(version)), expect);
+        assert.strictEqual(isIp.call(val, BigInt(version)), expect);
       }
       if (expect && version === 4) {
         // A valid IPv4 cannot be a valid IPv6
-        assert.strictEqual(isIp(val, 6), false);
+        assert.strictEqual(isIp.call(val, 6), false);
       }
       if (expect && version === 6) {
         // A valid IPv6 cannot be a valid IPv4
-        assert.strictEqual(isIp(val, 4), false);
+        assert.strictEqual(isIp.call(val, 4), false);
       }
     });
   }
@@ -678,7 +681,7 @@ void suite("isEmail", () => {
     assert.ok(m !== null);
     const expect = m[1] === "valid";
     void test(name, () => {
-      assert.strictEqual(isEmail(val), expect);
+      assert.strictEqual(isEmail.call(val), expect);
     });
   }
 
@@ -740,10 +743,10 @@ void suite("isUri", () => {
     assert.ok(m !== null);
     const expect = m[1] === "valid";
     void test(name, () => {
-      assert.strictEqual(isUri(val), expect);
+      assert.strictEqual(isUri.call(val), expect);
       if (expect) {
         // A valid URI must be a valid URI Reference
-        assert.strictEqual(isUriRef(val), expect);
+        assert.strictEqual(isUriRef.call(val), expect);
       }
     });
   }
@@ -991,7 +994,7 @@ void suite("isUriRef", () => {
     assert.ok(m !== null);
     const expect = m[1] === "valid";
     void test(name, () => {
-      assert.strictEqual(isUriRef(val), expect);
+      assert.strictEqual(isUriRef.call(val), expect);
     });
   }
 
@@ -1168,20 +1171,20 @@ void suite("isUriRef", () => {
 });
 
 void test("isInf", () => {
-  assert.strictEqual(isInf(Number.POSITIVE_INFINITY), true);
-  assert.strictEqual(isInf(Number.POSITIVE_INFINITY, 0), true);
-  assert.strictEqual(isInf(Number.POSITIVE_INFINITY, 1), true);
-  assert.strictEqual(isInf(Number.POSITIVE_INFINITY, BigInt(77)), true);
-  assert.strictEqual(isInf(Number.NEGATIVE_INFINITY), true);
-  assert.strictEqual(isInf(Number.NEGATIVE_INFINITY, 0), true);
-  assert.strictEqual(isInf(Number.NEGATIVE_INFINITY, -1), true);
-  assert.strictEqual(isInf(Number.NEGATIVE_INFINITY, BigInt(-77)), true);
-  assert.strictEqual(isInf(NaN), false);
-  assert.strictEqual(isInf(1), false);
-  assert.strictEqual(isInf(1, 0), false);
-  assert.strictEqual(isInf(1, -1), false);
-  assert.strictEqual(isInf(Number.POSITIVE_INFINITY, -1), false);
-  assert.strictEqual(isInf(Number.NEGATIVE_INFINITY, 1), false);
+  assert.strictEqual(isInf.call(Number.POSITIVE_INFINITY), true);
+  assert.strictEqual(isInf.call(Number.POSITIVE_INFINITY, 0), true);
+  assert.strictEqual(isInf.call(Number.POSITIVE_INFINITY, 1), true);
+  assert.strictEqual(isInf.call(Number.POSITIVE_INFINITY, BigInt(77)), true);
+  assert.strictEqual(isInf.call(Number.NEGATIVE_INFINITY), true);
+  assert.strictEqual(isInf.call(Number.NEGATIVE_INFINITY, 0), true);
+  assert.strictEqual(isInf.call(Number.NEGATIVE_INFINITY, -1), true);
+  assert.strictEqual(isInf.call(Number.NEGATIVE_INFINITY, BigInt(-77)), true);
+  assert.strictEqual(isInf.call(NaN), false);
+  assert.strictEqual(isInf.call(1), false);
+  assert.strictEqual(isInf.call(1, 0), false);
+  assert.strictEqual(isInf.call(1, -1), false);
+  assert.strictEqual(isInf.call(Number.POSITIVE_INFINITY, -1), false);
+  assert.strictEqual(isInf.call(Number.NEGATIVE_INFINITY, 1), false);
 });
 
 void suite("unique", () => {
@@ -1241,7 +1244,7 @@ void suite("unique", () => {
 
   function t(expect: boolean, val: CelValue[], comment = "") {
     void test(`${arrayLiteral(val)} ${expect}${comment.length ? `, ${comment}` : ""}`, () => {
-      assert.strictEqual(unique(celList(val)), expect);
+      assert.strictEqual(unique.call(celList(val)), expect);
     });
   }
 
@@ -1281,47 +1284,68 @@ void suite("bytes overloads", () => {
   }
   void test("contains", () => {
     assert.strictEqual(
-      bytesContains(s2b("hello world"), s2b("hello world")),
+      bytesContains.call(s2b("hello world"), s2b("hello world")),
       true,
     );
-    assert.strictEqual(bytesContains(s2b("hello world"), s2b("o w")), true);
-    assert.strictEqual(bytesContains(s2b("hello world"), s2b("hello")), true);
-    assert.strictEqual(bytesContains(s2b("hello world"), s2b("world")), true);
-    assert.strictEqual(bytesContains(s2b("hello world"), s2b("earth")), false);
-    assert.strictEqual(bytesContains(s2b("hello world"), s2b("")), true);
     assert.strictEqual(
-      bytesContains(s2b("hello world"), s2b("hello world from moon")),
+      bytesContains.call(s2b("hello world"), s2b("o w")),
+      true,
+    );
+    assert.strictEqual(
+      bytesContains.call(s2b("hello world"), s2b("hello")),
+      true,
+    );
+    assert.strictEqual(
+      bytesContains.call(s2b("hello world"), s2b("world")),
+      true,
+    );
+    assert.strictEqual(
+      bytesContains.call(s2b("hello world"), s2b("earth")),
+      false,
+    );
+    assert.strictEqual(bytesContains.call(s2b("hello world"), s2b("")), true);
+    assert.strictEqual(
+      bytesContains.call(s2b("hello world"), s2b("hello world from moon")),
       false,
     );
   });
   void test("startsWith", () => {
     assert.strictEqual(
-      bytesStartsWith(s2b("hello world"), s2b("hello world")),
+      bytesStartsWith.call(s2b("hello world"), s2b("hello world")),
       true,
     );
-    assert.strictEqual(bytesStartsWith(s2b("hello world"), s2b("hello")), true);
     assert.strictEqual(
-      bytesStartsWith(s2b("hello world"), s2b("world")),
+      bytesStartsWith.call(s2b("hello world"), s2b("hello")),
+      true,
+    );
+    assert.strictEqual(
+      bytesStartsWith.call(s2b("hello world"), s2b("world")),
       false,
     );
     assert.strictEqual(
-      bytesStartsWith(s2b("hello world"), s2b("hello world from moon")),
+      bytesStartsWith.call(s2b("hello world"), s2b("hello world from moon")),
       false,
     );
-    assert.strictEqual(bytesStartsWith(s2b("hello world"), s2b("")), true);
+    assert.strictEqual(bytesStartsWith.call(s2b("hello world"), s2b("")), true);
   });
   void test("endsWith", () => {
     assert.strictEqual(
-      bytesEndsWith(s2b("hello world"), s2b("hello world")),
+      bytesEndsWith.call(s2b("hello world"), s2b("hello world")),
       true,
     );
-    assert.strictEqual(bytesEndsWith(s2b("hello world"), s2b("world")), true);
-    assert.strictEqual(bytesEndsWith(s2b("hello world"), s2b("hello")), false);
     assert.strictEqual(
-      bytesEndsWith(s2b("hello world"), s2b("hello world from moon")),
+      bytesEndsWith.call(s2b("hello world"), s2b("world")),
+      true,
+    );
+    assert.strictEqual(
+      bytesEndsWith.call(s2b("hello world"), s2b("hello")),
       false,
     );
-    assert.strictEqual(bytesEndsWith(s2b("hello world"), s2b("")), true);
+    assert.strictEqual(
+      bytesEndsWith.call(s2b("hello world"), s2b("hello world from moon")),
+      false,
+    );
+    assert.strictEqual(bytesEndsWith.call(s2b("hello world"), s2b("")), true);
   });
 });
 

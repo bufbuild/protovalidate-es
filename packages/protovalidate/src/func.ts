@@ -15,7 +15,7 @@
 import {
   celFromScalar,
   celFunc,
-  celOverload,
+  celMethod,
   CelScalar,
   listType,
   type CelFunc,
@@ -38,65 +38,103 @@ import { isReflectMessage } from "@bufbuild/protobuf/reflect";
 import { isWrapperDesc } from "@bufbuild/protobuf/wkt";
 import { create } from "@bufbuild/protobuf";
 
-const isNanFn = celFunc("isNan", [
-  celOverload([CelScalar.DOUBLE], CelScalar.BOOL, Number.isNaN),
-]);
+const isNanFn = celMethod(
+  "isNan",
+  CelScalar.DOUBLE,
+  [],
+  CelScalar.BOOL,
+  function () {
+    return Number.isNaN(this);
+  },
+);
 
-const isInfFn = celFunc("isInf", [
-  celOverload([CelScalar.DOUBLE], CelScalar.BOOL, isInf),
-  celOverload([CelScalar.DOUBLE, CelScalar.INT], CelScalar.BOOL, isInf),
-]);
+const isInfFn = [
+  celMethod("isInf", CelScalar.DOUBLE, [], CelScalar.BOOL, isInf),
+  celMethod("isInf", CelScalar.DOUBLE, [CelScalar.INT], CelScalar.BOOL, isInf),
+];
 
-const isHostnameFn = celFunc("isHostname", [
-  celOverload([CelScalar.STRING], CelScalar.BOOL, isHostname),
-]);
+const isHostnameFn = celMethod(
+  "isHostname",
+  CelScalar.STRING,
+  [],
+  CelScalar.BOOL,
+  isHostname,
+);
 
-const isHostAndPortFn = celFunc("isHostAndPort", [
-  celOverload(
-    [CelScalar.STRING, CelScalar.BOOL],
-    CelScalar.BOOL,
-    isHostAndPort,
-  ),
-]);
+const isHostAndPortFn = celMethod(
+  "isHostAndPort",
+  CelScalar.STRING,
+  [CelScalar.BOOL],
+  CelScalar.BOOL,
+  isHostAndPort,
+);
 
-const isEmailFn = celFunc("isEmail", [
-  celOverload([CelScalar.STRING], CelScalar.BOOL, isEmail),
-]);
+const isEmailFn = celMethod(
+  "isEmail",
+  CelScalar.STRING,
+  [],
+  CelScalar.BOOL,
+  isEmail,
+);
 
-const isIpFn = celFunc("isIp", [
-  celOverload([CelScalar.STRING], CelScalar.BOOL, isIp),
-  celOverload([CelScalar.STRING, CelScalar.INT], CelScalar.BOOL, isIp),
-]);
+const isIpFn = [
+  celMethod("isIp", CelScalar.STRING, [], CelScalar.BOOL, isIp),
+  celMethod("isIp", CelScalar.STRING, [CelScalar.INT], CelScalar.BOOL, isIp),
+];
 
-const isIpPrefixFn = celFunc("isIpPrefix", [
-  celOverload([CelScalar.STRING], CelScalar.BOOL, isIpPrefix),
-  celOverload([CelScalar.STRING, CelScalar.INT], CelScalar.BOOL, isIpPrefix),
-  celOverload(
-    [CelScalar.STRING, CelScalar.BOOL],
-    CelScalar.BOOL,
-    (str, strict) => isIpPrefix(str, undefined, strict),
-  ),
-  celOverload(
-    [CelScalar.STRING, CelScalar.INT, CelScalar.BOOL],
+const isIpPrefixFn = [
+  celMethod("isIpPrefix", CelScalar.STRING, [], CelScalar.BOOL, isIpPrefix),
+  celMethod(
+    "isIpPrefix",
+    CelScalar.STRING,
+    [CelScalar.INT],
     CelScalar.BOOL,
     isIpPrefix,
   ),
-]);
+  celMethod(
+    "isIpPrefix",
+    CelScalar.STRING,
+    [CelScalar.BOOL],
+    CelScalar.BOOL,
+    function (strict) {
+      return isIpPrefix.call(this, undefined, strict);
+    },
+  ),
+  celMethod(
+    "isIpPrefix",
+    CelScalar.STRING,
+    [CelScalar.INT, CelScalar.BOOL],
+    CelScalar.BOOL,
+    isIpPrefix,
+  ),
+];
 
-const isUriFn = celFunc("isUri", [
-  celOverload([CelScalar.STRING], CelScalar.BOOL, isUri),
-]);
+const isUriFn = celMethod("isUri", CelScalar.STRING, [], CelScalar.BOOL, isUri);
 
-const isUriRefFn = celFunc("isUriRef", [
-  celOverload([CelScalar.STRING], CelScalar.BOOL, isUriRef),
-]);
+const isUriRefFn = celMethod(
+  "isUriRef",
+  CelScalar.STRING,
+  [],
+  CelScalar.BOOL,
+  isUriRef,
+);
 
-const uniqueFn = celFunc("unique", [
-  celOverload([listType(CelScalar.DYN)], CelScalar.BOOL, unique),
-]);
+const uniqueFn = [
+  CelScalar.UINT,
+  CelScalar.INT,
+  CelScalar.STRING,
+  CelScalar.BOOL,
+  CelScalar.DOUBLE,
+  CelScalar.BYTES,
+].map((elem) =>
+  celMethod("unique", listType(elem), [], CelScalar.BOOL, unique),
+);
 
-const getFieldFn = celFunc("getField", [
-  celOverload([CelScalar.DYN, CelScalar.STRING], CelScalar.DYN, (msg, name) => {
+const getFieldFn = celFunc(
+  "getField",
+  [CelScalar.DYN, CelScalar.STRING],
+  CelScalar.DYN,
+  (msg, name) => {
     if (!isReflectMessage(msg)) {
       throw new Error("getField can only be applied to messages");
     }
@@ -121,69 +159,89 @@ const getFieldFn = celFunc("getField", [
         }
         return create(field.message);
     }
-  }),
-]);
+  },
+);
 
-const containsFn = celFunc("contains", [
-  celOverload(
-    [CelScalar.BYTES, CelScalar.BYTES],
+const containsFn = [
+  celMethod(
+    "contains",
+    CelScalar.BYTES,
+    [CelScalar.BYTES],
     CelScalar.BOOL,
     bytesContains,
   ),
-  celOverload([CelScalar.STRING, CelScalar.STRING], CelScalar.BOOL, (l, r) =>
-    l.includes(r),
+  celMethod(
+    "contains",
+    CelScalar.STRING,
+    [CelScalar.STRING],
+    CelScalar.BOOL,
+    String.prototype.includes,
   ),
-]);
+];
 
-const endsWithFn = celFunc("endsWith", [
-  celOverload(
-    [CelScalar.BYTES, CelScalar.BYTES],
+const endsWithFn = [
+  celMethod(
+    "endsWith",
+    CelScalar.BYTES,
+    [CelScalar.BYTES],
     CelScalar.BOOL,
     bytesEndsWith,
   ),
-  celOverload([CelScalar.STRING, CelScalar.STRING], CelScalar.BOOL, (l, r) =>
-    l.endsWith(r),
+  celMethod(
+    "endsWith",
+    CelScalar.STRING,
+    [CelScalar.STRING],
+    CelScalar.BOOL,
+    String.prototype.endsWith,
   ),
-]);
+];
 
-const startsWithFn = celFunc("startsWith", [
-  celOverload(
-    [CelScalar.BYTES, CelScalar.BYTES],
+const startsWithFn = [
+  celMethod(
+    "startsWith",
+    CelScalar.BYTES,
+    [CelScalar.BYTES],
     CelScalar.BOOL,
     bytesStartsWith,
   ),
-  celOverload([CelScalar.STRING, CelScalar.STRING], CelScalar.BOOL, (l, r) =>
-    l.startsWith(r),
+  celMethod(
+    "startsWith",
+    CelScalar.STRING,
+    [CelScalar.STRING],
+    CelScalar.BOOL,
+    String.prototype.startsWith,
   ),
-]);
+];
 
 export type RegexMatcher = (pattern: string, against: string) => boolean;
 export function createCustomFuncions(regexMatcher?: RegexMatcher): CelFunc[] {
-  const funcs = [
+  const funcs: CelFunc[] = [
     isNanFn,
-    isInfFn,
+    ...isInfFn,
     isHostnameFn,
     isHostAndPortFn,
     isEmailFn,
-    isIpFn,
-    isIpPrefixFn,
+    ...isIpFn,
+    ...isIpPrefixFn,
     isUriFn,
     isUriRefFn,
-    uniqueFn,
+    ...uniqueFn,
     getFieldFn,
-    containsFn,
-    endsWithFn,
-    startsWithFn,
+    ...containsFn,
+    ...endsWithFn,
+    ...startsWithFn,
   ];
   if (regexMatcher) {
     funcs.push(
-      celFunc("matches", [
-        celOverload(
-          [CelScalar.STRING, CelScalar.STRING],
-          CelScalar.BOOL,
-          (against, pattern) => regexMatcher(pattern, against),
-        ),
-      ]),
+      celMethod(
+        "matches",
+        CelScalar.STRING,
+        [CelScalar.STRING],
+        CelScalar.BOOL,
+        function (pattern) {
+          return regexMatcher(pattern, this);
+        },
+      ),
     );
   }
   return funcs;
