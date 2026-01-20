@@ -20,11 +20,11 @@ import { ScalarType } from "@bufbuild/protobuf";
  * Returns true if the value is infinite, optionally limit to positive or
  * negative infinity.
  */
-export function isInf(val: number, sign?: number | bigint): boolean {
+export function isInf(this: number, sign?: number | bigint): boolean {
   sign ??= 0;
   return (
-    (sign >= 0 && val === Number.POSITIVE_INFINITY) ||
-    (sign <= 0 && val === Number.NEGATIVE_INFINITY)
+    (sign >= 0 && this === Number.POSITIVE_INFINITY) ||
+    (sign <= 0 && this === Number.NEGATIVE_INFINITY)
   );
 }
 
@@ -42,15 +42,15 @@ export function isInf(val: number, sign?: number | bigint): boolean {
  * Both formats are well-defined in the internet standard RFC 3986. Zone
  * identifiers for IPv6 addresses (for example "fe80::a%en1") are supported.
  */
-export function isIp(str: string, version?: number | bigint): boolean {
+export function isIp(this: string, version?: number | bigint): boolean {
   if (version == 6) {
-    return new Ipv6(str).address();
+    return new Ipv6(this).address();
   }
   if (version == 4) {
-    return new Ipv4(str).address();
+    return new Ipv4(this).address();
   }
   if (version === undefined || version == 0) {
-    return new Ipv4(str).address() || new Ipv6(str).address();
+    return new Ipv4(this).address() || new Ipv6(this).address();
   }
   return false;
 }
@@ -74,20 +74,20 @@ export function isIp(str: string, version?: number | bigint): boolean {
  * the first 24 bits of the 32-bit IPv4 as the network prefix.
  */
 export function isIpPrefix(
-  str: string,
+  this: string,
   version?: number | bigint,
   strict = false,
 ): boolean {
   if (version == 6) {
-    const ip = new Ipv6(str);
+    const ip = new Ipv6(this);
     return ip.addressPrefix() && (!strict || ip.isPrefixOnly());
   }
   if (version == 4) {
-    const ip = new Ipv4(str);
+    const ip = new Ipv4(this);
     return ip.addressPrefix() && (!strict || ip.isPrefixOnly());
   }
   if (version === undefined || version == 0) {
-    return isIpPrefix(str, 6, strict) || isIpPrefix(str, 4, strict);
+    return isIpPrefix.call(this, 6, strict) || isIpPrefix.call(this, 4, strict);
   }
   return false;
 }
@@ -515,11 +515,11 @@ export class Ipv6 {
  * - The name can have a trailing dot, for example "foo.example.com.".
  * - The name can be 253 characters at most, excluding the optional trailing dot.
  */
-export function isHostname(str: string): boolean {
-  if (str.length > 253) {
+export function isHostname(this: string): boolean {
+  if (this.length > 253) {
     return false;
   }
-  const s = str.endsWith(".") ? str.substring(0, str.length - 1) : str;
+  const s = this.endsWith(".") ? this.substring(0, this.length - 1) : this;
   let allDigits = false;
   // split hostname on '.' and validate each part
   for (const part of s.split(".")) {
@@ -561,30 +561,31 @@ export function isHostname(str: string): boolean {
  * The port is separated by a colon. It must be non-empty, with a decimal number
  * in the range of 0-65535, inclusive.
  */
-export function isHostAndPort(str: string, portRequired: boolean): boolean {
-  if (str.length == 0) {
+export function isHostAndPort(this: string, portRequired: boolean): boolean {
+  if (this.length == 0) {
     return false;
   }
-  const splitIdx = str.lastIndexOf(":");
-  if (str[0] == "[") {
-    const end = str.lastIndexOf("]");
+  const splitIdx = this.lastIndexOf(":");
+  if (this[0] == "[") {
+    const end = this.lastIndexOf("]");
     switch (end + 1) {
-      case str.length: // no port
-        return !portRequired && isIp(str.substring(1, end), 6);
+      case this.length: // no port
+        return !portRequired && isIp.call(this.substring(1, end), 6);
       case splitIdx: // port
         return (
-          isIp(str.substring(1, end), 6) && isPort(str.substring(splitIdx + 1))
+          isIp.call(this.substring(1, end), 6) &&
+          isPort(this.substring(splitIdx + 1))
         );
       default: // malformed
         return false;
     }
   }
   if (splitIdx < 0) {
-    return !portRequired && (isHostname(str) || isIp(str, 4));
+    return !portRequired && (isHostname.call(this) || isIp.call(this, 4));
   }
-  const host = str.substring(0, splitIdx);
-  const port = str.substring(splitIdx + 1);
-  return (isHostname(host) || isIp(host, 4)) && isPort(port);
+  const host = this.substring(0, splitIdx);
+  const port = this.substring(splitIdx + 1);
+  return (isHostname.call(host) || isIp.call(host, 4)) && isPort(port);
 }
 
 function isPort(str: string): boolean {
@@ -612,10 +613,10 @@ function isPort(str: string): boolean {
  * unexpected forms of email addresses and will easily match a typographical
  * error.
  */
-export function isEmail(str: string): boolean {
+export function isEmail(this: string): boolean {
   // See https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address
   return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
-    str,
+    this,
   );
 }
 
@@ -625,8 +626,8 @@ export function isEmail(str: string): boolean {
  * URI is defined in the internet standard RFC 3986.
  * Zone Identifiers in IPv6 address literals are supported (RFC 6874).
  */
-export function isUri(str: string): boolean {
-  return new Uri(str).uri();
+export function isUri(this: string): boolean {
+  return new Uri(this).uri();
 }
 
 /**
@@ -637,8 +638,8 @@ export function isUri(str: string): boolean {
  * standard RFC 3986. Zone Identifiers in IPv6 address literals are supported
  * (RFC 6874).
  */
-export function isUriRef(str: string): boolean {
-  return new Uri(str).uriReference();
+export function isUriRef(this: string): boolean {
+  return new Uri(this).uriReference();
 }
 
 class Uri {
@@ -919,7 +920,7 @@ class Uri {
     while (this.hexdig() || this.take(":")) {
       // continue
     }
-    if (isIp(this.str.substring(start, this.i), 6)) {
+    if (isIp.call(this.str.substring(start, this.i), 6)) {
       return true;
     }
     this.i = start;
@@ -1298,8 +1299,8 @@ class Uri {
  * Returns true if the array only contains values that are distinct from each
  * other by strict comparison.
  */
-export function unique(list: CelList): boolean {
-  return Array.from(list.values()).every((a, index, arr) => {
+export function unique(this: CelList): boolean {
+  return Array.from(this.values()).every((a, index, arr) => {
     if (isCelUint(a)) {
       for (let i = 0; i < arr.length; i++) {
         if (i == index) {
@@ -1331,17 +1332,17 @@ export function unique(list: CelList): boolean {
 /**
  * Returns true if argument bytes contains argument sub.
  */
-export function bytesContains(bytes: Uint8Array, sub: Uint8Array): boolean {
+export function bytesContains(this: Uint8Array, sub: Uint8Array): boolean {
   if (sub.length === 0) {
     return true;
   }
-  if (sub.length > bytes.length) {
+  if (sub.length > this.length) {
     return false;
   }
-  for (let i = 0; i < bytes.length - sub.length + 1; i++) {
+  for (let i = 0; i < this.length - sub.length + 1; i++) {
     let found = true;
     for (let j = 0; j < sub.length; j++) {
-      if (bytes[i + j] != sub[j]) {
+      if (this[i + j] != sub[j]) {
         found = false;
         break;
       }
@@ -1356,12 +1357,12 @@ export function bytesContains(bytes: Uint8Array, sub: Uint8Array): boolean {
 /**
  * Returns true if argument bytes starts with argument sub.
  */
-export function bytesStartsWith(bytes: Uint8Array, sub: Uint8Array): boolean {
-  if (sub.length > bytes.length) {
+export function bytesStartsWith(this: Uint8Array, sub: Uint8Array): boolean {
+  if (sub.length > this.length) {
     return false;
   }
   for (let i = 0; i < sub.length; i++) {
-    if (sub[i] != bytes[i]) {
+    if (sub[i] != this[i]) {
       return false;
     }
   }
@@ -1371,15 +1372,15 @@ export function bytesStartsWith(bytes: Uint8Array, sub: Uint8Array): boolean {
 /**
  * Returns true if argument bytes ends with argument sub.
  */
-export function bytesEndsWith(bytes: Uint8Array, sub: Uint8Array): boolean {
-  if (sub.length > bytes.length) {
+export function bytesEndsWith(this: Uint8Array, sub: Uint8Array): boolean {
+  if (sub.length > this.length) {
     return false;
   }
-  if (bytes.length < sub.length) {
+  if (this.length < sub.length) {
     return false;
   }
   for (let i = 0; i < sub.length; i++) {
-    if (sub[sub.length - i - 1] != bytes[bytes.length - i - 1]) {
+    if (sub[sub.length - i - 1] != this[this.length - i - 1]) {
       return false;
     }
   }

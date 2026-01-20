@@ -48,7 +48,7 @@ import type { Eval } from "./eval.js";
 import type { Cursor } from "./cursor.js";
 import { getRuleScalarType } from "./rules.js";
 import { createCustomFuncions, type RegexMatcher } from "./func.js";
-import { STRINGS_EXT_FUNCS } from "@bufbuild/cel/ext/strings";
+import { strings } from "@bufbuild/cel/ext";
 import { isReflectMessage } from "@bufbuild/protobuf/reflect";
 
 type CelCompiledRules = {
@@ -94,7 +94,7 @@ export class CelManager {
   ) {
     this.env = celEnv({
       registry,
-      funcs: [...STRINGS_EXT_FUNCS, ...createCustomFuncions(regexMatcher)],
+      funcs: [...strings, ...createCustomFuncions(regexMatcher)],
     });
     this.bindings.now = timestampNow();
   }
