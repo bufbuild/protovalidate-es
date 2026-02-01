@@ -19,7 +19,7 @@
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.62.1",
-    "@bufbuild/protoc-gen-es": "^2.10.2",
+    "@bufbuild/protoc-gen-es": "^2.11.0",
     "@standard-schema/spec": "^1.1.0"
   }
 }
