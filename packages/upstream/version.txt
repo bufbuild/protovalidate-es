@@ -1,3 +1,3 @@
 # Specify a version of protovalidate with a leading "v", for example v0.13.1.
 # Alternatively, specify a branch name on the main protovalidate repository.
-v1.1.0
+c2f5bb510327da92c875869e6d3fc6358f0d01f5
