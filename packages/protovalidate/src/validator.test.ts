@@ -329,6 +329,22 @@ void suite("Validator", () => {
       );
       assert.ok(result.error instanceof CompilationError);
     });
+    void test("unknown extension raises error on every call", () => {
+      const validator = createValidator();
+      const person = create(personSchema, {
+        name: "Pauly Shore",
+      });
+      const result = validator.validate(personSchema, person);
+      assert.equal(result.kind, "error", "first call should explode");
+      assert.ok(result.error instanceof CompilationError);
+      const retryResult = validator.validate(personSchema, person);
+      assert.equal(
+        retryResult.kind,
+        "error",
+        "second call should still explore, not silently skip the unknown extension and pass, buuddyy",
+      );
+      assert.ok(retryResult.error instanceof CompilationError);
+    });
     void test("registered extension validates", () => {
       const validator = createValidator({
         registry: createRegistry(ext_abc),

@@ -96,11 +96,16 @@ export class Planner {
     const messageRules = getOption(message, ext_message);
     const e = new EvalMany<ReflectMessage>();
     this.messageCache.set(message, e);
-    e.add(this.fields(messageRules.oneof, message.fields));
-    e.add(this.messageCel(messageRules));
-    e.add(this.messageOneofs(message, messageRules.oneof));
-    e.add(this.oneofs(message.oneofs));
-    e.prune();
+    try {
+      e.add(this.fields(messageRules.oneof, message.fields));
+      e.add(this.messageCel(messageRules));
+      e.add(this.messageOneofs(message, messageRules.oneof));
+      e.add(this.oneofs(message.oneofs));
+      e.prune();
+    } catch (err) {
+      this.messageCache.delete(message);
+      throw err;
+    }
     return e;
   }
 
