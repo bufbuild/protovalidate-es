@@ -341,7 +341,7 @@ void suite("Validator", () => {
       assert.equal(
         retryResult.kind,
         "error",
-        "second call should still explore, not silently skip the unknown extension and pass, buuddyy",
+        "second call should also explode",
       );
       assert.ok(retryResult.error instanceof CompilationError);
     });
