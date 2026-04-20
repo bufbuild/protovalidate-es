@@ -118,10 +118,7 @@ void suite("createStandardSchema", () => {
     const message = create(descMessage, { email: "not-an-email" });
     const result = await schema["~standard"].validate(message);
     assert.ok(result.issues?.length === 1);
-    assert.equal(
-      result.issues[0].message,
-      "value must be a valid email address",
-    );
+    assert.equal(result.issues[0].message, "must be a valid email address");
   });
   void test("FailureResult maps multiple violations to issues", async () => {
     const descMessage = compileMessage(
@@ -144,10 +141,10 @@ void suite("createStandardSchema", () => {
     const result = await schema["~standard"].validate(message);
     assert.ok(result.issues);
     assert.deepStrictEqual(result.issues, [
-      { message: "value must be a valid email address", path: ["email"] },
-      { message: "value must be greater than or equal to 18", path: ["age"] },
+      { message: "must be a valid email address", path: ["email"] },
+      { message: "must be greater than or equal to 18", path: ["age"] },
       {
-        message: "value length must be at least 3 characters",
+        message: "must be at least 3 characters",
         path: ["username"],
       },
     ]);
