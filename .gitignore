@@ -12,6 +12,7 @@ node_modules
 .antlr/
 .turbo
 packages/upstream/gobin
+packages/protovalidate-bench/.tmp
 
 # Editor directories and files
 .vscode/*

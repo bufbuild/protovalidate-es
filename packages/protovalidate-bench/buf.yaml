@@ -1,0 +1,17 @@
+# For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
+version: v2
+modules:
+  - path: proto
+deps:
+  - buf.build/bufbuild/protovalidate
+lint:
+  use:
+    - STANDARD
+  # native.proto deliberately stacks redundant int32/int64 rules to exercise
+  # the multi-rule code path (mirrors protovalidate-go's BenchmarkMultiRule).
+  ignore_only:
+    PROTOVALIDATE:
+      - proto/bench/v1/native.proto
+breaking:
+  use:
+    - FILE
