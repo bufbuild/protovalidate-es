@@ -147,13 +147,11 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
     : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
-  const regexMatch = opt?.regexMatch;
-  const celMan = new CelManager(registry, regexMatch);
+  const celMan = new CelManager(registry, opt?.regexMatch);
   const planner = new Planner(
     celMan,
     opt?.legacyRequired ?? false,
     opt?.disableNativeRules ?? false,
-    regexMatch,
   );
   return {
     validate<

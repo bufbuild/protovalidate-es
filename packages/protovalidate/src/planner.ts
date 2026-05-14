@@ -83,7 +83,6 @@ import {
 } from "./cel.js";
 import { CompilationError } from "./error.js";
 import { tryBuildNative } from "./native/index.js";
-import type { RegexMatcher } from "./func.js";
 
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
@@ -92,7 +91,6 @@ export class Planner {
     private readonly celMan: CelManager,
     private readonly legacyRequired: boolean,
     private readonly disableNativeRules: boolean,
-    private readonly regexMatch: RegexMatcher | undefined,
   ) {}
 
   plan(message: DescMessage): Eval<ReflectMessage> {
@@ -426,9 +424,15 @@ export class Planner {
       if (isMessage(rules, AnyRulesSchema)) {
         evals.add(new EvalAnyRules(rulePath, rules));
       }
-      const wrappedValueField = isWrapperDesc(descMessage)
-        ? descMessage.fields.find((f) => f.name === "value")
-        : undefined;
+      let wrappedValueField: DescField | undefined;
+      if (isWrapperDesc(descMessage)) {
+        wrappedValueField = descMessage.fields.find((f) => f.name === "value");
+        if (wrappedValueField === undefined) {
+          throw new CompilationError(
+            `wrapper ${descMessage.typeName} has no "value" field`,
+          );
+        }
+      }
       evals.add(this.rules(rules, rulePath, false, wrappedValueField));
     }
     return evals;
@@ -448,7 +452,6 @@ export class Planner {
           rules,
           rulePath,
           forMapKey,
-          regexMatch: this.regexMatch,
           wrappedValueField,
         });
     const evalStandard = new EvalStandardRulesCel(

@@ -333,4 +333,60 @@ void suite("native numeric rules", () => {
       diff(s, create(s, { x: Number.NaN }));
     });
   });
+
+  // Review follow-up: gaps surfaced by the code review.
+  void suite("review gap coverage", () => {
+    void test("T1: NaN value with float.in list", () => {
+      // NaN is never === to any list element, so the violation must fire.
+      const s = compile(
+        `message M { float x = 1 [(buf.validate.field).float = { in: [1.0, 2.0] }]; }`,
+      );
+      diff(s, create(s, { x: Number.NaN }));
+    });
+
+    void test("T2: const and range together both report violations", () => {
+      const s = compile(
+        `message M {
+          int32 n = 1 [(buf.validate.field).int32 = { const: 5, gt: 3, lt: 100 }];
+        }`,
+      );
+      // 4 satisfies the range (gt 3, lt 100) but violates const = 5.
+      diff(s, create(s, { n: 4 }));
+      // 200 violates both const and the range.
+      diff(s, create(s, { n: 200 }));
+    });
+
+    void test("T3: BoolValue wrapper unset on parent", () => {
+      const s = compile(
+        `message M {
+          google.protobuf.BoolValue b = 1 [(buf.validate.field).bool.const = true];
+        }`,
+      );
+      // Wrapper field absent — EvalField's presence check skips validation.
+      diff(s, create(s, {}));
+    });
+
+    void test("T4: int64 max-boundary values", () => {
+      // 9_223_372_036_854_775_807 is max int64. Validate const at and around it.
+      const s = compile(
+        `message M {
+          int64 n = 1 [(buf.validate.field).int64.const = 9223372036854775807];
+        }`,
+      );
+      diff(s, create(s, { n: 9223372036854775807n }));
+      diff(s, create(s, { n: 9223372036854775806n }));
+    });
+
+    void test("T5: explicit float.finite=false claims the field but emits nothing", () => {
+      const s = compile(
+        `message M {
+          float x = 1 [(buf.validate.field).float.finite = false];
+        }`,
+      );
+      // finite=false means "no constraint" — every value passes, even NaN.
+      diff(s, create(s, { x: Number.NaN }));
+      diff(s, create(s, { x: Number.POSITIVE_INFINITY }));
+      diff(s, create(s, { x: 1.5 }));
+    });
+  });
 });

@@ -13,11 +13,7 @@
 // limitations under the License.
 
 import type { DescField } from "@bufbuild/protobuf";
-import type {
-  ReflectMessage,
-  ReflectMessageGet,
-  ScalarValue,
-} from "@bufbuild/protobuf/reflect";
+import type { ReflectMessage, ScalarValue } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
 
@@ -43,16 +39,4 @@ export class WrappedValueEval implements Eval<ReflectMessage> {
   prune(): boolean {
     return this.inner.prune();
   }
-}
-
-/**
- * Cast helper: `Eval<ScalarValue>` and `Eval<ReflectMessage>` are both
- * assignable to `Eval<ReflectMessageGet>` (the union type that the planner
- * stores), but TypeScript doesn't see that directly because Eval is invariant
- * in its parameter. Use this once at each handoff.
- */
-export function asReflectGet<V extends ScalarValue | ReflectMessage>(
-  e: Eval<V>,
-): Eval<ReflectMessageGet> {
-  return e as unknown as Eval<ReflectMessageGet>;
 }

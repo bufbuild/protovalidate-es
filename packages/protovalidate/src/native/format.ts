@@ -28,10 +28,18 @@ export function codepointLength(s: string): number {
 }
 
 /**
- * Format a number for inclusion in a violation message.
+ * Format a finite double for inclusion in a violation message.
  *
- * Mirrors protovalidate-go's `printFloat` so error messages match the CEL
- * implementation byte-for-byte.
+ * Matches what `@bufbuild/cel`'s `%s` formatter produces for a `number` — i.e.
+ * `Number.prototype.toString()` — so the native and CEL evaluators emit
+ * byte-identical messages today.
+ *
+ * NOTE: This diverges from protovalidate-go, which uses
+ * `strconv.FormatFloat(v, 'f', -1, 64)` (always fixed-point). For values in
+ * the JS scientific-notation zone (outside `[1e-7, 1e21)`) the TS impls
+ * produce `1e+21` where Go produces `1000000000000000000000`. Both cel-es and
+ * this helper need to change together to close the gap; do not "fix" one in
+ * isolation. See protovalidate-es plan and the cel-es `formatFloating` impl.
  */
 export function printFloat(n: number): string {
   if (Number.isNaN(n)) {
