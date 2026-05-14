@@ -396,12 +396,20 @@ export function tryBuildNativeBytesRules(
     const src = rules.pattern;
     let test: (against: string) => boolean;
     try {
-      test = regexMatch
-        ? (against) => regexMatch(src, against)
-        : defaultRegexTest(src);
+      if (regexMatch) {
+        // Probe the user-supplied engine at plan time so an invalid pattern
+        // surfaces here, symmetric with the default engine's eager compile.
+        // Empty input is the contract-safe probe — a regex engine must be
+        // able to test any pattern against the empty string.
+        regexMatch(src, "");
+        test = (against) => regexMatch(src, against);
+      } else {
+        test = defaultRegexTest(src);
+      }
     } catch {
-      // Invalid pattern at plan time. Let CEL produce the CompilationError
-      // it already emits today.
+      // The pattern doesn't compile under the active engine. Fall through
+      // to CEL, whose own `matches()` call hits the same throw at eval
+      // time and surfaces it as a RuntimeError.
       return undefined;
     }
     cfg.pattern = {
