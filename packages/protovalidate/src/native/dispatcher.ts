@@ -26,23 +26,16 @@ import { tryBuildNativeNumericRules } from "./numeric.js";
 import { WrappedValueEval } from "./wrapper.js";
 
 /**
- * Result of {@link tryBuildNative}.
+ * A successful native dispatch result. The planner skips CEL enrollment for
+ * the fields in `handledFields` and appends `eval` to the rule's `EvalMany`.
  *
- * - "none": no native handler applies; the planner enrolls every set field in
- *   the CEL evaluator as it does today.
- * - "partial" / "full": at least one field is handled natively. The planner
- *   skips CEL enrollment for fields in `handledFields` and appends `eval` to
- *   the rule's `EvalMany`. "full" indicates every set field on the rules
- *   message was handled natively, so the trailing `EvalStandardRulesCel` will
- *   be empty and pruned.
+ * `tryBuildNative` returns `undefined` to mean "no native handler applies" —
+ * the planner enrolls every set field in the CEL evaluator as before.
  */
-export type NativeDispatchResult =
-  | { kind: "none" }
-  | {
-      kind: "partial" | "full";
-      eval: Eval<ReflectMessageGet>;
-      handledFields: ReadonlySet<DescField>;
-    };
+export type NativeDispatchResult = {
+  eval: Eval<ReflectMessageGet>;
+  handledFields: ReadonlySet<DescField>;
+};
 
 /**
  * Internal dispatch result used by the per-rules-type builders. They produce
@@ -50,13 +43,10 @@ export type NativeDispatchResult =
  * `Eval<ReflectMessageGet>` (the scalar case) or wraps it in a
  * `WrappedValueEval` for WKT wrapper messages.
  */
-export type ScalarNativeResult =
-  | { kind: "none" }
-  | {
-      kind: "partial" | "full";
-      eval: Eval<ScalarValue>;
-      handledFields: ReadonlySet<DescField>;
-    };
+export type ScalarNativeResult = {
+  eval: Eval<ScalarValue>;
+  handledFields: ReadonlySet<DescField>;
+};
 
 /**
  * Inputs to the native rule dispatcher.
@@ -79,12 +69,14 @@ export type NativeDispatchInput = {
  * Decide whether the given rules submessage can be evaluated natively, and
  * return an `Eval` for the handled subset plus the set of rule fields that
  * have been claimed (so the planner skips them on the CEL path).
+ *
+ * Returns `undefined` if no native handler applies.
  */
 export function tryBuildNative(
   input: NativeDispatchInput,
-): NativeDispatchResult {
+): NativeDispatchResult | undefined {
   const inner = buildScalarNative(input);
-  if (inner.kind === "none") return inner;
+  if (inner === undefined) return undefined;
   // Eval is invariant in its parameter; the cast is safe because every
   // ScalarValue is also a valid ReflectMessageGet at runtime.
   const lifted =
@@ -95,13 +87,14 @@ export function tryBuildNative(
           inner.eval,
         ) as unknown as Eval<ReflectMessageGet>);
   return {
-    kind: inner.kind,
     eval: lifted,
     handledFields: inner.handledFields,
   };
 }
 
-function buildScalarNative(input: NativeDispatchInput): ScalarNativeResult {
+function buildScalarNative(
+  input: NativeDispatchInput,
+): ScalarNativeResult | undefined {
   const { rules, rulePath, forMapKey } = input;
   if (rules.$typeName === BoolRulesSchema.typeName) {
     return tryBuildNativeBoolRules(rules as BoolRules, rulePath, forMapKey);

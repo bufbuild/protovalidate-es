@@ -54,23 +54,22 @@ class EvalNativeBoolRules implements Eval<ScalarValue> {
 }
 
 /**
- * Try to build a native evaluator for BoolRules. Returns kind:"none" if no
+ * Try to build a native evaluator for BoolRules. Returns `undefined` if no
  * native handler applies (no const set, or unknown extensions present).
  */
 export function tryBuildNativeBoolRules(
   rules: BoolRules,
   rulePath: PathBuilder,
   forMapKey: boolean,
-): ScalarNativeResult {
+): ScalarNativeResult | undefined {
   if (rules.$unknown && rules.$unknown.length > 0) {
-    return { kind: "none" };
+    return undefined;
   }
   if (!isFieldSet(rules, boolConstDesc)) {
-    return { kind: "none" };
+    return undefined;
   }
   const path = rulePath.clone().field(boolConstDesc).toPath();
   return {
-    kind: "full",
     eval: new EvalNativeBoolRules(forMapKey, rules.const, path),
     handledFields: new Set([boolConstDesc]),
   };

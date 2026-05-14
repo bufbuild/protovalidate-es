@@ -348,9 +348,9 @@ function build<T extends number | bigint>(
   config: NumericConfig<T>,
   rulePath: PathBuilder,
   forMapKey: boolean,
-): ScalarNativeResult {
+): ScalarNativeResult | undefined {
   if (rules.$unknown && rules.$unknown.length > 0) {
-    return { kind: "none" };
+    return undefined;
   }
 
   const handled = new Set<import("@bufbuild/protobuf").DescField>();
@@ -386,7 +386,7 @@ function build<T extends number | bigint>(
   if (rules.greaterThan.case !== undefined) {
     const kind = rules.greaterThan.case;
     const val = rules.greaterThan.value;
-    if (isNaNValue(val)) return { kind: "none" };
+    if (isNaNValue(val)) return undefined;
     const desc = kind === "gt" ? config.descs.gt : config.descs.gte;
     lowerRule = {
       kind,
@@ -400,7 +400,7 @@ function build<T extends number | bigint>(
   if (rules.lessThan.case !== undefined) {
     const kind = rules.lessThan.case;
     const val = rules.lessThan.value;
-    if (isNaNValue(val)) return { kind: "none" };
+    if (isNaNValue(val)) return undefined;
     const desc = kind === "lt" ? config.descs.lt : config.descs.lte;
     upperRule = {
       kind,
@@ -420,11 +420,10 @@ function build<T extends number | bigint>(
   }
 
   if (handled.size === 0) {
-    return { kind: "none" };
+    return undefined;
   }
 
   return {
-    kind: "full",
     eval: new EvalNativeNumericRules<T>(
       config,
       forMapKey,
@@ -441,14 +440,14 @@ function build<T extends number | bigint>(
 
 /**
  * Build a native evaluator for any of the 12 numeric rules messages.
- * Returns `kind: "none"` for any unrecognized type or for rules that bail
- * out (NaN bound, unknown extensions, no fields set).
+ * Returns `undefined` for any unrecognized type or for rules that bail out
+ * (NaN bound, unknown extensions, no fields set).
  */
 export function tryBuildNativeNumericRules(
   rules: Message<string>,
   rulePath: PathBuilder,
   forMapKey: boolean,
-): ScalarNativeResult {
+): ScalarNativeResult | undefined {
   switch (rules.$typeName) {
     case Int32RulesSchema.typeName:
       return build<number>(
@@ -535,6 +534,6 @@ export function tryBuildNativeNumericRules(
         forMapKey,
       );
     default:
-      return { kind: "none" };
+      return undefined;
   }
 }

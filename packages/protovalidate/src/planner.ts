@@ -447,7 +447,7 @@ export class Planner {
     const ruleDesc = getRuleDescriptor(rules.$typeName);
     const prepared = this.celMan.compileRules(ruleDesc);
     const native = this.disableNativeRules
-      ? ({ kind: "none" } as const)
+      ? undefined
       : tryBuildNative({
           rules,
           rulePath,
@@ -459,12 +459,11 @@ export class Planner {
       rules,
       forMapKey,
     );
-    const handled = native.kind === "none" ? undefined : native.handledFields;
     for (const plan of prepared.standard) {
       if (!isFieldSet(rules, plan.field)) {
         continue;
       }
-      if (handled?.has(plan.field)) {
+      if (native?.handledFields.has(plan.field)) {
         continue;
       }
       evalStandard.add(
@@ -499,7 +498,7 @@ export class Planner {
       evalStandard,
       evalExtended,
     );
-    if (native.kind !== "none") {
+    if (native !== undefined) {
       combined.add(native.eval);
     }
     return combined;
