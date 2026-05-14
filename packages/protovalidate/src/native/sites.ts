@@ -16,11 +16,14 @@ import type { DescField } from "@bufbuild/protobuf";
 import {
   BoolRulesSchema,
   DoubleRulesSchema,
+  EnumRulesSchema,
   Fixed32RulesSchema,
   Fixed64RulesSchema,
   FloatRulesSchema,
   Int32RulesSchema,
   Int64RulesSchema,
+  MapRulesSchema,
+  RepeatedRulesSchema,
   SFixed32RulesSchema,
   SFixed64RulesSchema,
   SInt32RulesSchema,
@@ -106,3 +109,40 @@ export const doubleDescs: NumericRulesDescs = {
 };
 
 export const boolConstDesc: DescField = BoolRulesSchema.field.const;
+
+/** Leaf-field references for EnumRules. */
+export type EnumRulesDescs = {
+  readonly const: DescField;
+  readonly in: DescField;
+  readonly notIn: DescField;
+};
+
+export const enumDescs: EnumRulesDescs = {
+  const: EnumRulesSchema.field.const,
+  in: EnumRulesSchema.field.in,
+  notIn: EnumRulesSchema.field.notIn,
+};
+
+/** Leaf-field references for RepeatedRules (list-level). */
+export type RepeatedRulesDescs = {
+  readonly minItems: DescField;
+  readonly maxItems: DescField;
+  readonly unique: DescField;
+};
+
+export const repeatedDescs: RepeatedRulesDescs = {
+  minItems: RepeatedRulesSchema.field.minItems,
+  maxItems: RepeatedRulesSchema.field.maxItems,
+  unique: RepeatedRulesSchema.field.unique,
+};
+
+/** Leaf-field references for MapRules. */
+export type MapRulesDescs = {
+  readonly minPairs: DescField;
+  readonly maxPairs: DescField;
+};
+
+export const mapDescs: MapRulesDescs = {
+  minPairs: MapRulesSchema.field.minPairs,
+  maxPairs: MapRulesSchema.field.maxPairs,
+};
