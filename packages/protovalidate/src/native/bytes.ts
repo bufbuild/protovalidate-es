@@ -27,9 +27,11 @@ import { formatList } from "./format.js";
 import { bytesDescs } from "./sites.js";
 import type { RegexMatcher } from "../func.js";
 
-type BytesConstRule = { readonly val: Uint8Array; readonly path: Path };
+/** A rule with a Uint8Array operand: const, prefix, suffix, contains. */
+type BytesRule = { readonly val: Uint8Array; readonly path: Path };
+/** A rule with a numeric size operand: len, min_len, max_len. */
 type SizeRule = { readonly val: bigint; readonly path: Path };
-type BytesValRule = { readonly val: Uint8Array; readonly path: Path };
+/** A rule with a Uint8Array list operand: in, not_in. */
 type BytesListRule = {
   readonly vals: readonly Uint8Array[];
   readonly path: Path;
@@ -41,34 +43,52 @@ type PatternRule = {
 };
 
 type WellKnownKind = "ip" | "ipv4" | "ipv6" | "uuid";
+
+/**
+ * Spec carried alongside an active well-known constraint, so `eval()` does
+ * no per-call table lookups.
+ */
 type WellKnownRule = {
   readonly kind: WellKnownKind;
+  readonly validSizes: readonly number[];
+  readonly msg: string;
+  readonly emptyMsg: string;
   readonly path: Path;
 };
 
 /**
- * Sizes (in bytes) accepted for each well-known format. Matches Go's
- * bytesWellKnown.validSizes — see `native_bytes.go`.
+ * Per-kind specs for the well-known bytes formats. Matches Go's
+ * `bytesWellKnown` structs in `native_bytes.go` and CEL's predefined
+ * annotations on the corresponding `BytesRules` fields.
  */
-const WELL_KNOWN_VALID_SIZES: Record<WellKnownKind, readonly number[]> = {
-  ip: [4, 16],
-  ipv4: [4],
-  ipv6: [16],
-  uuid: [16],
-};
-
-const WELL_KNOWN_MSG: Record<WellKnownKind, string> = {
-  ip: "must be a valid IP address",
-  ipv4: "must be a valid IPv4 address",
-  ipv6: "must be a valid IPv6 address",
-  uuid: "must be a valid UUID",
-};
-
-const WELL_KNOWN_EMPTY_MSG: Record<WellKnownKind, string> = {
-  ip: "value is empty, which is not a valid IP address",
-  ipv4: "value is empty, which is not a valid IPv4 address",
-  ipv6: "value is empty, which is not a valid IPv6 address",
-  uuid: "value is empty, which is not a valid UUID",
+const WELL_KNOWN: Record<
+  WellKnownKind,
+  {
+    readonly validSizes: readonly number[];
+    readonly msg: string;
+    readonly emptyMsg: string;
+  }
+> = {
+  ip: {
+    validSizes: [4, 16],
+    msg: "must be a valid IP address",
+    emptyMsg: "value is empty, which is not a valid IP address",
+  },
+  ipv4: {
+    validSizes: [4],
+    msg: "must be a valid IPv4 address",
+    emptyMsg: "value is empty, which is not a valid IPv4 address",
+  },
+  ipv6: {
+    validSizes: [16],
+    msg: "must be a valid IPv6 address",
+    emptyMsg: "value is empty, which is not a valid IPv6 address",
+  },
+  uuid: {
+    validSizes: [16],
+    msg: "must be a valid UUID",
+    emptyMsg: "value is empty, which is not a valid UUID",
+  },
 };
 
 /**
@@ -85,63 +105,70 @@ const utf8FatalDecoder = new TextDecoder("utf-8", { fatal: true });
  */
 const utf8NonFatalDecoder = new TextDecoder();
 
+/**
+ * Configuration for {@link EvalNativeBytesRules}. Bundled into a single
+ * object so callers don't have to track ~12 positional constructor args.
+ */
+type BytesRulesConfig = {
+  readonly forMapKey: boolean;
+  readonly constRule?: BytesRule;
+  readonly exactLen?: SizeRule;
+  readonly minLen?: SizeRule;
+  readonly maxLen?: SizeRule;
+  readonly pattern?: PatternRule;
+  readonly prefix?: BytesRule;
+  readonly suffix?: BytesRule;
+  readonly containsRule?: BytesRule;
+  readonly inRule?: BytesListRule;
+  readonly notInRule?: BytesListRule;
+  readonly wellKnown?: WellKnownRule;
+};
+
 class EvalNativeBytesRules implements Eval<ScalarValue> {
-  constructor(
-    private readonly forMapKey: boolean,
-    private readonly constRule: BytesConstRule | undefined,
-    private readonly exactLen: SizeRule | undefined,
-    private readonly minLen: SizeRule | undefined,
-    private readonly maxLen: SizeRule | undefined,
-    private readonly pattern: PatternRule | undefined,
-    private readonly prefix: BytesValRule | undefined,
-    private readonly suffix: BytesValRule | undefined,
-    private readonly containsRule: BytesValRule | undefined,
-    private readonly inRule: BytesListRule | undefined,
-    private readonly notInRule: BytesListRule | undefined,
-    private readonly wellKnown: WellKnownRule | undefined,
-  ) {}
+  constructor(private readonly cfg: BytesRulesConfig) {}
 
   eval(val: ScalarValue, cursor: Cursor): void {
     const v = val as Uint8Array;
     const len = BigInt(v.length);
+    const c = this.cfg;
 
-    if (this.constRule !== undefined && !bytesEqual(v, this.constRule.val)) {
+    if (c.constRule !== undefined && !bytesEqual(v, c.constRule.val)) {
       cursor.violate(
-        `must be ${toHex(this.constRule.val)}`,
+        `must be ${toHex(c.constRule.val)}`,
         "bytes.const",
-        this.constRule.path,
-        this.forMapKey,
+        c.constRule.path,
+        c.forMapKey,
       );
     }
 
-    if (this.exactLen !== undefined && len !== this.exactLen.val) {
+    if (c.exactLen !== undefined && len !== c.exactLen.val) {
       cursor.violate(
-        `must be ${this.exactLen.val} bytes`,
+        `must be ${c.exactLen.val} bytes`,
         "bytes.len",
-        this.exactLen.path,
-        this.forMapKey,
+        c.exactLen.path,
+        c.forMapKey,
       );
     }
 
-    if (this.minLen !== undefined && len < this.minLen.val) {
+    if (c.minLen !== undefined && len < c.minLen.val) {
       cursor.violate(
-        `must be at least ${this.minLen.val} bytes`,
+        `must be at least ${c.minLen.val} bytes`,
         "bytes.min_len",
-        this.minLen.path,
-        this.forMapKey,
+        c.minLen.path,
+        c.forMapKey,
       );
     }
 
-    if (this.maxLen !== undefined && len > this.maxLen.val) {
+    if (c.maxLen !== undefined && len > c.maxLen.val) {
       cursor.violate(
-        `must be at most ${this.maxLen.val} bytes`,
+        `must be at most ${c.maxLen.val} bytes`,
         "bytes.max_len",
-        this.maxLen.path,
-        this.forMapKey,
+        c.maxLen.path,
+        c.forMapKey,
       );
     }
 
-    if (this.pattern !== undefined) {
+    if (c.pattern !== undefined) {
       let decoded: string;
       try {
         decoded = utf8FatalDecoder.decode(v);
@@ -150,84 +177,84 @@ class EvalNativeBytesRules implements Eval<ScalarValue> {
           cause,
         });
       }
-      if (!this.pattern.test(decoded)) {
+      // Wrap test() — if a user-supplied regexMatch throws, surface it as a
+      // RuntimeError so CEL's behavior is preserved end-to-end. The default
+      // RegExp engine doesn't throw at match time.
+      let matched: boolean;
+      try {
+        matched = c.pattern.test(decoded);
+      } catch (cause) {
+        throw new RuntimeError(`regex match failed for ${c.pattern.src}`, {
+          cause,
+        });
+      }
+      if (!matched) {
         cursor.violate(
-          `must match regex pattern \`${this.pattern.src}\``,
+          `must match regex pattern \`${c.pattern.src}\``,
           "bytes.pattern",
-          this.pattern.path,
-          this.forMapKey,
+          c.pattern.path,
+          c.forMapKey,
         );
       }
     }
 
-    if (this.prefix !== undefined && !startsWith(v, this.prefix.val)) {
+    if (c.prefix !== undefined && !startsWith(v, c.prefix.val)) {
       cursor.violate(
-        `does not have prefix ${toHex(this.prefix.val)}`,
+        `does not have prefix ${toHex(c.prefix.val)}`,
         "bytes.prefix",
-        this.prefix.path,
-        this.forMapKey,
+        c.prefix.path,
+        c.forMapKey,
       );
     }
 
-    if (this.suffix !== undefined && !endsWith(v, this.suffix.val)) {
+    if (c.suffix !== undefined && !endsWith(v, c.suffix.val)) {
       cursor.violate(
-        `does not have suffix ${toHex(this.suffix.val)}`,
+        `does not have suffix ${toHex(c.suffix.val)}`,
         "bytes.suffix",
-        this.suffix.path,
-        this.forMapKey,
+        c.suffix.path,
+        c.forMapKey,
       );
     }
 
-    if (
-      this.containsRule !== undefined &&
-      !containsBytes(v, this.containsRule.val)
-    ) {
+    if (c.containsRule !== undefined && !containsBytes(v, c.containsRule.val)) {
       cursor.violate(
-        `does not contain ${toHex(this.containsRule.val)}`,
+        `does not contain ${toHex(c.containsRule.val)}`,
         "bytes.contains",
-        this.containsRule.path,
-        this.forMapKey,
+        c.containsRule.path,
+        c.forMapKey,
       );
     }
 
-    if (this.inRule !== undefined && !bytesListContains(this.inRule.vals, v)) {
+    if (c.inRule !== undefined && !bytesListContains(c.inRule.vals, v)) {
       cursor.violate(
-        `must be in list ${formatList(this.inRule.vals, bytesToCelString)}`,
+        `must be in list ${formatList(c.inRule.vals, (b) => utf8NonFatalDecoder.decode(b))}`,
         "bytes.in",
-        this.inRule.path,
-        this.forMapKey,
+        c.inRule.path,
+        c.forMapKey,
       );
     }
 
-    if (
-      this.notInRule !== undefined &&
-      bytesListContains(this.notInRule.vals, v)
-    ) {
+    if (c.notInRule !== undefined && bytesListContains(c.notInRule.vals, v)) {
       cursor.violate(
-        `must not be in list ${formatList(this.notInRule.vals, bytesToCelString)}`,
+        `must not be in list ${formatList(c.notInRule.vals, (b) => utf8NonFatalDecoder.decode(b))}`,
         "bytes.not_in",
-        this.notInRule.path,
-        this.forMapKey,
+        c.notInRule.path,
+        c.forMapKey,
       );
     }
 
-    if (this.wellKnown !== undefined) {
+    if (c.wellKnown !== undefined) {
+      const wk = c.wellKnown;
       const size = v.length;
-      const kind = this.wellKnown.kind;
       if (size === 0) {
         cursor.violate(
-          WELL_KNOWN_EMPTY_MSG[kind],
-          `bytes.${kind}_empty`,
-          this.wellKnown.path,
-          this.forMapKey,
+          wk.emptyMsg,
+          `bytes.${wk.kind}_empty`,
+          wk.path,
+          c.forMapKey,
         );
-      } else if (!WELL_KNOWN_VALID_SIZES[kind].includes(size)) {
-        cursor.violate(
-          WELL_KNOWN_MSG[kind],
-          `bytes.${kind}`,
-          this.wellKnown.path,
-          this.forMapKey,
-        );
+      } else if (!wk.validSizes.includes(size)) {
+        cursor.violate(wk.msg, `bytes.${wk.kind}`, wk.path, c.forMapKey);
       }
     }
   }
@@ -263,6 +290,8 @@ function endsWith(haystack: Uint8Array, needle: Uint8Array): boolean {
 }
 
 function containsBytes(haystack: Uint8Array, needle: Uint8Array): boolean {
+  // Empty needle is contained in every byte slice — matches Go's
+  // `bytes.Contains(_, []byte{})` (returns true).
   if (needle.length === 0) return true;
   if (needle.length > haystack.length) return false;
   const limit = haystack.length - needle.length;
@@ -299,15 +328,6 @@ function toHex(bytes: Uint8Array): string {
 }
 
 /**
- * Format a Uint8Array the way cel-es's `%s` does — non-fatal UTF-8
- * decode, with U+FFFD substitution for invalid sequences. Used inside
- * `bytes.in` / `bytes.not_in` list formatting.
- */
-function bytesToCelString(b: Uint8Array): string {
-  return utf8NonFatalDecoder.decode(b);
-}
-
-/**
  * Default regex test using the platform `RegExp` engine. Used when no
  * `regexMatch` override is supplied. Phase 4 swaps this for the cel-es
  * `re2` package.
@@ -333,57 +353,54 @@ export function tryBuildNativeBytesRules(
   }
 
   const handled = new Set<DescField>();
+  const cfg: { -readonly [K in keyof BytesRulesConfig]: BytesRulesConfig[K] } =
+    { forMapKey };
 
-  let constRule: BytesConstRule | undefined;
   if (isFieldSet(rules, bytesDescs.const)) {
-    constRule = {
+    cfg.constRule = {
       val: rules.const,
       path: rulePath.clone().field(bytesDescs.const).toPath(),
     };
     handled.add(bytesDescs.const);
   }
 
-  let exactLen: SizeRule | undefined;
   if (isFieldSet(rules, bytesDescs.len)) {
-    exactLen = {
+    cfg.exactLen = {
       val: rules.len,
       path: rulePath.clone().field(bytesDescs.len).toPath(),
     };
     handled.add(bytesDescs.len);
   }
 
-  let minLen: SizeRule | undefined;
   if (isFieldSet(rules, bytesDescs.minLen)) {
-    minLen = {
+    cfg.minLen = {
       val: rules.minLen,
       path: rulePath.clone().field(bytesDescs.minLen).toPath(),
     };
     handled.add(bytesDescs.minLen);
   }
 
-  let maxLen: SizeRule | undefined;
   if (isFieldSet(rules, bytesDescs.maxLen)) {
-    maxLen = {
+    cfg.maxLen = {
       val: rules.maxLen,
       path: rulePath.clone().field(bytesDescs.maxLen).toPath(),
     };
     handled.add(bytesDescs.maxLen);
   }
 
-  let pattern: PatternRule | undefined;
   if (isFieldSet(rules, bytesDescs.pattern)) {
     const src = rules.pattern;
-    let test: ((against: string) => boolean) | undefined;
+    let test: (against: string) => boolean;
     try {
       test = regexMatch
-        ? (against: string) => regexMatch(src, against)
+        ? (against) => regexMatch(src, against)
         : defaultRegexTest(src);
     } catch {
-      // Invalid pattern. Let CEL produce the CompilationError it already
-      // emits today.
+      // Invalid pattern at plan time. Let CEL produce the CompilationError
+      // it already emits today.
       return undefined;
     }
-    pattern = {
+    cfg.pattern = {
       src,
       test,
       path: rulePath.clone().field(bytesDescs.pattern).toPath(),
@@ -391,79 +408,68 @@ export function tryBuildNativeBytesRules(
     handled.add(bytesDescs.pattern);
   }
 
-  let prefix: BytesValRule | undefined;
   if (isFieldSet(rules, bytesDescs.prefix)) {
-    prefix = {
+    cfg.prefix = {
       val: rules.prefix,
       path: rulePath.clone().field(bytesDescs.prefix).toPath(),
     };
     handled.add(bytesDescs.prefix);
   }
 
-  let suffix: BytesValRule | undefined;
   if (isFieldSet(rules, bytesDescs.suffix)) {
-    suffix = {
+    cfg.suffix = {
       val: rules.suffix,
       path: rulePath.clone().field(bytesDescs.suffix).toPath(),
     };
     handled.add(bytesDescs.suffix);
   }
 
-  let containsRule: BytesValRule | undefined;
   if (isFieldSet(rules, bytesDescs.contains)) {
-    containsRule = {
+    cfg.containsRule = {
       val: rules.contains,
       path: rulePath.clone().field(bytesDescs.contains).toPath(),
     };
     handled.add(bytesDescs.contains);
   }
 
-  let inRule: BytesListRule | undefined;
   if (rules.in.length > 0) {
-    inRule = {
+    cfg.inRule = {
       vals: rules.in,
       path: rulePath.clone().field(bytesDescs.in).toPath(),
     };
     handled.add(bytesDescs.in);
   }
 
-  let notInRule: BytesListRule | undefined;
+  // Note: `bytes.not_in`'s CEL expression doesn't include a `size() > 0`
+  // guard like `bytes.in` does, but `this in []` is always false in CEL,
+  // so an empty `not_in` list never fires. We treat both the same — skip
+  // when the list is empty.
   if (rules.notIn.length > 0) {
-    notInRule = {
+    cfg.notInRule = {
       vals: rules.notIn,
       path: rulePath.clone().field(bytesDescs.notIn).toPath(),
     };
     handled.add(bytesDescs.notIn);
   }
 
-  // Well-known: at most one of ip/ipv4/ipv6/uuid is set (oneof). Only emit
-  // a violation when the corresponding bool is `true`.
-  let wellKnown: WellKnownRule | undefined;
-  const wk = rules.wellKnown;
-  if (wk.case === "ip" && wk.value) {
-    wellKnown = {
-      kind: "ip",
-      path: rulePath.clone().field(bytesDescs.ip).toPath(),
-    };
-    handled.add(bytesDescs.ip);
-  } else if (wk.case === "ipv4" && wk.value) {
-    wellKnown = {
-      kind: "ipv4",
-      path: rulePath.clone().field(bytesDescs.ipv4).toPath(),
-    };
-    handled.add(bytesDescs.ipv4);
-  } else if (wk.case === "ipv6" && wk.value) {
-    wellKnown = {
-      kind: "ipv6",
-      path: rulePath.clone().field(bytesDescs.ipv6).toPath(),
-    };
-    handled.add(bytesDescs.ipv6);
-  } else if (wk.case === "uuid" && wk.value) {
-    wellKnown = {
-      kind: "uuid",
-      path: rulePath.clone().field(bytesDescs.uuid).toPath(),
-    };
-    handled.add(bytesDescs.uuid);
+  // Well-known: at most one of ip/ipv4/ipv6/uuid is set (oneof). Claim the
+  // leaf field on isFieldSet regardless of value — explicit `ip: false` is
+  // a no-op rule, matching `repeated.unique: false` (`repeated.ts`) and
+  // `float.finite: false` (`numeric.ts`).
+  const wkCase = rules.wellKnown.case;
+  if (wkCase !== undefined) {
+    const desc = bytesDescs[wkCase];
+    handled.add(desc);
+    if (rules.wellKnown.value) {
+      const spec = WELL_KNOWN[wkCase];
+      cfg.wellKnown = {
+        kind: wkCase,
+        validSizes: spec.validSizes,
+        msg: spec.msg,
+        emptyMsg: spec.emptyMsg,
+        path: rulePath.clone().field(desc).toPath(),
+      };
+    }
   }
 
   if (handled.size === 0) {
@@ -471,20 +477,7 @@ export function tryBuildNativeBytesRules(
   }
 
   return {
-    eval: new EvalNativeBytesRules(
-      forMapKey,
-      constRule,
-      exactLen,
-      minLen,
-      maxLen,
-      pattern,
-      prefix,
-      suffix,
-      containsRule,
-      inRule,
-      notInRule,
-      wellKnown,
-    ),
+    eval: new EvalNativeBytesRules(cfg),
     handledFields: handled,
   };
 }

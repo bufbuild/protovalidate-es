@@ -181,12 +181,33 @@ void suite("native bytes rules", () => {
       diff(s, create(s, { b: bytes(...new Array(16).fill(0)) }));
       diff(s, create(s, { b: bytes(1, 2, 3, 4) }));
     });
-    void test("explicit ip=false is a no-op (claimed but emits nothing)", () => {
+    void test("explicit ip=false is a no-op claim — never emits a violation", () => {
+      // `ip: false` is field-set, so the native handler claims the well-known
+      // field and emits nothing. Behavior is identical to CEL (whose
+      // predicate `!rules.ip` short-circuits to no violation).
       const s = compile(
         `message M { bytes b = 1 [(buf.validate.field).bytes.ip = false]; }`,
       );
       diff(s, create(s, { b: bytes() }));
       diff(s, create(s, { b: bytes(1, 2, 3, 4, 5) }));
+      // Direct assertions on the native path so a future refactor that
+      // breaks claim semantics surfaces immediately.
+      assert.equal(native.validate(s, create(s, { b: bytes() })).kind, "valid");
+      assert.equal(
+        native.validate(s, create(s, { b: bytes(1, 2, 3, 4, 5) })).kind,
+        "valid",
+      );
+    });
+
+    void test("bytes.ip with 1-byte input fails as wrong-size", () => {
+      const s = compile(
+        `message M { bytes b = 1 [(buf.validate.field).bytes.ip = true]; }`,
+      );
+      diff(s, create(s, { b: bytes(0x01) }));
+      // Confirm it hits `bytes.ip` (wrong-size), not `bytes.ip_empty`.
+      const r = native.validate(s, create(s, { b: bytes(0x01) }));
+      assert.equal(r.kind, "invalid");
+      assert.equal(r.violations?.[0]?.ruleId, "bytes.ip");
     });
   });
 
@@ -259,5 +280,82 @@ void suite("native bytes rules", () => {
     diff(s, create(s, { b: new TextEncoder().encode("ab") })); // len fails, pattern passes
     diff(s, create(s, { b: new TextEncoder().encode("AB") })); // both fail
     diff(s, create(s, { b: new TextEncoder().encode("abc") })); // both pass
+  });
+
+  // Review follow-up: gaps surfaced by the code review.
+  void suite("review gap coverage", () => {
+    void test("bytes.const with empty rule value vs empty input", () => {
+      // `const = ""` matches an empty input; the violation message for any
+      // mismatch is `"must be "` (trailing space, empty hex).
+      const s = compile(
+        `message M { bytes b = 1 [(buf.validate.field).bytes.const = ""]; }`,
+      );
+      diff(s, create(s, { b: bytes() }));
+      diff(s, create(s, { b: bytes(0x01) }));
+    });
+
+    void test("bytes.pattern with empty pattern matches any input", () => {
+      // `new RegExp("")` matches the empty string at every position. Confirm
+      // native and CEL agree.
+      const s = compile(
+        `message M { bytes b = 1 [(buf.validate.field).bytes.pattern = ""]; }`,
+      );
+      diff(s, create(s, { b: bytes() }));
+      diff(s, create(s, { b: new TextEncoder().encode("hello") }));
+    });
+
+    void test("bytes.in with explicitly-set empty list is a no-op", () => {
+      // `in: []` (proto3 repeated, length 0) is treated as unset by both
+      // native and CEL — no violation regardless of input.
+      const s = compile(
+        `message M { bytes b = 1 [(buf.validate.field).bytes = { in: [] }]; }`,
+      );
+      diff(s, create(s, { b: bytes() }));
+      diff(s, create(s, { b: bytes(0x01) }));
+    });
+
+    void test("bytes.not_in with explicitly-set empty list is a no-op", () => {
+      const s = compile(
+        `message M { bytes b = 1 [(buf.validate.field).bytes = { not_in: [] }]; }`,
+      );
+      diff(s, create(s, { b: bytes() }));
+      diff(s, create(s, { b: bytes(0x01) }));
+    });
+
+    void test("bytes.contains with empty needle accepts every input", () => {
+      // Matches Go's `bytes.Contains(_, []byte{})` returning true.
+      const s = compile(
+        `message M { bytes b = 1 [(buf.validate.field).bytes.contains = ""]; }`,
+      );
+      diff(s, create(s, { b: bytes() }));
+      diff(s, create(s, { b: bytes(0x01) }));
+      diff(s, create(s, { b: bytes(0x01, 0x02, 0x03) }));
+    });
+
+    void test("BytesValue wrapper with absent inner value", () => {
+      // Wrapper field unset on the parent — EvalField's presence check
+      // skips validation entirely, so no spurious bytes.len violation.
+      const s = compile(
+        `message M {
+          google.protobuf.BytesValue b = 1 [(buf.validate.field).bytes.len = 2];
+        }`,
+      );
+      diff(s, create(s, {})); // wrapper absent
+      assert.equal(native.validate(s, create(s, {})).kind, "valid");
+    });
+
+    void test("custom regexMatch that throws is wrapped in RuntimeError", () => {
+      const s = compile(
+        `message M { bytes b = 1 [(buf.validate.field).bytes.pattern = ".+"]; }`,
+      );
+      const v = createValidator({
+        regexMatch: () => {
+          throw new Error("synthetic engine failure");
+        },
+      });
+      const r = v.validate(s, create(s, { b: new TextEncoder().encode("x") }));
+      assert.equal(r.kind, "error");
+      assert.ok(r.error instanceof RuntimeError);
+    });
   });
 });
