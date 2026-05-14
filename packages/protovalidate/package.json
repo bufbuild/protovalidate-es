@@ -20,7 +20,7 @@
     "postfetch-proto": "license-header proto",
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
-    "test": "npx tsx --test ./src/*.test.ts",
+    "test": "npx tsx --test ./src/*.test.ts ./src/**/*.test.ts",
     "prebuild": "rm -rf ./dist/*",
     "build": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc --project tsconfig.json --module commonjs --verbatimModuleSyntax false --moduleResolution node10 --outDir ./dist/cjs && echo >./dist/cjs/package.json '{\"type\":\"commonjs\"}'",

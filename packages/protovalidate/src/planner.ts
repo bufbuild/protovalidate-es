@@ -23,7 +23,10 @@ import {
   isMessage,
   ScalarType,
 } from "@bufbuild/protobuf";
-import { FeatureSet_FieldPresence } from "@bufbuild/protobuf/wkt";
+import {
+  FeatureSet_FieldPresence,
+  isWrapperDesc,
+} from "@bufbuild/protobuf/wkt";
 import {
   type FieldRules,
   type MessageRules,
@@ -423,7 +426,10 @@ export class Planner {
       if (isMessage(rules, AnyRulesSchema)) {
         evals.add(new EvalAnyRules(rulePath, rules));
       }
-      evals.add(this.rules(rules, rulePath, false));
+      const wrappedValueField = isWrapperDesc(descMessage)
+        ? descMessage.fields.find((f) => f.name === "value")
+        : undefined;
+      evals.add(this.rules(rules, rulePath, false, wrappedValueField));
     }
     return evals;
   }
@@ -432,6 +438,7 @@ export class Planner {
     rules: Exclude<FieldRules["type"]["value"], undefined>,
     rulePath: PathBuilder,
     forMapKey: boolean,
+    wrappedValueField: DescField | undefined = undefined,
   ) {
     const ruleDesc = getRuleDescriptor(rules.$typeName);
     const prepared = this.celMan.compileRules(ruleDesc);
@@ -442,6 +449,7 @@ export class Planner {
           rulePath,
           forMapKey,
           regexMatch: this.regexMatch,
+          wrappedValueField,
         });
     const evalStandard = new EvalStandardRulesCel(
       this.celMan,
