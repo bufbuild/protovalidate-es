@@ -83,6 +83,7 @@ import {
 } from "./cel.js";
 import { CompilationError } from "./error.js";
 import { tryBuildNative } from "./native/index.js";
+import type { RegexMatcher } from "./func.js";
 
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
@@ -91,6 +92,7 @@ export class Planner {
     private readonly celMan: CelManager,
     private readonly legacyRequired: boolean,
     private readonly disableNativeRules: boolean,
+    private readonly regexMatch: RegexMatcher | undefined,
   ) {}
 
   plan(message: DescMessage): Eval<ReflectMessage> {
@@ -455,6 +457,7 @@ export class Planner {
           forMapKey,
           wrappedValueField,
           listField,
+          regexMatch: this.regexMatch,
         });
     const evalStandard = new EvalStandardRulesCel(
       this.celMan,

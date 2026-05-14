@@ -15,6 +15,7 @@
 import type { DescField } from "@bufbuild/protobuf";
 import {
   BoolRulesSchema,
+  BytesRulesSchema,
   DoubleRulesSchema,
   EnumRulesSchema,
   Fixed32RulesSchema,
@@ -145,4 +146,45 @@ export type MapRulesDescs = {
 export const mapDescs: MapRulesDescs = {
   minPairs: MapRulesSchema.field.minPairs,
   maxPairs: MapRulesSchema.field.maxPairs,
+};
+
+/**
+ * Leaf-field references for BytesRules.
+ *
+ * The well-known fields (`ip`, `ipv4`, `ipv6`, `uuid`) sit inside the
+ * `well_known` oneof in the proto; protobuf-es still exposes them as
+ * top-level entries on `BytesRulesSchema.field`.
+ */
+export type BytesRulesDescs = {
+  readonly const: DescField;
+  readonly len: DescField;
+  readonly minLen: DescField;
+  readonly maxLen: DescField;
+  readonly pattern: DescField;
+  readonly prefix: DescField;
+  readonly suffix: DescField;
+  readonly contains: DescField;
+  readonly in: DescField;
+  readonly notIn: DescField;
+  readonly ip: DescField;
+  readonly ipv4: DescField;
+  readonly ipv6: DescField;
+  readonly uuid: DescField;
+};
+
+export const bytesDescs: BytesRulesDescs = {
+  const: BytesRulesSchema.field.const,
+  len: BytesRulesSchema.field.len,
+  minLen: BytesRulesSchema.field.minLen,
+  maxLen: BytesRulesSchema.field.maxLen,
+  pattern: BytesRulesSchema.field.pattern,
+  prefix: BytesRulesSchema.field.prefix,
+  suffix: BytesRulesSchema.field.suffix,
+  contains: BytesRulesSchema.field.contains,
+  in: BytesRulesSchema.field.in,
+  notIn: BytesRulesSchema.field.notIn,
+  ip: BytesRulesSchema.field.ip,
+  ipv4: BytesRulesSchema.field.ipv4,
+  ipv6: BytesRulesSchema.field.ipv6,
+  uuid: BytesRulesSchema.field.uuid,
 };

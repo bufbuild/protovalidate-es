@@ -20,6 +20,7 @@ import type {
 } from "@bufbuild/protobuf/reflect";
 import type {
   BoolRules,
+  BytesRules,
   EnumRules,
   FieldRules,
   MapRules,
@@ -27,12 +28,15 @@ import type {
 } from "../gen/buf/validate/validate_pb.js";
 import {
   BoolRulesSchema,
+  BytesRulesSchema,
   EnumRulesSchema,
   MapRulesSchema,
   RepeatedRulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
 import type { Eval } from "../eval.js";
+import type { RegexMatcher } from "../func.js";
 import { tryBuildNativeBoolRules } from "./bool.js";
+import { tryBuildNativeBytesRules } from "./bytes.js";
 import { tryBuildNativeEnumRules } from "./enum.js";
 import { tryBuildNativeMapRules } from "./map.js";
 import { tryBuildNativeNumericRules } from "./numeric.js";
@@ -84,6 +88,12 @@ export type NativeDispatchInput = {
    * call sites.
    */
   listField: (DescField & { fieldKind: "list" }) | undefined;
+  /**
+   * Regex matcher to use for rules that compile a pattern (bytes.pattern,
+   * string.pattern). When undefined, handlers use the same ECMAScript regex
+   * engine the CEL path falls back to. Phase 4 swaps the default to RE2.
+   */
+  regexMatch: RegexMatcher | undefined;
 };
 
 /**
@@ -96,13 +106,29 @@ export type NativeDispatchInput = {
 export function tryBuildNative(
   input: NativeDispatchInput,
 ): NativeDispatchResult | undefined {
-  const { rules, rulePath, forMapKey, wrappedValueField, listField } = input;
+  const {
+    rules,
+    rulePath,
+    forMapKey,
+    wrappedValueField,
+    listField,
+    regexMatch,
+  } = input;
   switch (rules.$typeName) {
     case BoolRulesSchema.typeName: {
       const r = tryBuildNativeBoolRules(
         rules as BoolRules,
         rulePath,
         forMapKey,
+      );
+      return liftScalar(r, wrappedValueField);
+    }
+    case BytesRulesSchema.typeName: {
+      const r = tryBuildNativeBytesRules(
+        rules as BytesRules,
+        rulePath,
+        forMapKey,
+        regexMatch,
       );
       return liftScalar(r, wrappedValueField);
     }
