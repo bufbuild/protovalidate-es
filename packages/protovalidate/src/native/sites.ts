@@ -15,16 +15,12 @@
 import type { DescField } from "@bufbuild/protobuf";
 import {
   BoolRulesSchema,
-  BytesRulesSchema,
   DoubleRulesSchema,
-  EnumRulesSchema,
+  FloatRulesSchema,
   Fixed32RulesSchema,
   Fixed64RulesSchema,
-  FloatRulesSchema,
   Int32RulesSchema,
   Int64RulesSchema,
-  MapRulesSchema,
-  RepeatedRulesSchema,
   SFixed32RulesSchema,
   SFixed64RulesSchema,
   SInt32RulesSchema,
@@ -36,9 +32,11 @@ import {
 /**
  * Leaf-field references for the numeric rules schemas.
  *
- * The dispatcher uses these to (a) consult `isFieldSet(rules, descs.const)`
- * for presence and (b) build leaf rule paths via
- * `rulePath.clone().field(descs.const).toPath()` at plan time.
+ * Twelve numeric scalar types share this shape; the per-type configs in
+ * `numeric.ts` consume `descs` via `NumericConfig.descs`. Other rule
+ * families (bool, bytes, enum, repeated, map) have only one schema and
+ * one consumer each, so they reference `*RulesSchema.field.X` directly
+ * instead of going through a `*Descs` alias.
  */
 export type NumericRulesDescs = {
   readonly const: DescField;
@@ -110,81 +108,3 @@ export const doubleDescs: NumericRulesDescs = {
 };
 
 export const boolConstDesc: DescField = BoolRulesSchema.field.const;
-
-/** Leaf-field references for EnumRules. */
-export type EnumRulesDescs = {
-  readonly const: DescField;
-  readonly in: DescField;
-  readonly notIn: DescField;
-};
-
-export const enumDescs: EnumRulesDescs = {
-  const: EnumRulesSchema.field.const,
-  in: EnumRulesSchema.field.in,
-  notIn: EnumRulesSchema.field.notIn,
-};
-
-/** Leaf-field references for RepeatedRules (list-level). */
-export type RepeatedRulesDescs = {
-  readonly minItems: DescField;
-  readonly maxItems: DescField;
-  readonly unique: DescField;
-};
-
-export const repeatedDescs: RepeatedRulesDescs = {
-  minItems: RepeatedRulesSchema.field.minItems,
-  maxItems: RepeatedRulesSchema.field.maxItems,
-  unique: RepeatedRulesSchema.field.unique,
-};
-
-/** Leaf-field references for MapRules. */
-export type MapRulesDescs = {
-  readonly minPairs: DescField;
-  readonly maxPairs: DescField;
-};
-
-export const mapDescs: MapRulesDescs = {
-  minPairs: MapRulesSchema.field.minPairs,
-  maxPairs: MapRulesSchema.field.maxPairs,
-};
-
-/**
- * Leaf-field references for BytesRules.
- *
- * The well-known fields (`ip`, `ipv4`, `ipv6`, `uuid`) sit inside the
- * `well_known` oneof in the proto; protobuf-es still exposes them as
- * top-level entries on `BytesRulesSchema.field`.
- */
-export type BytesRulesDescs = {
-  readonly const: DescField;
-  readonly len: DescField;
-  readonly minLen: DescField;
-  readonly maxLen: DescField;
-  readonly pattern: DescField;
-  readonly prefix: DescField;
-  readonly suffix: DescField;
-  readonly contains: DescField;
-  readonly in: DescField;
-  readonly notIn: DescField;
-  readonly ip: DescField;
-  readonly ipv4: DescField;
-  readonly ipv6: DescField;
-  readonly uuid: DescField;
-};
-
-export const bytesDescs: BytesRulesDescs = {
-  const: BytesRulesSchema.field.const,
-  len: BytesRulesSchema.field.len,
-  minLen: BytesRulesSchema.field.minLen,
-  maxLen: BytesRulesSchema.field.maxLen,
-  pattern: BytesRulesSchema.field.pattern,
-  prefix: BytesRulesSchema.field.prefix,
-  suffix: BytesRulesSchema.field.suffix,
-  contains: BytesRulesSchema.field.contains,
-  in: BytesRulesSchema.field.in,
-  notIn: BytesRulesSchema.field.notIn,
-  ip: BytesRulesSchema.field.ip,
-  ipv4: BytesRulesSchema.field.ipv4,
-  ipv6: BytesRulesSchema.field.ipv6,
-  uuid: BytesRulesSchema.field.uuid,
-};

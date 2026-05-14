@@ -20,8 +20,12 @@ import type {
 } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
-import type { RepeatedRules } from "../gen/buf/validate/validate_pb.js";
-import { repeatedDescs } from "./sites.js";
+import {
+  type RepeatedRules,
+  RepeatedRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
+
+const F = RepeatedRulesSchema.field;
 
 /**
  * Internal dispatch result for list-shaped native handlers.
@@ -151,38 +155,38 @@ export function tryBuildNativeRepeatedRules(
   const handled = new Set<DescField>();
 
   let minItemsRule: SizeRule | undefined;
-  if (isFieldSet(rules, repeatedDescs.minItems)) {
+  if (isFieldSet(rules, F.minItems)) {
     minItemsRule = {
       val: rules.minItems,
-      path: rulePath.clone().field(repeatedDescs.minItems).toPath(),
+      path: rulePath.clone().field(F.minItems).toPath(),
     };
-    handled.add(repeatedDescs.minItems);
+    handled.add(F.minItems);
   }
 
   let maxItemsRule: SizeRule | undefined;
-  if (isFieldSet(rules, repeatedDescs.maxItems)) {
+  if (isFieldSet(rules, F.maxItems)) {
     maxItemsRule = {
       val: rules.maxItems,
-      path: rulePath.clone().field(repeatedDescs.maxItems).toPath(),
+      path: rulePath.clone().field(F.maxItems).toPath(),
     };
-    handled.add(repeatedDescs.maxItems);
+    handled.add(F.maxItems);
   }
 
   let uniqueRule: UniqueRule | undefined;
-  if (isFieldSet(rules, repeatedDescs.unique)) {
+  if (isFieldSet(rules, F.unique)) {
     if (!rules.unique) {
       // Explicit `unique: false` is a no-op rule. Claim the field so CEL
       // doesn't bother re-evaluating it. Matches numeric.ts's treatment of
       // `finite: false`.
-      handled.add(repeatedDescs.unique);
+      handled.add(F.unique);
     } else if (listField !== undefined) {
       const kind = uniqueKindForListField(listField);
       if (kind !== undefined) {
         uniqueRule = {
           kind,
-          path: rulePath.clone().field(repeatedDescs.unique).toPath(),
+          path: rulePath.clone().field(F.unique).toPath(),
         };
-        handled.add(repeatedDescs.unique);
+        handled.add(F.unique);
       }
       // When `kind === undefined` (message-element list with unique:true) we
       // deliberately do NOT claim the unique field; CEL handles it.

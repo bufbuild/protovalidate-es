@@ -21,11 +21,15 @@ import type {
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
 import { RuntimeError } from "../error.js";
-import type { BytesRules } from "../gen/buf/validate/validate_pb.js";
+import {
+  type BytesRules,
+  BytesRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
 import { formatList } from "./format.js";
-import { bytesDescs } from "./sites.js";
 import type { RegexMatcher } from "../func.js";
+
+const F = BytesRulesSchema.field;
 
 /** A rule with a Uint8Array operand: const, prefix, suffix, contains. */
 type BytesRule = { readonly val: Uint8Array; readonly path: Path };
@@ -356,39 +360,39 @@ export function tryBuildNativeBytesRules(
   const cfg: { -readonly [K in keyof BytesRulesConfig]: BytesRulesConfig[K] } =
     { forMapKey };
 
-  if (isFieldSet(rules, bytesDescs.const)) {
+  if (isFieldSet(rules, F.const)) {
     cfg.constRule = {
       val: rules.const,
-      path: rulePath.clone().field(bytesDescs.const).toPath(),
+      path: rulePath.clone().field(F.const).toPath(),
     };
-    handled.add(bytesDescs.const);
+    handled.add(F.const);
   }
 
-  if (isFieldSet(rules, bytesDescs.len)) {
+  if (isFieldSet(rules, F.len)) {
     cfg.exactLen = {
       val: rules.len,
-      path: rulePath.clone().field(bytesDescs.len).toPath(),
+      path: rulePath.clone().field(F.len).toPath(),
     };
-    handled.add(bytesDescs.len);
+    handled.add(F.len);
   }
 
-  if (isFieldSet(rules, bytesDescs.minLen)) {
+  if (isFieldSet(rules, F.minLen)) {
     cfg.minLen = {
       val: rules.minLen,
-      path: rulePath.clone().field(bytesDescs.minLen).toPath(),
+      path: rulePath.clone().field(F.minLen).toPath(),
     };
-    handled.add(bytesDescs.minLen);
+    handled.add(F.minLen);
   }
 
-  if (isFieldSet(rules, bytesDescs.maxLen)) {
+  if (isFieldSet(rules, F.maxLen)) {
     cfg.maxLen = {
       val: rules.maxLen,
-      path: rulePath.clone().field(bytesDescs.maxLen).toPath(),
+      path: rulePath.clone().field(F.maxLen).toPath(),
     };
-    handled.add(bytesDescs.maxLen);
+    handled.add(F.maxLen);
   }
 
-  if (isFieldSet(rules, bytesDescs.pattern)) {
+  if (isFieldSet(rules, F.pattern)) {
     const src = rules.pattern;
     let test: (against: string) => boolean;
     try {
@@ -403,41 +407,41 @@ export function tryBuildNativeBytesRules(
     cfg.pattern = {
       src,
       test,
-      path: rulePath.clone().field(bytesDescs.pattern).toPath(),
+      path: rulePath.clone().field(F.pattern).toPath(),
     };
-    handled.add(bytesDescs.pattern);
+    handled.add(F.pattern);
   }
 
-  if (isFieldSet(rules, bytesDescs.prefix)) {
+  if (isFieldSet(rules, F.prefix)) {
     cfg.prefix = {
       val: rules.prefix,
-      path: rulePath.clone().field(bytesDescs.prefix).toPath(),
+      path: rulePath.clone().field(F.prefix).toPath(),
     };
-    handled.add(bytesDescs.prefix);
+    handled.add(F.prefix);
   }
 
-  if (isFieldSet(rules, bytesDescs.suffix)) {
+  if (isFieldSet(rules, F.suffix)) {
     cfg.suffix = {
       val: rules.suffix,
-      path: rulePath.clone().field(bytesDescs.suffix).toPath(),
+      path: rulePath.clone().field(F.suffix).toPath(),
     };
-    handled.add(bytesDescs.suffix);
+    handled.add(F.suffix);
   }
 
-  if (isFieldSet(rules, bytesDescs.contains)) {
+  if (isFieldSet(rules, F.contains)) {
     cfg.containsRule = {
       val: rules.contains,
-      path: rulePath.clone().field(bytesDescs.contains).toPath(),
+      path: rulePath.clone().field(F.contains).toPath(),
     };
-    handled.add(bytesDescs.contains);
+    handled.add(F.contains);
   }
 
   if (rules.in.length > 0) {
     cfg.inRule = {
       vals: rules.in,
-      path: rulePath.clone().field(bytesDescs.in).toPath(),
+      path: rulePath.clone().field(F.in).toPath(),
     };
-    handled.add(bytesDescs.in);
+    handled.add(F.in);
   }
 
   // Note: `bytes.not_in`'s CEL expression doesn't include a `size() > 0`
@@ -447,9 +451,9 @@ export function tryBuildNativeBytesRules(
   if (rules.notIn.length > 0) {
     cfg.notInRule = {
       vals: rules.notIn,
-      path: rulePath.clone().field(bytesDescs.notIn).toPath(),
+      path: rulePath.clone().field(F.notIn).toPath(),
     };
-    handled.add(bytesDescs.notIn);
+    handled.add(F.notIn);
   }
 
   // Well-known: at most one of ip/ipv4/ipv6/uuid is set (oneof). Claim the
@@ -458,7 +462,7 @@ export function tryBuildNativeBytesRules(
   // `float.finite: false` (`numeric.ts`).
   const wkCase = rules.wellKnown.case;
   if (wkCase !== undefined) {
-    const desc = bytesDescs[wkCase];
+    const desc = F[wkCase];
     handled.add(desc);
     if (rules.wellKnown.value) {
       const spec = WELL_KNOWN[wkCase];

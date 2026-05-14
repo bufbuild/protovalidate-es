@@ -16,8 +16,12 @@ import { type DescField, isFieldSet } from "@bufbuild/protobuf";
 import type { Path, PathBuilder, ReflectMap } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
-import type { MapRules } from "../gen/buf/validate/validate_pb.js";
-import { mapDescs } from "./sites.js";
+import {
+  type MapRules,
+  MapRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
+
+const F = MapRulesSchema.field;
 
 /**
  * Internal dispatch result for map-shaped native handlers.
@@ -77,21 +81,21 @@ export function tryBuildNativeMapRules(
   const handled = new Set<DescField>();
 
   let minPairsRule: SizeRule | undefined;
-  if (isFieldSet(rules, mapDescs.minPairs)) {
+  if (isFieldSet(rules, F.minPairs)) {
     minPairsRule = {
       val: rules.minPairs,
-      path: rulePath.clone().field(mapDescs.minPairs).toPath(),
+      path: rulePath.clone().field(F.minPairs).toPath(),
     };
-    handled.add(mapDescs.minPairs);
+    handled.add(F.minPairs);
   }
 
   let maxPairsRule: SizeRule | undefined;
-  if (isFieldSet(rules, mapDescs.maxPairs)) {
+  if (isFieldSet(rules, F.maxPairs)) {
     maxPairsRule = {
       val: rules.maxPairs,
-      path: rulePath.clone().field(mapDescs.maxPairs).toPath(),
+      path: rulePath.clone().field(F.maxPairs).toPath(),
     };
-    handled.add(mapDescs.maxPairs);
+    handled.add(F.maxPairs);
   }
 
   if (handled.size === 0) {
