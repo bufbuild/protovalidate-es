@@ -13,44 +13,20 @@
 // limitations under the License.
 
 import { suite, test } from "node:test";
-import * as assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { create, type DescMessage } from "@bufbuild/protobuf";
-import { compileMessage } from "@bufbuild/protocompile";
-import { createValidator } from "../validator.js";
-import type { Violation } from "../error.js";
+import { compile as compileWithPreamble, diff } from "./testing.js";
 
-const bufCompileOptions = {
-  imports: {
-    "buf/validate/validate.proto": readFileSync(
-      "proto/buf/validate/validate.proto",
-      "utf-8",
-    ),
-  },
-};
+const COLOR_PREAMBLE = `
+  enum Color {
+    COLOR_UNSPECIFIED = 0;
+    COLOR_RED = 1;
+    COLOR_GREEN = 2;
+    COLOR_BLUE = 3;
+  }
+`;
 
-const native = createValidator();
-const cel = createValidator({ disableNativeRules: true });
-
-function diff(schema: DescMessage, msg: object): void {
-  // biome-ignore lint/suspicious/noExplicitAny: cross-schema test helper
-  const a = native.validate(schema, msg as any);
-  // biome-ignore lint/suspicious/noExplicitAny: cross-schema test helper
-  const b = cel.validate(schema, msg as any);
-  assert.equal(a.kind, b.kind, "kind mismatch");
-  const fmt = (v: Violation) => v.toString();
-  assert.deepEqual(a.violations?.map(fmt), b.violations?.map(fmt));
-}
-
-function compile(proto: string): DescMessage {
-  return compileMessage(
-    `
-    syntax="proto3";
-    import "buf/validate/validate.proto";
-    enum Color { COLOR_UNSPECIFIED = 0; COLOR_RED = 1; COLOR_GREEN = 2; COLOR_BLUE = 3; }
-    ${proto}`,
-    bufCompileOptions,
-  );
+function compile(definition: string): DescMessage {
+  return compileWithPreamble(definition, { preamble: COLOR_PREAMBLE });
 }
 
 void suite("native enum rules", () => {

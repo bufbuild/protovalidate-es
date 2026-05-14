@@ -14,50 +14,17 @@
 
 import { suite, test } from "node:test";
 import * as assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { create, type DescMessage } from "@bufbuild/protobuf";
-import { compileFile } from "@bufbuild/protocompile";
-import { createValidator } from "../validator.js";
-import type { Violation } from "../error.js";
 import { pathToString } from "@bufbuild/protobuf/reflect";
+import { compile as compileWithPreamble, diff, native } from "./testing.js";
 
-const bufCompileOptions = {
-  imports: {
-    "buf/validate/validate.proto": readFileSync(
-      "proto/buf/validate/validate.proto",
-      "utf-8",
-    ),
-  },
-};
+const PREAMBLE = `
+  enum Color { COLOR_UNSPECIFIED = 0; COLOR_RED = 1; COLOR_GREEN = 2; }
+  message Inner { int32 x = 1; }
+`;
 
-const native = createValidator();
-const cel = createValidator({ disableNativeRules: true });
-
-function diff(schema: DescMessage, msg: object): void {
-  // biome-ignore lint/suspicious/noExplicitAny: cross-schema test helper
-  const a = native.validate(schema, msg as any);
-  // biome-ignore lint/suspicious/noExplicitAny: cross-schema test helper
-  const b = cel.validate(schema, msg as any);
-  assert.equal(a.kind, b.kind, "kind mismatch");
-  const fmt = (v: Violation) => v.toString();
-  assert.deepEqual(a.violations?.map(fmt), b.violations?.map(fmt));
-}
-
-function compile(proto: string): DescMessage {
-  const file = compileFile(
-    `
-    syntax="proto3";
-    import "buf/validate/validate.proto";
-    import "google/protobuf/wrappers.proto";
-    enum Color { COLOR_UNSPECIFIED = 0; COLOR_RED = 1; COLOR_GREEN = 2; }
-    message Inner { int32 x = 1; }
-    ${proto}`,
-    bufCompileOptions,
-  );
-  // The test target is always called M; Inner is shared context.
-  const m = file.messages.find((m) => m.name === "M");
-  if (!m) throw new Error("test schema must define a message M");
-  return m;
+function compile(definition: string): DescMessage {
+  return compileWithPreamble(definition, { preamble: PREAMBLE });
 }
 
 void suite("native repeated rules", () => {
