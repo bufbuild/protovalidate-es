@@ -22,6 +22,7 @@ import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
 import type { EnumRules } from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
+import { formatList } from "./format.js";
 import { enumDescs } from "./sites.js";
 
 type ConstRule = { readonly val: number; readonly path: Path };
@@ -52,18 +53,18 @@ class EvalNativeEnumRules implements Eval<ScalarValue> {
       );
     }
 
-    if (this.inRule && !this.inRule.vals.includes(v)) {
+    if (this.inRule !== undefined && !contains(this.inRule.vals, v)) {
       cursor.violate(
-        `must be in list ${formatList(this.inRule.vals)}`,
+        `must be in list ${formatList(this.inRule.vals, String)}`,
         "enum.in",
         this.inRule.path,
         this.forMapKey,
       );
     }
 
-    if (this.notInRule?.vals.includes(v)) {
+    if (this.notInRule !== undefined && contains(this.notInRule.vals, v)) {
       cursor.violate(
-        `must not be in list ${formatList(this.notInRule.vals)}`,
+        `must not be in list ${formatList(this.notInRule.vals, String)}`,
         "enum.not_in",
         this.notInRule.path,
         this.forMapKey,
@@ -76,13 +77,11 @@ class EvalNativeEnumRules implements Eval<ScalarValue> {
   }
 }
 
-function formatList(vs: readonly number[]): string {
-  let out = "[";
-  for (let i = 0; i < vs.length; i++) {
-    if (i > 0) out += ", ";
-    out += String(vs[i]);
+function contains(arr: readonly number[], v: number): boolean {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] === v) return true;
   }
-  return `${out}]`;
+  return false;
 }
 
 /**

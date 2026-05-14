@@ -17,6 +17,7 @@ import * as assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { create, type DescMessage } from "@bufbuild/protobuf";
 import { compileMessage } from "@bufbuild/protocompile";
+import { pathToString } from "@bufbuild/protobuf/reflect";
 import { createValidator } from "../validator.js";
 import type { Violation } from "../error.js";
 
@@ -100,5 +101,33 @@ void suite("native map rules", () => {
     diff(s, create(s, { kv: { a: 1, b: 2 } }));
     diff(s, create(s, { kv: { a: 1, b: -1 } })); // min ok, value bad
     diff(s, create(s, { kv: { a: -1 } })); // both bad
+  });
+
+  void test("rule path lands at map.min_pairs", () => {
+    const s = compile(
+      `message M {
+        map<string, int32> kv = 1 [(buf.validate.field).map.min_pairs = 2];
+      }`,
+    );
+    const r = native.validate(s, create(s, { kv: { a: 1 } }));
+    assert.equal(r.kind, "invalid");
+    const v = r.violations?.[0];
+    assert.ok(v);
+    assert.equal(v.ruleId, "map.min_pairs");
+    assert.equal(pathToString(v.rule), "map.min_pairs");
+  });
+
+  void test("rule path lands at map.max_pairs", () => {
+    const s = compile(
+      `message M {
+        map<string, int32> kv = 1 [(buf.validate.field).map.max_pairs = 1];
+      }`,
+    );
+    const r = native.validate(s, create(s, { kv: { a: 1, b: 2 } }));
+    assert.equal(r.kind, "invalid");
+    const v = r.violations?.[0];
+    assert.ok(v);
+    assert.equal(v.ruleId, "map.max_pairs");
+    assert.equal(pathToString(v.rule), "map.max_pairs");
   });
 });

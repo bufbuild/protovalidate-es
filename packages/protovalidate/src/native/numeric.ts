@@ -35,7 +35,7 @@ import {
   UInt64RulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
-import { printFloat } from "./format.js";
+import { formatList, printFloat } from "./format.js";
 import {
   doubleDescs,
   fixed32Descs,
@@ -206,7 +206,7 @@ class EvalNativeNumericRules<T extends number | bigint>
 
     if (this.inRule !== undefined && !includesT(this.inRule.vals, v)) {
       cursor.violate(
-        `must be in list ${formatList(this.inRule.vals, this.config)}`,
+        `must be in list ${formatList(this.inRule.vals, this.config.format)}`,
         `${this.config.typeName}.in`,
         this.inRule.path,
         this.forMapKey,
@@ -215,7 +215,7 @@ class EvalNativeNumericRules<T extends number | bigint>
 
     if (this.notInRule !== undefined && includesT(this.notInRule.vals, v)) {
       cursor.violate(
-        `must not be in list ${formatList(this.notInRule.vals, this.config)}`,
+        `must not be in list ${formatList(this.notInRule.vals, this.config.format)}`,
         `${this.config.typeName}.not_in`,
         this.notInRule.path,
         this.forMapKey,
@@ -325,18 +325,6 @@ function includesT<T extends number | bigint>(
     if (arr[i] === v) return true;
   }
   return false;
-}
-
-function formatList<T extends number | bigint>(
-  vs: readonly T[],
-  config: NumericConfig<T>,
-): string {
-  let out = "[";
-  for (let i = 0; i < vs.length; i++) {
-    if (i > 0) out += ", ";
-    out += config.format(vs[i] as T);
-  }
-  return `${out}]`;
 }
 
 function isNaNValue(v: number | bigint): boolean {

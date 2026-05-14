@@ -71,6 +71,17 @@ void suite("native enum rules", () => {
     diff(s, create(s, { c: 2 }));
   });
 
+  void test("enum.in with default-zero field violates", () => {
+    // Proto3 default enum value is 0. With `in: [1, 3]`, an unset field
+    // (which validates as 0) must produce a violation. Diff confirms native
+    // and CEL agree on this realistic scenario.
+    const s = compile(
+      `message M { Color c = 1 [(buf.validate.field).enum = { in: [1, 3] }]; }`,
+    );
+    diff(s, create(s, {})); // c defaults to 0
+    diff(s, create(s, { c: 0 })); // explicit zero
+  });
+
   void test("enum.not_in passes and fails", () => {
     const s = compile(
       `message M { Color c = 1 [(buf.validate.field).enum = { not_in: [0] }]; }`,

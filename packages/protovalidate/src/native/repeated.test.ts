@@ -137,6 +137,15 @@ void suite("native repeated rules", () => {
           xs: [new Uint8Array([1, 2]), new Uint8Array([1, 3])],
         }),
       );
+      // Empty Uint8Array elements: two equal-length empty buffers must
+      // collide; one is trivially unique.
+      diff(s, create(s, { xs: [new Uint8Array([])] }));
+      diff(
+        s,
+        create(s, {
+          xs: [new Uint8Array([]), new Uint8Array([])],
+        }),
+      );
     });
 
     void test("enum", () => {
@@ -182,7 +191,33 @@ void suite("native repeated rules", () => {
       );
       diff(s, create(s, { xs: [] }));
       diff(s, create(s, { xs: [{ x: 1 }] }));
+      // Two identical messages — exercises the CEL-handled unique path so we
+      // confirm fallthrough actually triggers the violation.
+      diff(s, create(s, { xs: [{ x: 1 }, { x: 1 }] }));
     });
+  });
+
+  void test("repeated.max_items with empty list passes", () => {
+    const s = compile(
+      `message M { repeated int32 xs = 1 [(buf.validate.field).repeated.max_items = 2]; }`,
+    );
+    diff(s, create(s, { xs: [] }));
+  });
+
+  void test("min_items + max_items + unique together", () => {
+    const s = compile(
+      `message M {
+        repeated int32 xs = 1 [(buf.validate.field).repeated = {
+          min_items: 2, max_items: 4, unique: true
+        }];
+      }`,
+    );
+    diff(s, create(s, { xs: [1, 2, 3] })); // valid
+    diff(s, create(s, { xs: [1] })); // min fails
+    diff(s, create(s, { xs: [1, 2, 3, 4, 5] })); // max fails
+    diff(s, create(s, { xs: [1, 2, 2] })); // unique fails
+    diff(s, create(s, { xs: [1, 1, 1, 1, 1] })); // max + unique fail
+    diff(s, create(s, { xs: [1, 1] })); // unique fails (min satisfied)
   });
 
   void test("rule path lands at repeated.min_items", () => {
@@ -195,11 +230,42 @@ void suite("native repeated rules", () => {
     const v = r.violations?.[0];
     assert.ok(v);
     assert.equal(v.ruleId, "repeated.min_items");
-    // The rule path is the chain inside FieldRules: repeated → min_items.
-    const rulePathStr = pathToString(v.rule);
-    assert.ok(
-      rulePathStr.includes("min_items") || rulePathStr.includes("minItems"),
-      `expected rule path to include min_items leaf, got: ${rulePathStr}`,
+    assert.equal(pathToString(v.rule), "repeated.min_items");
+  });
+
+  void test("rule path lands at repeated.max_items", () => {
+    const s = compile(
+      `message M { repeated int32 xs = 1 [(buf.validate.field).repeated.max_items = 1]; }`,
     );
+    const r = native.validate(s, create(s, { xs: [1, 2] }));
+    assert.equal(r.kind, "invalid");
+    const v = r.violations?.[0];
+    assert.ok(v);
+    assert.equal(v.ruleId, "repeated.max_items");
+    assert.equal(pathToString(v.rule), "repeated.max_items");
+  });
+
+  void test("rule path lands at repeated.unique", () => {
+    const s = compile(
+      `message M { repeated int32 xs = 1 [(buf.validate.field).repeated.unique = true]; }`,
+    );
+    const r = native.validate(s, create(s, { xs: [1, 1] }));
+    assert.equal(r.kind, "invalid");
+    const v = r.violations?.[0];
+    assert.ok(v);
+    assert.equal(v.ruleId, "repeated.unique");
+    assert.equal(pathToString(v.rule), "repeated.unique");
+  });
+
+  void test("repeated.unique = false claims the field (no-op rule)", () => {
+    // Explicit unique=false is a no-op; the native handler claims the field
+    // so CEL doesn't re-evaluate. Behavior is unchanged from CEL.
+    const s = compile(
+      `message M {
+        repeated int32 xs = 1 [(buf.validate.field).repeated.unique = false];
+      }`,
+    );
+    diff(s, create(s, { xs: [1, 1] })); // duplicates allowed
+    diff(s, create(s, { xs: [] }));
   });
 });

@@ -21,38 +21,38 @@ import { mapDescs } from "./sites.js";
 
 /**
  * Internal dispatch result for map-shaped native handlers.
+ *
+ * @internal
  */
 export type MapNativeResult = {
   eval: Eval<ReflectMap>;
   handledFields: ReadonlySet<DescField>;
 };
 
+type SizeRule = { readonly val: bigint; readonly path: Path };
+
 class EvalNativeMapRules implements Eval<ReflectMap> {
   constructor(
-    private readonly minPairs: bigint | undefined,
-    private readonly minPairsPath: Path | undefined,
-    private readonly maxPairs: bigint | undefined,
-    private readonly maxPairsPath: Path | undefined,
+    private readonly minPairsRule: SizeRule | undefined,
+    private readonly maxPairsRule: SizeRule | undefined,
   ) {}
 
   eval(val: ReflectMap, cursor: Cursor): void {
     const size = BigInt(val.size);
 
-    if (this.minPairs !== undefined && size < this.minPairs) {
+    if (this.minPairsRule !== undefined && size < this.minPairsRule.val) {
       cursor.violate(
-        `map must be at least ${this.minPairs} entries`,
+        `map must be at least ${this.minPairsRule.val} entries`,
         "map.min_pairs",
-        // biome-ignore lint/style/noNonNullAssertion: path is set whenever minPairs is set
-        this.minPairsPath!,
+        this.minPairsRule.path,
       );
     }
 
-    if (this.maxPairs !== undefined && size > this.maxPairs) {
+    if (this.maxPairsRule !== undefined && size > this.maxPairsRule.val) {
       cursor.violate(
-        `map must be at most ${this.maxPairs} entries`,
+        `map must be at most ${this.maxPairsRule.val} entries`,
         "map.max_pairs",
-        // biome-ignore lint/style/noNonNullAssertion: path is set whenever maxPairs is set
-        this.maxPairsPath!,
+        this.maxPairsRule.path,
       );
     }
   }
@@ -76,19 +76,21 @@ export function tryBuildNativeMapRules(
 
   const handled = new Set<DescField>();
 
-  let minPairs: bigint | undefined;
-  let minPairsPath: Path | undefined;
+  let minPairsRule: SizeRule | undefined;
   if (isFieldSet(rules, mapDescs.minPairs)) {
-    minPairs = rules.minPairs;
-    minPairsPath = rulePath.clone().field(mapDescs.minPairs).toPath();
+    minPairsRule = {
+      val: rules.minPairs,
+      path: rulePath.clone().field(mapDescs.minPairs).toPath(),
+    };
     handled.add(mapDescs.minPairs);
   }
 
-  let maxPairs: bigint | undefined;
-  let maxPairsPath: Path | undefined;
+  let maxPairsRule: SizeRule | undefined;
   if (isFieldSet(rules, mapDescs.maxPairs)) {
-    maxPairs = rules.maxPairs;
-    maxPairsPath = rulePath.clone().field(mapDescs.maxPairs).toPath();
+    maxPairsRule = {
+      val: rules.maxPairs,
+      path: rulePath.clone().field(mapDescs.maxPairs).toPath(),
+    };
     handled.add(mapDescs.maxPairs);
   }
 
@@ -97,12 +99,7 @@ export function tryBuildNativeMapRules(
   }
 
   return {
-    eval: new EvalNativeMapRules(
-      minPairs,
-      minPairsPath,
-      maxPairs,
-      maxPairsPath,
-    ),
+    eval: new EvalNativeMapRules(minPairsRule, maxPairsRule),
     handledFields: handled,
   };
 }

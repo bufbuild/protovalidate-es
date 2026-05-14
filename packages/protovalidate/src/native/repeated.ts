@@ -25,6 +25,8 @@ import { repeatedDescs } from "./sites.js";
 
 /**
  * Internal dispatch result for list-shaped native handlers.
+ *
+ * @internal
  */
 export type ListNativeResult = {
   eval: Eval<ReflectList>;
@@ -33,43 +35,40 @@ export type ListNativeResult = {
 
 type UniqueKind = "scalar" | "bytes" | "enum";
 
+type SizeRule = { readonly val: bigint; readonly path: Path };
+type UniqueRule = { readonly kind: UniqueKind; readonly path: Path };
+
 class EvalNativeRepeatedRules implements Eval<ReflectList> {
   constructor(
-    private readonly minItems: bigint | undefined,
-    private readonly minItemsPath: Path | undefined,
-    private readonly maxItems: bigint | undefined,
-    private readonly maxItemsPath: Path | undefined,
-    private readonly uniqueKind: UniqueKind | undefined,
-    private readonly uniquePath: Path | undefined,
+    private readonly minItemsRule: SizeRule | undefined,
+    private readonly maxItemsRule: SizeRule | undefined,
+    private readonly uniqueRule: UniqueRule | undefined,
   ) {}
 
   eval(val: ReflectList, cursor: Cursor): void {
     const size = BigInt(val.size);
 
-    if (this.minItems !== undefined && size < this.minItems) {
+    if (this.minItemsRule !== undefined && size < this.minItemsRule.val) {
       cursor.violate(
-        `must contain at least ${this.minItems} item(s)`,
+        `must contain at least ${this.minItemsRule.val} item(s)`,
         "repeated.min_items",
-        // biome-ignore lint/style/noNonNullAssertion: path is set whenever minItems is set
-        this.minItemsPath!,
+        this.minItemsRule.path,
       );
     }
 
-    if (this.maxItems !== undefined && size > this.maxItems) {
+    if (this.maxItemsRule !== undefined && size > this.maxItemsRule.val) {
       cursor.violate(
-        `must contain no more than ${this.maxItems} item(s)`,
+        `must contain no more than ${this.maxItemsRule.val} item(s)`,
         "repeated.max_items",
-        // biome-ignore lint/style/noNonNullAssertion: path is set whenever maxItems is set
-        this.maxItemsPath!,
+        this.maxItemsRule.path,
       );
     }
 
-    if (this.uniqueKind !== undefined && !isUnique(val, this.uniqueKind)) {
+    if (this.uniqueRule !== undefined && !isUnique(val, this.uniqueRule.kind)) {
       cursor.violate(
         "repeated value must contain unique items",
         "repeated.unique",
-        // biome-ignore lint/style/noNonNullAssertion: path is set whenever uniqueKind is set
-        this.uniquePath!,
+        this.uniqueRule.path,
       );
     }
   }
@@ -106,7 +105,7 @@ function isUnique(list: ReflectList, kind: UniqueKind): boolean {
 function bytesKey(bytes: Uint8Array): string {
   let out = "";
   for (let i = 0; i < bytes.length; i++) {
-    out += String.fromCharCode(bytes[i] as number);
+    out += String.fromCharCode(bytes[i]);
   }
   return out;
 }
@@ -135,10 +134,6 @@ function uniqueKindForListField(
  * Try to build a native evaluator for RepeatedRules (list-level rules:
  * min_items, max_items, unique). Returns `undefined` if no native handler
  * applies.
- *
- * `unique` is only handled natively for scalar / enum / bytes element kinds.
- * For message-typed elements (including WKT wrapper messages), the dispatcher
- * leaves `unique` on the CEL path while still claiming min_items / max_items.
  */
 export function tryBuildNativeRepeatedRules(
   rules: RepeatedRules,
@@ -149,35 +144,54 @@ export function tryBuildNativeRepeatedRules(
   if (rules.$unknown && rules.$unknown.length > 0) {
     return undefined;
   }
-  // Repeated rules don't apply to map keys; the planner only routes a
-  // RepeatedRules instance from planList(). Defensive guard:
+  // Type-level invariant: the planner only routes RepeatedRules from
+  // planList(), which always passes forMapKey=false. Kept as a tripwire.
   if (forMapKey) return undefined;
 
   const handled = new Set<DescField>();
 
-  let minItems: bigint | undefined;
-  let minItemsPath: Path | undefined;
+  let minItemsRule: SizeRule | undefined;
   if (isFieldSet(rules, repeatedDescs.minItems)) {
-    minItems = rules.minItems;
-    minItemsPath = rulePath.clone().field(repeatedDescs.minItems).toPath();
+    minItemsRule = {
+      val: rules.minItems,
+      path: rulePath.clone().field(repeatedDescs.minItems).toPath(),
+    };
     handled.add(repeatedDescs.minItems);
   }
 
-  let maxItems: bigint | undefined;
-  let maxItemsPath: Path | undefined;
+  let maxItemsRule: SizeRule | undefined;
   if (isFieldSet(rules, repeatedDescs.maxItems)) {
-    maxItems = rules.maxItems;
-    maxItemsPath = rulePath.clone().field(repeatedDescs.maxItems).toPath();
+    maxItemsRule = {
+      val: rules.maxItems,
+      path: rulePath.clone().field(repeatedDescs.maxItems).toPath(),
+    };
     handled.add(repeatedDescs.maxItems);
   }
 
-  let uniqueKind: UniqueKind | undefined;
-  let uniquePath: Path | undefined;
-  if (rules.unique && listField !== undefined) {
-    uniqueKind = uniqueKindForListField(listField);
-    if (uniqueKind !== undefined) {
-      uniquePath = rulePath.clone().field(repeatedDescs.unique).toPath();
+  let uniqueRule: UniqueRule | undefined;
+  if (isFieldSet(rules, repeatedDescs.unique)) {
+    if (!rules.unique) {
+      // Explicit `unique: false` is a no-op rule. Claim the field so CEL
+      // doesn't bother re-evaluating it. Matches numeric.ts's treatment of
+      // `finite: false`.
       handled.add(repeatedDescs.unique);
+    } else if (listField !== undefined) {
+      const kind = uniqueKindForListField(listField);
+      if (kind !== undefined) {
+        uniqueRule = {
+          kind,
+          path: rulePath.clone().field(repeatedDescs.unique).toPath(),
+        };
+        handled.add(repeatedDescs.unique);
+      }
+      // When `kind === undefined` (message-element list with unique:true) we
+      // deliberately do NOT claim the unique field; CEL handles it.
+      //
+      // protovalidate-go bails the entire RepeatedRules handler in this case
+      // — releasing min/max_items back to CEL too — to keep ownership
+      // all-or-nothing. We split ownership instead because in TS the
+      // partial-claim cost is zero and unique on message elements is
+      // uncommon. Conformance with the CEL path holds in both shapes.
     }
   }
 
@@ -186,14 +200,7 @@ export function tryBuildNativeRepeatedRules(
   }
 
   return {
-    eval: new EvalNativeRepeatedRules(
-      minItems,
-      minItemsPath,
-      maxItems,
-      maxItemsPath,
-      uniqueKind,
-      uniquePath,
-    ),
+    eval: new EvalNativeRepeatedRules(minItemsRule, maxItemsRule, uniqueRule),
     handledFields: handled,
   };
 }
