@@ -15,15 +15,7 @@
 import { Bench } from "tinybench";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { register as registerScalar } from "./suites/scalar.bench.js";
-import { register as registerRepeated } from "./suites/repeated.bench.js";
-import { register as registerMap } from "./suites/map.bench.js";
-import { register as registerComplex } from "./suites/complex.bench.js";
-import { register as registerInt32GT } from "./suites/int32-gt.bench.js";
-import { register as registerByteMatching } from "./suites/byte-matching.bench.js";
-import { register as registerStringMatching } from "./suites/string-matching.bench.js";
-import { register as registerWrapper } from "./suites/wrapper.bench.js";
-import { register as registerMultiRule } from "./suites/multirule.bench.js";
+import { register as registerValidate } from "./suites/validate.bench.js";
 import { register as registerCompile } from "./suites/compile.bench.js";
 import { register as registerStandardSchema } from "./suites/standard-schema.bench.js";
 
@@ -99,15 +91,7 @@ const bench = new Bench({
   warmupIterations: opts.warmupIterations,
 });
 
-registerScalar(bench);
-registerRepeated(bench);
-registerMap(bench);
-registerComplex(bench);
-registerInt32GT(bench);
-registerByteMatching(bench);
-registerStringMatching(bench);
-registerWrapper(bench);
-registerMultiRule(bench);
+registerValidate(bench);
 registerCompile(bench);
 registerStandardSchema(bench);
 

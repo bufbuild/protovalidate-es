@@ -14,13 +14,18 @@
 
 import type { Bench } from "tinybench";
 import { createValidator } from "@bufbuild/protovalidate";
-import { StringMatchingSchema } from "../gen/bench/v1/native_pb.js";
-import { stringMatching } from "../fixtures.js";
+import { cases } from "./cases.js";
+
+// Validate-time benches: a single validator is warmed once per case and then
+// reused across iterations, matching Go's BenchmarkValidate*. The set of
+// cases lives in cases.ts — add a row there to add a benchmark.
 
 export function register(bench: Bench): void {
   const validator = createValidator();
-  validator.validate(StringMatchingSchema, stringMatching);
-  bench.add("StringMatching", () => {
-    validator.validate(StringMatchingSchema, stringMatching);
-  });
+  for (const c of cases) {
+    validator.validate(c.schema, c.fixture); // warm the planner cache
+    bench.add(c.name, () => {
+      validator.validate(c.schema, c.fixture);
+    });
+  }
 }
