@@ -14,21 +14,20 @@
 
 import type { Bench } from "tinybench";
 import { createValidator } from "@bufbuild/protovalidate";
-import { BenchComplexSchemaSchema } from "../gen/bench/v1/bench_pb.js";
-import { BenchGTSchema } from "../gen/bench/v1/native_pb.js";
-import { benchComplexSchema, benchGT } from "../fixtures.js";
+import { caseByName } from "./cases.js";
 
 // Compile-time benchmarks: build a fresh validator on each iteration and run
 // one validate() call so the plan is forced. Mirrors Go's BenchmarkCompile,
 // which calls New() in the hot loop.
 
+const compileTargets = ["ComplexSchema", "Int32GT"] as const;
+
 export function register(bench: Bench): void {
-  bench.add("Compile/ComplexSchema", () => {
-    const v = createValidator();
-    v.validate(BenchComplexSchemaSchema, benchComplexSchema);
-  });
-  bench.add("Compile/Int32GT", () => {
-    const v = createValidator();
-    v.validate(BenchGTSchema, benchGT);
-  });
+  for (const name of compileTargets) {
+    const c = caseByName(name);
+    bench.add(`Compile/${c.name}`, () => {
+      const v = createValidator();
+      v.validate(c.schema, c.fixture);
+    });
+  }
 }

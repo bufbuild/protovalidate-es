@@ -14,26 +14,21 @@
 
 import type { Bench } from "tinybench";
 import { createStandardSchema } from "@bufbuild/protovalidate";
-import { BenchComplexSchemaSchema } from "../gen/bench/v1/bench_pb.js";
-import { BenchScalarSchema } from "../gen/bench/v1/bench_pb.js";
-import { benchComplexSchema, benchScalar } from "../fixtures.js";
+import { caseByName } from "./cases.js";
 
 // Standard Schema adapter overhead — TS-only surface, no Go analogue. Compares
-// directly with the Scalar and ComplexSchema benches to surface the cost of
-// the adapter's path→Issue translation and unknown→typed narrowing.
+// directly with the matching Scalar/ComplexSchema validate benches to surface
+// the cost of the adapter's path→Issue translation and unknown→typed narrowing.
+
+const adapterTargets = ["Scalar", "ComplexSchema"] as const;
 
 export function register(bench: Bench): void {
-  const scalarSchema = createStandardSchema(BenchScalarSchema);
-  const complexSchema = createStandardSchema(BenchComplexSchemaSchema);
-
-  // Warm planner.
-  scalarSchema["~standard"].validate(benchScalar);
-  complexSchema["~standard"].validate(benchComplexSchema);
-
-  bench.add("StandardSchema/Scalar", () => {
-    scalarSchema["~standard"].validate(benchScalar);
-  });
-  bench.add("StandardSchema/ComplexSchema", () => {
-    complexSchema["~standard"].validate(benchComplexSchema);
-  });
+  for (const name of adapterTargets) {
+    const c = caseByName(name);
+    const adapter = createStandardSchema(c.schema);
+    adapter["~standard"].validate(c.fixture); // warm
+    bench.add(`StandardSchema/${c.name}`, () => {
+      adapter["~standard"].validate(c.fixture);
+    });
+  }
 }
