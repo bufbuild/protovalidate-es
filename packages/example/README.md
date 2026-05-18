@@ -36,9 +36,7 @@ Modify the transfer in [src/basic.ts](./src/index.ts) and re-run the example to 
 
 Protovalidate rules can modify TypeScript types. A message field annotated with Protovalidate's [`required` rule](https://protovalidate.com/reference/rules/field_rules/#required) becomes a required property.
 
-See [order.proto](./proto/store/v1/order.proto) and [src/valid-types.ts](./src/valid-types.ts) for an example,
-and take a look at the [Valid types](https://github.com/bufbuild/protobuf-es/blob/v2.6.1/MANUAL.md#valid-types)
-section in the Protobuf-ES manual.
+See [order.proto](./proto/store/v1/order.proto) and [src/valid-types.ts](./src/valid-types.ts) for an example, and take a look at the [Valid types](https://protobufes.com/reference/valid-types/) section in the Protobuf-ES documentation.
 
 
 ### Standard Schema v1
@@ -52,4 +50,3 @@ If you modify the rules of one of the Protobuf messages, make sure to re-generat
 
 With the [Buf CLI](https://github.com/bufbuild/buf), simply run `npx buf generate` in this directory. [`buf.gen.yaml`](./buf.gen.yaml)
 contains the plugin configuration.
-
