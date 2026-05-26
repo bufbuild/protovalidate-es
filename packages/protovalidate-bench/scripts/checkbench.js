@@ -144,9 +144,18 @@ function buildArgs(values) {
     }
     throw err;
   }
-  const threshold = values.threshold
-    ? Number(values.threshold)
-    : DEFAULT_THRESHOLD;
+  let threshold = DEFAULT_THRESHOLD;
+  if (values.threshold !== undefined) {
+    const raw = values.threshold.trim();
+    const n = Number(raw);
+    if (raw === "" || !Number.isFinite(n) || n < 0) {
+      console.error(
+        `--threshold must be a non-negative number: ${values.threshold}`,
+      );
+      process.exit(2);
+    }
+    threshold = n;
+  }
   return { threshold, dir, quiet: values.quiet ?? false };
 }
 
