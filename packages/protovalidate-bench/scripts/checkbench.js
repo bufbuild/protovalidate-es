@@ -28,71 +28,32 @@
 // delta exceeds both the threshold AND the combined RME of the two samples
 // (so we don't flag noise as a regression).
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { parseArgs } from "node:util";
 
 const BENCH_DIR = ".tmp/bench";
 const DEFAULT_THRESHOLD = 5;
-
-function parseArgs(argv) {
-  const positional = [];
-  let threshold = DEFAULT_THRESHOLD;
-  let dir = BENCH_DIR;
-  let quiet = false;
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    if (a === "--threshold") {
-      threshold = Number(argv[++i]);
-    } else if (a === "--dir") {
-      dir = argv[++i];
-    } else if (a === "--quiet" || a === "-q") {
-      quiet = true;
-    } else if (a === "-h" || a === "--help") {
-      usage();
-      process.exit(0);
-    } else if (a.startsWith("--")) {
-      console.error(`unknown flag: ${a}`);
-      process.exit(2);
-    } else {
-      positional.push(a);
-    }
-  }
-  return { positional, threshold, dir, quiet };
-}
 
 function usage() {
   process.stdout.write(
     [
       "Usage: node scripts/checkbench.js <baseline> <current> [options]",
       "",
-      "Arguments may be paths to JSON files or one of the shortcuts:",
-      "  latest    most recent file in .tmp/bench/",
-      "  previous  second-most recent file in .tmp/bench/",
+      "Arguments are paths to JSON files relative to the benchmark directory (default: .tmp/bench/).",
+      "If neither argument is present, the two most recent files are used, with the older file being the baseline.",
+      "If one argument is present, the named file in the benchmark directory is used as the baseline and the most recent file is used as the current.",
       "",
       "Options:",
       "  --threshold <pct>   regression threshold percent (default: 5)",
       "  --dir <path>        bench results directory (default: .tmp/bench)",
       "  --quiet, -q         only print summary line",
+      "  --help, -h          show this help and exit",
       "",
-      "Exit code: 0 if no regressions past threshold, 1 otherwise.",
+      "Exit code: 0 if no regressions past threshold, 1 for regressions, 2 for other errors.",
       "",
     ].join("\n"),
   );
-}
-
-function resolveFile(arg, dir) {
-  if (arg === "latest" || arg === "previous") {
-    const entries = readdirSync(dir)
-      .filter((f) => f.endsWith(".json"))
-      .map((f) => ({ f, mtime: statSync(join(dir, f)).mtimeMs }))
-      .sort((a, b) => b.mtime - a.mtime);
-    const idx = arg === "latest" ? 0 : 1;
-    if (entries.length <= idx) {
-      throw new Error(`not enough JSON files in ${dir} to resolve "${arg}"`);
-    }
-    return resolve(dir, entries[idx].f);
-  }
-  return resolve(arg);
 }
 
 function load(path) {
@@ -127,19 +88,107 @@ function color(s, code) {
   return `\x1b[${code}m${s}\x1b[0m`;
 }
 
-const args = parseArgs(process.argv.slice(2));
-if (args.positional.length === 0 || args.positional.length > 2) {
+function getFile(dir, arg) {
+  const path = resolve(dir, arg);
+  try {
+    if (!statSync(path).isFile()) {
+      console.error(`not a file: ${path}`);
+      process.exit(2);
+    }
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      console.error(`file does not exist: ${path}`);
+      process.exit(2);
+    }
+    throw err;
+  }
+  return path;
+}
+
+function getSortedDirEntries(dir) {
+  return readdirSync(dir)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => ({ f, mtime: statSync(join(dir, f)).mtimeMs }))
+    .sort((a, b) => b.mtime - a.mtime);
+}
+
+function getNewestFile(dir) {
+  const entries = getSortedDirEntries(dir);
+  if (entries.length === 0) {
+    console.error(`no JSON files in ${dir}`);
+    process.exit(2);
+  }
+  return getFile(dir, entries[0].f);
+}
+
+function getSecondNewestFile(dir) {
+  const entries = getSortedDirEntries(dir);
+  if (entries.length < 2) {
+    console.error(`not enough JSON files in ${dir} to resolve previous file`);
+    process.exit(2);
+  }
+  return getFile(dir, entries[1].f);
+}
+
+function buildArgs(values) {
+  const dir = values.dir ?? BENCH_DIR;
+  try {
+    if (!statSync(dir).isDirectory()) {
+      console.error(`--dir is not a directory: ${dir}`);
+      process.exit(2);
+    }
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      console.error(`--dir does not exist: ${dir}`);
+      process.exit(2);
+    }
+    throw err;
+  }
+  const threshold = values.threshold
+    ? Number(values.threshold)
+    : DEFAULT_THRESHOLD;
+  return { threshold, dir, quiet: values.quiet ?? false };
+}
+
+const options = {
+  threshold: {
+    type: "string",
+  },
+  dir: {
+    type: "string",
+  },
+  quiet: {
+    type: "boolean",
+    short: "q",
+  },
+  help: {
+    type: "boolean",
+    short: "h",
+  },
+};
+const { values, positionals } = parseArgs({
+  options,
+  allowPositionals: true,
+});
+if (values.help) {
+  usage();
+  process.exit(0);
+}
+if (positionals.length > 2) {
   usage();
   process.exit(2);
 }
 
-const baselineArg =
-  args.positional.length === 2 ? args.positional[0] : "previous";
-const currentArg =
-  args.positional.length === 2 ? args.positional[1] : args.positional[0];
+const args = buildArgs(values);
 
-const baselinePath = resolveFile(baselineArg, args.dir);
-const currentPath = resolveFile(currentArg, args.dir);
+const baselinePath =
+  positionals.length > 0
+    ? getFile(args.dir, positionals[0])
+    : getSecondNewestFile(args.dir);
+const currentPath =
+  positionals.length === 2
+    ? getFile(args.dir, positionals[1])
+    : getNewestFile(args.dir);
 
 if (baselinePath === currentPath) {
   console.error(
