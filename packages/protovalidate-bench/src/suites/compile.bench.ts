@@ -28,6 +28,6 @@ export function register(): void {
     bench(`Compile/${c.name}`, () => {
       const v = createValidator();
       v.validate(c.schema, c.fixture);
-    }).gc('inner');
+    }).gc("inner");
   }
 }

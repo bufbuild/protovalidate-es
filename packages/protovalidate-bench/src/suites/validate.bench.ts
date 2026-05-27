@@ -26,6 +26,6 @@ export function register(): void {
     validator.validate(c.schema, c.fixture); // warm the planner cache
     bench(c.name, () => {
       validator.validate(c.schema, c.fixture);
-    }).gc('inner');
+    }).gc("inner");
   }
 }

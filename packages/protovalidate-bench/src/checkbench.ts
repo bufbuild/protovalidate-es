@@ -388,8 +388,7 @@ for (const name of [...names].sort()) {
   let kind: Row["kind"] = "ok";
   let meanText = fmtDelta(meanDelta, meanV);
   const minText = fmtDelta(minDelta, minV);
-  const heapText =
-    heapDelta === undefined ? "" : fmtDelta(heapDelta, heapV);
+  const heapText = heapDelta === undefined ? "" : fmtDelta(heapDelta, heapV);
   const gcText =
     gcDelta === undefined
       ? ""

@@ -29,6 +29,6 @@ export function register(): void {
     adapter["~standard"].validate(c.fixture); // warm
     bench(`StandardSchema/${c.name}`, () => {
       adapter["~standard"].validate(c.fixture);
-    }).gc('inner');
+    }).gc("inner");
   }
 }
