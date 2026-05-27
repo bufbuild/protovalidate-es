@@ -78,16 +78,15 @@ between languages stay meaningful.
 Use `checkbench` to diff two result files and surface regressions:
 
 ```shell
-# After running on main, then on your branch:
-node scripts/checkbench.js previous latest
+# compares the last two JSON files in .tmp/bench/
+tsx src/checkbench.ts
 
-# Or pass explicit paths:
-node scripts/checkbench.js .tmp/bench/baseline.json .tmp/bench/current.json
+# compare the latest JSON file against a specific baseline file in .tmp/bench/:
+tsx src/checkbench.ts baseline.json
+
+# Or pass explicit files for baseline and current:
+tsx src/checkbench.ts baseline.json current.json
 ```
-
-The shortcuts `latest` and `previous` resolve to the newest and second-newest
-JSON files in `.tmp/bench/` (by mtime). Calling with only one argument
-defaults the baseline to `previous`.
 
 Output is per task: baseline mean, current mean, `±%` delta, and a marker —
 `REGRESS`, `faster`, or `(noise)`. A delta is treated as noise if it falls
@@ -114,7 +113,7 @@ npm run bench                          # produces .tmp/bench/<ts>.json (baseline
 git checkout my-optimization-branch
 npm run bench                          # produces .tmp/bench/<ts>.json (current)
 
-node scripts/checkbench.js latest      # diff vs previous
+node scripts/checkbench.ts latest      # diff vs previous
 ```
 
 Heads up: bench-to-bench wall-time numbers are sensitive to other load on the

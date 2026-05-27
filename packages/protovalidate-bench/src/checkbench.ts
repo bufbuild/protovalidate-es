@@ -14,20 +14,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Compare two bench JSON files written by src/bench.ts.
-//
-// Usage:
-//   node scripts/checkbench.js <baseline.json> <current.json> [--threshold 5]
-//
-// "latest" / "previous" shortcuts pick the most recent files in .tmp/bench/:
-//   node scripts/checkbench.js latest
-//   node scripts/checkbench.js previous latest
-//
-// Exits non-zero if any task regresses by more than --threshold percent
-// (default 5%). A regression is defined as a slower mean latency where the
-// delta exceeds both the threshold AND the combined RME of the two samples
-// (so we don't flag noise as a regression).
-
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
@@ -38,7 +24,7 @@ const DEFAULT_THRESHOLD = 5;
 function usage() {
   process.stdout.write(
     [
-      "Usage: node scripts/checkbench.js <baseline> <current> [options]",
+      "Usage: tsx src/checkbench.ts <baseline> <current> [options]",
       "",
       "Arguments are paths to JSON files relative to the benchmark directory (default: .tmp/bench/).",
       "If neither argument is present, the two most recent files are used, with the older file being the baseline.",
@@ -56,7 +42,26 @@ function usage() {
   );
 }
 
-function load(path) {
+type FileInfo = {
+  meta: {
+    node: string;
+    platform: string;
+    timestamp: string;
+    path: string;
+  };
+  byName: Map<string, Task>;
+};
+
+type Task = {
+  name: string;
+  meanLatencyNs: number;
+  p99LatencyNs: number;
+  throughputOpsPerSec: number;
+  rmePercent: number;
+  samples: number;
+};
+
+function load(path: string): FileInfo {
   const data = JSON.parse(readFileSync(path, "utf-8"));
   const byName = new Map();
   for (const task of data.tasks) {
@@ -73,22 +78,22 @@ function load(path) {
   };
 }
 
-function pad(s, n) {
+function pad(s: string, n: number): string {
   return String(s).padEnd(n);
 }
 
-function fmtNs(n) {
+function fmtNs(n: number): string {
   if (n < 1000) return `${n.toFixed(0)} ns`;
   if (n < 1_000_000) return `${(n / 1000).toFixed(2)} µs`;
   return `${(n / 1_000_000).toFixed(2)} ms`;
 }
 
-function color(s, code) {
+function color(s: string, code: string): string {
   if (!process.stdout.isTTY) return s;
   return `\x1b[${code}m${s}\x1b[0m`;
 }
 
-function getFile(dir, arg) {
+function getFile(dir: string, arg: string): string {
   const path = resolve(dir, arg);
   try {
     if (!statSync(path).isFile()) {
@@ -96,7 +101,8 @@ function getFile(dir, arg) {
       process.exit(2);
     }
   } catch (err) {
-    if (err.code === "ENOENT") {
+    const e = err as NodeJS.ErrnoException;
+    if (e.code === "ENOENT") {
       console.error(`file does not exist: ${path}`);
       process.exit(2);
     }
@@ -105,14 +111,16 @@ function getFile(dir, arg) {
   return path;
 }
 
-function getSortedDirEntries(dir) {
+type DirEntry = { f: string; mtime: number };
+
+function getSortedDirEntries(dir: string): DirEntry[] {
   return readdirSync(dir)
     .filter((f) => f.endsWith(".json"))
     .map((f) => ({ f, mtime: statSync(join(dir, f)).mtimeMs }))
     .sort((a, b) => b.mtime - a.mtime);
 }
 
-function getNewestFile(dir) {
+function getNewestFile(dir: string): string {
   const entries = getSortedDirEntries(dir);
   if (entries.length === 0) {
     console.error(`no JSON files in ${dir}`);
@@ -121,7 +129,7 @@ function getNewestFile(dir) {
   return getFile(dir, entries[0].f);
 }
 
-function getSecondNewestFile(dir) {
+function getSecondNewestFile(dir: string): string {
   const entries = getSortedDirEntries(dir);
   if (entries.length < 2) {
     console.error(`not enough JSON files in ${dir} to resolve previous file`);
@@ -130,7 +138,14 @@ function getSecondNewestFile(dir) {
   return getFile(dir, entries[1].f);
 }
 
-function buildArgs(values) {
+type ParsedValues = {
+  threshold?: string;
+  dir?: string;
+  quiet?: boolean;
+  help?: boolean;
+};
+
+function buildArgs(values: ParsedValues) {
   const dir = values.dir ?? BENCH_DIR;
   try {
     if (!statSync(dir).isDirectory()) {
@@ -138,7 +153,8 @@ function buildArgs(values) {
       process.exit(2);
     }
   } catch (err) {
-    if (err.code === "ENOENT") {
+    const e = err as NodeJS.ErrnoException;
+    if (e.code === "ENOENT") {
       console.error(`--dir does not exist: ${dir}`);
       process.exit(2);
     }
@@ -174,7 +190,7 @@ const options = {
     type: "boolean",
     short: "h",
   },
-};
+} as const;
 const { values, positionals } = parseArgs({
   options,
   allowPositionals: true,
@@ -250,7 +266,7 @@ for (const name of [...names].sort()) {
       kind: "new",
       text: color("NEW", "36"),
       bMean: undefined,
-      cMean: c.meanLatencyNs,
+      cMean: c?c.meanLatencyNs:undefined,
       delta: undefined,
     });
     continue;
@@ -299,7 +315,7 @@ if (!args.quiet) {
     `${pad("task", nameW)}  ${pad("baseline", 12)}  ${pad("current", 12)}  delta`,
   );
   console.log(
-    `${pad("", nameW).replaceAll(" ", "-")}  ${"-".repeat(12)}  ${"-".repeat(12)}  ${"-".repeat(20)}`,
+    `${"-".repeat(nameW)}  ${"-".repeat(12)}  ${"-".repeat(12)}  ${"-".repeat(20)}`,
   );
   for (const r of rows) {
     const b = r.bMean !== undefined ? fmtNs(r.bMean) : "—";
