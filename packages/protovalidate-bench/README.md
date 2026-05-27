@@ -4,9 +4,11 @@ Performance benchmarks for `@bufbuild/protovalidate`. This package is private an
 mirrors the suite in [`protovalidate-go/validator_bench_test.go`](https://github.com/bufbuild/protovalidate-go/blob/main/validator_bench_test.go)
 so that runtime cost can be tracked across changes and compared cross-language.
 
-The harness is [tinybench](https://github.com/tinylibs/tinybench). Fixtures are
-hand-built (no faker dependency) and seeded with a deterministic PRNG so every
-run validates the same messages.
+The harness is [mitata](https://github.com/evanwashere/mitata), which
+auto-tunes warmup and sample counts and reports per-task histograms, p99, and
+optimization-elimination warnings. Fixtures are hand-built (no faker
+dependency) and seeded with a deterministic PRNG so every run validates the
+same messages.
 
 ## Running
 
@@ -30,23 +32,46 @@ The runner prints a table of results and writes a JSON file to `.tmp/bench/`
 | Flag                  | Default     | Description                                                     |
 | --------------------- | ----------- | --------------------------------------------------------------- |
 | `--filter <substr>`   | _(none)_    | Only run tasks whose name contains `<substr>`                   |
-| `--time <ms>`         | `1000`      | Per-task wall-time budget                                       |
-| `--iterations <n>`    | _(time)_    | Force fixed iteration count instead of the time budget          |
-| `--warmup <n>`        | `16`        | Warmup iterations per task                                      |
 | `--out <dir>`         | `.tmp/bench`| Output directory for JSON results                               |
 
-Examples:
+mitata auto-tunes warmup, sample count, and per-task wall time. To slow the
+runner down, run fewer benchmarks via `--filter`.
+
+Example:
 
 ```shell
-# Quick smoke run
-npm run bench -- --time 200 --warmup 5
-
 # Only validation benchmarks (skip the Compile/* tasks)
 npm run bench -- --filter Scalar
-
-# Long, stable run
-npm run bench -- --time 5000 --warmup 32
 ```
+
+### Output schema
+
+Each run writes a JSON file like:
+
+```json
+{
+  "node": "v22.x.x",
+  "platform": "darwin/arm64",
+  "timestamp": "2026-05-27T...",
+  "tasks": [
+    {
+      "name": "Scalar",
+      "meanLatencyNs": 110.42,
+      "minLatencyNs": 104.18,
+      "medianLatencyNs": 108.93,
+      "p99LatencyNs": 142.07,
+      "throughputOpsPerSec": 9056221,
+      "rmePercent": 4.71,
+      "samples": 128,
+      "gcTotalNs": 0,
+      "heapAvgBytes": 0
+    }
+  ]
+}
+```
+
+`gcTotalNs` and `heapAvgBytes` are only present when mitata can observe them
+(Node started with `--expose-gc` for GC stats; `node:v8` heap stats for heap).
 
 ## Benchmarks
 
@@ -88,10 +113,30 @@ tsx src/checkbench.ts baseline.json
 tsx src/checkbench.ts baseline.json current.json
 ```
 
-Output is per task: baseline mean, current mean, `±%` delta, and a marker —
-`REGRESS`, `faster`, or `(noise)`. A delta is treated as noise if it falls
-inside the combined RME of the two runs, so jitter in low-RME benchmarks does
-not trigger false alarms.
+Output is per task: baseline mean, current mean, `min Δ`, `heap Δ`
+(when available), an optional `gc Δ` (when both runs have GC stats), and
+`mean Δ` with a marker — `REGRESS (mean|min|heap|...)`, `faster (...)`, or
+`(noise)`. A delta is treated as noise if it falls inside the combined
+relative standard deviation of the two runs.
+
+The tool gates on three signals: **mean latency, min latency, and heap
+allocation per iteration**. A task fails if any of these deltas exceeds
+`--threshold` and falls outside the noise floor.
+
+- **Mean** catches the typical-case slowdown.
+- **Min** is the JIT-warm floor — immune to GC pauses, so it surfaces real
+  CPU regressions that mean might hide in tail noise.
+- **Heap Δ** is bytes allocated per iteration (via `node:v8`
+  `getHeapStatistics()`). Catches allocation regressions even when wall-clock
+  is flat — those still hurt in production because they amplify GC pressure.
+  The heap signal is mostly deterministic for short benches; for long-running
+  alloc-heavy benches (`Compile/*`) it can drift with GC scheduling, which
+  the noise floor absorbs.
+- **GC Δ** is informational only (no gating) and only appears when both runs
+  were produced with `--expose-gc` so mitata can observe gc time.
+
+Note on `rmePercent`: it's the relative standard deviation of the
+samples (`stddev / mean × 100`).
 
 ### Options
 

@@ -55,10 +55,14 @@ type FileInfo = {
 type Task = {
   name: string;
   meanLatencyNs: number;
+  minLatencyNs: number;
+  medianLatencyNs: number;
   p99LatencyNs: number;
   throughputOpsPerSec: number;
   rmePercent: number;
   samples: number;
+  gcTotalNs?: number;
+  heapAvgBytes?: number;
 };
 
 function load(path: string): FileInfo {
@@ -256,7 +260,50 @@ const names = new Set([...baseline.byName.keys(), ...current.byName.keys()]);
 let regressions = 0;
 let improvements = 0;
 
-const rows = [];
+type SignalVerdict = "regress" | "improve" | "noise" | "ok";
+
+function classify(
+  deltaPct: number,
+  noiseFloor: number,
+  threshold: number,
+): SignalVerdict {
+  if (Math.abs(deltaPct) <= noiseFloor) return "noise";
+  if (deltaPct > threshold) return "regress";
+  if (deltaPct < -threshold) return "improve";
+  return "ok";
+}
+
+function fmtDelta(deltaPct: number, verdict: SignalVerdict): string {
+  const base = `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`;
+  switch (verdict) {
+    case "regress":
+      return color(base, "31");
+    case "improve":
+      return color(base, "32");
+    case "noise":
+      return color(base, "90");
+    default:
+      return base;
+  }
+}
+
+type Row = {
+  name: string;
+  kind: "new" | "gone" | "regress" | "improve" | "ok";
+  bMean: number | undefined;
+  cMean: number | undefined;
+  meanText: string;
+  minText: string;
+  heapText: string;
+  gcText: string;
+};
+
+const rows: Row[] = [];
+// Track whether any row has heap/gc info so we can skip those columns entirely
+// when neither file has them (e.g. comparing against a pre-mitata JSON).
+let anyHeap = false;
+let anyGc = false;
+
 for (const name of [...names].sort()) {
   const b = baseline.byName.get(name);
   const c = current.byName.get(name);
@@ -264,10 +311,12 @@ for (const name of [...names].sort()) {
     rows.push({
       name,
       kind: "new",
-      text: color("NEW", "36"),
       bMean: undefined,
-      cMean: c ? c.meanLatencyNs : undefined,
-      delta: undefined,
+      cMean: c?.meanLatencyNs,
+      meanText: color("NEW", "36"),
+      minText: "",
+      heapText: "",
+      gcText: "",
     });
     continue;
   }
@@ -275,54 +324,148 @@ for (const name of [...names].sort()) {
     rows.push({
       name,
       kind: "gone",
-      text: color("GONE", "90"),
       bMean: b.meanLatencyNs,
       cMean: undefined,
-      delta: undefined,
+      meanText: color("GONE", "90"),
+      minText: "",
+      heapText: "",
+      gcText: "",
     });
     continue;
   }
-  const deltaPct =
+  const meanDelta =
     ((c.meanLatencyNs - b.meanLatencyNs) / b.meanLatencyNs) * 100;
-  // Combined relative margin of error; deltas inside this are noise.
+  const minDelta = ((c.minLatencyNs - b.minLatencyNs) / b.minLatencyNs) * 100;
+  // Combined relative stddev; deltas inside this are treated as noise.
   const noiseFloor = (b.rmePercent ?? 0) + (c.rmePercent ?? 0);
-  let kind = "ok";
-  let text = `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`;
-  if (deltaPct > args.threshold && Math.abs(deltaPct) > noiseFloor) {
-    kind = "regress";
-    text = color(`${text}  REGRESS`, "31");
-    regressions++;
-  } else if (deltaPct < -args.threshold && Math.abs(deltaPct) > noiseFloor) {
-    kind = "improve";
-    text = color(`${text}  faster`, "32");
-    improvements++;
-  } else if (Math.abs(deltaPct) <= noiseFloor) {
-    text = color(`${text}  (noise)`, "90");
+  const meanV = classify(meanDelta, noiseFloor, args.threshold);
+  const minV = classify(minDelta, noiseFloor, args.threshold);
+
+  // Heap is mostly deterministic per code+fixture, but for long-running
+  // alloc-heavy benches (Compile/*) the GC scheduler can fire mid-iteration
+  // and make `getHeapStatistics()` snapshots noisy. Reuse the timing noise
+  // floor (combined rmePercent) as a soft upper bound on measurement noise —
+  // not exact, but it suppresses the same kind of jitter that timing sees.
+  let heapDelta: number | undefined;
+  let heapV: SignalVerdict = "ok";
+  if (b.heapAvgBytes !== undefined && c.heapAvgBytes !== undefined) {
+    anyHeap = true;
+    const heapAbsDelta = c.heapAvgBytes - b.heapAvgBytes;
+    if (b.heapAvgBytes === 0) {
+      heapDelta = c.heapAvgBytes === 0 ? 0 : Number.POSITIVE_INFINITY;
+    } else {
+      heapDelta = (heapAbsDelta / b.heapAvgBytes) * 100;
+    }
+    if (Math.abs(heapAbsDelta) < 1) {
+      heapV = "ok";
+    } else {
+      heapV = classify(heapDelta, noiseFloor, args.threshold);
+    }
   }
+
+  // GC time is reported only when the runtime exposes gc(). Informational
+  // only — we don't gate on it because per-iter GC cost is noisy and already
+  // captured (in a noisier form) by heap allocation.
+  let gcDelta: number | undefined;
+  if (b.gcTotalNs !== undefined && c.gcTotalNs !== undefined) {
+    anyGc = true;
+    if (b.gcTotalNs === 0) {
+      gcDelta = c.gcTotalNs === 0 ? 0 : Number.POSITIVE_INFINITY;
+    } else {
+      gcDelta = ((c.gcTotalNs - b.gcTotalNs) / b.gcTotalNs) * 100;
+    }
+  }
+
+  const tags: string[] = [];
+  if (meanV === "regress") tags.push("mean");
+  if (minV === "regress") tags.push("min");
+  if (heapV === "regress") tags.push("heap");
+  const fasterTags: string[] = [];
+  if (meanV === "improve") fasterTags.push("mean");
+  if (minV === "improve") fasterTags.push("min");
+  if (heapV === "improve") fasterTags.push("heap");
+
+  let kind: Row["kind"] = "ok";
+  let meanText = fmtDelta(meanDelta, meanV);
+  const minText = fmtDelta(minDelta, minV);
+  const heapText =
+    heapDelta === undefined ? "" : fmtDelta(heapDelta, heapV);
+  const gcText =
+    gcDelta === undefined
+      ? ""
+      : Number.isFinite(gcDelta)
+        ? `${gcDelta >= 0 ? "+" : ""}${gcDelta.toFixed(2)}%`
+        : "∞";
+
+  if (tags.length > 0) {
+    kind = "regress";
+    regressions++;
+    const marker = color(`REGRESS (${tags.join("+")})`, "31");
+    meanText = `${meanText}  ${marker}`;
+  } else if (fasterTags.length > 0) {
+    kind = "improve";
+    improvements++;
+    const marker = color(`faster (${fasterTags.join("+")})`, "32");
+    meanText = `${meanText}  ${marker}`;
+  } else if (meanV === "noise" || minV === "noise") {
+    meanText = `${meanText}  ${color("(noise)", "90")}`;
+  }
+
   rows.push({
     name,
     kind,
-    text,
     bMean: b.meanLatencyNs,
     cMean: c.meanLatencyNs,
-    delta: deltaPct,
+    meanText,
+    minText,
+    heapText,
+    gcText,
   });
+}
+
+// padVisible pads s to width n based on its visible (ANSI-stripped) length.
+const ansiPattern = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+function padVisible(s: string, n: number): string {
+  const visible = s.replace(ansiPattern, "");
+  const padding = Math.max(0, n - visible.length);
+  return s + " ".repeat(padding);
 }
 
 if (!args.quiet) {
   const nameW = Math.max(4, ...rows.map((r) => r.name.length));
-  console.log(
-    `${pad("task", nameW)}  ${pad("baseline", 12)}  ${pad("current", 12)}  delta`,
-  );
-  console.log(
-    `${"-".repeat(nameW)}  ${"-".repeat(12)}  ${"-".repeat(12)}  ${"-".repeat(20)}`,
-  );
+  const cols = [
+    `${pad("task", nameW)}`,
+    pad("baseline", 12),
+    pad("current", 12),
+    pad("min Δ", 10),
+  ];
+  const seps = [
+    "-".repeat(nameW),
+    "-".repeat(12),
+    "-".repeat(12),
+    "-".repeat(10),
+  ];
+  if (anyHeap) {
+    cols.push(pad("heap Δ", 10));
+    seps.push("-".repeat(10));
+  }
+  if (anyGc) {
+    cols.push(pad("gc Δ", 10));
+    seps.push("-".repeat(10));
+  }
+  cols.push("mean Δ");
+  seps.push("-".repeat(28));
+  console.log(cols.join("  "));
+  console.log(seps.join("  "));
   for (const r of rows) {
     const b = r.bMean !== undefined ? fmtNs(r.bMean) : "—";
     const c = r.cMean !== undefined ? fmtNs(r.cMean) : "—";
-    console.log(
-      `${pad(r.name, nameW)}  ${pad(b, 12)}  ${pad(c, 12)}  ${r.text}`,
-    );
+    const minCell = padVisible(r.minText, 10);
+    const cells = [pad(r.name, nameW), pad(b, 12), pad(c, 12), minCell];
+    if (anyHeap) cells.push(padVisible(r.heapText || "—", 10));
+    if (anyGc) cells.push(padVisible(r.gcText || "—", 10));
+    cells.push(r.meanText);
+    console.log(cells.join("  "));
   }
   console.log("");
 }

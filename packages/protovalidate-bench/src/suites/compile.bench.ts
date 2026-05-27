@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Bench } from "tinybench";
+import { bench } from "mitata";
 import { createValidator } from "@bufbuild/protovalidate";
 import { caseByName } from "./cases.js";
 
@@ -22,12 +22,12 @@ import { caseByName } from "./cases.js";
 
 const compileTargets = ["ComplexSchema", "Int32GT"] as const;
 
-export function register(bench: Bench): void {
+export function register(): void {
   for (const name of compileTargets) {
     const c = caseByName(name);
-    bench.add(`Compile/${c.name}`, () => {
+    bench(`Compile/${c.name}`, () => {
       const v = createValidator();
       v.validate(c.schema, c.fixture);
-    });
+    }).gc('inner');
   }
 }

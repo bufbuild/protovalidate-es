@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Bench } from "tinybench";
+import { bench } from "mitata";
 import { createStandardSchema } from "@bufbuild/protovalidate";
 import { caseByName } from "./cases.js";
 
@@ -22,13 +22,13 @@ import { caseByName } from "./cases.js";
 
 const adapterTargets = ["Scalar", "ComplexSchema"] as const;
 
-export function register(bench: Bench): void {
+export function register(): void {
   for (const name of adapterTargets) {
     const c = caseByName(name);
     const adapter = createStandardSchema(c.schema);
     adapter["~standard"].validate(c.fixture); // warm
-    bench.add(`StandardSchema/${c.name}`, () => {
+    bench(`StandardSchema/${c.name}`, () => {
       adapter["~standard"].validate(c.fixture);
-    });
+    }).gc('inner');
   }
 }

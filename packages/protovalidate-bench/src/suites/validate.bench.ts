@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Bench } from "tinybench";
+import { bench } from "mitata";
 import { createValidator } from "@bufbuild/protovalidate";
 import { cases } from "./cases.js";
 
@@ -20,12 +20,12 @@ import { cases } from "./cases.js";
 // reused across iterations, matching Go's BenchmarkValidate*. The set of
 // cases lives in cases.ts — add a row there to add a benchmark.
 
-export function register(bench: Bench): void {
+export function register(): void {
   const validator = createValidator();
   for (const c of cases) {
     validator.validate(c.schema, c.fixture); // warm the planner cache
-    bench.add(c.name, () => {
+    bench(c.name, () => {
       validator.validate(c.schema, c.fixture);
-    });
+    }).gc('inner');
   }
 }
