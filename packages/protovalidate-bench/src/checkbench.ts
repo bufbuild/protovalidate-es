@@ -266,7 +266,7 @@ for (const name of [...names].sort()) {
       kind: "new",
       text: color("NEW", "36"),
       bMean: undefined,
-      cMean: c?c.meanLatencyNs:undefined,
+      cMean: c ? c.meanLatencyNs : undefined,
       delta: undefined,
     });
     continue;
