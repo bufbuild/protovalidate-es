@@ -61,7 +61,7 @@ function parseArgs(argv: readonly string[]): CliOptions {
       }
       case "--worker":
         // Internal: marks this process as a child worker. The coordinator
-        // spawns one Node process per run with this flag, and reads the
+        // spawns one Node process per run with this flag and reads the
         // worker's JSON payload from stdout.
         worker = true;
         break;
@@ -69,7 +69,6 @@ function parseArgs(argv: readonly string[]): CliOptions {
       case "-h":
         printUsage();
         process.exit(0);
-        break;
       default:
         if (a?.startsWith("--")) {
           console.error(`unknown flag: ${a}`);
@@ -99,7 +98,7 @@ function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// Subset of mitata's stats shape we read. Mitata declares these inline; we
+// Subset of the mitata stats shape that we read. Mitata declares these inline; we
 // restate the fields we touch.
 interface MitataStats {
   avg: number;
@@ -134,8 +133,8 @@ interface WorkerPayload {
   tasks: WorkerTask[];
 }
 
-// What the coordinator writes to disk. When runs=1, this is just the worker
-// stats with no cross-run fields. When runs>1, fields are aggregated across
+// What the coordinator writes to disk. When runs = 1, this is just the worker
+// stats with no cross-run fields. When runs > 1, fields are aggregated across
 // runs and crossRunRsdPercent / perRunMeanLatencyNs are populated.
 interface AggregatedTask {
   name: string;
@@ -248,18 +247,38 @@ async function collectWorkerTasks(
   const tasks: WorkerTask[] = [];
   for (const spec of specs) {
     process.stderr.write(`  ${spec.name} ...`);
+    // Pre-warm: drive the function past V8's cold-start state so mitata's
+    // warmup sees steady-state timing. Without this, a cold first iter on a
+    // ~40µs bench can exceed mitata's 500µs warmup_threshold, which silently
+    // disables batching and collapses sample quality (within-run RSD jumps
+    // from <1% to >10%).
+    for (let i = 0; i < 20; i++) spec.fn();
     const t0 = performance.now();
-    // gc is left undefined so mitata uses its default gc function (which
+    // gc is left undefined, so mitata uses its default gc function (which
     // calls globalThis.gc() under --expose-gc). Passing `gc: true` makes
     // mitata try to call `true()` as the gc function.
-    const stats = (await measure(spec.fn, {
+    const measureOpts: Record<string, unknown> = {
       inner_gc: spec.gc === "inner",
       heap: heapFn,
       // Disable mitata's built-in symmetric trim so we can see the raw min
       // and compute our own trimmed mean. Any positive number larger than the
       // sample count works; MAX_SAFE_INTEGER is the cleanest.
       samples_threshold: Number.MAX_SAFE_INTEGER,
-    })) as MitataStats;
+      // mitata defaults warmup_threshold to 500µs: if the first iter exceeds
+      // that, the inner warmup loop is skipped and batching is disabled.
+      // For 10-40µs benches a cold first iter routinely lands above 500µs,
+      // making the batch decision non-deterministic across processes. Bumped
+      // to 5ms, so any sub-millisecond bench reliably enters the inner warmup
+      // (and the batch_threshold of 65µs then makes the actual batch choice).
+      warmup_threshold: 5_000_000,
+    };
+    if (spec.minSamples !== undefined) {
+      measureOpts.min_samples = spec.minSamples;
+    }
+    if (spec.minCpuTimeMs !== undefined) {
+      measureOpts.min_cpu_time = spec.minCpuTimeMs * 1e6;
+    }
+    const stats = (await measure(spec.fn, measureOpts)) as MitataStats;
     const t1 = performance.now();
     const samples = stats.samples;
     const meanNs = trimmedMean(samples);

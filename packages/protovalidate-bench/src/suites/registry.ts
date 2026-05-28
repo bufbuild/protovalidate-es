@@ -15,10 +15,22 @@
 // "once": one GC before measurement starts. Use for fast benches where forcing
 // a full GC between batches would add more variance than it removes.
 // "inner": GC between every batch sample. Use when allocation cost is the
-// signal under test (e.g. Compile/*) — pays for itself in stability.
+// signal under test, or when opportunistic GC inside a batch is responsible
+// for a high within-run RSD.
 export type GcMode = "once" | "inner";
 
-export interface BenchSpec {
+export interface SpecOptions {
+  // Override mitata's min_samples default (12). Use when a slow per-iter
+  // bench naturally hits min_samples before min_cpu_time and you want
+  // tighter within-run stats.
+  minSamples?: number;
+  // Override mitata's min_cpu_time default (642ms). The runtime budget for
+  // the measurement loop; the bench keeps sampling until both
+  // (samples >= minSamples) and (elapsed >= minCpuTimeMs) are satisfied.
+  minCpuTimeMs?: number;
+}
+
+export interface BenchSpec extends SpecOptions {
   name: string;
   fn: () => void;
   gc: GcMode;
@@ -26,8 +38,13 @@ export interface BenchSpec {
 
 const specs: BenchSpec[] = [];
 
-export function registerSpec(name: string, fn: () => void, gc: GcMode): void {
-  specs.push({ name, fn, gc });
+export function registerSpec(
+  name: string,
+  fn: () => void,
+  gc: GcMode,
+  options?: SpecOptions,
+): void {
+  specs.push({ name, fn, gc, ...options });
 }
 
 export function getSpecs(filter?: RegExp): BenchSpec[] {

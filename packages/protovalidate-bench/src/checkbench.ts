@@ -63,8 +63,8 @@ type Task = {
   throughputOpsPerSec: number;
   rmePercent: number;
   // Present only for files written with schemaVersion >= 2 from a multi-run
-  // invocation. When present this is the relative stddev across per-run means
-  // — i.e. the actual run-to-run noise — and should be used as the noise
+  // invocation. When present, this is the relative stddev across per-run means
+  // — i.e., the actual run-to-run noise — and should be used as the noise
   // floor in preference to rmePercent (which is within-run sample spread).
   crossRunRsdPercent?: number;
   samples: number;
@@ -331,11 +331,15 @@ type Row = {
   minText: string;
   heapText: string;
   gcText: string;
+  // Combined per-task noise floor used to classify deltas. Empty for new/gone
+  // rows where one side is missing. Suffixed with "*" when at least one side
+  // fell back to within-run rmePercent (schemaVersion < 2 or runs == 1).
+  noiseText: string;
 };
 
 const rows: Row[] = [];
 // Track whether any row has heap/gc info so we can skip those columns entirely
-// when neither file has them (e.g. comparing against a pre-mitata JSON).
+// when neither file has them (e.g., comparing against a pre-mitata JSON).
 let anyHeap = false;
 let anyGc = false;
 
@@ -352,6 +356,7 @@ for (const name of [...names].sort()) {
       minText: "",
       heapText: "",
       gcText: "",
+      noiseText: "",
     });
     continue;
   }
@@ -365,6 +370,7 @@ for (const name of [...names].sort()) {
       minText: "",
       heapText: "",
       gcText: "",
+      noiseText: "",
     });
     continue;
   }
@@ -373,15 +379,18 @@ for (const name of [...names].sort()) {
   const minDelta = ((c.minLatencyNs - b.minLatencyNs) / b.minLatencyNs) * 100;
   // Prefer the cross-run RSD when both files have it (schemaVersion >= 2,
   // runs > 1). That measures actual between-process variance and is the
-  // honest noise floor for comparing two separate bench invocations. Within
-  // -run rmePercent describes sample spread inside a single process; using
-  // it as a noise floor across processes systematically under-estimates the
+  // honest noise floor for comparing two separate bench invocations.
+  // Within-run rmePercent describes sample spread inside a single process; using
+  // it as a noise floor across processes systematically underestimates the
   // noise, which is what produced spurious "regress" markers on unchanged
   // code. Falling back to rmePercent for v1 files keeps old comparisons
   // working at the cost of accuracy.
   const bNoise = b.crossRunRsdPercent ?? b.rmePercent ?? 0;
   const cNoise = c.crossRunRsdPercent ?? c.rmePercent ?? 0;
   const noiseFloor = bNoise + cNoise;
+  const noiseFellBack =
+    b.crossRunRsdPercent === undefined || c.crossRunRsdPercent === undefined;
+  const noiseText = `${noiseFloor.toFixed(2)}%${noiseFellBack ? "*" : ""}`;
   const meanV = classify(meanDelta, noiseFloor, args.threshold);
   const minV = classify(minDelta, noiseFloor, args.threshold);
 
@@ -463,6 +472,7 @@ for (const name of [...names].sort()) {
     minText,
     heapText,
     gcText,
+    noiseText,
   });
 }
 
@@ -476,6 +486,7 @@ function padVisible(s: string, n: number): string {
 
 if (!args.quiet) {
   const nameW = Math.max(4, ...rows.map((r) => r.name.length));
+  const noiseW = 8;
   const cols = [
     `${pad("task", nameW)}`,
     pad("baseline", 12),
@@ -496,6 +507,8 @@ if (!args.quiet) {
     cols.push(pad("gc Δ", 10));
     seps.push("-".repeat(10));
   }
+  cols.push(pad("noise", noiseW));
+  seps.push("-".repeat(noiseW));
   cols.push("mean Δ");
   seps.push("-".repeat(28));
   console.log(cols.join("  "));
@@ -507,6 +520,7 @@ if (!args.quiet) {
     const cells = [pad(r.name, nameW), pad(b, 12), pad(c, 12), minCell];
     if (anyHeap) cells.push(padVisible(r.heapText || "—", 10));
     if (anyGc) cells.push(padVisible(r.gcText || "—", 10));
+    cells.push(padVisible(r.noiseText || "—", noiseW));
     cells.push(r.meanText);
     console.log(cells.join("  "));
   }

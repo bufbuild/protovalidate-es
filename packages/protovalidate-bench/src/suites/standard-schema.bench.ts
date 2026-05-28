@@ -20,9 +20,8 @@ import { registerSpec } from "./registry.js";
 // directly with the matching Scalar/ComplexSchema validate benches to surface
 // the cost of the adapter's path→Issue translation and unknown→typed narrowing.
 //
-// gc: "once" — same reasoning as validate.bench.ts: the adapter is a thin
-// wrapper around validate(), so the GC strategy should match.
-
+// Uses gc: "once" to match the corresponding validate-time benches; see the
+// note in validate.bench.ts for why gc: "inner" was rejected here.
 const adapterTargets = ["Scalar", "ComplexSchema"] as const;
 
 export function register(): void {

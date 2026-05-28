@@ -179,7 +179,10 @@ allocation per iteration**. A task fails if any of these deltas exceeds
 | `--dir <path>`      | `.tmp/bench` | Directory the `latest` / `previous` shortcuts look in.       |
 | `--quiet`, `-q`     | _(off)_      | Print summary line only.                                     |
 
-The script exits **1** if any task regresses past `--threshold`, otherwise
+Pass a larger `--threshold` if you're working on noisier hardware or want to allow
+small regressions through.
+
+The script exits **2** for bad parameter values (invalid threshold, directory, or files), **1** if any task regresses past `--threshold`, otherwise
 **0** — drop it into a pre-commit hook or CI step to gate PRs on performance.
 
 ### Typical workflow
