@@ -459,11 +459,13 @@ export class Planner {
           listField,
           regexMatch: this.regexMatch,
         });
-    const evalStandard = new EvalStandardRulesCel(
-      this.celMan,
-      rules,
-      forMapKey,
-    );
+    // Standard CEL plans: enroll every set field whose rule isn't claimed by
+    // the native dispatcher. When native handles every set rule (e.g., a pure
+    // numeric/bytes message after the phase-3 port) the CEL evaluator stays
+    // empty — leave it out of the tree entirely so its per-iteration setEnv()
+    // calls don't run. The handledFields set from tryBuildNative is what
+    // tells us which plans the native path took.
+    let evalStandard: EvalStandardRulesCel | undefined;
     for (const plan of prepared.standard) {
       if (!isFieldSet(rules, plan.field)) {
         continue;
@@ -471,16 +473,19 @@ export class Planner {
       if (native?.handledFields.has(plan.field)) {
         continue;
       }
+      evalStandard ??= new EvalStandardRulesCel(this.celMan, rules, forMapKey);
       evalStandard.add(
         plan.compiled,
         rulePath.clone().field(plan.field).toPath(),
       );
     }
-    const evalExtended = new EvalExtendedRulesCel(
-      this.celMan,
-      rules,
-      forMapKey,
-    );
+    // Extended CEL plans: only allocate the wrapper when an $unknown
+    // extension actually contributes a rule. Native handlers bail on rules
+    // with $unknown fields, so this evaluator is mutually exclusive with
+    // the native path — but constructing it eagerly costs ~13-34% per
+    // validate across the suite because EvalExtendedRulesCel.eval() still
+    // runs two setEnv calls per field even when empty.
+    let evalExtended: EvalExtendedRulesCel | undefined;
     if (rules.$unknown) {
       for (const uf of rules.$unknown) {
         const plans = prepared.extensions.get(uf.no);
@@ -490,6 +495,11 @@ export class Planner {
           );
         }
         for (const plan of plans) {
+          evalExtended ??= new EvalExtendedRulesCel(
+            this.celMan,
+            rules,
+            forMapKey,
+          );
           evalExtended.add(
             plan.compiled,
             rulePath.clone().extension(plan.ext).toPath(),
@@ -499,10 +509,9 @@ export class Planner {
         }
       }
     }
-    const combined = new EvalMany<ReflectMessageGet>(
-      evalStandard,
-      evalExtended,
-    );
+    const combined = new EvalMany<ReflectMessageGet>();
+    if (evalStandard !== undefined) combined.add(evalStandard);
+    if (evalExtended !== undefined) combined.add(evalExtended);
     if (native !== undefined) {
       combined.add(native.eval);
     }
