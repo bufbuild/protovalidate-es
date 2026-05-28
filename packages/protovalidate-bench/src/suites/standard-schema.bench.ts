@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { bench } from "mitata";
 import { createStandardSchema } from "@bufbuild/protovalidate";
 import { caseByName } from "./cases.js";
+import { registerSpec } from "./registry.js";
 
 // Standard Schema adapter overhead — TS-only surface, no Go analogue. Compares
 // directly with the matching Scalar/ComplexSchema validate benches to surface
 // the cost of the adapter's path→Issue translation and unknown→typed narrowing.
+//
+// gc: "once" — same reasoning as validate.bench.ts: the adapter is a thin
+// wrapper around validate(), so the GC strategy should match.
 
 const adapterTargets = ["Scalar", "ComplexSchema"] as const;
 
@@ -27,8 +30,12 @@ export function register(): void {
     const c = caseByName(name);
     const adapter = createStandardSchema(c.schema);
     adapter["~standard"].validate(c.fixture); // warm
-    bench(`StandardSchema/${c.name}`, () => {
-      adapter["~standard"].validate(c.fixture);
-    }).gc("inner");
+    registerSpec(
+      `StandardSchema/${c.name}`,
+      () => {
+        adapter["~standard"].validate(c.fixture);
+      },
+      "once",
+    );
   }
 }

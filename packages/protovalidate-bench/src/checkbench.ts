@@ -48,6 +48,8 @@ type FileInfo = {
     platform: string;
     timestamp: string;
     path: string;
+    runs: number;
+    schemaVersion: number;
   };
   byName: Map<string, Task>;
 };
@@ -60,7 +62,13 @@ type Task = {
   p99LatencyNs: number;
   throughputOpsPerSec: number;
   rmePercent: number;
+  // Present only for files written with schemaVersion >= 2 from a multi-run
+  // invocation. When present this is the relative stddev across per-run means
+  // — i.e. the actual run-to-run noise — and should be used as the noise
+  // floor in preference to rmePercent (which is within-run sample spread).
+  crossRunRsdPercent?: number;
   samples: number;
+  runs?: number;
   gcTotalNs?: number;
   heapAvgBytes?: number;
 };
@@ -77,6 +85,12 @@ function load(path: string): FileInfo {
       platform: data.platform,
       timestamp: data.timestamp,
       path,
+      // Older files (schemaVersion absent or 1) don't have a runs field at
+      // the top level, but they also lack crossRunRsdPercent on tasks, so
+      // checkbench falls back to rmePercent for them.
+      runs: typeof data.runs === "number" ? data.runs : 1,
+      schemaVersion:
+        typeof data.schemaVersion === "number" ? data.schemaVersion : 1,
     },
     byName,
   };
@@ -231,11 +245,11 @@ const current = load(currentPath);
 
 console.log(`baseline: ${baseline.meta.path}`);
 console.log(
-  `          ${baseline.meta.timestamp}  node ${baseline.meta.node}  ${baseline.meta.platform}`,
+  `          ${baseline.meta.timestamp}  node ${baseline.meta.node}  ${baseline.meta.platform}  runs=${baseline.meta.runs}`,
 );
 console.log(`current:  ${current.meta.path}`);
 console.log(
-  `          ${current.meta.timestamp}  node ${current.meta.node}  ${current.meta.platform}`,
+  `          ${current.meta.timestamp}  node ${current.meta.node}  ${current.meta.platform}  runs=${current.meta.runs}`,
 );
 console.log("");
 
@@ -251,6 +265,22 @@ if (baseline.meta.node !== current.meta.node) {
   console.log(
     color(
       `! node version differs (${baseline.meta.node} vs ${current.meta.node})`,
+      "33",
+    ),
+  );
+}
+if (baseline.meta.runs !== current.meta.runs) {
+  console.log(
+    color(
+      `! runs count differs (${baseline.meta.runs} vs ${current.meta.runs}) — noise floor uses the looser of the two`,
+      "33",
+    ),
+  );
+}
+if (baseline.meta.schemaVersion < 2 || current.meta.schemaVersion < 2) {
+  console.log(
+    color(
+      `! one or both files use schemaVersion 1 — falling back to within-run rmePercent as the noise floor (overstates real signal)`,
       "33",
     ),
   );
@@ -274,7 +304,12 @@ function classify(
 }
 
 function fmtDelta(deltaPct: number, verdict: SignalVerdict): string {
-  const base = `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`;
+  let base: string;
+  if (!Number.isFinite(deltaPct)) {
+    base = deltaPct > 0 ? "+∞%" : "-∞%";
+  } else {
+    base = `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`;
+  }
   switch (verdict) {
     case "regress":
       return color(base, "31");
@@ -336,8 +371,17 @@ for (const name of [...names].sort()) {
   const meanDelta =
     ((c.meanLatencyNs - b.meanLatencyNs) / b.meanLatencyNs) * 100;
   const minDelta = ((c.minLatencyNs - b.minLatencyNs) / b.minLatencyNs) * 100;
-  // Combined relative stddev; deltas inside this are treated as noise.
-  const noiseFloor = (b.rmePercent ?? 0) + (c.rmePercent ?? 0);
+  // Prefer the cross-run RSD when both files have it (schemaVersion >= 2,
+  // runs > 1). That measures actual between-process variance and is the
+  // honest noise floor for comparing two separate bench invocations. Within
+  // -run rmePercent describes sample spread inside a single process; using
+  // it as a noise floor across processes systematically under-estimates the
+  // noise, which is what produced spurious "regress" markers on unchanged
+  // code. Falling back to rmePercent for v1 files keeps old comparisons
+  // working at the cost of accuracy.
+  const bNoise = b.crossRunRsdPercent ?? b.rmePercent ?? 0;
+  const cNoise = c.crossRunRsdPercent ?? c.rmePercent ?? 0;
+  const noiseFloor = bNoise + cNoise;
   const meanV = classify(meanDelta, noiseFloor, args.threshold);
   const minV = classify(minDelta, noiseFloor, args.threshold);
 
