@@ -12,23 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Bench } from "tinybench";
 import { createStandardSchema } from "@bufbuild/protovalidate";
 import { caseByName } from "./cases.js";
+import { registerSpec } from "./registry.js";
 
 // Standard Schema adapter overhead — TS-only surface, no Go analogue. Compares
 // directly with the matching Scalar/ComplexSchema validate benches to surface
 // the cost of the adapter's path→Issue translation and unknown→typed narrowing.
-
+//
+// Uses gc: "once" to match the corresponding validate-time benches; see the
+// note in validate.bench.ts for why gc: "inner" was rejected here.
 const adapterTargets = ["Scalar", "ComplexSchema"] as const;
 
-export function register(bench: Bench): void {
+export function register(): void {
   for (const name of adapterTargets) {
     const c = caseByName(name);
     const adapter = createStandardSchema(c.schema);
     adapter["~standard"].validate(c.fixture); // warm
-    bench.add(`StandardSchema/${c.name}`, () => {
-      adapter["~standard"].validate(c.fixture);
-    });
+    registerSpec(
+      `StandardSchema/${c.name}`,
+      () => {
+        adapter["~standard"].validate(c.fixture);
+      },
+      "once",
+    );
   }
 }
