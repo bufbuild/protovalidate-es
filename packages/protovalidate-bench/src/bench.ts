@@ -28,11 +28,25 @@ import { register as registerValidate } from "./suites/validate.bench.js";
 const SCHEMA_VERSION = 2;
 const DEFAULT_RUNS = 5;
 
+// What's being measured. "cpu" skips the heap probe entirely (no
+// getHeapStatistics() per sample) — about 10-20% faster per run. "memory"
+// and "both" are identical on the bench side since mitata always measures
+// time; the distinction only matters in checkbench, where it controls what
+// gates a regression.
+export type Metric = "cpu" | "memory" | "both";
+
 interface CliOptions {
   filter: string | undefined;
   outDir: string;
   runs: number;
   worker: boolean;
+  metric: Metric;
+}
+
+function parseMetric(raw: string | undefined): Metric {
+  if (raw === "cpu" || raw === "memory" || raw === "both") return raw;
+  console.error(`--metric must be cpu|memory|both: ${raw}`);
+  process.exit(2);
 }
 
 function parseArgs(argv: readonly string[]): CliOptions {
@@ -40,6 +54,7 @@ function parseArgs(argv: readonly string[]): CliOptions {
   let outDir = ".tmp/bench";
   let runs = DEFAULT_RUNS;
   let worker = false;
+  let metric: Metric = "both";
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     switch (a) {
@@ -59,6 +74,9 @@ function parseArgs(argv: readonly string[]): CliOptions {
         runs = n;
         break;
       }
+      case "--metric":
+        metric = parseMetric(argv[++i]);
+        break;
       case "--worker":
         // Internal: marks this process as a child worker. The coordinator
         // spawns one Node process per run with this flag and reads the
@@ -76,7 +94,7 @@ function parseArgs(argv: readonly string[]): CliOptions {
         }
     }
   }
-  return { filter, outDir, runs, worker };
+  return { filter, outDir, runs, worker, metric };
 }
 
 function printUsage(): void {
@@ -89,6 +107,10 @@ function printUsage(): void {
       "  --out <dir>           Output directory for JSON results (default: .tmp/bench)",
       `  --runs <N>            Run N independent Node processes and aggregate (default: ${DEFAULT_RUNS}).`,
       "                        N=1 runs inline with no aggregation.",
+      "  --metric <m>          Which signals to measure: cpu|memory|both (default both).",
+      "                        cpu skips the heap probe and runs ~10-20% faster.",
+      "                        memory and both are identical on the bench side; they",
+      "                        differ only in checkbench's regression gating.",
       "",
     ].join("\n"),
   );
@@ -130,6 +152,9 @@ interface WorkerPayload {
   node: string;
   platform: string;
   timestamp: string;
+  // Recorded so checkbench knows whether heap stats are absent because they
+  // weren't measured (--metric cpu) vs because mitata couldn't observe them.
+  metric: Metric;
   tasks: WorkerTask[];
 }
 
@@ -158,6 +183,7 @@ interface AggregatedPayload {
   platform: string;
   timestamp: string;
   runs: number;
+  metric: Metric;
   tasks: AggregatedTask[];
 }
 
@@ -232,6 +258,7 @@ async function makeHeapFn(): Promise<(() => number) | undefined> {
 
 async function collectWorkerTasks(
   filterRe: RegExp | undefined,
+  metric: Metric,
 ): Promise<WorkerTask[]> {
   registerValidate();
   registerCompile();
@@ -243,7 +270,9 @@ async function collectWorkerTasks(
     process.exit(2);
   }
 
-  const heapFn = await makeHeapFn();
+  // metric=cpu skips the heap probe — no getHeapStatistics() per sample.
+  // memory and both keep it.
+  const heapFn = metric === "cpu" ? undefined : await makeHeapFn();
   const tasks: WorkerTask[] = [];
   for (const spec of specs) {
     process.stderr.write(`  ${spec.name} ...`);
@@ -301,13 +330,17 @@ async function collectWorkerTasks(
   return tasks;
 }
 
-async function runWorker(filterRe: RegExp | undefined): Promise<void> {
-  const tasks = await collectWorkerTasks(filterRe);
+async function runWorker(
+  filterRe: RegExp | undefined,
+  metric: Metric,
+): Promise<void> {
+  const tasks = await collectWorkerTasks(filterRe, metric);
   const payload: WorkerPayload = {
     schemaVersion: SCHEMA_VERSION,
     node: process.version,
     platform: `${process.platform}/${process.arch}`,
     timestamp: new Date().toISOString(),
+    metric,
     tasks,
   };
   process.stdout.write(`${JSON.stringify(payload)}\n`);
@@ -315,11 +348,20 @@ async function runWorker(filterRe: RegExp | undefined): Promise<void> {
 
 // ---- Coordinator (multi-process aggregation) ----
 
-function spawnWorker(filter: string | undefined): Promise<WorkerPayload> {
+function spawnWorker(
+  filter: string | undefined,
+  metric: Metric,
+): Promise<WorkerPayload> {
   // Re-invoke the same script in a fresh Node process. process.execArgv
   // carries the original flags (--expose-gc, any tsx loader hooks), so the
   // child runs in the same environment as the parent.
-  const args = [...process.execArgv, process.argv[1], "--worker"];
+  const args = [
+    ...process.execArgv,
+    process.argv[1],
+    "--worker",
+    "--metric",
+    metric,
+  ];
   if (filter !== undefined) args.push("--filter", filter);
 
   return new Promise((resolve, reject) => {
@@ -427,6 +469,7 @@ function aggregate(workers: WorkerPayload[]): AggregatedPayload {
     platform: first.platform,
     timestamp: new Date().toISOString(),
     runs: workers.length,
+    metric: first.metric,
     tasks: aggTasks,
   };
 }
@@ -459,17 +502,18 @@ async function runCoordinator(opts: CliOptions): Promise<void> {
 
   console.log(`# protovalidate-es bench`);
   console.log(`# node ${process.version} ${process.platform}/${process.arch}`);
-  console.log(`# runs ${opts.runs}`);
+  console.log(`# runs ${opts.runs}  metric ${opts.metric}`);
 
   let payload: AggregatedPayload;
   if (opts.runs === 1) {
-    const tasks = await collectWorkerTasks(filterRe);
+    const tasks = await collectWorkerTasks(filterRe, opts.metric);
     payload = aggregate([
       {
         schemaVersion: SCHEMA_VERSION,
         node: process.version,
         platform: `${process.platform}/${process.arch}`,
         timestamp: new Date().toISOString(),
+        metric: opts.metric,
         tasks,
       },
     ]);
@@ -477,7 +521,7 @@ async function runCoordinator(opts: CliOptions): Promise<void> {
     const workers: WorkerPayload[] = [];
     for (let i = 0; i < opts.runs; i++) {
       console.log(`run ${i + 1}/${opts.runs} ...`);
-      workers.push(await spawnWorker(opts.filter));
+      workers.push(await spawnWorker(opts.filter, opts.metric));
     }
     payload = aggregate(workers);
   }
@@ -503,7 +547,7 @@ if (opts.worker) {
     opts.filter !== undefined
       ? new RegExp(escapeRegExp(opts.filter))
       : undefined;
-  await runWorker(filterRe);
+  await runWorker(filterRe, opts.metric);
 } else {
   await runCoordinator(opts);
 }

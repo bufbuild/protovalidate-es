@@ -21,6 +21,13 @@ import { parseArgs } from "node:util";
 const BENCH_DIR = ".tmp/bench";
 const DEFAULT_THRESHOLD = 5;
 
+// Which signal categories gate a regression. "cpu" only gates on mean
+// latency. "memory" only gates on heap allocation. "both" gates on either.
+// Min latency is shown but never gates (too sensitive to JIT warmth/
+// scheduling jitter; mean catches anything genuinely regressed).
+type Metric = "cpu" | "memory" | "both";
+const DEFAULT_METRIC: Metric = "both";
+
 function usage() {
   process.stdout.write(
     [
@@ -33,6 +40,9 @@ function usage() {
       "Options:",
       "  --threshold <pct>   regression threshold percent (default: 5)",
       "  --dir <path>        bench results directory (default: .tmp/bench)",
+      "  --metric <m>        which signals gate a regression: cpu|memory|both (default both)",
+      "                      cpu: mean latency only; memory: heap only; both: mean+heap",
+      "                      (min latency is always shown but never gates)",
       "  --quiet, -q         only print summary line",
       "  --help, -h          show this help and exit",
       "",
@@ -50,6 +60,9 @@ type FileInfo = {
     path: string;
     runs: number;
     schemaVersion: number;
+    // What the bench was told to measure. Default "both" for files written
+    // before --metric existed.
+    metric: Metric;
   };
   byName: Map<string, Task>;
 };
@@ -91,6 +104,10 @@ function load(path: string): FileInfo {
       runs: typeof data.runs === "number" ? data.runs : 1,
       schemaVersion:
         typeof data.schemaVersion === "number" ? data.schemaVersion : 1,
+      metric:
+        data.metric === "cpu" || data.metric === "memory"
+          ? data.metric
+          : "both",
     },
     byName,
   };
@@ -159,6 +176,7 @@ function getSecondNewestFile(dir: string): string {
 type ParsedValues = {
   threshold?: string;
   dir?: string;
+  metric?: string;
   quiet?: boolean;
   help?: boolean;
 };
@@ -190,7 +208,16 @@ function buildArgs(values: ParsedValues) {
     }
     threshold = n;
   }
-  return { threshold, dir, quiet: values.quiet ?? false };
+  let metric: Metric = DEFAULT_METRIC;
+  if (values.metric !== undefined) {
+    const raw = values.metric.trim();
+    if (raw !== "cpu" && raw !== "memory" && raw !== "both") {
+      console.error(`--metric must be cpu|memory|both: ${values.metric}`);
+      process.exit(2);
+    }
+    metric = raw;
+  }
+  return { threshold, dir, metric, quiet: values.quiet ?? false };
 }
 
 const options = {
@@ -198,6 +225,9 @@ const options = {
     type: "string",
   },
   dir: {
+    type: "string",
+  },
+  metric: {
     type: "string",
   },
   quiet: {
@@ -245,12 +275,15 @@ const current = load(currentPath);
 
 console.log(`baseline: ${baseline.meta.path}`);
 console.log(
-  `          ${baseline.meta.timestamp}  node ${baseline.meta.node}  ${baseline.meta.platform}  runs=${baseline.meta.runs}`,
+  `          ${baseline.meta.timestamp}  node ${baseline.meta.node}  ${baseline.meta.platform}  runs=${baseline.meta.runs}  metric=${baseline.meta.metric}`,
 );
 console.log(`current:  ${current.meta.path}`);
 console.log(
-  `          ${current.meta.timestamp}  node ${current.meta.node}  ${current.meta.platform}  runs=${current.meta.runs}`,
+  `          ${current.meta.timestamp}  node ${current.meta.node}  ${current.meta.platform}  runs=${current.meta.runs}  metric=${current.meta.metric}`,
 );
+if (args.metric !== DEFAULT_METRIC) {
+  console.log(`gating:   --metric ${args.metric}`);
+}
 console.log("");
 
 if (baseline.meta.platform !== current.meta.platform) {
@@ -281,6 +314,25 @@ if (baseline.meta.schemaVersion < 2 || current.meta.schemaVersion < 2) {
   console.log(
     color(
       `! one or both files use schemaVersion 1 — falling back to within-run rmePercent as the noise floor (overstates real signal)`,
+      "33",
+    ),
+  );
+}
+if (baseline.meta.metric !== current.meta.metric) {
+  console.log(
+    color(
+      `! recorded metric differs (${baseline.meta.metric} vs ${current.meta.metric}) — one side may be missing heap data`,
+      "33",
+    ),
+  );
+}
+if (
+  args.metric === "memory" &&
+  (baseline.meta.metric === "cpu" || current.meta.metric === "cpu")
+) {
+  console.log(
+    color(
+      `! --metric memory requested but one file was produced with --metric cpu (no heap data); nothing to gate on`,
       "33",
     ),
   );
@@ -429,14 +481,23 @@ for (const name of [...names].sort()) {
     }
   }
 
+  // --metric controls which signals can trigger REGRESS/faster markers.
+  // Non-gated signals still appear in the table (with their colored delta);
+  // they just can't fail the run. cpu → mean only, memory → heap only,
+  // both → mean+heap.
+  //
+  // The min column is informational. Even though it's a real signal — the
+  // fastest sample observed across all runs — it's too sensitive to JIT
+  // warmth and scheduling jitter to be a reliable gate on its own, and
+  // anything genuinely worth flagging will also show up in mean.
+  const gateCpu = args.metric === "cpu" || args.metric === "both";
+  const gateMem = args.metric === "memory" || args.metric === "both";
   const tags: string[] = [];
-  if (meanV === "regress") tags.push("mean");
-  if (minV === "regress") tags.push("min");
-  if (heapV === "regress") tags.push("heap");
+  if (gateCpu && meanV === "regress") tags.push("mean");
+  if (gateMem && heapV === "regress") tags.push("heap");
   const fasterTags: string[] = [];
-  if (meanV === "improve") fasterTags.push("mean");
-  if (minV === "improve") fasterTags.push("min");
-  if (heapV === "improve") fasterTags.push("heap");
+  if (gateCpu && meanV === "improve") fasterTags.push("mean");
+  if (gateMem && heapV === "improve") fasterTags.push("heap");
 
   let kind: Row["kind"] = "ok";
   let meanText = fmtDelta(meanDelta, meanV);
