@@ -37,11 +37,13 @@ The runner prints a table of results and writes a JSON file to `.tmp/bench/`
 | `--filter <substr>` | _(none)_     | Only run tasks whose name contains `<substr>`                                  |
 | `--out <dir>`       | `.tmp/bench` | Output directory for JSON results                                              |
 | `--runs <N>`        | `5`          | Number of fresh Node processes to spawn and aggregate. `--runs 1` runs inline. |
+| `--metric <m>`      | `both`       | What to measure: `cpu` skips the heap probe (~10-20% faster per run); `memory` and `both` collect heap stats. |
 
 A 5-run pass over the full suite takes a few minutes. For
 quick iteration, drop to `--runs 1` and accept the wider noise floor, or
 combine `--runs 1 --filter <substr>` to only re-measure the tasks you're
-changing.
+changing. `--metric cpu` is the right pick when you're iterating on a CPU
+optimization and don't care about allocation deltas.
 
 Example:
 
@@ -153,21 +155,22 @@ noise floor of the two files: the sum of each side's `crossRunRsdPercent`
 (when present) or `rmePercent` (fallback for schemaVersion-1 files, which
 overstates real signal).
 
-The tool gates on three signals: **mean latency, min latency, and heap
-allocation per iteration**. A task fails if any of these deltas exceeds
-`--threshold` and falls outside the noise floor.
+The tool gates on two signals: **mean latency** and **heap allocation per
+iteration**. A task fails if either delta exceeds `--threshold` and falls
+outside the noise floor.
 
 - **Mean** catches the typical-case slowdown.
-- **Min** is the raw fastest sample across all runs — sensitive to JIT
-  warmth and immune to GC pauses. With multi-run aggregation the min is
-  taken across every process's samples, so it's also stable against single-process 
-  JIT variance.
 - **Heap Δ** is bytes allocated per iteration (via `node:v8`
   `getHeapStatistics()`). Catches allocation regressions even when wall-clock time
   is flat — those still hurt in production because they amplify GC pressure.
   The heap signal is mostly deterministic for short benches; for long-running
   alloc-heavy benches (`Compile/*`) it can drift with GC scheduling, which
   the noise floor absorbs.
+- **Min Δ** is the raw fastest sample across all runs — sensitive to JIT
+  warmth and immune to GC pauses. **Informational only** — shown in the
+  table to help diagnose unexpected mean shifts, but never gates a
+  regression because it's too sensitive to per-process JIT variance to be
+  reliable on its own; anything genuinely regressed shows up in mean.
 - **GC Δ** is informational only (no gating) and only appears when both runs
   were produced with `--expose-gc` so mitata can observe gc time.
 
@@ -177,10 +180,14 @@ allocation per iteration**. A task fails if any of these deltas exceeds
 |---------------------|--------------|--------------------------------------------------------------|
 | `--threshold <pct>` | `5`          | Regression bar. Slowdowns above this AND outside noise fail. |
 | `--dir <path>`      | `.tmp/bench` | Directory the `latest` / `previous` shortcuts look in.       |
+| `--metric <m>`      | `both`       | Which signals gate a regression: `cpu` (mean latency only), `memory` (heap only), or `both` (mean+heap). Non-gated signals still appear in the table — they just can't fail the run. |
 | `--quiet`, `-q`     | _(off)_      | Print summary line only.                                     |
 
 Pass a larger `--threshold` if you're working on noisier hardware or want to allow
-small regressions through.
+small regressions through. The bench-side `--metric` (what gets measured) and
+the checkbench-side `--metric` (what gates) are independent — a file produced
+with `--metric cpu` has no heap data, so `checkbench --metric memory` against
+it has nothing to gate on and warns.
 
 The script exits **2** for bad parameter values (invalid threshold, directory, or files), **1** if any task regresses past `--threshold`, otherwise
 **0** — drop it into a pre-commit hook or CI step to gate PRs on performance.

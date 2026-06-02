@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { createValidator } from "@bufbuild/protovalidate";
-import { cases } from "./cases.js";
+import { cases } from "../cases.js";
 import { registerSpec, type SpecOptions } from "./registry.js";
 
 // Validate-time benches: a single validator is warmed once per case and then

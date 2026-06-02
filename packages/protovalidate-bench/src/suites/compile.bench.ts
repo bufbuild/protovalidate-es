@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { createValidator } from "@bufbuild/protovalidate";
-import { caseByName } from "./cases.js";
+import { caseByName } from "../cases.js";
 import { registerSpec } from "./registry.js";
 
 // Compile-time benchmarks: build a fresh validator on each iteration and run
