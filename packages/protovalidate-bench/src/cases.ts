@@ -21,14 +21,14 @@ import {
   BenchRepeatedScalarSchema,
   BenchRepeatedScalarUniqueSchema,
   BenchScalarSchema,
-} from "../gen/bench/v1/bench_pb.js";
+} from "./gen/bench/v1/bench_pb.js";
 import {
   BenchGTSchema,
   MultiRuleSchema,
   StringMatchingSchema,
   TestByteMatchingSchema,
   WrapperTestingSchema,
-} from "../gen/bench/v1/native_pb.js";
+} from "./gen/bench/v1/native_pb.js";
 import {
   benchComplexSchema,
   benchGT,
@@ -43,7 +43,7 @@ import {
   stringMatching,
   testByteMatching,
   wrapperTesting,
-} from "../fixtures.js";
+} from "./fixtures.js";
 
 /**
  * One bench case: a schema, a fixture, and the name to record under.

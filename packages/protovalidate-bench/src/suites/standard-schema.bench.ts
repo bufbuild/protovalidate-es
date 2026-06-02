@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import { createStandardSchema } from "@bufbuild/protovalidate";
-import { caseByName } from "./cases.js";
+import { caseByName } from "../cases.js";
 import { registerSpec } from "./registry.js";
 
 // Standard Schema adapter overhead — TS-only surface, no Go analogue. Compares
