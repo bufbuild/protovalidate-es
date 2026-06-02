@@ -168,55 +168,6 @@ function buildArgs(values: ParsedValues) {
   return { dir };
 }
 
-const options = {
-  dir: {
-    type: "string",
-  },
-  help: {
-    type: "boolean",
-    short: "h",
-  },
-} as const;
-const { values, positionals } = parseArgs({
-  options,
-  allowPositionals: true,
-});
-if (values.help) {
-  usage();
-  process.exit(0);
-}
-if (positionals.length > 2) {
-  usage();
-  process.exit(2);
-}
-
-const args = buildArgs(values);
-
-const baselinePath =
-  positionals.length > 0
-    ? getFile(args.dir, positionals[0])
-    : getSecondNewestFile(args.dir);
-const currentPath =
-  positionals.length === 2
-    ? getFile(args.dir, positionals[1])
-    : getNewestFile(args.dir);
-
-if (baselinePath === currentPath) {
-  console.error(
-    `baseline and current resolve to the same file: ${baselinePath}`,
-  );
-  process.exit(2);
-}
-
-const baseline = load(baselinePath);
-const current = load(currentPath);
-
-console.log(`baseline: ${baseline.path}`);
-console.log(`          ${baseline.timestamp}  node ${baseline.node}  ${baseline.platform}`);
-console.log(`current:  ${current.path}`);
-console.log(`          ${current.timestamp}  node ${current.node}  ${current.platform}`);
-console.log("");
-
 // Render one row per task name present in either file. Tasks that errored
 // (no result.latency) are reported as "—" cells so the row layout stays
 // consistent.
@@ -247,7 +198,8 @@ function deltaCells(
   const baseNs = msToNs(baseMs);
   const curNs = msToNs(curMs);
   const deltaNs = curNs - baseNs;
-  const deltaPct = baseNs === 0 ? Number.POSITIVE_INFINITY : (deltaNs / baseNs) * 100;
+  const deltaPct =
+    baseNs === 0 ? Number.POSITIVE_INFINITY : (deltaNs / baseNs) * 100;
   return {
     base: fmtNs(baseNs),
     cur: fmtNs(curNs),
@@ -256,68 +208,145 @@ function deltaCells(
   };
 }
 
-const rows: Row[] = [];
-const names = new Set([...baseline.byName.keys(), ...current.byName.keys()]);
-for (const name of [...names].sort()) {
-  const b = baseline.byName.get(name);
-  const c = current.byName.get(name);
-  const meanCells = deltaCells(b?.result?.latency?.mean, c?.result?.latency?.mean);
-  const p50Cells = deltaCells(b?.result?.latency?.p50, c?.result?.latency?.p50);
-  rows.push({
-    name,
-    baseMean: meanCells.base,
-    curMean: meanCells.cur,
-    meanDeltaNs: meanCells.deltaNs,
-    meanDeltaPct: meanCells.deltaPct,
-    baseP50: p50Cells.base,
-    curP50: p50Cells.cur,
-    p50DeltaNs: p50Cells.deltaNs,
-    p50DeltaPct: p50Cells.deltaPct,
-  });
+function buildRows(baseline: FileInfo, current: FileInfo): Row[] {
+  const rows: Row[] = [];
+  const names = new Set([...baseline.byName.keys(), ...current.byName.keys()]);
+  for (const name of [...names].sort()) {
+    const b = baseline.byName.get(name);
+    const c = current.byName.get(name);
+    const meanCells = deltaCells(
+      b?.result?.latency?.mean,
+      c?.result?.latency?.mean,
+    );
+    const p50Cells = deltaCells(
+      b?.result?.latency?.p50,
+      c?.result?.latency?.p50,
+    );
+    rows.push({
+      name,
+      baseMean: meanCells.base,
+      curMean: meanCells.cur,
+      meanDeltaNs: meanCells.deltaNs,
+      meanDeltaPct: meanCells.deltaPct,
+      baseP50: p50Cells.base,
+      curP50: p50Cells.cur,
+      p50DeltaNs: p50Cells.deltaNs,
+      p50DeltaPct: p50Cells.deltaPct,
+    });
+  }
+  return rows;
 }
 
-const nameW = Math.max(4, ...rows.map((r) => r.name.length));
-const cellW = 12;
-const deltaW = 12;
-const pctW = 9;
-console.log(
-  [
-    pad("task", nameW),
-    pad("base mean", cellW),
-    pad("cur mean", cellW),
-    pad("mean Δ", deltaW),
-    pad("mean %", pctW),
-    pad("base p50", cellW),
-    pad("cur p50", cellW),
-    pad("p50 Δ", deltaW),
-    pad("p50 %", pctW),
-  ].join("  "),
-);
-console.log(
-  [
-    "-".repeat(nameW),
-    "-".repeat(cellW),
-    "-".repeat(cellW),
-    "-".repeat(deltaW),
-    "-".repeat(pctW),
-    "-".repeat(cellW),
-    "-".repeat(cellW),
-    "-".repeat(deltaW),
-    "-".repeat(pctW),
-  ].join("  "),
-);
-for (const r of rows) {
+function writeHeader(baseline: FileInfo, current: FileInfo): void {
+  console.log(`baseline: ${baseline.path}`);
+  console.log(
+    `          ${baseline.timestamp}  node ${baseline.node}  ${baseline.platform}`,
+  );
+  console.log(`current:  ${current.path}`);
+  console.log(
+    `          ${current.timestamp}  node ${current.node}  ${current.platform}`,
+  );
+  console.log("");
+}
+
+function writeTable(rows: Row[]): void {
+  const nameW = Math.max(4, ...rows.map((r) => r.name.length));
+  const cellW = 12;
+  const deltaW = 12;
+  const pctW = 9;
   console.log(
     [
-      pad(r.name, nameW),
-      pad(r.baseMean, cellW),
-      pad(r.curMean, cellW),
-      pad(r.meanDeltaNs, deltaW),
-      pad(r.meanDeltaPct, pctW),
-      pad(r.baseP50, cellW),
-      pad(r.curP50, cellW),
-      pad(r.p50DeltaNs, deltaW),
-      pad(r.p50DeltaPct, pctW),
+      pad("task", nameW),
+      pad("base mean", cellW),
+      pad("cur mean", cellW),
+      pad("mean Δ", deltaW),
+      pad("mean %", pctW),
+      pad("base p50", cellW),
+      pad("cur p50", cellW),
+      pad("p50 Δ", deltaW),
+      pad("p50 %", pctW),
     ].join("  "),
   );
+  console.log(
+    [
+      "-".repeat(nameW),
+      "-".repeat(cellW),
+      "-".repeat(cellW),
+      "-".repeat(deltaW),
+      "-".repeat(pctW),
+      "-".repeat(cellW),
+      "-".repeat(cellW),
+      "-".repeat(deltaW),
+      "-".repeat(pctW),
+    ].join("  "),
+  );
+  for (const r of rows) {
+    console.log(
+      [
+        pad(r.name, nameW),
+        pad(r.baseMean, cellW),
+        pad(r.curMean, cellW),
+        pad(r.meanDeltaNs, deltaW),
+        pad(r.meanDeltaPct, pctW),
+        pad(r.baseP50, cellW),
+        pad(r.curP50, cellW),
+        pad(r.p50DeltaNs, deltaW),
+        pad(r.p50DeltaPct, pctW),
+      ].join("  "),
+    );
+  }
 }
+
+function main(): void {
+  const options = {
+    dir: {
+      type: "string",
+    },
+    help: {
+      type: "boolean",
+      short: "h",
+    },
+  } as const;
+
+  const { values, positionals } = parseArgs({
+    options,
+    allowPositionals: true,
+  });
+  if (values.help) {
+    usage();
+    process.exit(0);
+  }
+  if (positionals.length > 2) {
+    usage();
+    process.exit(2);
+  }
+
+  const args = buildArgs(values);
+
+  const baselinePath =
+    positionals.length > 0
+      ? getFile(args.dir, positionals[0])
+      : getSecondNewestFile(args.dir);
+  const currentPath =
+    positionals.length === 2
+      ? getFile(args.dir, positionals[1])
+      : getNewestFile(args.dir);
+
+  if (baselinePath === currentPath) {
+    console.error(
+      `baseline and current resolve to the same file: ${baselinePath}`,
+    );
+    process.exit(2);
+  }
+
+  const baseline = load(baselinePath);
+  const current = load(currentPath);
+
+  writeHeader(baseline, current);
+
+  const rows = buildRows(baseline, current);
+
+  writeTable(rows);
+}
+
+main();

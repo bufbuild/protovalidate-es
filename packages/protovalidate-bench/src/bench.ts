@@ -1,4 +1,4 @@
-// Copyright 2021-2026 Buf Technologies, Inc.
+// Copyright 2024-2026 Buf Technologies, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,94 +12,113 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Bench} from "tinybench";
+import { Bench } from "tinybench";
 import * as console from "node:console";
-import type {DescMessage, Message} from "@bufbuild/protobuf";
+import type { DescMessage, Message } from "@bufbuild/protobuf";
 import { createValidator } from "@bufbuild/protovalidate";
-import {cases} from "./cases.js";
-import {writeFileSync} from "node:fs";
+import { cases } from "./cases.js";
+import { writeFileSync } from "node:fs";
+import { parseArgs } from "node:util";
 
 /* eslint-disable no-console, import/no-named-as-default-member */
 
-const outPath = ".tmp/bench";
+let outPath = ".tmp/bench";
 
 async function main(args: string[]): Promise<void> {
-    function filterTests(regexp: string): Test[] {
-        const tests = setupTests();
-        const re = new RegExp(regexp);
-        return tests.filter((test) => re.test(test.name));
-    }
-    switch (args.shift()) {
-        case "list":
-            if (args.length > 1) {
-                exitUsage(1);
-                break;
-            }
-            for (const test of filterTests(args.length == 1 ? args[0] : ".*")) {
-                console.log(test.name);
-            }
-            break;
-        case "benchmark":
-            if (args.length > 1) {
-                exitUsage(1);
-                break;
-            }
-            await bench(filterTests(args.length == 1 ? args[0] : ".*"));
-            break;
-        case "run": {
-            if (args.length > 1) {
-                exitUsage(1);
-                break;
-            }
-            const tests = filterTests(args.length == 1 ? args[0] : ".*");
-            run(tests);
-            break;
-        }
-        default:
-            exitUsage(1);
-    }
+  function filterTests(regexp: string): Test[] {
+    const tests = setupTests();
+    const re = new RegExp(regexp);
+    return tests.filter((test) => re.test(test.name));
+  }
 
-    function exitUsage(exitCode = 0) {
-        const out = exitCode === 0 ? process.stdout : process.stderr;
-        out.write(
-            [
-                `USAGE: ${process.argv[1]} [list|benchmark|run] [regex] [iteration]`,
-                ``,
-                `benchmark '.*'`,
-                `Run tests with the npm package "tinybench", and print results to standard out.`,
-                ``,
-                `run '.*'`,
-                `Run each test.`,
-                ``,
-                `list '.*':`,
-                `List tests.`,
-                ``,
-            ].join("\n"),
-            () => process.exit(exitCode),
-        );
+  const options = {
+    dir: {
+      type: "string",
+    },
+    help: {
+      type: "boolean",
+      short: "h",
+    },
+  } as const;
+
+  const { values, positionals } = parseArgs({
+    options,
+    allowPositionals: true,
+  });
+  if (values.help) {
+    exitUsage(0);
+  }
+  if (values.dir) {
+    outPath = values.dir;
+  }
+  if (positionals.length == 0 || positionals.length > 2) {
+    exitUsage(2);
+  }
+
+  let filter = ".*";
+  if (positionals.length == 2) {
+    filter = positionals[1];
+  }
+  const tests = filterTests(filter);
+
+  switch (positionals[0]) {
+    case "list":
+      for (const test of tests) {
+        console.log(test.name);
+      }
+      break;
+    case "benchmark":
+      await bench(tests);
+      break;
+    case "run": {
+      run(tests);
+      break;
     }
+    default:
+      exitUsage(1);
+  }
+
+  function exitUsage(exitCode = 0): never {
+    const out = exitCode === 0 ? process.stdout : process.stderr;
+    out.write(
+      [
+        `USAGE: ${process.argv[1]} [list|benchmark|run] [regex]`,
+        ``,
+        `benchmark '.*'`,
+        `Run tests with the npm package "tinybench", and print results to standard out.`,
+        ``,
+        `run '.*'`,
+        `Run each test.`,
+        ``,
+        `list '.*':`,
+        `List tests.`,
+        ``,
+      ].join("\n"),
+    );
+    process.exit(exitCode);
+  }
 }
 
 interface Test {
-    name: string;
-    schema: DescMessage;
-    fixture: Message;
+  name: string;
+  schema: DescMessage;
+  fixture: Message;
 }
 
 function setupTests(): Test[] {
-    const tests: Test[] = [];
-    tests.push(...cases);
-    return tests;
+  const tests: Test[] = [];
+  tests.push(...cases);
+  return tests;
 }
 /**
  * Run given tests consecutively.
  */
 function run(tests: Test[]): void {
-    const validator = createValidator();
-    for (const test of tests) {
-        console.log(`Running "${test.name}"`);
-        validator.validate(test.schema, test.fixture);
-    }
+  const validator = createValidator();
+  for (const test of tests) {
+    console.log(`Running "${test.name}"`);
+    validator.validate(test.schema, test.fixture);
+  }
 }
 
 /**
@@ -107,33 +126,36 @@ function run(tests: Test[]): void {
  * standard out.
  */
 async function bench(tests: Test[]): Promise<void> {
-    const bench = new Bench({name: 'protovalidate benchmarks', time: 100})
-    const validator = createValidator();
+  const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
+  const validator = createValidator();
 
-    for (const test of tests) {
-        bench.add(test.name, ()=> {
-            validator.validate(test.schema, test.fixture);
-        });
-    }
+  for (const test of tests) {
+    bench.add(test.name, () => {
+      validator.validate(test.schema, test.fixture);
+    });
+  }
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
 
-    await bench.run()
+  await bench.run();
 
-    const payload = {
-        timestamp: timestamp,
-        node: process.version,
-        platform: `${process.platform}/${process.arch}`,
-        tasks: bench.tasks.map((t) => ({
-            name: t.name,
-            // t.result is undefined if the task errored
-            result: t.result,
-        })),
-    };
-    writeFileSync(`${outPath}/${timestamp}.json`, JSON.stringify(payload, null, 2));
+  const payload = {
+    timestamp: timestamp,
+    node: process.version,
+    platform: `${process.platform}/${process.arch}`,
+    tasks: bench.tasks.map((t) => ({
+      name: t.name,
+      // t.result is undefined if the task errored
+      result: t.result,
+    })),
+  };
+  writeFileSync(
+    `${outPath}/${timestamp}.json`,
+    JSON.stringify(payload, null, 2),
+  );
 
-    console.log(bench.name)
-    console.table(bench.table())
+  console.log(bench.name);
+  console.table(bench.table());
 }
 
 await main(process.argv.slice(2));
