@@ -51,47 +51,29 @@ async function main(args: string[]): Promise<void> {
   if (values.dir) {
     outPath = values.dir;
   }
-  if (positionals.length == 0 || positionals.length > 2) {
+  if (positionals.length > 1) {
     exitUsage(2);
   }
 
   let filter = ".*";
-  if (positionals.length == 2) {
-    filter = positionals[1];
+  if (positionals.length == 1) {
+    filter = positionals[0];
   }
   const tests = filterTests(filter);
-
-  switch (positionals[0]) {
-    case "list":
-      for (const test of tests) {
-        console.log(test.name);
-      }
-      break;
-    case "benchmark":
-      await bench(tests);
-      break;
-    case "run": {
-      run(tests);
-      break;
-    }
-    default:
-      exitUsage(1);
+  if (tests.length == 0) {
+    console.log("No tests match pattern; exiting.")
+    process.exit(0);
   }
+  await bench(tests);
 
   function exitUsage(exitCode = 0): never {
     const out = exitCode === 0 ? process.stdout : process.stderr;
     out.write(
       [
-        `USAGE: ${process.argv[1]} [list|benchmark|run] [regex]`,
+        `USAGE: ${process.argv[1]} [regex]`,
         ``,
-        `benchmark '.*'`,
         `Run tests with the npm package "tinybench", and print results to standard out.`,
-        ``,
-        `run '.*'`,
-        `Run each test.`,
-        ``,
-        `list '.*':`,
-        `List tests.`,
+          `If no regex is supplied, all benchmarks are run.`,
         ``,
       ].join("\n"),
     );
@@ -109,16 +91,6 @@ function setupTests(): Test[] {
   const tests: Test[] = [];
   tests.push(...cases);
   return tests;
-}
-/**
- * Run given tests consecutively.
- */
-function run(tests: Test[]): void {
-  const validator = createValidator();
-  for (const test of tests) {
-    console.log(`Running "${test.name}"`);
-    validator.validate(test.schema, test.fixture);
-  }
 }
 
 /**

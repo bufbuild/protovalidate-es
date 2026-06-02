@@ -58,8 +58,7 @@ export type BenchCase = {
  * Every (schema, fixture) pair used by the validate-time benches.
  *
  * To add a benchmark, add the fixture to fixtures.ts and append a row here.
- * `validate.bench.ts` iterates this list; `compile.bench.ts` and
- * `standard-schema.bench.ts` reference individual entries by name.
+ * `bench.ts` iterates this list to register tinybench tasks.
  */
 export const cases: readonly BenchCase[] = [
   { name: "Scalar", schema: BenchScalarSchema, fixture: benchScalar },
@@ -116,15 +115,3 @@ export const cases: readonly BenchCase[] = [
     fixture: multiRuleNoError,
   },
 ];
-
-/**
- * Look up a single case by name. Throws if no case matches — used by suites
- * that pick a curated subset (e.g. compile, standard-schema benches).
- */
-export function caseByName(name: string): BenchCase {
-  const c = cases.find((c) => c.name === name);
-  if (!c) {
-    throw new Error(`no bench case named "${name}"`);
-  }
-  return c;
-}

@@ -4,21 +4,12 @@ Performance benchmarks for `@bufbuild/protovalidate`. This package is private an
 mirrors the suite in [`protovalidate-go/validator_bench_test.go`](https://github.com/bufbuild/protovalidate-go/blob/main/validator_bench_test.go)
 so that runtime cost can be tracked across changes and compared cross-language.
 
-The harness is [mitata](https://github.com/evanwashere/mitata), called via
-its low-level `measure()` API so we can disable mitata's symmetric sample trim
-and observe the raw min. By default, the runner spawns **5 fresh Node
-processes** and aggregates per-task stats across them — between-process
-variance (thermal state, JIT decisions, scheduling) dominates over within-run 
-sample noise, and a single process can't see it.
-Fixtures are hand-built (no faker dependency) and seeded with a
-deterministic PRNG so every run validates the same messages.
-
 ## Running
 
 From the repo root:
 
 ```shell
-npx turbo run bench --filter=@bufbuild/protovalidate-bench
+npx turbo run bench [regex] -d dir
 ```
 
 Or from this directory:
@@ -30,82 +21,80 @@ npm run bench
 The runner prints a table of results and writes a JSON file to `.tmp/bench/`
 (gitignored) named after the current timestamp.
 
+The regular expression is optional and only runs tasks whose name contains it.
+
 ### Options
 
-| Flag                | Default      | Description                                                                    |
-|---------------------|--------------|--------------------------------------------------------------------------------|
-| `--filter <substr>` | _(none)_     | Only run tasks whose name contains `<substr>`                                  |
-| `--out <dir>`       | `.tmp/bench` | Output directory for JSON results                                              |
-| `--runs <N>`        | `5`          | Number of fresh Node processes to spawn and aggregate. `--runs 1` runs inline. |
-| `--metric <m>`      | `both`       | What to measure: `cpu` skips the heap probe (~10-20% faster per run); `memory` and `both` collect heap stats. |
-
-A 5-run pass over the full suite takes a few minutes. For
-quick iteration, drop to `--runs 1` and accept the wider noise floor, or
-combine `--runs 1 --filter <substr>` to only re-measure the tasks you're
-changing. `--metric cpu` is the right pick when you're iterating on a CPU
-optimization and don't care about allocation deltas.
-
-Example:
-
-```shell
-# Quick single-process check, validation benchmarks only
-npm run bench -- --runs 1 --filter Scalar
-
-# Full 5-run aggregate
-npm run bench
-```
+| Flag       | Default      | Description                       |
+|------------|--------------|-----------------------------------|
+| `-d <dir>` | `.tmp/bench` | Output directory for JSON results |
+| `-h`       |              | Print usage information           |
 
 ### Output schema
 
-Each invocation writes a single JSON file. The shape (schemaVersion 2):
+Each invocation writes a single JSON file named after the current timestamp,
+containing a `tasks` array of objects with the following fields:
 
 ```json
 {
-  "schemaVersion": 2,
-  "node": "v22.x.x",
+  "timestamp": "2026-06-02T17-30-42-845Z",
+  "node": "v24.15.0",
   "platform": "darwin/arm64",
-  "timestamp": "2026-05-27T...",
-  "runs": 5,
   "tasks": [
     {
       "name": "Scalar",
-      "meanLatencyNs": 4099.62,
-      "minLatencyNs": 3920.79,
-      "medianLatencyNs": 4060.41,
-      "p99LatencyNs": 5008.19,
-      "throughputOpsPerSec": 243924,
-      "rmePercent": 4.10,
-      "crossRunRsdPercent": 0.13,
-      "samples": 125,
-      "runs": 5,
-      "perRunMeanLatencyNs": [4108.5, 4099.6, 4098.2, 4101.1, 4099.8],
-      "heapAvgBytes": 5315.2,
-      "gcTotalNs": 161677084
+      "result": {
+        "state": "completed",
+        "latency": {
+          "aad": 0.000023186290713732412,
+          "critical": 1.96,
+          "df": 217917,
+          "mad": 9.99999883788405e-7,
+          "max": 0.10383299999989504,
+          "mean": 0.0004588884259220391,
+          "min": 0.00033300000018243736,
+          "moe": 0.000001330994271845705,
+          "p50": 0.00045799999998052954,
+          "p75": 0.00045899999986431794,
+          "p99": 0.0005840000001171575,
+          "p995": 0.0007499999999254214,
+          "p999": 0.0014590000000680448,
+          "rme": 0.2900474705090576,
+          "samplesCount": 217918,
+          "sd": 0.0003170054051330531,
+          "sem": 6.790787101253597e-7,
+          "variance": 1.0049242688357114e-7
+        },
+        "period": 0.0004588884259220385,
+        "throughput": {
+          "aad": 97984.76021053715,
+          "critical": 1.96,
+          "df": 217917,
+          "mad": 4756.875513155013,
+          "max": 3003003.001357778,
+          "mean": 2215598.5707707237,
+          "min": 9630.849537247415,
+          "moe": 672.4829553507935,
+          "p50": 2183406.1136299386,
+          "p75": 2398081.533635069,
+          "p99": 2403846.154659788,
+          "p995": 2403846.154659788,
+          "p999": 2403846.154659788,
+          "rme": 0.030352202074081583,
+          "samplesCount": 217918,
+          "sd": 160166.5282980001,
+          "sem": 343.10354864836404,
+          "variance": 25653316787.034073
+        },
+        "totalTime": 100.00004800007878,
+        "runtime": "node",
+        "runtimeVersion": "24.15.0",
+        "timestampProviderName": "performanceNow"
+      }
     }
   ]
 }
 ```
-
-Field notes:
-
-- `meanLatencyNs` — trimmed mean (drops the lowest two and highest two samples) of
-  each process's sample set, then median across runs.
-- `minLatencyNs` — true raw minimum sample across all runs. Older
-  schemaVersion-1 files reported mitata's trimmed min (third-lowest), so
-  comparing v1↔v2 will show min deltas that don't reflect real changes;
-  checkbench warns about this.
-- `rmePercent` — within-run sample RSD (median across runs).
-  Informational only — overstates real signal when comparing across
-  processes.
-- `crossRunRsdPercent` — RSD of per-run means. **This is the noise floor
-  checkbench uses for regression detection.** Present only when
-  `runs > 1`.
-- `perRunMeanLatencyNs` — per-process means in registration order.
-  Present only when `runs > 1`. Lets you spot a single outlier process.
-- `gcTotalNs` and `heapAvgBytes` are only present when mitata can observe
-  them (Node started with `--expose-gc` for GC stats; `node:v8`
-  `getHeapStatistics()` for heap). The `npm run bench` script already
-  passes `--expose-gc`.
 
 ## Benchmarks
 
@@ -127,87 +116,8 @@ between languages stay meaningful.
 | `WrapperTesting`               | `google.protobuf.*Value` wrapper fields with rules.                          |
 | `MultiRule/Error`              | Multi-rule field that fails — drives violation accumulation.                 |
 | `MultiRule/NoError`            | Same schema, valid value — success path.                                     |
-| `Compile/ComplexSchema`        | `createValidator()` + first validate on each iteration. Plan-build cost.     |
-| `Compile/Int32GT`              | Same, simpler schema.                                                        |
 | `StandardSchema/Scalar`        | Standard Schema adapter, scalar message. TS-only — no Go analogue.           |
 | `StandardSchema/ComplexSchema` | Standard Schema adapter, complex message.                                    |
-
-## Comparing runs
-
-Use `checkbench` to diff two result files and surface regressions:
-
-```shell
-# compares the last two JSON files in .tmp/bench/
-tsx src/checkbench.ts
-
-# compare the latest JSON file against a specific baseline file in .tmp/bench/:
-tsx src/checkbench.ts baseline.json
-
-# Or pass explicit files for baseline and current:
-tsx src/checkbench.ts baseline.json current.json
-```
-
-Output is per task: baseline mean, current mean, `min Δ`, `heap Δ`
-(when available), an optional `gc Δ` (when both runs have GC stats), and
-`mean Δ` with a marker — `REGRESS (mean|min|heap|...)`, `faster (...)`, or
-`(noise)`. A delta is treated as noise if it falls inside the combined
-noise floor of the two files: the sum of each side's `crossRunRsdPercent`
-(when present) or `rmePercent` (fallback for schemaVersion-1 files, which
-overstates real signal).
-
-The tool gates on two signals: **mean latency** and **heap allocation per
-iteration**. A task fails if either delta exceeds `--threshold` and falls
-outside the noise floor.
-
-- **Mean** catches the typical-case slowdown.
-- **Heap Δ** is bytes allocated per iteration (via `node:v8`
-  `getHeapStatistics()`). Catches allocation regressions even when wall-clock time
-  is flat — those still hurt in production because they amplify GC pressure.
-  The heap signal is mostly deterministic for short benches; for long-running
-  alloc-heavy benches (`Compile/*`) it can drift with GC scheduling, which
-  the noise floor absorbs.
-- **Min Δ** is the raw fastest sample across all runs — sensitive to JIT
-  warmth and immune to GC pauses. **Informational only** — shown in the
-  table to help diagnose unexpected mean shifts, but never gates a
-  regression because it's too sensitive to per-process JIT variance to be
-  reliable on its own; anything genuinely regressed shows up in mean.
-- **GC Δ** is informational only (no gating) and only appears when both runs
-  were produced with `--expose-gc` so mitata can observe gc time.
-
-### Options
-
-| Flag                | Default      | Description                                                  |
-|---------------------|--------------|--------------------------------------------------------------|
-| `--threshold <pct>` | `5`          | Regression bar. Slowdowns above this AND outside noise fail. |
-| `--dir <path>`      | `.tmp/bench` | Directory the `latest` / `previous` shortcuts look in.       |
-| `--metric <m>`      | `both`       | Which signals gate a regression: `cpu` (mean latency only), `memory` (heap only), or `both` (mean+heap). Non-gated signals still appear in the table — they just can't fail the run. |
-| `--quiet`, `-q`     | _(off)_      | Print summary line only.                                     |
-
-Pass a larger `--threshold` if you're working on noisier hardware or want to allow
-small regressions through. The bench-side `--metric` (what gets measured) and
-the checkbench-side `--metric` (what gates) are independent — a file produced
-with `--metric cpu` has no heap data, so `checkbench --metric memory` against
-it has nothing to gate on and warns.
-
-The script exits **2** for bad parameter values (invalid threshold, directory, or files), **1** if any task regresses past `--threshold`, otherwise
-**0** — drop it into a pre-commit hook or CI step to gate PRs on performance.
-
-### Typical workflow
-
-```shell
-git checkout main
-npm run bench                          # produces .tmp/bench/<ts>.json (baseline)
-
-git checkout my-optimization-branch
-npm run bench                          # produces .tmp/bench/<ts>.json (current)
-
-node scripts/checkbench.ts latest      # diff vs previous
-```
-
-Bench-to-bench wall-time numbers are sensitive to other loads on the
-machine. For meaningful comparison, run baseline and current on the same
-hardware, close other CPU-heavy apps, and bump `--runs` if you need a
-tighter noise floor than the default 5 runs gives.
 
 ## Regenerating proto code
 
