@@ -19,113 +19,58 @@ import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 const BENCH_DIR = ".tmp/bench";
-const DEFAULT_THRESHOLD = 5;
-
-// Which signal categories gate a regression. "cpu" only gates on mean
-// latency. "memory" only gates on heap allocation. "both" gates on either.
-// Min latency is shown but never gates (too sensitive to JIT warmth/
-// scheduling jitter; mean catches anything genuinely regressed).
-type Metric = "cpu" | "memory" | "both";
-const DEFAULT_METRIC: Metric = "both";
 
 function usage() {
   process.stdout.write(
     [
-      "Usage: tsx src/checkbench.ts <baseline> <current> [options]",
+      "Usage: tsx src/new_checkbench.ts [baseline] [current] [options]",
       "",
       "Arguments are paths to JSON files relative to the benchmark directory (default: .tmp/bench/).",
-      "If neither argument is present, the two most recent files are used, with the older file being the baseline.",
-      "If one argument is present, the named file in the benchmark directory is used as the baseline and the most recent file is used as the current.",
+      "If no arguments are given, the two most recent files are used with the older file as baseline.",
+      "If one argument is given, it is used as the baseline and the most recent file is used as current.",
+      "If two arguments are given, the first is the baseline and the second is the current.",
       "",
       "Options:",
-      "  --threshold <pct>   regression threshold percent (default: 5)",
       "  --dir <path>        bench results directory (default: .tmp/bench)",
-      "  --metric <m>        which signals gate a regression: cpu|memory|both (default both)",
-      "                      cpu: mean latency only; memory: heap only; both: mean+heap",
-      "                      (min latency is always shown but never gates)",
-      "  --quiet, -q         only print summary line",
       "  --help, -h          show this help and exit",
-      "",
-      "Exit code: 0 if no regressions past threshold, 1 for regressions, 2 for other errors.",
       "",
     ].join("\n"),
   );
 }
 
-type FileInfo = {
-  meta: {
-    node: string;
-    platform: string;
-    timestamp: string;
-    path: string;
-    runs: number;
-    schemaVersion: number;
-    // What the bench was told to measure. Default "both" for files written
-    // before --metric existed.
-    metric: Metric;
+// Shape of each task in a tinybench-produced JSON file. Only the latency
+// fields we read are required; the rest of result.* is ignored.
+type TinybenchTask = {
+  name: string;
+  result?: {
+    latency?: {
+      mean: number;
+      p50: number;
+    };
   };
-  byName: Map<string, Task>;
 };
 
-type Task = {
-  name: string;
-  meanLatencyNs: number;
-  minLatencyNs: number;
-  medianLatencyNs: number;
-  p99LatencyNs: number;
-  throughputOpsPerSec: number;
-  rmePercent: number;
-  // Present only for files written with schemaVersion >= 2 from a multi-run
-  // invocation. When present, this is the relative stddev across per-run means
-  // — i.e., the actual run-to-run noise — and should be used as the noise
-  // floor in preference to rmePercent (which is within-run sample spread).
-  crossRunRsdPercent?: number;
-  samples: number;
-  runs?: number;
-  gcTotalNs?: number;
-  heapAvgBytes?: number;
+type FileInfo = {
+  path: string;
+  timestamp: string;
+  node: string;
+  platform: string;
+  byName: Map<string, TinybenchTask>;
 };
 
 function load(path: string): FileInfo {
   const data = JSON.parse(readFileSync(path, "utf-8"));
-  const byName = new Map();
-  for (const task of data.tasks) {
+  const byName = new Map<string, TinybenchTask>();
+  for (const task of data.tasks ?? []) {
     byName.set(task.name, task);
   }
   return {
-    meta: {
-      node: data.node,
-      platform: data.platform,
-      timestamp: data.timestamp,
-      path,
-      // Older files (schemaVersion absent or 1) don't have a runs field at
-      // the top level, but they also lack crossRunRsdPercent on tasks, so
-      // checkbench falls back to rmePercent for them.
-      runs: typeof data.runs === "number" ? data.runs : 1,
-      schemaVersion:
-        typeof data.schemaVersion === "number" ? data.schemaVersion : 1,
-      metric:
-        data.metric === "cpu" || data.metric === "memory"
-          ? data.metric
-          : "both",
-    },
+    path,
+    timestamp: data.timestamp ?? "",
+    node: data.node ?? "",
+    platform: data.platform ?? "",
     byName,
   };
-}
-
-function pad(s: string, n: number): string {
-  return String(s).padEnd(n);
-}
-
-function fmtNs(n: number): string {
-  if (n < 1000) return `${n.toFixed(0)} ns`;
-  if (n < 1_000_000) return `${(n / 1000).toFixed(2)} µs`;
-  return `${(n / 1_000_000).toFixed(2)} ms`;
-}
-
-function color(s: string, code: string): string {
-  if (!process.stdout.isTTY) return s;
-  return `\x1b[${code}m${s}\x1b[0m`;
 }
 
 function getFile(dir: string, arg: string): string {
@@ -173,11 +118,35 @@ function getSecondNewestFile(dir: string): string {
   return getFile(dir, entries[1].f);
 }
 
+// tinybench reports latency in milliseconds. Convert to ns once at the
+// boundary so the rest of the code (and fmtNs) works in a single unit.
+function msToNs(ms: number): number {
+  return ms * 1e6;
+}
+
+function fmtNs(n: number): string {
+  const abs = Math.abs(n);
+  if (abs < 1000) return `${n.toFixed(0)} ns`;
+  if (abs < 1_000_000) return `${(n / 1000).toFixed(2)} µs`;
+  return `${(n / 1_000_000).toFixed(2)} ms`;
+}
+
+function fmtSignedNs(n: number): string {
+  const s = fmtNs(n);
+  return n >= 0 && !s.startsWith("-") ? `+${s}` : s;
+}
+
+function fmtPct(pct: number): string {
+  if (!Number.isFinite(pct)) return pct > 0 ? "+∞%" : "-∞%";
+  return `${pct >= 0 ? "+" : ""}${pct.toFixed(2)}%`;
+}
+
+function pad(s: string, n: number): string {
+  return String(s).padEnd(n);
+}
+
 type ParsedValues = {
-  threshold?: string;
   dir?: string;
-  metric?: string;
-  quiet?: boolean;
   help?: boolean;
 };
 
@@ -196,43 +165,12 @@ function buildArgs(values: ParsedValues) {
     }
     throw err;
   }
-  let threshold = DEFAULT_THRESHOLD;
-  if (values.threshold !== undefined) {
-    const raw = values.threshold.trim();
-    const n = Number(raw);
-    if (raw === "" || !Number.isFinite(n) || n < 0) {
-      console.error(
-        `--threshold must be a non-negative number: ${values.threshold}`,
-      );
-      process.exit(2);
-    }
-    threshold = n;
-  }
-  let metric: Metric = DEFAULT_METRIC;
-  if (values.metric !== undefined) {
-    const raw = values.metric.trim();
-    if (raw !== "cpu" && raw !== "memory" && raw !== "both") {
-      console.error(`--metric must be cpu|memory|both: ${values.metric}`);
-      process.exit(2);
-    }
-    metric = raw;
-  }
-  return { threshold, dir, metric, quiet: values.quiet ?? false };
+  return { dir };
 }
 
 const options = {
-  threshold: {
-    type: "string",
-  },
   dir: {
     type: "string",
-  },
-  metric: {
-    type: "string",
-  },
-  quiet: {
-    type: "boolean",
-    short: "q",
   },
   help: {
     type: "boolean",
@@ -273,322 +211,113 @@ if (baselinePath === currentPath) {
 const baseline = load(baselinePath);
 const current = load(currentPath);
 
-console.log(`baseline: ${baseline.meta.path}`);
-console.log(
-  `          ${baseline.meta.timestamp}  node ${baseline.meta.node}  ${baseline.meta.platform}  runs=${baseline.meta.runs}  metric=${baseline.meta.metric}`,
-);
-console.log(`current:  ${current.meta.path}`);
-console.log(
-  `          ${current.meta.timestamp}  node ${current.meta.node}  ${current.meta.platform}  runs=${current.meta.runs}  metric=${current.meta.metric}`,
-);
-if (args.metric !== DEFAULT_METRIC) {
-  console.log(`gating:   --metric ${args.metric}`);
-}
+console.log(`baseline: ${baseline.path}`);
+console.log(`          ${baseline.timestamp}  node ${baseline.node}  ${baseline.platform}`);
+console.log(`current:  ${current.path}`);
+console.log(`          ${current.timestamp}  node ${current.node}  ${current.platform}`);
 console.log("");
 
-if (baseline.meta.platform !== current.meta.platform) {
-  console.log(
-    color(
-      `! platform differs (${baseline.meta.platform} vs ${current.meta.platform}) — numbers may not be comparable`,
-      "33",
-    ),
-  );
-}
-if (baseline.meta.node !== current.meta.node) {
-  console.log(
-    color(
-      `! node version differs (${baseline.meta.node} vs ${current.meta.node})`,
-      "33",
-    ),
-  );
-}
-if (baseline.meta.runs !== current.meta.runs) {
-  console.log(
-    color(
-      `! runs count differs (${baseline.meta.runs} vs ${current.meta.runs}) — noise floor uses the looser of the two`,
-      "33",
-    ),
-  );
-}
-if (baseline.meta.schemaVersion < 2 || current.meta.schemaVersion < 2) {
-  console.log(
-    color(
-      `! one or both files use schemaVersion 1 — falling back to within-run rmePercent as the noise floor (overstates real signal)`,
-      "33",
-    ),
-  );
-}
-if (baseline.meta.metric !== current.meta.metric) {
-  console.log(
-    color(
-      `! recorded metric differs (${baseline.meta.metric} vs ${current.meta.metric}) — one side may be missing heap data`,
-      "33",
-    ),
-  );
-}
-if (
-  args.metric === "memory" &&
-  (baseline.meta.metric === "cpu" || current.meta.metric === "cpu")
-) {
-  console.log(
-    color(
-      `! --metric memory requested but one file was produced with --metric cpu (no heap data); nothing to gate on`,
-      "33",
-    ),
-  );
-}
-
-const names = new Set([...baseline.byName.keys(), ...current.byName.keys()]);
-let regressions = 0;
-let improvements = 0;
-
-type SignalVerdict = "regress" | "improve" | "noise" | "ok";
-
-function classify(
-  deltaPct: number,
-  noiseFloor: number,
-  threshold: number,
-): SignalVerdict {
-  if (Math.abs(deltaPct) <= noiseFloor) return "noise";
-  if (deltaPct > threshold) return "regress";
-  if (deltaPct < -threshold) return "improve";
-  return "ok";
-}
-
-function fmtDelta(deltaPct: number, verdict: SignalVerdict): string {
-  let base: string;
-  if (!Number.isFinite(deltaPct)) {
-    base = deltaPct > 0 ? "+∞%" : "-∞%";
-  } else {
-    base = `${deltaPct >= 0 ? "+" : ""}${deltaPct.toFixed(2)}%`;
-  }
-  switch (verdict) {
-    case "regress":
-      return color(base, "31");
-    case "improve":
-      return color(base, "32");
-    case "noise":
-      return color(base, "90");
-    default:
-      return base;
-  }
-}
-
+// Render one row per task name present in either file. Tasks that errored
+// (no result.latency) are reported as "—" cells so the row layout stays
+// consistent.
 type Row = {
   name: string;
-  kind: "new" | "gone" | "regress" | "improve" | "ok";
-  bMean: number | undefined;
-  cMean: number | undefined;
-  meanText: string;
-  minText: string;
-  heapText: string;
-  gcText: string;
-  // Combined per-task noise floor used to classify deltas. Empty for new/gone
-  // rows where one side is missing. Suffixed with "*" when at least one side
-  // fell back to within-run rmePercent (schemaVersion < 2 or runs == 1).
-  noiseText: string;
+  baseMean: string;
+  curMean: string;
+  meanDeltaNs: string;
+  meanDeltaPct: string;
+  baseP50: string;
+  curP50: string;
+  p50DeltaNs: string;
+  p50DeltaPct: string;
 };
 
-const rows: Row[] = [];
-// Track whether any row has heap/gc info so we can skip those columns entirely
-// when neither file has them (e.g., comparing against a pre-mitata JSON).
-let anyHeap = false;
-let anyGc = false;
+function deltaCells(
+  baseMs: number | undefined,
+  curMs: number | undefined,
+): { base: string; cur: string; deltaNs: string; deltaPct: string } {
+  if (baseMs === undefined || curMs === undefined) {
+    return {
+      base: baseMs === undefined ? "—" : fmtNs(msToNs(baseMs)),
+      cur: curMs === undefined ? "—" : fmtNs(msToNs(curMs)),
+      deltaNs: "—",
+      deltaPct: "—",
+    };
+  }
+  const baseNs = msToNs(baseMs);
+  const curNs = msToNs(curMs);
+  const deltaNs = curNs - baseNs;
+  const deltaPct = baseNs === 0 ? Number.POSITIVE_INFINITY : (deltaNs / baseNs) * 100;
+  return {
+    base: fmtNs(baseNs),
+    cur: fmtNs(curNs),
+    deltaNs: fmtSignedNs(deltaNs),
+    deltaPct: fmtPct(deltaPct),
+  };
+}
 
+const rows: Row[] = [];
+const names = new Set([...baseline.byName.keys(), ...current.byName.keys()]);
 for (const name of [...names].sort()) {
   const b = baseline.byName.get(name);
   const c = current.byName.get(name);
-  if (!b) {
-    rows.push({
-      name,
-      kind: "new",
-      bMean: undefined,
-      cMean: c?.meanLatencyNs,
-      meanText: color("NEW", "36"),
-      minText: "",
-      heapText: "",
-      gcText: "",
-      noiseText: "",
-    });
-    continue;
-  }
-  if (!c) {
-    rows.push({
-      name,
-      kind: "gone",
-      bMean: b.meanLatencyNs,
-      cMean: undefined,
-      meanText: color("GONE", "90"),
-      minText: "",
-      heapText: "",
-      gcText: "",
-      noiseText: "",
-    });
-    continue;
-  }
-  const meanDelta =
-    ((c.meanLatencyNs - b.meanLatencyNs) / b.meanLatencyNs) * 100;
-  const minDelta = ((c.minLatencyNs - b.minLatencyNs) / b.minLatencyNs) * 100;
-  // Prefer the cross-run RSD when both files have it (schemaVersion >= 2,
-  // runs > 1). That measures actual between-process variance and is the
-  // honest noise floor for comparing two separate bench invocations.
-  // Within-run rmePercent describes sample spread inside a single process; using
-  // it as a noise floor across processes systematically underestimates the
-  // noise, which is what produced spurious "regress" markers on unchanged
-  // code. Falling back to rmePercent for v1 files keeps old comparisons
-  // working at the cost of accuracy.
-  const bNoise = b.crossRunRsdPercent ?? b.rmePercent ?? 0;
-  const cNoise = c.crossRunRsdPercent ?? c.rmePercent ?? 0;
-  const noiseFloor = bNoise + cNoise;
-  const noiseFellBack =
-    b.crossRunRsdPercent === undefined || c.crossRunRsdPercent === undefined;
-  const noiseText = `${noiseFloor.toFixed(2)}%${noiseFellBack ? "*" : ""}`;
-  const meanV = classify(meanDelta, noiseFloor, args.threshold);
-  const minV = classify(minDelta, noiseFloor, args.threshold);
-
-  // Heap is mostly deterministic per code+fixture, but for long-running
-  // alloc-heavy benches (Compile/*) the GC scheduler can fire mid-iteration
-  // and make `getHeapStatistics()` snapshots noisy. Reuse the timing noise
-  // floor (combined rmePercent) as a soft upper bound on measurement noise —
-  // not exact, but it suppresses the same kind of jitter that timing sees.
-  let heapDelta: number | undefined;
-  let heapV: SignalVerdict = "ok";
-  if (b.heapAvgBytes !== undefined && c.heapAvgBytes !== undefined) {
-    anyHeap = true;
-    const heapAbsDelta = c.heapAvgBytes - b.heapAvgBytes;
-    if (b.heapAvgBytes === 0) {
-      heapDelta = c.heapAvgBytes === 0 ? 0 : Number.POSITIVE_INFINITY;
-    } else {
-      heapDelta = (heapAbsDelta / b.heapAvgBytes) * 100;
-    }
-    if (Math.abs(heapAbsDelta) < 1) {
-      heapV = "ok";
-    } else {
-      heapV = classify(heapDelta, noiseFloor, args.threshold);
-    }
-  }
-
-  // GC time is reported only when the runtime exposes gc(). Informational
-  // only — we don't gate on it because per-iter GC cost is noisy and already
-  // captured (in a noisier form) by heap allocation.
-  let gcDelta: number | undefined;
-  if (b.gcTotalNs !== undefined && c.gcTotalNs !== undefined) {
-    anyGc = true;
-    if (b.gcTotalNs === 0) {
-      gcDelta = c.gcTotalNs === 0 ? 0 : Number.POSITIVE_INFINITY;
-    } else {
-      gcDelta = ((c.gcTotalNs - b.gcTotalNs) / b.gcTotalNs) * 100;
-    }
-  }
-
-  // --metric controls which signals can trigger REGRESS/faster markers.
-  // Non-gated signals still appear in the table (with their colored delta);
-  // they just can't fail the run. cpu → mean only, memory → heap only,
-  // both → mean+heap.
-  //
-  // The min column is informational. Even though it's a real signal — the
-  // fastest sample observed across all runs — it's too sensitive to JIT
-  // warmth and scheduling jitter to be a reliable gate on its own, and
-  // anything genuinely worth flagging will also show up in mean.
-  const gateCpu = args.metric === "cpu" || args.metric === "both";
-  const gateMem = args.metric === "memory" || args.metric === "both";
-  const tags: string[] = [];
-  if (gateCpu && meanV === "regress") tags.push("mean");
-  if (gateMem && heapV === "regress") tags.push("heap");
-  const fasterTags: string[] = [];
-  if (gateCpu && meanV === "improve") fasterTags.push("mean");
-  if (gateMem && heapV === "improve") fasterTags.push("heap");
-
-  let kind: Row["kind"] = "ok";
-  let meanText = fmtDelta(meanDelta, meanV);
-  const minText = fmtDelta(minDelta, minV);
-  const heapText = heapDelta === undefined ? "" : fmtDelta(heapDelta, heapV);
-  const gcText =
-    gcDelta === undefined
-      ? ""
-      : Number.isFinite(gcDelta)
-        ? `${gcDelta >= 0 ? "+" : ""}${gcDelta.toFixed(2)}%`
-        : "∞";
-
-  if (tags.length > 0) {
-    kind = "regress";
-    regressions++;
-    const marker = color(`REGRESS (${tags.join("+")})`, "31");
-    meanText = `${meanText}  ${marker}`;
-  } else if (fasterTags.length > 0) {
-    kind = "improve";
-    improvements++;
-    const marker = color(`faster (${fasterTags.join("+")})`, "32");
-    meanText = `${meanText}  ${marker}`;
-  } else if (meanV === "noise" || minV === "noise") {
-    meanText = `${meanText}  ${color("(noise)", "90")}`;
-  }
-
+  const meanCells = deltaCells(b?.result?.latency?.mean, c?.result?.latency?.mean);
+  const p50Cells = deltaCells(b?.result?.latency?.p50, c?.result?.latency?.p50);
   rows.push({
     name,
-    kind,
-    bMean: b.meanLatencyNs,
-    cMean: c.meanLatencyNs,
-    meanText,
-    minText,
-    heapText,
-    gcText,
-    noiseText,
+    baseMean: meanCells.base,
+    curMean: meanCells.cur,
+    meanDeltaNs: meanCells.deltaNs,
+    meanDeltaPct: meanCells.deltaPct,
+    baseP50: p50Cells.base,
+    curP50: p50Cells.cur,
+    p50DeltaNs: p50Cells.deltaNs,
+    p50DeltaPct: p50Cells.deltaPct,
   });
 }
 
-// padVisible pads s to width n based on its visible (ANSI-stripped) length.
-const ansiPattern = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
-function padVisible(s: string, n: number): string {
-  const visible = s.replace(ansiPattern, "");
-  const padding = Math.max(0, n - visible.length);
-  return s + " ".repeat(padding);
-}
-
-if (!args.quiet) {
-  const nameW = Math.max(4, ...rows.map((r) => r.name.length));
-  const noiseW = 8;
-  const cols = [
-    `${pad("task", nameW)}`,
-    pad("baseline", 12),
-    pad("current", 12),
-    pad("min Δ", 10),
-  ];
-  const seps = [
-    "-".repeat(nameW),
-    "-".repeat(12),
-    "-".repeat(12),
-    "-".repeat(10),
-  ];
-  if (anyHeap) {
-    cols.push(pad("heap Δ", 10));
-    seps.push("-".repeat(10));
-  }
-  if (anyGc) {
-    cols.push(pad("gc Δ", 10));
-    seps.push("-".repeat(10));
-  }
-  cols.push(pad("noise", noiseW));
-  seps.push("-".repeat(noiseW));
-  cols.push("mean Δ");
-  seps.push("-".repeat(28));
-  console.log(cols.join("  "));
-  console.log(seps.join("  "));
-  for (const r of rows) {
-    const b = r.bMean !== undefined ? fmtNs(r.bMean) : "—";
-    const c = r.cMean !== undefined ? fmtNs(r.cMean) : "—";
-    const minCell = padVisible(r.minText, 10);
-    const cells = [pad(r.name, nameW), pad(b, 12), pad(c, 12), minCell];
-    if (anyHeap) cells.push(padVisible(r.heapText || "—", 10));
-    if (anyGc) cells.push(padVisible(r.gcText || "—", 10));
-    cells.push(padVisible(r.noiseText || "—", noiseW));
-    cells.push(r.meanText);
-    console.log(cells.join("  "));
-  }
-  console.log("");
-}
-
+const nameW = Math.max(4, ...rows.map((r) => r.name.length));
+const cellW = 12;
+const deltaW = 12;
+const pctW = 9;
 console.log(
-  `summary: ${regressions} regression(s), ${improvements} improvement(s), threshold ${args.threshold}%`,
+  [
+    pad("task", nameW),
+    pad("base mean", cellW),
+    pad("cur mean", cellW),
+    pad("mean Δ", deltaW),
+    pad("mean %", pctW),
+    pad("base p50", cellW),
+    pad("cur p50", cellW),
+    pad("p50 Δ", deltaW),
+    pad("p50 %", pctW),
+  ].join("  "),
 );
-process.exit(regressions > 0 ? 1 : 0);
+console.log(
+  [
+    "-".repeat(nameW),
+    "-".repeat(cellW),
+    "-".repeat(cellW),
+    "-".repeat(deltaW),
+    "-".repeat(pctW),
+    "-".repeat(cellW),
+    "-".repeat(cellW),
+    "-".repeat(deltaW),
+    "-".repeat(pctW),
+  ].join("  "),
+);
+for (const r of rows) {
+  console.log(
+    [
+      pad(r.name, nameW),
+      pad(r.baseMean, cellW),
+      pad(r.curMean, cellW),
+      pad(r.meanDeltaNs, deltaW),
+      pad(r.meanDeltaPct, pctW),
+      pad(r.baseP50, cellW),
+      pad(r.curP50, cellW),
+      pad(r.p50DeltaNs, deltaW),
+      pad(r.p50DeltaPct, pctW),
+    ].join("  "),
+  );
+}

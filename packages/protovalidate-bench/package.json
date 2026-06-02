@@ -6,8 +6,8 @@
   "scripts": {
     "generate": "buf generate",
     "postgenerate": "license-header src/gen",
-    "bench": "tsx --expose-gc src/new_bench.ts",
-    "checkbench": "tsx src/new_checkbench.ts",
+    "bench": "tsx --expose-gc src/bench.ts",
+    "checkbench": "tsx src/checkbench.ts",
     "format": "biome format --write",
     "lint": "biome lint --error-on-warnings && buf lint",
     "license-header": "license-header"
