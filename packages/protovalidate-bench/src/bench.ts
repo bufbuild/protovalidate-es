@@ -61,7 +61,7 @@ async function main(args: string[]): Promise<void> {
   }
   const tests = filterTests(filter);
   if (tests.length == 0) {
-    console.log("No tests match pattern; exiting.")
+    console.log("No tests match pattern; exiting.");
     process.exit(0);
   }
   await bench(tests);
@@ -73,7 +73,7 @@ async function main(args: string[]): Promise<void> {
         `USAGE: ${process.argv[1]} [regex]`,
         ``,
         `Run tests with the npm package "tinybench", and print results to standard out.`,
-          `If no regex is supplied, all benchmarks are run.`,
+        `If no regex is supplied, all benchmarks are run.`,
         ``,
       ].join("\n"),
     );
