@@ -88,23 +88,8 @@ async function bench(tests: BenchCase[]): Promise<void> {
     });
   }
 
-  const timestamp = new Date();
-
   await bench.run();
-
-  const output: OutputJson = {
-    timestamp: timestamp,
-    node: process.version,
-    platform: `${process.platform}/${process.arch}`,
-    tasks: bench.tasks.map((t) => ({
-      name: t.name,
-      result: t.result,
-    })),
-  };
-  writeFileSync(
-    `${outPath}/${timestamp.toISOString().replace(/[:.]/g, "-")}.json`,
-    JSON.stringify(output, null, 2),
-  );
+  writeOutputJson(outPath, bench.tasks);
 
   console.log(bench.name);
   console.table(bench.table());
@@ -133,3 +118,20 @@ type OutputJson = {
     result: Task["result"];
   }[];
 };
+
+function writeOutputJson(outPath: string, tasks: Task[]) {
+  const timestamp = new Date();
+  const output: OutputJson = {
+    timestamp: timestamp,
+    node: process.version,
+    platform: `${process.platform}/${process.arch}`,
+    tasks: tasks.map((t) => ({
+      name: t.name,
+      result: t.result,
+    })),
+  };
+  writeFileSync(
+    `${outPath}/${timestamp.toISOString().replace(/[:.]/g, "-")}.json`,
+    JSON.stringify(output, null, 2),
+  );
+}
