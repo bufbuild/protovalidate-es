@@ -24,7 +24,7 @@ import { parseArgs } from "node:util";
 
 let outPath = ".tmp/bench";
 
-async function main(args: string[]): Promise<void> {
+async function main(): Promise<void> {
   function filterTests(regexp: string): Test[] {
     const tests = setupTests();
     const re = new RegExp(regexp);
@@ -130,4 +130,4 @@ async function bench(tests: Test[]): Promise<void> {
   console.table(bench.table());
 }
 
-await main(process.argv.slice(2));
+await main();
