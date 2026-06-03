@@ -12,6 +12,7 @@
   "workspaces": [
     "packages/protovalidate",
     "packages/protovalidate-testing",
+    "packages/protovalidate-bench",
     "packages/example",
     "packages/upstream"
   ],
