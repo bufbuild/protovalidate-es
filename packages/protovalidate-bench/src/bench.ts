@@ -24,11 +24,6 @@ import { parseArgs } from "node:util";
 let outPath = ".tmp/bench";
 
 async function main(): Promise<void> {
-  function filterTests(regexp: string): BenchCase[] {
-    const re = new RegExp(regexp);
-    return cases.filter((test) => re.test(test.name));
-  }
-
   const options = {
     dir: {
       type: "string",
@@ -53,11 +48,11 @@ async function main(): Promise<void> {
     exitUsage(2);
   }
 
-  let filter = ".*";
+  let filter = /.*/;
   if (positionals.length == 1) {
-    filter = positionals[0];
+    filter = new RegExp(positionals[0]);
   }
-  const tests = filterTests(filter);
+  const tests = cases.filter((test) => filter.test(test.name));
   if (tests.length == 0) {
     console.log("No tests match pattern; exiting.");
     process.exit(0);
