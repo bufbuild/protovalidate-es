@@ -13,144 +13,121 @@
 // limitations under the License.
 
 import { Bench } from "tinybench";
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { register as registerValidate } from "./suites/validate.bench.js";
-import { register as registerCompile } from "./suites/compile.bench.js";
-import { register as registerStandardSchema } from "./suites/standard-schema.bench.js";
+import * as console from "node:console";
+import type { DescMessage, Message } from "@bufbuild/protobuf";
+import { createValidator } from "@bufbuild/protovalidate";
+import { cases } from "./cases.js";
+import { writeFileSync } from "node:fs";
+import { parseArgs } from "node:util";
 
-interface CliOptions {
-  filter: string | undefined;
-  iterations: number;
-  warmupIterations: number;
-  time: number;
-  outDir: string;
-}
+/* eslint-disable no-console, import/no-named-as-default-member */
 
-function parseArgs(argv: readonly string[]): CliOptions {
-  let filter: string | undefined;
-  let iterations = 0;
-  let warmupIterations = 16;
-  let time = 1000;
-  let outDir = ".tmp/bench";
-  for (let i = 0; i < argv.length; i++) {
-    const a = argv[i];
-    switch (a) {
-      case "--filter":
-        filter = argv[++i];
-        break;
-      case "--iterations":
-        iterations = Number(argv[++i]);
-        break;
-      case "--warmup":
-        warmupIterations = Number(argv[++i]);
-        break;
-      case "--time":
-        time = Number(argv[++i]);
-        break;
-      case "--out":
-        outDir = String(argv[++i]);
-        break;
-      case "--help":
-      case "-h":
-        printUsage();
-        process.exit(0);
-        break;
-      default:
-        if (a?.startsWith("--")) {
-          console.error(`unknown flag: ${a}`);
-          process.exit(2);
-        }
-    }
+let outPath = ".tmp/bench";
+
+async function main(args: string[]): Promise<void> {
+  function filterTests(regexp: string): Test[] {
+    const tests = setupTests();
+    const re = new RegExp(regexp);
+    return tests.filter((test) => re.test(test.name));
   }
-  return { filter, iterations, warmupIterations, time, outDir };
-}
 
-function printUsage(): void {
-  process.stdout.write(
-    [
-      "Usage: tsx src/bench.ts [options]",
-      "",
-      "Options:",
-      "  --filter <substr>     Only run benchmarks whose name contains <substr>",
-      "  --time <ms>           Per-task wall time budget (default: 1000)",
-      "  --iterations <n>      Force fixed iteration count instead of time budget",
-      "  --warmup <n>          Warmup iterations per task (default: 16)",
-      "  --out <dir>           Output directory for JSON results (default: .tmp/bench)",
-      "",
-    ].join("\n"),
-  );
-}
+  const options = {
+    dir: {
+      type: "string",
+    },
+    help: {
+      type: "boolean",
+      short: "h",
+    },
+  } as const;
 
-const opts = parseArgs(process.argv.slice(2));
+  const { values, positionals } = parseArgs({
+    options,
+    allowPositionals: true,
+  });
+  if (values.help) {
+    exitUsage(0);
+  }
+  if (values.dir) {
+    outPath = values.dir;
+  }
+  if (positionals.length > 1) {
+    exitUsage(2);
+  }
 
-const bench = new Bench({
-  name: "protovalidate-es",
-  time: opts.iterations > 0 ? 0 : opts.time,
-  iterations: opts.iterations > 0 ? opts.iterations : 10,
-  warmupIterations: opts.warmupIterations,
-});
+  let filter = ".*";
+  if (positionals.length == 1) {
+    filter = positionals[0];
+  }
+  const tests = filterTests(filter);
+  if (tests.length == 0) {
+    console.log("No tests match pattern; exiting.");
+    process.exit(0);
+  }
+  await bench(tests);
 
-registerValidate(bench);
-registerCompile(bench);
-registerStandardSchema(bench);
-
-if (opts.filter !== undefined) {
-  const f = opts.filter;
-  for (const t of bench.tasks.slice()) {
-    if (!t.name.includes(f)) {
-      bench.remove(t.name);
-    }
+  function exitUsage(exitCode = 0): never {
+    const out = exitCode === 0 ? process.stdout : process.stderr;
+    out.write(
+      [
+        `USAGE: ${process.argv[1]} [regex]`,
+        ``,
+        `Run tests with the npm package "tinybench", and print results to standard out.`,
+        `If no regex is supplied, all benchmarks are run.`,
+        ``,
+      ].join("\n"),
+    );
+    process.exit(exitCode);
   }
 }
 
-console.log(`# protovalidate-es bench`);
-console.log(`# node ${process.version} ${process.platform}/${process.arch}`);
-console.log(`# tasks: ${bench.tasks.length}`);
-if (bench.tasks.length === 0) {
-  console.error("no tasks matched filter");
-  process.exit(2);
+interface Test {
+  name: string;
+  schema: DescMessage;
+  fixture: Message;
 }
 
-await bench.run();
+function setupTests(): Test[] {
+  const tests: Test[] = [];
+  tests.push(...cases);
+  return tests;
+}
 
-const tableRows = bench.table((task) => {
-  const r = task.result;
-  if (!r) {
-    return { Task: task.name };
+/**
+ * Benchmark tests with the npm package "tinybench". Results are printed to
+ * standard out.
+ */
+async function bench(tests: Test[]): Promise<void> {
+  const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
+  const validator = createValidator();
+
+  for (const test of tests) {
+    bench.add(test.name, () => {
+      validator.validate(test.schema, test.fixture);
+    });
   }
-  return {
-    Task: task.name,
-    "ops/sec": Math.round(r.throughput.mean).toLocaleString(),
-    "avg (ns)": (r.latency.mean * 1e6).toFixed(0),
-    "p99 (ns)": ((r.latency.p99 ?? 0) * 1e6).toFixed(0),
-    rme: `±${r.latency.rme.toFixed(2)}%`,
-    samples: r.latency.samples.length,
-  };
-});
-console.table(tableRows);
 
-const stamp = new Date()
-  .toISOString()
-  .replace(/[:.]/g, "-")
-  .replace(/T/, "_")
-  .replace(/Z$/, "");
-mkdirSync(opts.outDir, { recursive: true });
-const outPath = join(opts.outDir, `${stamp}.json`);
-const payload = {
-  node: process.version,
-  platform: `${process.platform}/${process.arch}`,
-  timestamp: new Date().toISOString(),
-  tasks: bench.tasks
-    .filter((t) => t.result !== undefined)
-    .map((t) => ({
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+
+  await bench.run();
+
+  const payload = {
+    timestamp: timestamp,
+    node: process.version,
+    platform: `${process.platform}/${process.arch}`,
+    tasks: bench.tasks.map((t) => ({
       name: t.name,
-      meanLatencyNs: (t.result?.latency.mean ?? 0) * 1e6,
-      p99LatencyNs: (t.result?.latency.p99 ?? 0) * 1e6,
-      throughputOpsPerSec: t.result?.throughput.mean ?? 0,
-      rmePercent: t.result?.latency.rme ?? 0,
-      samples: t.result?.latency.samples.length ?? 0,
+      // t.result is undefined if the task errored
+      result: t.result,
     })),
-};
-writeFileSync(outPath, JSON.stringify(payload, null, 2));
-console.log(`wrote ${outPath}`);
+  };
+  writeFileSync(
+    `${outPath}/${timestamp}.json`,
+    JSON.stringify(payload, null, 2),
+  );
+
+  console.log(bench.name);
+  console.table(bench.table());
+}
+
+await main(process.argv.slice(2));
