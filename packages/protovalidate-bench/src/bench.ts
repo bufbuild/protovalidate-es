@@ -98,7 +98,6 @@ async function bench(tests: BenchCase[]): Promise<void> {
     platform: `${process.platform}/${process.arch}`,
     tasks: bench.tasks.map((t) => ({
       name: t.name,
-      // t.result is undefined if the task errored
       result: t.result,
     })),
   };
