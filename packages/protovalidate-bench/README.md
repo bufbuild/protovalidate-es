@@ -9,7 +9,7 @@ so that runtime cost can be tracked across changes and compared cross-language.
 From the repo root:
 
 ```shell
-npx turbo run bench [regex] --dir <dir>
+npx turbo run bench -- [regex] --dir <dir>
 ```
 
 Or from this directory:
