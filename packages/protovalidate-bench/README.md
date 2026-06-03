@@ -9,7 +9,7 @@ so that runtime cost can be tracked across changes and compared cross-language.
 From the repo root:
 
 ```shell
-npx turbo run bench [regex] -d dir
+npx turbo run bench [regex] --dir <dir>
 ```
 
 Or from this directory:
@@ -21,14 +21,13 @@ npm run bench
 The runner prints a table of results and writes a JSON file to `.tmp/bench/`
 (gitignored) named after the current timestamp.
 
-The regular expression is optional and only runs tasks whose name contains it.
+### Arguments and options
 
-### Options
-
-| Flag       | Default      | Description                       |
-|------------|--------------|-----------------------------------|
-| `-d <dir>` | `.tmp/bench` | Output directory for JSON results |
-| `-h`       |              | Print usage information           |
+| Argument / flag | Default      | Description                        |
+|-----------------|--------------|------------------------------------|
+| `[regex]`       | `.*`         | Run tasks matching this regex.     |
+| `--dir <dir>`   | `.tmp/bench` | Output directory for JSON results. |
+| `--help`, `-h`  |              | Print usage information.           |
 
 ### Output schema
 
