@@ -23,6 +23,19 @@ import { parseArgs } from "node:util";
 
 let outPath = ".tmp/bench";
 
+const usage = `USAGE: ${process.argv[1]} [regex]
+
+Run tests with the npm package "tinybench", and print results to standard out.
+If no regex is supplied, all benchmarks are run.
+
+Arguments:
+  regex          Run only tests whose name matches this regex.
+
+Options:
+  --dir <dir>    Directory for JSON results (default: .tmp/bench).
+  -h, --help     Print this help and exit.
+`;
+
 async function main(): Promise<void> {
   const options = {
     dir: {
@@ -39,13 +52,15 @@ async function main(): Promise<void> {
     allowPositionals: true,
   });
   if (values.help) {
-    exitUsage(0);
+    console.log(usage);
+    process.exit(0);
   }
   if (values.dir) {
     outPath = values.dir;
   }
   if (positionals.length > 1) {
-    exitUsage(2);
+    console.error(usage);
+    process.exit(2);
   }
 
   let filter = /.*/;
@@ -58,20 +73,6 @@ async function main(): Promise<void> {
     process.exit(0);
   }
   await bench(tests);
-
-  function exitUsage(exitCode = 0): never {
-    const out = exitCode === 0 ? process.stdout : process.stderr;
-    out.write(
-      [
-        `USAGE: ${process.argv[1]} [regex]`,
-        ``,
-        `Run tests with the npm package "tinybench", and print results to standard out.`,
-        `If no regex is supplied, all benchmarks are run.`,
-        ``,
-      ].join("\n"),
-    );
-    process.exit(exitCode);
-  }
 }
 
 /**
