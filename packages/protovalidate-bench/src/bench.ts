@@ -14,9 +14,8 @@
 
 import { Bench, type Task } from "tinybench";
 import * as console from "node:console";
-import type { DescMessage, Message } from "@bufbuild/protobuf";
 import { createValidator } from "@bufbuild/protovalidate";
-import { cases } from "./cases.js";
+import { cases, type BenchCase } from "./cases.js";
 import { writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 
@@ -25,10 +24,9 @@ import { parseArgs } from "node:util";
 let outPath = ".tmp/bench";
 
 async function main(): Promise<void> {
-  function filterTests(regexp: string): Test[] {
-    const tests = setupTests();
+  function filterTests(regexp: string): BenchCase[] {
     const re = new RegExp(regexp);
-    return tests.filter((test) => re.test(test.name));
+    return cases.filter((test) => re.test(test.name));
   }
 
   const options = {
@@ -81,23 +79,11 @@ async function main(): Promise<void> {
   }
 }
 
-interface Test {
-  name: string;
-  schema: DescMessage;
-  fixture: Message;
-}
-
-function setupTests(): Test[] {
-  const tests: Test[] = [];
-  tests.push(...cases);
-  return tests;
-}
-
 /**
  * Benchmark tests with the npm package "tinybench". Results are printed to
  * standard out.
  */
-async function bench(tests: Test[]): Promise<void> {
+async function bench(tests: BenchCase[]): Promise<void> {
   const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
   const validator = createValidator();
 
