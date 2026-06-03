@@ -34,53 +34,46 @@ Options:
   -h, --help     Print this help and exit.
 `;
 
-async function main(): Promise<void> {
-  const options = {
-    dir: {
-      type: "string",
-    },
-    help: {
-      type: "boolean",
-      short: "h",
-    },
-  } as const;
-
-  const { values, positionals } = parseArgs({
-    options,
-    allowPositionals: true,
-  });
-  if (values.help) {
-    console.log(usage);
-    process.exit(0);
-  }
-  if (positionals.length > 1) {
-    console.error(usage);
-    process.exit(2);
-  }
-  const outPath = values.dir ?? ".tmp/bench";
-  const filter = positionals.length > 0 ? new RegExp(positionals[0]) : /.*/;
-  const tests = cases.filter((test) => filter.test(test.name));
-  if (tests.length == 0) {
-    console.log("No tests match pattern; exiting.");
-    process.exit(0);
-  }
-
-  const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
-  const validator = createValidator();
-  for (const test of tests) {
-    bench.add(test.name, () => {
-      validator.validate(test.schema, test.fixture);
-    });
-  }
-
-  await bench.run();
-  writeOutputJson(outPath, bench.tasks);
-
-  console.log(bench.name);
-  console.table(bench.table());
+const options = {
+  dir: {
+    type: "string",
+  },
+  help: {
+    type: "boolean",
+    short: "h",
+  },
+} as const;
+const { values, positionals } = parseArgs({
+  options,
+  allowPositionals: true,
+});
+if (values.help) {
+  console.log(usage);
+  process.exit(0);
+}
+if (positionals.length > 1) {
+  console.error(usage);
+  process.exit(2);
+}
+const outPath = values.dir ?? ".tmp/bench";
+const filter = positionals.length > 0 ? new RegExp(positionals[0]) : /.*/;
+const tests = cases.filter((test) => filter.test(test.name));
+if (tests.length == 0) {
+  console.log("No tests match pattern; exiting.");
+  process.exit(0);
 }
 
-await main();
+const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
+const validator = createValidator();
+for (const test of tests) {
+  bench.add(test.name, () => {
+    validator.validate(test.schema, test.fixture);
+  });
+}
+await bench.run();
+writeOutputJson(outPath, bench.tasks);
+console.log(bench.name);
+console.table(bench.table());
 
 /**
  * JSON output
