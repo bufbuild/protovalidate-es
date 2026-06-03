@@ -19,8 +19,6 @@ import { createValidator } from "@bufbuild/protovalidate";
 import { Bench, type Task } from "tinybench";
 import { cases } from "./cases.js";
 
-/* eslint-disable no-console, import/no-named-as-default-member */
-
 const usage = `USAGE: ${process.argv[1]} [regex]
 
 Run tests with the npm package "tinybench", and print results to standard out.
