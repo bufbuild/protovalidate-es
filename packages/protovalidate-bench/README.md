@@ -6,13 +6,13 @@ so that runtime cost can be tracked across changes and compared cross-language.
 
 ## Running
 
-From the repo root:
+With turborepo:
 
 ```shell
 npx turbo run bench -- [regex] --dir <dir>
 ```
 
-Or from this directory:
+With npm (make sure to generate proto and build dependencies first):
 
 ```shell
 npm run bench
@@ -52,13 +52,3 @@ between languages stay meaningful.
 | `MultiRule/NoError`            | Same schema, valid value — success path.                                     |
 | `StandardSchema/Scalar`        | Standard Schema adapter, scalar message. TS-only — no Go analogue.           |
 | `StandardSchema/ComplexSchema` | Standard Schema adapter, complex message.                                    |
-
-## Regenerating proto code
-
-If the `.proto` files change:
-
-```shell
-npm run generate
-```
-
-Generated code lives under `src/gen/` and is committed.
