@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Bench } from "tinybench";
+import { Bench, type Task } from "tinybench";
 import * as console from "node:console";
 import type { DescMessage, Message } from "@bufbuild/protobuf";
 import { createValidator } from "@bufbuild/protovalidate";
@@ -107,11 +107,11 @@ async function bench(tests: Test[]): Promise<void> {
     });
   }
 
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const timestamp = new Date();
 
   await bench.run();
 
-  const payload = {
+  const output: OutputJson = {
     timestamp: timestamp,
     node: process.version,
     platform: `${process.platform}/${process.arch}`,
@@ -122,8 +122,8 @@ async function bench(tests: Test[]): Promise<void> {
     })),
   };
   writeFileSync(
-    `${outPath}/${timestamp}.json`,
-    JSON.stringify(payload, null, 2),
+    `${outPath}/${timestamp.toISOString().replace(/[:.]/g, "-")}.json`,
+    JSON.stringify(output, null, 2),
   );
 
   console.log(bench.name);
@@ -131,3 +131,25 @@ async function bench(tests: Test[]): Promise<void> {
 }
 
 await main();
+
+/**
+ * JSON output
+ */
+type OutputJson = {
+  timestamp: Date;
+  /**
+   * Node.js version
+   */
+  node: string;
+  /**
+   * Node.js platform / arch
+   */
+  platform: string;
+  /**
+   * tinybench task results
+   */
+  tasks: {
+    name: string;
+    result: Task["result"];
+  }[];
+};
