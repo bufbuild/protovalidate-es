@@ -296,6 +296,45 @@ void suite("Validator", () => {
       assert.equal(result.kind, "valid");
     });
   });
+  void suite("option disableNativeRules", () => {
+    const schema = compileMessage(
+      `
+        syntax="proto3";
+        import "buf/validate/validate.proto";
+        message Example {
+          int32 n = 1 [(buf.validate.field).int32.gt = 0];
+          string s = 2 [(buf.validate.field).string.min_len = 3];
+        }
+        `,
+      bufCompileOptions,
+    );
+    const invalid = create(schema, { n: 0, s: "ab" });
+    const valid = create(schema, { n: 1, s: "abc" });
+    void test("createValidator accepts the option", () => {
+      const v = createValidator({ disableNativeRules: true });
+      assert.ok(typeof v.validate == "function");
+    });
+    void test("default and disabled paths agree on a valid message", () => {
+      const def = createValidator().validate(schema, valid);
+      const off = createValidator({ disableNativeRules: true }).validate(
+        schema,
+        valid,
+      );
+      assert.equal(def.kind, "valid");
+      assert.equal(off.kind, "valid");
+    });
+    void test("default and disabled paths produce identical violations", () => {
+      const def = createValidator().validate(schema, invalid);
+      const off = createValidator({ disableNativeRules: true }).validate(
+        schema,
+        invalid,
+      );
+      assert.equal(def.kind, "invalid");
+      assert.equal(off.kind, "invalid");
+      const fmt = (v: Violation) => v.toString();
+      assert.deepEqual(def.violations?.map(fmt), off.violations?.map(fmt));
+    });
+  });
   void suite("predefined rules", () => {
     const descFile = compileFile(
       `

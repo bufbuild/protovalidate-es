@@ -77,6 +77,17 @@ export type ValidatorOptions = {
    * By default, legacy required field are not validated.
    */
   legacyRequired?: boolean;
+
+  /**
+   * Disable the native (non-CEL) implementation of standard rules.
+   *
+   * By default, validation uses hand-written checks for most standard
+   * buf.validate.field rules. Setting this option to true forces every
+   * standard rule through CEL instead. Behavior is identical either way;
+   * the flag exists to isolate the native path during debugging or to
+   * compare conformance.
+   */
+  disableNativeRules?: boolean;
 };
 
 /**
@@ -136,8 +147,14 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
     : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
-  const celMan = new CelManager(registry, opt?.regexMatch);
-  const planner = new Planner(celMan, opt?.legacyRequired ?? false);
+  const regexMatch = opt?.regexMatch;
+  const celMan = new CelManager(registry, regexMatch);
+  const planner = new Planner(
+    celMan,
+    opt?.legacyRequired ?? false,
+    opt?.disableNativeRules ?? false,
+    regexMatch,
+  );
   return {
     validate<
       Desc extends DescMessage,
