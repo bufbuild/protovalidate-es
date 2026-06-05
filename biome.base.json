@@ -1,13 +1,13 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "vcs": {
-    "enabled": false,
+    "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
     "ignoreUnknown": false,
-    "ignore": ["tsconfig.*.json", "src/gen/**", "packages/*/dist/**", ".turbo"]
+    "ignore": ["tsconfig.*.json", "src/gen/**"]
   },
   "formatter": {
     "indentStyle": "space"
