@@ -334,7 +334,6 @@ void suite("native numeric rules", () => {
     });
   });
 
-  // Review follow-up: gaps surfaced by the code review.
   void suite("review gap coverage", () => {
     void test("T1: NaN value with float.in list", () => {
       // NaN is never === to any list element, so the violation must fire.

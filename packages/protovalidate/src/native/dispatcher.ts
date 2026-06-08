@@ -39,7 +39,7 @@ export type NativeDispatchResult = {
 
 /**
  * Internal dispatch result used by the per-rules-type builders. They produce
- * a scalar-typed eval; {@link tryBuildNative} either lifts it directly into
+ * a scalar-typed eval; tryBuildNative either lifts it directly into
  * `Eval<ReflectMessageGet>` (the scalar case) or wraps it in a
  * `WrappedValueEval` for WKT wrapper messages.
  */

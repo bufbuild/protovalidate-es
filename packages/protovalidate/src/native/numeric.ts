@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { isFieldSet, type Message } from "@bufbuild/protobuf";
+import { type DescField, isFieldSet, type Message } from "@bufbuild/protobuf";
 import type {
   Path,
   PathBuilder,
@@ -36,21 +36,18 @@ import {
 } from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
 import { printFloat } from "./format.js";
-import {
-  doubleDescs,
-  fixed32Descs,
-  fixed64Descs,
-  floatDescs,
-  int32Descs,
-  int64Descs,
-  type NumericRulesDescs,
-  sfixed32Descs,
-  sfixed64Descs,
-  sint32Descs,
-  sint64Descs,
-  uint32Descs,
-  uint64Descs,
-} from "./sites.js";
+
+type NumericRulesDescs = {
+  readonly const: DescField;
+  readonly gt: DescField;
+  readonly gte: DescField;
+  readonly lt: DescField;
+  readonly lte: DescField;
+  readonly in: DescField;
+  readonly notIn: DescField;
+  /** Only present on FloatRulesSchema and DoubleRulesSchema. */
+  readonly finite?: DescField;
+};
 
 /**
  * Per-scalar configuration for the numeric native evaluator.
@@ -71,73 +68,73 @@ const floatFormat = (v: number): string => printFloat(v);
 
 const int32Config: NumericConfig<number> = {
   typeName: "int32",
-  descs: int32Descs,
+  descs: Int32RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const int64Config: NumericConfig<bigint> = {
   typeName: "int64",
-  descs: int64Descs,
+  descs: Int64RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const uint32Config: NumericConfig<number> = {
   typeName: "uint32",
-  descs: uint32Descs,
+  descs: UInt32RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const uint64Config: NumericConfig<bigint> = {
   typeName: "uint64",
-  descs: uint64Descs,
+  descs: UInt64RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const sint32Config: NumericConfig<number> = {
   typeName: "sint32",
-  descs: sint32Descs,
+  descs: SInt32RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const sint64Config: NumericConfig<bigint> = {
   typeName: "sint64",
-  descs: sint64Descs,
+  descs: SInt64RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const fixed32Config: NumericConfig<number> = {
   typeName: "fixed32",
-  descs: fixed32Descs,
+  descs: Fixed32RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const fixed64Config: NumericConfig<bigint> = {
   typeName: "fixed64",
-  descs: fixed64Descs,
+  descs: Fixed64RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const sfixed32Config: NumericConfig<number> = {
   typeName: "sfixed32",
-  descs: sfixed32Descs,
+  descs: SFixed32RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const sfixed64Config: NumericConfig<bigint> = {
   typeName: "sfixed64",
-  descs: sfixed64Descs,
+  descs: SFixed64RulesSchema.field,
   format: stringFormat,
   nanFailsRange: false,
 };
 const floatConfig: NumericConfig<number> = {
   typeName: "float",
-  descs: floatDescs,
+  descs: FloatRulesSchema.field,
   format: floatFormat,
   nanFailsRange: true,
 };
 const doubleConfig: NumericConfig<number> = {
   typeName: "double",
-  descs: doubleDescs,
+  descs: DoubleRulesSchema.field,
   format: floatFormat,
   nanFailsRange: true,
 };
@@ -353,7 +350,7 @@ function build<T extends number | bigint>(
     return undefined;
   }
 
-  const handled = new Set<import("@bufbuild/protobuf").DescField>();
+  const handled = new Set<DescField>();
 
   let constRule: ConstRule<T> | undefined;
   if (isFieldSet(rules, config.descs.const)) {

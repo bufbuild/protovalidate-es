@@ -20,8 +20,10 @@ import type {
 } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
-import type { BoolRules } from "../gen/buf/validate/validate_pb.js";
-import { boolConstDesc } from "./sites.js";
+import {
+  type BoolRules,
+  BoolRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
 
 /**
@@ -38,7 +40,7 @@ class EvalNativeBoolRules implements Eval<ScalarValue> {
   ) {}
 
   eval(val: ScalarValue, cursor: Cursor): void {
-    if ((val as boolean) !== this.constVal) {
+    if (val !== this.constVal) {
       cursor.violate(
         `must equal ${this.constVal}`,
         "bool.const",
@@ -65,12 +67,12 @@ export function tryBuildNativeBoolRules(
   if (rules.$unknown && rules.$unknown.length > 0) {
     return undefined;
   }
-  if (!isFieldSet(rules, boolConstDesc)) {
+  if (!isFieldSet(rules, BoolRulesSchema.field.const)) {
     return undefined;
   }
-  const path = rulePath.clone().field(boolConstDesc).toPath();
+  const path = rulePath.clone().field(BoolRulesSchema.field.const).toPath();
   return {
     eval: new EvalNativeBoolRules(forMapKey, rules.const, path),
-    handledFields: new Set([boolConstDesc]),
+    handledFields: new Set([BoolRulesSchema.field.const]),
   };
 }

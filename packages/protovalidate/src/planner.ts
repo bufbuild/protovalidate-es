@@ -454,12 +454,11 @@ export class Planner {
           forMapKey,
           wrappedValueField,
         });
-    // Standard CEL plans: enroll every set field whose rule isn't claimed by
-    // the native dispatcher. When native handles every set rule (e.g., a pure
-    // numeric/bytes message after the phase-3 port) the CEL evaluator stays
-    // empty — leave it out of the tree entirely so its per-iteration setEnv()
-    // calls don't run. The handledFields set from tryBuildNative is what
-    // tells us which plans the native path took.
+    // Standard CEL plans: enroll every field whose rule isn't claimed by
+    // the native dispatcher. In situations where native rules handle every specified
+    // rule, the CEL evaluator stays empty. Leave it out of the tree entirely so
+    // its per-iteration setEnv() calls don't run. The handledFields set from
+    // tryBuildNative is what tells us which plans the native path took.
     let evalStandard: EvalStandardRulesCel | undefined;
     for (const plan of prepared.standard) {
       if (!isFieldSet(rules, plan.field)) {
