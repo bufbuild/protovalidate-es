@@ -48,7 +48,7 @@ import {
 /**
  * One bench case: a schema, a fixture, and the name to record under.
  */
-export type BenchCase = {
+type BenchCase = {
   name: string;
   schema: DescMessage;
   fixture: Message;
