@@ -15,7 +15,10 @@
 import * as console from "node:console";
 import { writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
-import { createValidator } from "@bufbuild/protovalidate";
+import {
+  createValidator,
+  type ValidatorOptions,
+} from "@bufbuild/protovalidate";
 import { Bench, type Task } from "tinybench";
 import { cases } from "./cases.js";
 
@@ -62,7 +65,10 @@ if (tests.length == 0) {
 }
 
 const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
-const validator = createValidator();
+const disableNative = process.env.DISABLE_NATIVE_RULES;
+const opts: ValidatorOptions =
+  disableNative !== undefined ? { disableNativeRules: true } : {};
+const validator = createValidator(opts);
 for (const test of tests) {
   bench.add(test.name, () => {
     validator.validate(test.schema, test.fixture);

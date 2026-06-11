@@ -23,7 +23,10 @@ import {
   isMessage,
   ScalarType,
 } from "@bufbuild/protobuf";
-import { FeatureSet_FieldPresence } from "@bufbuild/protobuf/wkt";
+import {
+  FeatureSet_FieldPresence,
+  isWrapperDesc,
+} from "@bufbuild/protobuf/wkt";
 import {
   type FieldRules,
   type MessageRules,
@@ -256,7 +259,7 @@ export class Planner {
       field,
     );
     if (rules) {
-      evals.add(this.rules(rules, rulePath, false));
+      evals.add(this.rules(rules, rulePath, false, undefined, field));
     }
     const itemsRules = rules?.items;
     switch (field.listKind) {
@@ -423,7 +426,16 @@ export class Planner {
       if (isMessage(rules, AnyRulesSchema)) {
         evals.add(new EvalAnyRules(rulePath, rules));
       }
-      evals.add(this.rules(rules, rulePath, false));
+      let wrappedValueField: DescField | undefined;
+      if (isWrapperDesc(descMessage)) {
+        wrappedValueField = descMessage.fields.find((f) => f.name === "value");
+        if (wrappedValueField === undefined) {
+          throw new CompilationError(
+            `wrapper ${descMessage.typeName} has no "value" field`,
+          );
+        }
+      }
+      evals.add(this.rules(rules, rulePath, false, wrappedValueField));
     }
     return evals;
   }
@@ -432,40 +444,47 @@ export class Planner {
     rules: Exclude<FieldRules["type"]["value"], undefined>,
     rulePath: PathBuilder,
     forMapKey: boolean,
+    wrappedValueField: DescField | undefined = undefined,
+    listField: (DescField & { fieldKind: "list" }) | undefined = undefined,
   ) {
     const ruleDesc = getRuleDescriptor(rules.$typeName);
     const prepared = this.celMan.compileRules(ruleDesc);
     const native = this.disableNativeRules
-      ? ({ kind: "none" } as const)
+      ? undefined
       : tryBuildNative({
           rules,
           rulePath,
           forMapKey,
+          wrappedValueField,
+          listField,
           regexMatch: this.regexMatch,
         });
-    const evalStandard = new EvalStandardRulesCel(
-      this.celMan,
-      rules,
-      forMapKey,
-    );
-    const handled = native.kind === "none" ? undefined : native.handledFields;
+    // Standard CEL plans: enroll every field whose rule isn't claimed by
+    // the native dispatcher. In situations where native rules handle every specified
+    // rule, the CEL evaluator stays empty. Leave it out of the tree entirely so
+    // its per-iteration setEnv() calls don't run. The handledFields set from
+    // tryBuildNative is what tells us which plans the native path took.
+    let evalStandard: EvalStandardRulesCel | undefined;
     for (const plan of prepared.standard) {
       if (!isFieldSet(rules, plan.field)) {
         continue;
       }
-      if (handled?.has(plan.field)) {
+      if (native?.handledFields.has(plan.field)) {
         continue;
       }
+      evalStandard ??= new EvalStandardRulesCel(this.celMan, rules, forMapKey);
       evalStandard.add(
         plan.compiled,
         rulePath.clone().field(plan.field).toPath(),
       );
     }
-    const evalExtended = new EvalExtendedRulesCel(
-      this.celMan,
-      rules,
-      forMapKey,
-    );
+    // Extended CEL plans: only allocate the wrapper when an $unknown
+    // extension actually contributes a rule. Native handlers bail on rules
+    // with $unknown fields, so this evaluator is mutually exclusive with
+    // the native path — but constructing it eagerly costs ~13-34% per
+    // validate across the suite because EvalExtendedRulesCel.eval() still
+    // runs two setEnv calls per field even when empty.
+    let evalExtended: EvalExtendedRulesCel | undefined;
     if (rules.$unknown) {
       for (const uf of rules.$unknown) {
         const plans = prepared.extensions.get(uf.no);
@@ -475,6 +494,11 @@ export class Planner {
           );
         }
         for (const plan of plans) {
+          evalExtended ??= new EvalExtendedRulesCel(
+            this.celMan,
+            rules,
+            forMapKey,
+          );
           evalExtended.add(
             plan.compiled,
             rulePath.clone().extension(plan.ext).toPath(),
@@ -484,11 +508,10 @@ export class Planner {
         }
       }
     }
-    const combined = new EvalMany<ReflectMessageGet>(
-      evalStandard,
-      evalExtended,
-    );
-    if (native.kind !== "none") {
+    const combined = new EvalMany<ReflectMessageGet>();
+    if (evalStandard !== undefined) combined.add(evalStandard);
+    if (evalExtended !== undefined) combined.add(evalExtended);
+    if (native !== undefined) {
       combined.add(native.eval);
     }
     return combined;

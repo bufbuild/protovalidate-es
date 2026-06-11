@@ -38,7 +38,13 @@ if (!request.fdset) {
   throw new Error(`Empty request field "fdset"`);
 }
 const registry = createFileRegistry(request.fdset);
-const validator = createValidator({ registry });
+// Set PROTOVALIDATE_DISABLE_NATIVE_RULES=1 to run the conformance suite
+// against the pure-CEL path, proving equivalence with the (default-on)
+// native rules.
+const validator = createValidator({
+  registry,
+  disableNativeRules: process.env.PROTOVALIDATE_DISABLE_NATIVE_RULES === "1",
+});
 const response = create(TestConformanceResponseSchema);
 for (const [name, any] of Object.entries(request.cases)) {
   const testResult = create(TestResultSchema);
