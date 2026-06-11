@@ -32,6 +32,10 @@
       "dependsOn": ["format", "^build", "generate"],
       "cache": false
     },
+    "bench": {
+      "dependsOn": ["^build"],
+      "cache": false
+    },
     "attw": {
       "dependsOn": ["build"],
       "outputLogs": "new-only"
