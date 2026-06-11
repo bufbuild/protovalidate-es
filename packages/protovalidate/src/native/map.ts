@@ -18,6 +18,8 @@ import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
 import {type MapRules, MapRulesSchema} from "../gen/buf/validate/validate_pb.js";
 
+const F = MapRulesSchema.field;
+
 /**
  * Internal dispatch result for map-shaped native handlers.
  *
@@ -76,21 +78,21 @@ export function tryBuildNativeMapRules(
   const handled = new Set<DescField>();
 
   let minPairsRule: SizeRule | undefined;
-  if (isFieldSet(rules, MapRulesSchema.field.minPairs)) {
+  if (isFieldSet(rules, F.minPairs)) {
     minPairsRule = {
       val: rules.minPairs,
-      path: rulePath.clone().field(MapRulesSchema.field.minPairs).toPath(),
+      path: rulePath.clone().field(F.minPairs).toPath(),
     };
-    handled.add(MapRulesSchema.field.minPairs);
+    handled.add(F.minPairs);
   }
 
   let maxPairsRule: SizeRule | undefined;
-  if (isFieldSet(rules, MapRulesSchema.field.maxPairs)) {
+  if (isFieldSet(rules, F.maxPairs)) {
     maxPairsRule = {
       val: rules.maxPairs,
-      path: rulePath.clone().field(MapRulesSchema.field.maxPairs).toPath(),
+      path: rulePath.clone().field(F.maxPairs).toPath(),
     };
-    handled.add(MapRulesSchema.field.maxPairs);
+    handled.add(F.maxPairs);
   }
 
   if (handled.size === 0) {
