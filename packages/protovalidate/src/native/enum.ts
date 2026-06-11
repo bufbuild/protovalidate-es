@@ -20,10 +20,9 @@ import type {
 } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
-import type { EnumRules } from "../gen/buf/validate/validate_pb.js";
+import {type EnumRules, EnumRulesSchema} from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
 import { formatList } from "./format.js";
-import { enumDescs } from "./sites.js";
 
 type ConstRule = { readonly val: number; readonly path: Path };
 type ListRule = { readonly vals: readonly number[]; readonly path: Path };
@@ -103,30 +102,30 @@ export function tryBuildNativeEnumRules(
   const handled = new Set<DescField>();
 
   let constRule: ConstRule | undefined;
-  if (isFieldSet(rules, enumDescs.const)) {
+  if (isFieldSet(rules, EnumRulesSchema.field.const)) {
     constRule = {
       val: rules.const,
-      path: rulePath.clone().field(enumDescs.const).toPath(),
+      path: rulePath.clone().field(EnumRulesSchema.field.const).toPath(),
     };
-    handled.add(enumDescs.const);
+    handled.add(EnumRulesSchema.field.const);
   }
 
   let inRule: ListRule | undefined;
   if (rules.in.length > 0) {
     inRule = {
       vals: rules.in,
-      path: rulePath.clone().field(enumDescs.in).toPath(),
+      path: rulePath.clone().field(EnumRulesSchema.field.in).toPath(),
     };
-    handled.add(enumDescs.in);
+    handled.add(EnumRulesSchema.field.in);
   }
 
   let notInRule: ListRule | undefined;
   if (rules.notIn.length > 0) {
     notInRule = {
       vals: rules.notIn,
-      path: rulePath.clone().field(enumDescs.notIn).toPath(),
+      path: rulePath.clone().field(EnumRulesSchema.field.notIn).toPath(),
     };
-    handled.add(enumDescs.notIn);
+    handled.add(EnumRulesSchema.field.notIn);
   }
 
   if (handled.size === 0) {
