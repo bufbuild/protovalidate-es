@@ -12,122 +12,102 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Bench } from "tinybench";
 import * as console from "node:console";
-import type { DescMessage, Message } from "@bufbuild/protobuf";
-import { createValidator } from "@bufbuild/protovalidate";
-import { cases } from "./cases.js";
 import { writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
+import { createValidator } from "@bufbuild/protovalidate";
+import { Bench, type Task } from "tinybench";
+import { cases } from "./cases.js";
 
-/* eslint-disable no-console, import/no-named-as-default-member */
+const usage = `USAGE: ${process.argv[1]} [regex]
 
-let outPath = ".tmp/bench";
+Run tests with the npm package "tinybench", and print results to standard out.
+If no regex is supplied, all benchmarks are run.
 
-async function main(args: string[]): Promise<void> {
-  function filterTests(regexp: string): Test[] {
-    const tests = setupTests();
-    const re = new RegExp(regexp);
-    return tests.filter((test) => re.test(test.name));
-  }
+Arguments:
+  regex          Run only tests whose name matches this regex.
 
-  const options = {
-    dir: {
-      type: "string",
-    },
-    help: {
-      type: "boolean",
-      short: "h",
-    },
-  } as const;
+Options:
+  --dir <dir>    Directory for JSON results (default: .tmp/bench).
+  -h, --help     Print this help and exit.
+`;
 
-  const { values, positionals } = parseArgs({
-    options,
-    allowPositionals: true,
+const options = {
+  dir: {
+    type: "string",
+  },
+  help: {
+    type: "boolean",
+    short: "h",
+  },
+} as const;
+const { values, positionals } = parseArgs({
+  options,
+  allowPositionals: true,
+});
+if (values.help) {
+  console.log(usage);
+  process.exit(0);
+}
+if (positionals.length > 1) {
+  console.error(usage);
+  process.exit(2);
+}
+const outPath = values.dir ?? ".tmp/bench";
+const filter = positionals.length > 0 ? new RegExp(positionals[0]) : /.*/;
+const tests = cases.filter((test) => filter.test(test.name));
+if (tests.length == 0) {
+  console.log("No tests match pattern; exiting.");
+  process.exit(0);
+}
+
+const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
+const validator = createValidator();
+for (const test of tests) {
+  bench.add(test.name, () => {
+    validator.validate(test.schema, test.fixture);
   });
-  if (values.help) {
-    exitUsage(0);
-  }
-  if (values.dir) {
-    outPath = values.dir;
-  }
-  if (positionals.length > 1) {
-    exitUsage(2);
-  }
-
-  let filter = ".*";
-  if (positionals.length == 1) {
-    filter = positionals[0];
-  }
-  const tests = filterTests(filter);
-  if (tests.length == 0) {
-    console.log("No tests match pattern; exiting.");
-    process.exit(0);
-  }
-  await bench(tests);
-
-  function exitUsage(exitCode = 0): never {
-    const out = exitCode === 0 ? process.stdout : process.stderr;
-    out.write(
-      [
-        `USAGE: ${process.argv[1]} [regex]`,
-        ``,
-        `Run tests with the npm package "tinybench", and print results to standard out.`,
-        `If no regex is supplied, all benchmarks are run.`,
-        ``,
-      ].join("\n"),
-    );
-    process.exit(exitCode);
-  }
 }
-
-interface Test {
-  name: string;
-  schema: DescMessage;
-  fixture: Message;
-}
-
-function setupTests(): Test[] {
-  const tests: Test[] = [];
-  tests.push(...cases);
-  return tests;
-}
+await bench.run();
+writeOutputJson(outPath, bench.tasks);
+console.log(bench.name);
+console.table(bench.table());
 
 /**
- * Benchmark tests with the npm package "tinybench". Results are printed to
- * standard out.
+ * JSON output
  */
-async function bench(tests: Test[]): Promise<void> {
-  const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
-  const validator = createValidator();
+type OutputJson = {
+  timestamp: Date;
+  /**
+   * Node.js version
+   */
+  node: string;
+  /**
+   * Node.js platform / arch
+   */
+  platform: string;
+  /**
+   * tinybench task results
+   */
+  tasks: {
+    name: string;
+    result: Task["result"];
+  }[];
+};
 
-  for (const test of tests) {
-    bench.add(test.name, () => {
-      validator.validate(test.schema, test.fixture);
-    });
-  }
-
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-
-  await bench.run();
-
-  const payload = {
-    timestamp: timestamp,
+function writeOutputJson(outPath: string, tasks: Task[]) {
+  const timestamp = new Date();
+  const output: OutputJson = {
+    timestamp,
     node: process.version,
     platform: `${process.platform}/${process.arch}`,
-    tasks: bench.tasks.map((t) => ({
+    tasks: tasks.map((t) => ({
       name: t.name,
-      // t.result is undefined if the task errored
       result: t.result,
     })),
   };
   writeFileSync(
-    `${outPath}/${timestamp}.json`,
-    JSON.stringify(payload, null, 2),
+    `${outPath}/${timestamp.toISOString().replace(/[:.]/g, "-")}.json`,
+    JSON.stringify(output, null, 2),
   );
-
-  console.log(bench.name);
-  console.table(bench.table());
 }
-
-await main(process.argv.slice(2));
