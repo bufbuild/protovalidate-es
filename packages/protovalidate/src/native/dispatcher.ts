@@ -18,11 +18,25 @@ import type {
   ReflectMessageGet,
   ScalarValue,
 } from "@bufbuild/protobuf/reflect";
-import type { BoolRules, FieldRules } from "../gen/buf/validate/validate_pb.js";
-import { BoolRulesSchema } from "../gen/buf/validate/validate_pb.js";
+import type {
+  BoolRules,
+  EnumRules,
+  FieldRules,
+  MapRules,
+  RepeatedRules,
+} from "../gen/buf/validate/validate_pb.js";
+import {
+  BoolRulesSchema,
+  EnumRulesSchema,
+  MapRulesSchema,
+  RepeatedRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
 import type { Eval } from "../eval.js";
 import { tryBuildNativeBoolRules } from "./bool.js";
+import { tryBuildNativeEnumRules } from "./enum.js";
+import { tryBuildNativeMapRules } from "./map.js";
 import { tryBuildNativeNumericRules } from "./numeric.js";
+import { tryBuildNativeRepeatedRules } from "./repeated.js";
 import { WrappedValueEval } from "./wrapper.js";
 
 /**
@@ -38,10 +52,10 @@ export type NativeDispatchResult = {
 };
 
 /**
- * Internal dispatch result used by the per-rules-type builders. They produce
- * a scalar-typed eval; tryBuildNative either lifts it directly into
- * `Eval<ReflectMessageGet>` (the scalar case) or wraps it in a
- * `WrappedValueEval` for WKT wrapper messages.
+ * Internal dispatch result used by the scalar/enum/bool per-rules-type
+ * builders. They produce a `Eval<ScalarValue>`; {@link tryBuildNative} either
+ * lifts it directly into `Eval<ReflectMessageGet>` (the scalar case) or wraps
+ * it in a `WrappedValueEval` for WKT wrapper messages.
  */
 export type ScalarNativeResult = {
   eval: Eval<ScalarValue>;
@@ -63,6 +77,13 @@ export type NativeDispatchInput = {
    * direct scalar fields.
    */
   wrappedValueField: DescField | undefined;
+  /**
+   * For RepeatedRules dispatch (from `Planner.planList`), the list field
+   * descriptor. The repeated builder uses it to decide whether the `unique`
+   * rule is native-handleable for the element kind. Undefined for non-list
+   * call sites.
+   */
+  listField: (DescField & { fieldKind: "list" }) | undefined;
 };
 
 /**
@@ -75,29 +96,74 @@ export type NativeDispatchInput = {
 export function tryBuildNative(
   input: NativeDispatchInput,
 ): NativeDispatchResult | undefined {
-  const inner = buildScalarNative(input);
-  if (inner === undefined) return undefined;
+  const { rules, rulePath, forMapKey, wrappedValueField, listField } = input;
+  switch (rules.$typeName) {
+    case BoolRulesSchema.typeName: {
+      const r = tryBuildNativeBoolRules(
+        rules as BoolRules,
+        rulePath,
+        forMapKey,
+      );
+      return liftScalar(r, wrappedValueField);
+    }
+    case EnumRulesSchema.typeName: {
+      const r = tryBuildNativeEnumRules(
+        rules as EnumRules,
+        rulePath,
+        forMapKey,
+      );
+      return liftScalar(r, wrappedValueField);
+    }
+    case RepeatedRulesSchema.typeName: {
+      const r = tryBuildNativeRepeatedRules(
+        rules as RepeatedRules,
+        rulePath,
+        forMapKey,
+        listField,
+      );
+      if (r === undefined) return undefined;
+      // Eval is invariant in its parameter; ReflectList is a valid runtime
+      // ReflectMessageGet at this call site.
+      return {
+        eval: r.eval as unknown as Eval<ReflectMessageGet>,
+        handledFields: r.handledFields,
+      };
+    }
+    case MapRulesSchema.typeName: {
+      const r = tryBuildNativeMapRules(rules as MapRules, rulePath);
+      if (r === undefined) return undefined;
+      // Eval is invariant; ReflectMap is a valid runtime ReflectMessageGet here.
+      return {
+        eval: r.eval as unknown as Eval<ReflectMessageGet>,
+        handledFields: r.handledFields,
+      };
+    }
+    default: {
+      // Numeric rule types: int32/int64/uint32/uint64/sint32/sint64/
+      // fixed32/fixed64/sfixed32/sfixed64/float/double. Anything else
+      // (Duration, Timestamp, Any, FieldMask, custom) returns undefined.
+      const r = tryBuildNativeNumericRules(rules, rulePath, forMapKey);
+      return liftScalar(r, wrappedValueField);
+    }
+  }
+}
+
+function liftScalar(
+  result: ScalarNativeResult | undefined,
+  wrappedValueField: DescField | undefined,
+): NativeDispatchResult | undefined {
+  if (result === undefined) return undefined;
   // Eval is invariant in its parameter; the cast is safe because every
   // ScalarValue is also a valid ReflectMessageGet at runtime.
   const lifted =
-    input.wrappedValueField === undefined
-      ? (inner.eval as unknown as Eval<ReflectMessageGet>)
+    wrappedValueField === undefined
+      ? (result.eval as unknown as Eval<ReflectMessageGet>)
       : (new WrappedValueEval(
-          input.wrappedValueField,
-          inner.eval,
+          wrappedValueField,
+          result.eval,
         ) as unknown as Eval<ReflectMessageGet>);
   return {
     eval: lifted,
-    handledFields: inner.handledFields,
+    handledFields: result.handledFields,
   };
-}
-
-function buildScalarNative(
-  input: NativeDispatchInput,
-): ScalarNativeResult | undefined {
-  const { rules, rulePath, forMapKey } = input;
-  if (rules.$typeName === BoolRulesSchema.typeName) {
-    return tryBuildNativeBoolRules(rules as BoolRules, rulePath, forMapKey);
-  }
-  return tryBuildNativeNumericRules(rules, rulePath, forMapKey);
 }

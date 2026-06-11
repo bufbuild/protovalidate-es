@@ -257,7 +257,7 @@ export class Planner {
       field,
     );
     if (rules) {
-      evals.add(this.rules(rules, rulePath, false));
+      evals.add(this.rules(rules, rulePath, false, undefined, field));
     }
     const itemsRules = rules?.items;
     switch (field.listKind) {
@@ -443,6 +443,7 @@ export class Planner {
     rulePath: PathBuilder,
     forMapKey: boolean,
     wrappedValueField: DescField | undefined = undefined,
+    listField: (DescField & { fieldKind: "list" }) | undefined = undefined,
   ) {
     const ruleDesc = getRuleDescriptor(rules.$typeName);
     const prepared = this.celMan.compileRules(ruleDesc);
@@ -453,6 +454,7 @@ export class Planner {
           rulePath,
           forMapKey,
           wrappedValueField,
+          listField,
         });
     // Standard CEL plans: enroll every field whose rule isn't claimed by
     // the native dispatcher. In situations where native rules handle every specified

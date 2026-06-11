@@ -53,3 +53,18 @@ export function printFloat(n: number): string {
   }
   return n.toString();
 }
+
+/**
+ * Format a list of values as `"[v1, v2, ...]"` for inclusion in a violation
+ * message. The per-element formatter is supplied by the caller so each rule
+ * family controls its own element formatting (e.g. numeric uses
+ * `config.format`, enum uses `String`).
+ */
+export function formatList<T>(vs: readonly T[], fmt: (v: T) => string): string {
+  let out = "[";
+  for (let i = 0; i < vs.length; i++) {
+    if (i > 0) out += ", ";
+    out += fmt(vs[i] as T);
+  }
+  return `${out}]`;
+}

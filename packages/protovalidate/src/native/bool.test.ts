@@ -13,50 +13,15 @@
 // limitations under the License.
 
 import { suite, test } from "node:test";
-import * as assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { create, type DescMessage } from "@bufbuild/protobuf";
-import { compileMessage } from "@bufbuild/protocompile";
-import { createValidator } from "../validator.js";
-import type { Violation } from "../error.js";
-
-const bufCompileOptions = {
-  imports: {
-    "buf/validate/validate.proto": readFileSync(
-      "proto/buf/validate/validate.proto",
-      "utf-8",
-    ),
-  },
-};
-
-const native = createValidator();
-const cel = createValidator({ disableNativeRules: true });
-
-/**
- * Validate a fixture under both the native and CEL paths and assert their
- * Violation arrays are byte-identical (message + ruleId + rule path + field
- * path, via Violation.toString()).
- */
-function diff(schema: DescMessage, msg: object): void {
-  // biome-ignore lint/suspicious/noExplicitAny: cross-schema test helper
-  const a = native.validate(schema, msg as any);
-  // biome-ignore lint/suspicious/noExplicitAny: cross-schema test helper
-  const b = cel.validate(schema, msg as any);
-  assert.equal(a.kind, b.kind, "kind mismatch");
-  const fmt = (v: Violation) => v.toString();
-  assert.deepEqual(a.violations?.map(fmt), b.violations?.map(fmt));
-}
+import { create } from "@bufbuild/protobuf";
+import { compile, diff } from "./testing.js";
 
 void suite("native bool rules", () => {
   void suite("bool.const", () => {
-    const schema = compileMessage(
-      `
-      syntax="proto3";
-      import "buf/validate/validate.proto";
-      message M {
+    const schema = compile(
+      `message M {
         bool b = 1 [(buf.validate.field).bool.const = true];
       }`,
-      bufCompileOptions,
     );
     void test("matches: valid", () => {
       diff(schema, create(schema, { b: true }));
@@ -67,15 +32,10 @@ void suite("native bool rules", () => {
   });
 
   void suite("BoolValue wrapper", () => {
-    const schema = compileMessage(
-      `
-      syntax="proto3";
-      import "buf/validate/validate.proto";
-      import "google/protobuf/wrappers.proto";
-      message M {
+    const schema = compile(
+      `message M {
         google.protobuf.BoolValue b = 1 [(buf.validate.field).bool.const = true];
       }`,
-      bufCompileOptions,
     );
     void test("inner value matches: valid", () => {
       diff(schema, create(schema, { b: true }));
