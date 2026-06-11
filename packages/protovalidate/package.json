@@ -42,7 +42,8 @@
     }
   },
   "dependencies": {
-    "@bufbuild/cel": "0.4.0"
+    "@bufbuild/cel": "0.4.0",
+    "@bufbuild/re2": "^0.6.0"
   },
   "peerDependencies": {
     "@bufbuild/protobuf": "^2.8.0"

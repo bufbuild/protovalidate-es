@@ -25,6 +25,7 @@ import type {
   FieldRules,
   MapRules,
   RepeatedRules,
+  StringRules,
 } from "../gen/buf/validate/validate_pb.js";
 import {
   BoolRulesSchema,
@@ -32,6 +33,7 @@ import {
   EnumRulesSchema,
   MapRulesSchema,
   RepeatedRulesSchema,
+  StringRulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
 import type { Eval } from "../eval.js";
 import type { RegexMatcher } from "../func.js";
@@ -41,6 +43,7 @@ import { tryBuildNativeEnumRules } from "./enum.js";
 import { tryBuildNativeMapRules } from "./map.js";
 import { tryBuildNativeNumericRules } from "./numeric.js";
 import { tryBuildNativeRepeatedRules } from "./repeated.js";
+import { tryBuildNativeStringRules } from "./string.js";
 import { WrappedValueEval } from "./wrapper.js";
 
 /**
@@ -120,6 +123,15 @@ export function tryBuildNative(
         rules as BoolRules,
         rulePath,
         forMapKey,
+      );
+      return liftScalar(r, wrappedValueField);
+    }
+    case StringRulesSchema.typeName: {
+      const r = tryBuildNativeStringRules(
+        rules as StringRules,
+        rulePath,
+        forMapKey,
+        regexMatch,
       );
       return liftScalar(r, wrappedValueField);
     }

@@ -50,9 +50,9 @@ if (result.kind !== "valid") {
 > 
 > The `string.pattern` rule supports regular expressions with CEL's standard [RE2 syntax](https://github.com/google/re2/wiki/syntax). 
 > 
-> Protovalidate translates RE2 to ECMAScript's regular expressions. This works except for some RE2 flags, but it cannot support RE2's most important property: Execution in linear time, which guards against [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS).
+> Protovalidate evaluates patterns with [@bufbuild/re2](https://www.npmjs.com/package/@bufbuild/re2), an RE2-compatible engine that executes in linear time, guarding against [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS).
 >
-> If you need full support for RE2, you can bring your own RE2 implementation:
+> If you prefer a different engine, you can bring your own RE2 implementation:
 > 
 > ```ts
 > const validator = createValidator({
