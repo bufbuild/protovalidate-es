@@ -16,7 +16,10 @@ import { type DescField, isFieldSet } from "@bufbuild/protobuf";
 import type { Path, PathBuilder, ReflectMap } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
-import {type MapRules, MapRulesSchema} from "../gen/buf/validate/validate_pb.js";
+import {
+  type MapRules,
+  MapRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
 
 const F = MapRulesSchema.field;
 

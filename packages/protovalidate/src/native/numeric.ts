@@ -35,7 +35,7 @@ import {
   UInt64RulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
-import {formatList, printFloat } from "./format.js";
+import { formatList, printFloat } from "./format.js";
 
 type NumericRulesDescs = {
   readonly const: DescField;

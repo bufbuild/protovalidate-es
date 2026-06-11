@@ -20,7 +20,10 @@ import type {
 } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
-import {type EnumRules, EnumRulesSchema} from "../gen/buf/validate/validate_pb.js";
+import {
+  type EnumRules,
+  EnumRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
 import type { ScalarNativeResult } from "./dispatcher.js";
 import { formatList } from "./format.js";
 
