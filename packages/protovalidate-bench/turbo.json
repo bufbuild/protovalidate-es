@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "bench": {
+      "dependsOn": ["^build", "generate"],
+      "cache": false
+    },
+    "generate": {
+      "dependsOn": ["^build"],
+      "inputs": ["proto", "buf.gen.yaml", "buf.yaml", "package.json"],
+      "outputs": ["src/gen/**"],
+      "outputLogs": "new-only"
+    }
+  }
+}

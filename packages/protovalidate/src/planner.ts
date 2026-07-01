@@ -79,6 +79,8 @@ import {
   EvalStandardRulesCel,
 } from "./cel.js";
 import { CompilationError } from "./error.js";
+import { tryBuildNative } from "./native/index.js";
+import type { RegexMatcher } from "./func.js";
 
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
@@ -86,6 +88,8 @@ export class Planner {
   constructor(
     private readonly celMan: CelManager,
     private readonly legacyRequired: boolean,
+    private readonly disableNativeRules: boolean,
+    private readonly regexMatch: RegexMatcher | undefined,
   ) {}
 
   plan(message: DescMessage): Eval<ReflectMessage> {
@@ -431,13 +435,25 @@ export class Planner {
   ) {
     const ruleDesc = getRuleDescriptor(rules.$typeName);
     const prepared = this.celMan.compileRules(ruleDesc);
+    const native = this.disableNativeRules
+      ? ({ kind: "none" } as const)
+      : tryBuildNative({
+          rules,
+          rulePath,
+          forMapKey,
+          regexMatch: this.regexMatch,
+        });
     const evalStandard = new EvalStandardRulesCel(
       this.celMan,
       rules,
       forMapKey,
     );
+    const handled = native.kind === "none" ? undefined : native.handledFields;
     for (const plan of prepared.standard) {
       if (!isFieldSet(rules, plan.field)) {
+        continue;
+      }
+      if (handled?.has(plan.field)) {
         continue;
       }
       evalStandard.add(
@@ -468,7 +484,14 @@ export class Planner {
         }
       }
     }
-    return new EvalMany(evalStandard, evalExtended);
+    const combined = new EvalMany<ReflectMessageGet>(
+      evalStandard,
+      evalExtended,
+    );
+    if (native.kind !== "none") {
+      combined.add(native.eval);
+    }
+    return combined;
   }
 
   private messageCel(messageRules: MessageRules): Eval<ReflectMessage> {
