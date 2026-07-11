@@ -12,10 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {
-  DescMessage,
-  MessageShape,
-  MessageValidType,
+import {
+  create,
+  type DescMessage,
+  isMessage,
+  type MessageInitShape,
+  type MessageShape,
+  type MessageValidType,
 } from "@bufbuild/protobuf";
 import { createValidator, type ValidatorOptions } from "./validator.js";
 import type { Violation } from "./error.js";
@@ -72,6 +75,10 @@ function violationToIssue(violation: Violation): StandardSchemaV1.Issue {
 /**
  * Create a Standard Schema compliant validator for a Protobuf message type.
  *
+ * The input type is the message shape, matching values built with create().
+ * At runtime, a plain object with the message's init shape is also accepted,
+ * and converted to a message with create() before validation.
+ *
  * @param messageDesc - The Protobuf message descriptor
  * @param options - Optional validator configuration
  * @returns A StandardSchemaV1 compliant validator
@@ -80,6 +87,36 @@ export function createStandardSchema<Desc extends DescMessage>(
   messageDesc: Desc,
   options?: ValidatorOptions,
 ): StandardSchemaV1<MessageShape<Desc>, MessageValidType<Desc>> {
+  return buildStandardSchema(messageDesc, options);
+}
+
+/**
+ * Create a Standard Schema compliant validator for a Protobuf message type,
+ * accepting the message's init shape as input.
+ *
+ * Same runtime behavior as createStandardSchema(), but the input type is
+ * MessageInitShape instead of MessageShape. Use this variant where input
+ * values are plain objects rather than message instances, e.g. form values
+ * or deserialized request payloads.
+ *
+ * @param messageDesc - The Protobuf message descriptor
+ * @param options - Optional validator configuration
+ * @returns A StandardSchemaV1 compliant validator
+ */
+export function createStandardSchemaInit<Desc extends DescMessage>(
+  messageDesc: Desc,
+  options?: ValidatorOptions,
+): StandardSchemaV1<MessageInitShape<Desc>, MessageValidType<Desc>> {
+  return buildStandardSchema(messageDesc, options);
+}
+
+function buildStandardSchema<
+  Desc extends DescMessage,
+  Input extends MessageShape<Desc> | MessageInitShape<Desc>,
+>(
+  messageDesc: Desc,
+  options?: ValidatorOptions,
+): StandardSchemaV1<Input, MessageValidType<Desc>> {
   const validator = createValidator(options);
 
   return {
@@ -98,10 +135,24 @@ export function createStandardSchema<Desc extends DescMessage>(
           };
         }
 
-        const result = validator.validate(
-          messageDesc,
-          value as MessageShape<Desc>,
-        );
+        let message: MessageShape<Desc>;
+        if (isMessage(value, messageDesc)) {
+          message = value;
+        } else {
+          try {
+            message = create(messageDesc, value as MessageInitShape<Desc>);
+          } catch (e) {
+            return {
+              issues: [
+                {
+                  message: e instanceof Error ? e.message : String(e),
+                },
+              ],
+            };
+          }
+        }
+
+        const result = validator.validate(messageDesc, message);
 
         switch (result.kind) {
           case "valid":
@@ -131,7 +182,7 @@ export function createStandardSchema<Desc extends DescMessage>(
       // Runtime values are intentionally set to undefined to minimize overhead
       // while maintaining full TypeScript type information.
       types: {
-        input: undefined as unknown as MessageShape<Desc>,
+        input: undefined as unknown as Input,
         output: undefined as unknown as MessageValidType<Desc>,
       },
     },
