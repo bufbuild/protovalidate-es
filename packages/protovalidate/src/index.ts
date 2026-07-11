@@ -14,4 +14,7 @@
 
 export * from "./validator.js";
 export * from "./error.js";
-export { createStandardSchema } from "./standard-schema.js";
+export {
+  createStandardSchema,
+  createStandardSchemaInit,
+} from "./standard-schema.js";
