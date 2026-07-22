@@ -19,7 +19,7 @@
     "tinybench": "^6.0.2"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.62.1",
+    "@bufbuild/buf": "^1.72.0",
     "@bufbuild/protoc-gen-es": "^2.11.0"
   }
 }
