@@ -1,0 +1,23 @@
+name: dependabot-automerge
+on:
+  pull_request:
+  workflow_run:
+    # Name of workflows whose jobs run on Dependabot PRs.
+    # Each successful completion on a dependabot/** branch wakes the sweep.
+    # The cron below is the backstop.
+    workflows:
+      - "ci"
+    types: [completed]
+    branches: ["dependabot/**"]
+  schedule:
+    - cron: "0 13 * * *" # 13:00 UTC weekdays (8am EST / 9am EDT)
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+jobs:
+  automerge:
+    uses: bufbuild/base-workflows/.github/workflows/dependabot-automerge.yaml@10433b6255ed3de09ce75571cbf4eb9fbff63075 # main
+    with:
+      github-auto-merge: false
