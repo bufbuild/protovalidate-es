@@ -12,12 +12,12 @@ on:
   schedule:
     - cron: "0 13 * * *" # 13:00 UTC weekdays (8am EST / 9am EDT)
   workflow_dispatch:
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
+permissions: {}
 jobs:
   automerge:
-    uses: bufbuild/base-workflows/.github/workflows/dependabot-automerge.yaml@10433b6255ed3de09ce75571cbf4eb9fbff63075 # main
+    uses: bufbuild/base-workflows/.github/workflows/dependabot-automerge.yaml@d80278db600dfe9e959ba815200b38a9c3d9e78c # main
+    secrets:
+      DEPENDENCY_AUTOMERGE_APP_ID: ${{ secrets.DEPENDENCY_AUTOMERGE_APP_ID }}
+      DEPENDENCY_AUTOMERGE_APP_PRIVATE_KEY: ${{ secrets.DEPENDENCY_AUTOMERGE_APP_PRIVATE_KEY }}
     with:
       github-auto-merge: false
