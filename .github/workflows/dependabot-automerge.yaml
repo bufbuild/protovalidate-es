@@ -15,7 +15,7 @@ on:
 permissions: {}
 jobs:
   automerge:
-    uses: bufbuild/base-workflows/.github/workflows/dependabot-automerge.yaml@d80278db600dfe9e959ba815200b38a9c3d9e78c # main
+    uses: bufbuild/base-workflows/.github/workflows/dependabot-automerge.yaml@7c0b54b718244c78f00037343ff7cb33ef7caca9 # main
     secrets:
       DEPENDENCY_AUTOMERGE_APP_ID: ${{ secrets.DEPENDENCY_AUTOMERGE_APP_ID }}
       DEPENDENCY_AUTOMERGE_APP_PRIVATE_KEY: ${{ secrets.DEPENDENCY_AUTOMERGE_APP_PRIVATE_KEY }}
