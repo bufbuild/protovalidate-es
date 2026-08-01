@@ -40,7 +40,7 @@ jobs:
     name: ${{ matrix.task }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
       - uses: actions/setup-node@v6
         with:
           node-version-file: .nvmrc
@@ -64,7 +64,7 @@ jobs:
     name: "test on Node.js ${{ matrix.node-version }}"
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-go@v6
+      - uses: actions/setup-go@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
