@@ -46,7 +46,7 @@
     }
   },
   "dependencies": {
-    "@bufbuild/cel": "0.4.0"
+    "@bufbuild/cel": "0.6.0"
   },
   "peerDependencies": {
     "@bufbuild/protobuf": "^2.8.0"
@@ -54,7 +54,7 @@
   "devDependencies": {
     "@bufbuild/protobuf": "^2.11.0",
     "@bufbuild/protocompile": "^0.0.1",
-    "expect-type": "^1.3.0",
+    "expect-type": "^1.4.0",
     "upstream": "*"
   }
 }
