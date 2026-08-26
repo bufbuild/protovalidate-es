@@ -40,9 +40,9 @@
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
     },
-    "./gen/buf/validate/*": {
-      "import": "./dist/esm/gen/buf/validate/*",
-      "require": "./dist/cjs/gen/buf/validate/*"
+    "./gen/buf/validate/validate_pb.js": {
+      "import": "./dist/esm/gen/buf/validate/validate_pb.js",
+      "require": "./dist/cjs/gen/buf/validate/validate_pb.js"
     }
   },
   "dependencies": {
