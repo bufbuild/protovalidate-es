@@ -14,7 +14,7 @@
 
 import { suite, test } from "node:test";
 import * as assert from "node:assert/strict";
-import { codepointLength, printFloat } from "./format.js";
+import { codepointLength, printFloat, utf8ByteLength } from "./format.js";
 
 void suite("codepointLength", () => {
   void test("counts ASCII as one per char", () => {
@@ -40,6 +40,44 @@ void suite("codepointLength", () => {
     const cases = ["", "x", "𝑎b", "🇺🇸", "héllo"];
     for (const s of cases) {
       assert.strictEqual(codepointLength(s), [...s].length);
+    }
+  });
+});
+
+void suite("utf8ByteLength", () => {
+  void test("counts ASCII as one byte per char", () => {
+    assert.strictEqual(utf8ByteLength(""), 0);
+    assert.strictEqual(utf8ByteLength("a"), 1);
+    assert.strictEqual(utf8ByteLength("abc"), 3);
+  });
+
+  void test("counts 2-, 3-, and 4-byte sequences", () => {
+    assert.strictEqual(utf8ByteLength("é"), 2); // U+00E9
+    assert.strictEqual(utf8ByteLength("€"), 3); // U+20AC
+    assert.strictEqual(utf8ByteLength("𝑎"), 4); // U+1D44E, surrogate pair
+  });
+
+  void test("counts unpaired surrogates as U+FFFD (3 bytes)", () => {
+    assert.strictEqual(utf8ByteLength("\ud800"), 3); // lone high surrogate
+    assert.strictEqual(utf8ByteLength("\udc00"), 3); // lone low surrogate
+    assert.strictEqual(utf8ByteLength("\ud800x"), 4); // high surrogate + ASCII
+  });
+
+  void test("matches TextEncoder for mixed inputs", () => {
+    const cases = [
+      "",
+      "x",
+      "𝑎b",
+      "🇺🇸",
+      "héllo",
+      "߿ࠀ",
+      "\ud800",
+      "\udc00😀",
+      "a𐀀b",
+    ];
+    const encoder = new TextEncoder();
+    for (const s of cases) {
+      assert.strictEqual(utf8ByteLength(s), encoder.encode(s).length);
     }
   });
 });

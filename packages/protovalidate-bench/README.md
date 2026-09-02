@@ -9,10 +9,13 @@ so that runtime cost can be tracked across changes and compared cross-language.
 With turborepo:
 
 ```shell
-npx turbo run bench -- [regex] --dir <dir>
+npx turbo run bench --filter=@bufbuild/protovalidate-bench -- [regex]
 ```
 
-With npm (make sure to generate proto and build dependencies first):
+This command will rebuild the `protovalidate` package and run the benchmarks. This is preferred to make sure
+the latest changes are reflected in the results.
+
+You can also run the benchmarks directly from the `protovalidate-bench` package:
 
 ```shell
 npm run bench

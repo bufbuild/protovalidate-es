@@ -33,6 +33,7 @@ import {
 import { Planner } from "./planner.js";
 import { CelManager } from "./cel.js";
 import type { RegexMatcher } from "./func.js";
+import { re2RegexMatch } from "./regex.js";
 import { file_buf_validate_validate } from "./gen/buf/validate/validate_pb.js";
 
 /**
@@ -60,12 +61,15 @@ export type ValidatorOptions = {
   /**
    * RE2 compliant regex matcher to use.
    *
-   * ECMAScript supports most, but not all RE expressions. You can use a custom
-   * regex engine to support the unsupported features of RE2.
+   * By default, regular expressions are evaluated with an RE2 engine
+   * (the @bufbuild/re2 package), matching protovalidate's documented RE2
+   * contract: RE2 syntax, linear-time matching, no backreferences or
+   * lookaround.
    *
-   * Know limitations of default RE (ECMAScript) matcher:
-   *  * Cannot change flags mid-sequence e.g. 'John(?i)Doe'.
-   *  * Doesn't support the 'U' flag.
+   * This option is the bring-your-own-engine hook: a matcher supplied here
+   * replaces the default for every regex the validator evaluates — the
+   * `string.pattern` and `bytes.pattern` rules, and the CEL `matches()`
+   * function.
    */
   regexMatch?: RegexMatcher;
 
@@ -147,7 +151,7 @@ export function createValidator(opt?: ValidatorOptions): Validator {
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
     : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
-  const regexMatch = opt?.regexMatch;
+  const regexMatch = opt?.regexMatch ?? re2RegexMatch;
   const celMan = new CelManager(registry, regexMatch);
   const planner = new Planner(
     celMan,
