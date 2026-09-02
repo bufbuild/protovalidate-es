@@ -15,11 +15,17 @@
 import { suite, test } from "node:test";
 import * as assert from "node:assert/strict";
 import { create, createRegistry } from "@bufbuild/protobuf";
-import { pathToString } from "@bufbuild/protobuf/reflect";
+import { buildPath, pathToString } from "@bufbuild/protobuf/reflect";
 import { compileFile } from "@bufbuild/protocompile";
 import { bufCompileOptions, cel, compile, diff, native } from "./testing.js";
 import { RuntimeError } from "../error.js";
 import { createValidator } from "../validator.js";
+import {
+  KnownRegex,
+  StringRulesSchema,
+} from "../gen/buf/validate/validate_pb.js";
+import { re2RegexMatch } from "../regex.js";
+import { tryBuildNativeStringRules } from "./string.js";
 
 void suite("native string rules", () => {
   void test("string.const passes and fails", () => {
@@ -474,6 +480,37 @@ void suite("native string rules", () => {
         "valid",
       );
     });
+    // Regression: these header patterns originally spelled their control
+    // characters as `backslash-u` escapes, which RE2 rejects as an invalid
+    // escape sequence. `makePatternTest` swallows that error and returns
+    // undefined, so the entire rules message fell through to CEL — output
+    // stayed correct (so `diff` above still passed) while the native path
+    // silently never ran. Assert engagement directly, against the default
+    // RE2 engine.
+    for (const [label, wk] of [
+      ["header name", KnownRegex.HTTP_HEADER_NAME],
+      ["header value", KnownRegex.HTTP_HEADER_VALUE],
+    ] as const) {
+      for (const strict of [true, false]) {
+        void test(`${label} (strict=${strict}) is valid RE2 and stays native`, () => {
+          const rules = create(StringRulesSchema, {
+            wellKnown: { case: "wellKnownRegex", value: wk },
+            strict,
+          });
+          const built = tryBuildNativeStringRules(
+            rules,
+            buildPath(StringRulesSchema),
+            false,
+            re2RegexMatch,
+          );
+          assert.notEqual(
+            built,
+            undefined,
+            "native path fell back to CEL — the well_known_regex pattern is not valid RE2",
+          );
+        });
+      }
+    }
   });
 
   void suite("fallthrough", () => {

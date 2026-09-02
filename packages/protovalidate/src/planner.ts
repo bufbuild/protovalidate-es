@@ -426,15 +426,9 @@ export class Planner {
       if (isMessage(rules, AnyRulesSchema)) {
         evals.add(new EvalAnyRules(rulePath, rules));
       }
-      let wrappedValueField: DescField | undefined;
-      if (isWrapperDesc(descMessage)) {
-        wrappedValueField = descMessage.fields.find((f) => f.name === "value");
-        if (wrappedValueField === undefined) {
-          throw new CompilationError(
-            `wrapper ${descMessage.typeName} has no "value" field`,
-          );
-        }
-      }
+      const wrappedValueField = isWrapperDesc(descMessage)
+          ? descMessage.field.value
+          : undefined;
       evals.add(this.rules(rules, rulePath, false, wrappedValueField));
     }
     return evals;

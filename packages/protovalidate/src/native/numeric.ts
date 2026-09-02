@@ -222,7 +222,7 @@ class EvalNativeNumericRules<T extends number | bigint>
     if (
       this.finitePath !== undefined &&
       typeof v === "number" &&
-      (Number.isNaN(v) || !Number.isFinite(v))
+      !Number.isFinite(v)
     ) {
       cursor.violate(
         "must be finite",

@@ -65,7 +65,7 @@ if (tests.length == 0) {
 }
 
 const bench = new Bench({ name: "protovalidate benchmarks", time: 100 });
-const disableNative = process.env.DISABLE_NATIVE_RULES;
+const disableNative = process.env.PROTOVALIDATE_DISABLE_NATIVE_RULES;
 const opts: ValidatorOptions =
   disableNative !== undefined ? { disableNativeRules: true } : {};
 const validator = createValidator(opts);

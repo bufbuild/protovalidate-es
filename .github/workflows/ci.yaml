@@ -75,3 +75,9 @@ jobs:
           restore-keys: ${{ runner.os }}/test
       - run: npm ci
       - run: npx turbo run test
+      # Re-run the conformance suite against the pure-CEL path to prove it
+      # stays equivalent to the (default-on) native rules.
+      - name: conformance (native rules disabled)
+        run: npx turbo run test --filter=@bufbuild/protovalidate-testing
+        env:
+          PROTOVALIDATE_DISABLE_NATIVE_RULES: "1"

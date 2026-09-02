@@ -206,16 +206,20 @@ const WELL_KNOWN: Record<
   },
 };
 
-// The `well_known_regex` patterns, byte-identical to the strings the CEL
-// expressions on `StringRules.well_known_regex` compile (after CEL string
-// unescaping — `\\x60` becomes a literal backtick, `\\u0000` a literal NUL).
+// The `well_known_regex` patterns, matching the regexes the CEL expressions
+// on `StringRules.well_known_regex` build. CEL unescapes its string literals
+// before handing them to the regex engine (`\\x60` becomes a literal
+// backtick, `\\u0000` a literal NUL), so the CEL path's control characters
+// arrive raw. RE2 rejects a regex-level `\u` as an invalid escape sequence,
+// so the equivalent `\xHH` escapes are used here — they denote the same
+// codepoints and are valid in both RE2 and ECMAScript.
 // The loose patterns differ between header name (`+`) and header value
 // (`*`); CEL is the source of truth here, not protovalidate-go's shared
 // loose regex.
 const headerNameStrictPattern = "^:?[0-9a-zA-Z!#$%&'*+-.^_|~`]+$";
-const headerNameLoosePattern = "^[^\\u0000\\u000A\\u000D]+$";
-const headerValueStrictPattern = "^[^\\u0000-\\u0008\\u000A-\\u001F\\u007F]*$";
-const headerValueLoosePattern = "^[^\\u0000\\u000A\\u000D]*$";
+const headerNameLoosePattern = "^[^\\x00\\x0A\\x0D]+$";
+const headerValueStrictPattern = "^[^\\x00-\\x08\\x0A-\\x1F\\x7F]*$";
+const headerValueLoosePattern = "^[^\\x00\\x0A\\x0D]*$";
 
 /**
  * Configuration for {@link EvalNativeStringRules}. Bundled into a single

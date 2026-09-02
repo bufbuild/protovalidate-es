@@ -1,5 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": ["PROTOVALIDATE_DISABLE_NATIVE_RULES"],
   "tasks": {
     "build": {
       "dependsOn": ["^build", "generate"],
