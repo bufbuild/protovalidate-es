@@ -427,8 +427,8 @@ export class Planner {
         evals.add(new EvalAnyRules(rulePath, rules));
       }
       const wrappedValueField = isWrapperDesc(descMessage)
-          ? descMessage.field.value
-          : undefined;
+        ? descMessage.field.value
+        : undefined;
       evals.add(this.rules(rules, rulePath, false, wrappedValueField));
     }
     return evals;

@@ -15,6 +15,7 @@
 import { readFileSync } from "node:fs";
 import * as assert from "node:assert/strict";
 import type { DescMessage, Message } from "@bufbuild/protobuf";
+import { pathToString } from "@bufbuild/protobuf/reflect";
 import { compileFile } from "@bufbuild/protocompile";
 import { createValidator } from "../validator.js";
 import type { Violation } from "../error.js";
@@ -40,8 +41,14 @@ export const cel = createValidator({ disableNativeRules: true });
 
 /**
  * Validate a fixture under both the native and CEL paths and assert their
- * Violation arrays are byte-identical (message + ruleId + rule path + field
- * path, via `Violation.toString()`).
+ * Violation arrays are identical across every field: message, ruleId,
+ * field path, rule path, and forKey.
+ *
+ * This compares the whole Violation rather than `Violation.toString()`,
+ * which renders only `<field path>: <message> [<ruleId>]` and so is blind to
+ * `rule` and `forKey`. Two violations that differ only in those — a map with
+ * the same rule on its key and value, say — stringify identically, and a
+ * native handler that mixed them up would slip through.
  *
  * This is the workhorse assertion for native-rule unit tests — every native
  * handler must reproduce CEL output exactly, and the simplest way to prove
@@ -51,7 +58,13 @@ export function diff(schema: DescMessage, msg: Message): void {
   const a = native.validate(schema, msg);
   const b = cel.validate(schema, msg);
   assert.equal(a.kind, b.kind, "kind mismatch");
-  const fmt = (v: Violation) => v.toString();
+  // Paths are arrays of descriptors; render them so deepEqual compares the
+  // paths themselves rather than descriptor object identity.
+  const fmt = (v: Violation) => ({
+    ...v,
+    field: pathToString(v.field),
+    rule: pathToString(v.rule),
+  });
   assert.deepEqual(a.violations?.map(fmt), b.violations?.map(fmt));
 }
 
