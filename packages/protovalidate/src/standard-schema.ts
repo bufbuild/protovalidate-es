@@ -15,7 +15,6 @@
 import {
   create,
   type DescMessage,
-  isMessage,
   type MessageInitShape,
   type MessageShape,
   type MessageValidType,
@@ -101,24 +100,10 @@ export function createStandardSchema<Desc extends DescMessage>(
           };
         }
 
-        let message: MessageShape<Desc>;
-        if (isMessage(value, messageDesc)) {
-          message = value;
-        } else {
-          try {
-            message = create(messageDesc, value as MessageInitShape<Desc>);
-          } catch (e) {
-            return {
-              issues: [
-                {
-                  message: e instanceof Error ? e.message : String(e),
-                },
-              ],
-            };
-          }
-        }
-
-        const result = validator.validate(messageDesc, message);
+        const result = validator.validate(
+          messageDesc,
+          create(messageDesc, value as MessageInitShape<Desc>),
+        );
 
         switch (result.kind) {
           case "valid":
