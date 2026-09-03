@@ -39,6 +39,17 @@
     ".": {
       "import": "./dist/esm/index.js",
       "require": "./dist/cjs/index.js"
+    },
+    "./gen/buf/validate/validate_pb.js": {
+      "import": "./dist/esm/gen/buf/validate/validate_pb.js",
+      "require": "./dist/cjs/gen/buf/validate/validate_pb.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "gen/buf/validate/validate_pb.js": [
+        "./dist/cjs/gen/buf/validate/validate_pb.d.ts"
+      ]
     }
   },
   "dependencies": {
@@ -48,7 +59,7 @@
     "@bufbuild/protobuf": "^2.8.0"
   },
   "devDependencies": {
-    "@bufbuild/protobuf": "^2.11.0",
+    "@bufbuild/protobuf": "^2.14.1",
     "@bufbuild/protocompile": "^0.0.1",
     "expect-type": "^1.4.0",
     "upstream": "*"
