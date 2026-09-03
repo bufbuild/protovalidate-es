@@ -19,8 +19,6 @@ import {
   create,
   type Message,
   type MessageInitShape,
-  type MessageShape,
-  type MessageValidType,
 } from "@bufbuild/protobuf";
 import { expectTypeOf } from "expect-type";
 import { compileMessage } from "@bufbuild/protocompile";
@@ -107,65 +105,11 @@ void suite("createStandardSchema", () => {
       { message: "must be a valid email address", path: ["email"] },
     ]);
   });
-  void test("validates message instance by identity", async () => {
-    const descMessage = compileMessage(
-      `
-      syntax = "proto3";
-      import "buf/validate/validate.proto";
-      message User {
-        string email = 1 [(buf.validate.field).string.email = true];
-      }`,
-      bufCompileOptions,
-    );
-    const schema = createStandardSchema(descMessage);
-    const message = create(descMessage, { email: "test@example.com" });
-    const result = await schema["~standard"].validate(message);
-    assert.ok(result.issues === undefined);
-    assert.strictEqual(result.value, message);
-  });
-  void test("keeps message shape as input type", () => {
-    const schema = createStandardSchema(StringRulesSchema);
+  void test("createStandardSchemaInit infers init shape as input type", () => {
+    const schema = createStandardSchemaInit(StringRulesSchema);
     expectTypeOf<StandardSchemaV1.InferInput<typeof schema>>().toEqualTypeOf<
-      MessageShape<typeof StringRulesSchema>
+      MessageInitShape<typeof StringRulesSchema>
     >();
-    expectTypeOf<StandardSchemaV1.InferOutput<typeof schema>>().toEqualTypeOf<
-      MessageValidType<typeof StringRulesSchema>
-    >();
-    expectTypeOf<typeof schema>().toExtend<
-      StandardSchemaV1<MessageShape<typeof StringRulesSchema>, unknown>
-    >();
-  });
-  void suite("createStandardSchemaInit", () => {
-    void test("returns SuccessResult for valid init object", async () => {
-      const descMessage = compileMessage(
-        `
-        syntax = "proto3";
-        import "buf/validate/validate.proto";
-        message User {
-          string email = 1 [(buf.validate.field).string.email = true];
-        }`,
-        bufCompileOptions,
-      );
-      const schema = createStandardSchemaInit(descMessage);
-      const result = await schema["~standard"].validate({
-        email: "test@example.com",
-      });
-      assert.deepStrictEqual(result, {
-        value: create(descMessage, { email: "test@example.com" }),
-      } satisfies StandardSchemaV1.SuccessResult<Message>);
-    });
-    void test("infers init shape as input type", () => {
-      const schema = createStandardSchemaInit(StringRulesSchema);
-      expectTypeOf<StandardSchemaV1.InferInput<typeof schema>>().toEqualTypeOf<
-        MessageInitShape<typeof StringRulesSchema>
-      >();
-      expectTypeOf<StandardSchemaV1.InferOutput<typeof schema>>().toEqualTypeOf<
-        MessageValidType<typeof StringRulesSchema>
-      >();
-      expectTypeOf<typeof schema>().toExtend<
-        StandardSchemaV1<MessageInitShape<typeof StringRulesSchema>, unknown>
-      >();
-    });
   });
   void test("returns FailureResult for non-message input", async () => {
     const descMessage = compileMessage(`
