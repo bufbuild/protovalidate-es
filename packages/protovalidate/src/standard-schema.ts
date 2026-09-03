@@ -87,36 +87,6 @@ export function createStandardSchema<Desc extends DescMessage>(
   messageDesc: Desc,
   options?: ValidatorOptions,
 ): StandardSchemaV1<MessageShape<Desc>, MessageValidType<Desc>> {
-  return buildStandardSchema(messageDesc, options);
-}
-
-/**
- * Create a Standard Schema compliant validator for a Protobuf message type,
- * accepting the message's init shape as input.
- *
- * Same runtime behavior as createStandardSchema(), but the input type is
- * MessageInitShape instead of MessageShape. Use this variant where input
- * values are plain objects rather than message instances, e.g. form values
- * or deserialized request payloads.
- *
- * @param messageDesc - The Protobuf message descriptor
- * @param options - Optional validator configuration
- * @returns A StandardSchemaV1 compliant validator
- */
-export function createStandardSchemaInit<Desc extends DescMessage>(
-  messageDesc: Desc,
-  options?: ValidatorOptions,
-): StandardSchemaV1<MessageInitShape<Desc>, MessageValidType<Desc>> {
-  return buildStandardSchema(messageDesc, options);
-}
-
-function buildStandardSchema<
-  Desc extends DescMessage,
-  Input extends MessageShape<Desc> | MessageInitShape<Desc>,
->(
-  messageDesc: Desc,
-  options?: ValidatorOptions,
-): StandardSchemaV1<Input, MessageValidType<Desc>> {
   const validator = createValidator(options);
 
   return {
@@ -182,11 +152,31 @@ function buildStandardSchema<
       // Runtime values are intentionally set to undefined to minimize overhead
       // while maintaining full TypeScript type information.
       types: {
-        input: undefined as unknown as Input,
+        input: undefined as unknown as MessageShape<Desc>,
         output: undefined as unknown as MessageValidType<Desc>,
       },
     },
   };
+}
+
+/**
+ * Create a Standard Schema compliant validator for a Protobuf message type,
+ * accepting the message's init shape as input.
+ *
+ * Same runtime behavior as createStandardSchema(), but the input type is
+ * MessageInitShape instead of MessageShape. Use this variant where input
+ * values are plain objects rather than message instances, e.g. form values
+ * or deserialized request payloads.
+ *
+ * @param messageDesc - The Protobuf message descriptor
+ * @param options - Optional validator configuration
+ * @returns A StandardSchemaV1 compliant validator
+ */
+export function createStandardSchemaInit<Desc extends DescMessage>(
+  messageDesc: Desc,
+  options?: ValidatorOptions,
+): StandardSchemaV1<MessageInitShape<Desc>, MessageValidType<Desc>> {
+  return createStandardSchema(messageDesc, options);
 }
 
 /*
