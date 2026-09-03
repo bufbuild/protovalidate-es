@@ -75,10 +75,6 @@ function violationToIssue(violation: Violation): StandardSchemaV1.Issue {
 /**
  * Create a Standard Schema compliant validator for a Protobuf message type.
  *
- * The input type is the message shape, matching values built with create().
- * At runtime, a plain object with the message's init shape is also accepted,
- * and converted to a message with create() before validation.
- *
  * @param messageDesc - The Protobuf message descriptor
  * @param options - Optional validator configuration
  * @returns A StandardSchemaV1 compliant validator
@@ -160,13 +156,8 @@ export function createStandardSchema<Desc extends DescMessage>(
 }
 
 /**
- * Create a Standard Schema compliant validator for a Protobuf message type,
- * accepting the message's init shape as input.
- *
- * Same runtime behavior as createStandardSchema(), but the input type is
- * MessageInitShape instead of MessageShape. Use this variant where input
- * values are plain objects rather than message instances, e.g. form values
- * or deserialized request payloads.
+ * Create a Standard Schema compliant validator for a Protobuf message type
+ * that accepts the message's init shape as input.
  *
  * @param messageDesc - The Protobuf message descriptor
  * @param options - Optional validator configuration
