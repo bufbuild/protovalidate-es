@@ -18,7 +18,7 @@
 
 import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import { file_buf_validate_validate } from "../../buf/validate/validate_pb";
+import { file_buf_validate_validate } from "@bufbuild/protovalidate/gen/buf/validate/validate_pb.js";
 import type { Message } from "@bufbuild/protobuf";
 
 /**
