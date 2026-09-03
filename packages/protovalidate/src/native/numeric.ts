@@ -201,6 +201,8 @@ class EvalNativeNumericRules<T extends number | bigint>
       );
     }
 
+    this.evalRange(v, cursor);
+
     if (this.inRule !== undefined && !includesT(this.inRule.vals, v)) {
       cursor.violate(
         `must be in list ${formatList(this.inRule.vals, this.config.format)}`,
@@ -231,8 +233,6 @@ class EvalNativeNumericRules<T extends number | bigint>
         this.forMapKey,
       );
     }
-
-    this.evalRange(v, cursor);
   }
 
   prune(): boolean {

@@ -24,6 +24,7 @@ jobs:
         task:
           - format
           - lint
+          - typecheck
           - attw
           - build
           - license-header

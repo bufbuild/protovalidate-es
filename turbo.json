@@ -23,6 +23,10 @@
       "dependsOn": ["^build", "generate"],
       "cache": false
     },
+    "typecheck": {
+      "dependsOn": ["^build", "generate"],
+      "outputLogs": "new-only"
+    },
     "format": {
       "outputLogs": "new-only"
     },

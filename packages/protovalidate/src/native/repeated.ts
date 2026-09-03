@@ -187,15 +187,10 @@ export function tryBuildNativeRepeatedRules(
           path: rulePath.clone().field(F.unique).toPath(),
         };
         handled.add(F.unique);
+      } else {
+        // if we can't handle unique, don't partially handle repeated rules
+        return undefined;
       }
-      // When `kind === undefined` (message-element list with unique:true) we
-      // deliberately do NOT claim the unique field; CEL handles it.
-      //
-      // protovalidate-go bails the entire RepeatedRules handler in this case
-      // — releasing min/max_items back to CEL too — to keep ownership
-      // all-or-nothing. We split ownership instead because in TS the
-      // partial-claim cost is zero and unique on message elements is
-      // uncommon. Conformance with the CEL path holds in both shapes.
     }
   }
 
