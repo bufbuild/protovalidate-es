@@ -6,8 +6,10 @@ inputs:
 plugins:
   - local: protoc-gen-es
     out: src/gen
-    include_imports: true
     opt:
       - target=ts
       - import_extension=.js
       - ts_nocheck=false
+      # Use the validate.proto artifacts exported by @bufbuild/protovalidate
+      # instead of generating a local copy.
+      - rewrite_imports=./buf/validate/*_pb.js:@bufbuild/protovalidate/gen
