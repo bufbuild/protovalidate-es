@@ -173,8 +173,20 @@ export class EvalField<F extends DescField> implements Eval<ReflectMessage> {
       this.pass.eval(fieldVal, cursor.field(this.field));
     }
   }
+  private pruning = false;
   prune(): boolean {
-    return this.condition.never && !this.required && !this.legacyRequired;
+    let passDead = false;
+    // Plans for recursive message types are cyclic; don't recurse twice.
+    if (!this.pruning) {
+      this.pruning = true;
+      passDead = this.pass.prune();
+      this.pruning = false;
+    }
+    return (
+      (this.condition.never || passDead) &&
+      !this.required &&
+      !this.legacyRequired
+    );
   }
 }
 
