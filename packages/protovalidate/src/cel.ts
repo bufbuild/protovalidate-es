@@ -86,7 +86,7 @@ export class CelManager {
   private readonly rulesCache = new Map<string, CelCompiledRules>();
   private readonly bindings: Partial<
     Record<"this" | "rules" | "rule" | "now", CelInput>
-  > = {};
+  >;
   private now: CelInput | undefined;
 
   constructor(
@@ -97,16 +97,16 @@ export class CelManager {
       registry,
       funcs: [...strings, ...createCustomFuncions(regexMatcher)],
     });
-    // Computing a Timestamp is comparatively expensive and most rules never
-    // read "now", so the binding computes on first access and memoizes until
-    // resetNow(). The memo keeps "now" stable within a single validation.
-    Object.defineProperty(this.bindings, "now", {
-      enumerable: true,
-      get: (): CelInput => {
-        this.now ??= timestampNow();
-        return this.now;
+    const manager = this;
+    this.bindings = {
+      // Computing a Timestamp is comparatively expensive and most rules never
+      // read "now", so the binding computes on first access and memoizes until
+      // resetNow(). The memo keeps "now" stable within a single validation.
+      get now(): CelInput {
+        manager.now ??= timestampNow();
+        return manager.now;
       },
-    });
+    };
   }
 
   /**
