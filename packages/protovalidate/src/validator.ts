@@ -216,7 +216,11 @@ function validateUnsafe(
   const plan = planner.plan(schema);
   const msg = reflect(schema, message);
   const cursor = Cursor.create(schema, failFast);
-  celMan.updateCelNow();
-  plan.eval(msg, cursor);
+  try {
+    plan.eval(msg, cursor);
+  } finally {
+    // The memoized "now" must not outlive the validation of this message.
+    celMan.resetNow();
+  }
   cursor.throwIfViolated();
 }
