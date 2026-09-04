@@ -15,12 +15,19 @@
 import * as assert from "node:assert";
 import { suite, test } from "node:test";
 import { readFileSync } from "node:fs";
-import { create, type Message } from "@bufbuild/protobuf";
+import {
+  create,
+  type Message,
+  type MessageInitShape,
+} from "@bufbuild/protobuf";
+import { expectTypeOf } from "expect-type";
 import { compileMessage } from "@bufbuild/protocompile";
 import {
   createStandardSchema,
+  createStandardSchemaInit,
   type StandardSchemaV1,
 } from "./standard-schema.js";
+import { StringRulesSchema } from "./gen/buf/validate/validate_pb.js";
 
 const bufCompileOptions = {
   imports: {
@@ -60,6 +67,49 @@ void suite("createStandardSchema", () => {
     assert.deepStrictEqual(result, {
       value: message,
     } satisfies StandardSchemaV1.SuccessResult<Message>);
+  });
+  void test("returns SuccessResult for valid init object", async () => {
+    const descMessage = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message User {
+        string email = 1 [(buf.validate.field).string.email = true];
+      }`,
+      bufCompileOptions,
+    );
+    const schema = createStandardSchema(descMessage);
+    const result = await schema["~standard"].validate({
+      email: "test@example.com",
+    });
+    assert.deepStrictEqual(result, {
+      value: create(descMessage, { email: "test@example.com" }),
+    } satisfies StandardSchemaV1.SuccessResult<Message>);
+  });
+  void test("returns FailureResult for invalid init object", async () => {
+    const descMessage = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message User {
+        string email = 1 [(buf.validate.field).string.email = true];
+      }`,
+      bufCompileOptions,
+    );
+    const schema = createStandardSchema(descMessage);
+    const result = await schema["~standard"].validate({
+      email: "not-an-email",
+    });
+    assert.ok(result.issues?.length === 1);
+    assert.deepStrictEqual(result.issues, [
+      { message: "must be a valid email address", path: ["email"] },
+    ]);
+  });
+  void test("createStandardSchemaInit infers init shape as input type", () => {
+    const schema = createStandardSchemaInit(StringRulesSchema);
+    expectTypeOf<StandardSchemaV1.InferInput<typeof schema>>().toEqualTypeOf<
+      MessageInitShape<typeof StringRulesSchema>
+    >();
   });
   void test("returns FailureResult for non-message input", async () => {
     const descMessage = compileMessage(`

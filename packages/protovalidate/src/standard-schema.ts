@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {
-  DescMessage,
-  MessageShape,
-  MessageValidType,
+import {
+  create,
+  type DescMessage,
+  type MessageInitShape,
+  type MessageShape,
+  type MessageValidType,
 } from "@bufbuild/protobuf";
 import { createValidator, type ValidatorOptions } from "./validator.js";
 import type { Violation } from "./error.js";
@@ -100,7 +102,7 @@ export function createStandardSchema<Desc extends DescMessage>(
 
         const result = validator.validate(
           messageDesc,
-          value as MessageShape<Desc>,
+          create(messageDesc, value as MessageInitShape<Desc>),
         );
 
         switch (result.kind) {
@@ -136,6 +138,21 @@ export function createStandardSchema<Desc extends DescMessage>(
       },
     },
   };
+}
+
+/**
+ * Create a Standard Schema compliant validator for a Protobuf message type
+ * that accepts the message's init shape as input.
+ *
+ * @param messageDesc - The Protobuf message descriptor
+ * @param options - Optional validator configuration
+ * @returns A StandardSchemaV1 compliant validator
+ */
+export function createStandardSchemaInit<Desc extends DescMessage>(
+  messageDesc: Desc,
+  options?: ValidatorOptions,
+): StandardSchemaV1<MessageInitShape<Desc>, MessageValidType<Desc>> {
+  return createStandardSchema(messageDesc, options);
 }
 
 /*
