@@ -50,3 +50,7 @@ If you modify the rules of one of the Protobuf messages, make sure to re-generat
 
 With the [Buf CLI](https://github.com/bufbuild/buf), simply run `npx buf generate` in this directory. [`buf.gen.yaml`](./buf.gen.yaml)
 contains the plugin configuration.
+
+Note that this example does not generate code for `buf/validate/validate.proto`, even though its Protobuf files
+import it. Instead, the plugin option `rewrite_imports` points the generated imports at the code that
+`@bufbuild/protovalidate` already ships as `@bufbuild/protovalidate/gen/buf/validate/validate_pb.js`.
