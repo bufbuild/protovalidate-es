@@ -47,16 +47,34 @@ if (result.kind !== "valid") {
 ```
 
 > [!TIP]
-> 
-> The `string.pattern` rule supports regular expressions with CEL's standard [RE2 syntax](https://github.com/google/re2/wiki/syntax). 
-> 
-> Protovalidate evaluates patterns with [@bufbuild/re2](https://www.npmjs.com/package/@bufbuild/re2), an RE2-compatible engine that executes in linear time, guarding against [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS).
 >
-> If you prefer a different engine, you can bring your own RE2 implementation:
-> 
+> The `string.pattern` rule supports regular expressions with CEL's standard [RE2 syntax](https://github.com/google/re2/wiki/syntax).
+>
+> Protovalidate evaluates patterns with [@bufbuild/re2](https://www.npmjs.com/package/@bufbuild/re2), an RE2-compatible engine that executes in linear time, guarding against [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS). It is the default because it is scoped to what CEL and Protovalidate need, which keeps it small.
+>
+> To evaluate patterns with a different engine, pass a `regexMatch` function. For example, with [re2js](https://www.npmjs.com/package/re2js), a complete port of RE2/J that offers a broader API at the cost of a larger bundle:
+>
 > ```ts
+> import { RE2JS } from "re2js";
+> import { createValidator } from "@bufbuild/protovalidate";
+>
+> // Patterns come from schema rules, so the same handful are matched over and
+> // over. Caching the compiled form keeps repeat matches cheap.
+> const compiled = new Map<string, RE2JS>();
+>
 > const validator = createValidator({
->   regexMatch: (pattern: string, against: string): boolean => new RE2(pattern).test(against),
+>   regexMatch: (pattern: string, against: string): boolean => {
+>     let re = compiled.get(pattern);
+>     if (re === undefined) {
+>       re = RE2JS.compile(pattern);
+>       compiled.set(pattern, re);
+>     }
+>     // Use `find`, which searches anywhere in the input, to match the
+>     // unanchored semantics of CEL's `matches()`. `matches` requires the
+>     // entire input to match and would reject values that Protovalidate
+>     // considers valid.
+>     return re.matcher(against).find();
+>   },
 > });
 > ```
 
