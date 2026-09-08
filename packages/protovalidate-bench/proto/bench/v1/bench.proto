@@ -79,7 +79,7 @@ message BenchComplexSchema {
     string: {min_len: 1}
   }];
 
-  map<string, BenchScalar> map_str_msg = 27 [(buf.validate.field).map.values = {required: true}];
+  map<string, BenchScalar> map_str_msg = 27;
   map<int64, BenchScalar> map_i64_msg = 28;
 
   BenchEnum enum_field = 29 [(buf.validate.field).enum.defined_only = true];

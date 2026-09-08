@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import * as assert from "node:assert";
-import { suite, test } from "node:test";
+import { suite, test, type TestContext } from "node:test";
 import { readFileSync } from "node:fs";
 import { expectTypeOf } from "expect-type";
 import {
@@ -22,7 +22,11 @@ import {
   type DescMessage,
   type Message,
 } from "@bufbuild/protobuf";
-import { DurationSchema, TimestampSchema } from "@bufbuild/protobuf/wkt";
+import {
+  DurationSchema,
+  type Timestamp,
+  TimestampSchema,
+} from "@bufbuild/protobuf/wkt";
 import type { GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { compileFile, compileMessage } from "@bufbuild/protocompile";
 import {
@@ -540,5 +544,105 @@ void suite("MessageOneofRule", () => {
       result.error?.message,
       `field "xxx" not found in message Example`,
     );
+  });
+});
+
+void suite("CEL variable now", () => {
+  void test("is fresh for each validation", (t) => {
+    // timestampNow() reads the clock through new Date().
+    t.mock.timers.enable({ apis: ["Date"], now: 1_000_000_000_000 });
+    type M = Message<"M"> & { ts?: Timestamp };
+    const schema = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      import "google/protobuf/timestamp.proto";
+      message M {
+        google.protobuf.Timestamp ts = 1 [(buf.validate.field).timestamp.lt_now = true];
+      }
+      `,
+      bufCompileOptions,
+    ) as GenMessage<M>;
+    const validator = createValidator();
+    // One second in the (mocked) future: not less than now.
+    const msg = create(schema, {
+      ts: create(TimestampSchema, { seconds: 1_000_000_001n }),
+    });
+    assert.strictEqual(validator.validate(schema, msg).kind, "invalid");
+    // Two seconds later, the same timestamp is in the past. "now" is
+    // memoized only for the duration of a single validation, so the second
+    // validation must see the new time.
+    t.mock.timers.tick(2000);
+    assert.strictEqual(validator.validate(schema, msg).kind, "valid");
+  });
+
+  // Mock the clock: each parameterless new Date() returns a time one hour
+  // later than the last. timestampNow() reads the clock through new Date().
+  // Returns a counter of those reads.
+  function installAdvancingClock(t: TestContext): () => number {
+    const RealDate = globalThis.Date;
+    let nowMs = 1_000_000_000_000;
+    const mocked = t.mock.method(
+      globalThis,
+      "Date",
+      class extends RealDate {
+        constructor(ms?: number) {
+          if (ms === undefined) {
+            nowMs += 3_600_000;
+            ms = nowMs;
+          }
+          super(ms);
+        }
+      } as DateConstructor,
+    );
+    return () =>
+      mocked.mock.calls.filter((call) => call.arguments.length === 0).length;
+  }
+
+  void test("is read at most once per validation", (t) => {
+    installAdvancingClock(t);
+    const schema = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message M {
+        option (buf.validate.message).cel = {
+          id: "now_is_stable"
+          message: "now must be stable within a validation"
+          expression: "now == now"
+        };
+      }
+      `,
+      bufCompileOptions,
+    );
+    const validator = createValidator();
+    // Every uncached clock read returns a different time, so this can only
+    // be valid if both reads of "now" see the same memoized value.
+    assert.strictEqual(
+      validator.validate(schema, create(schema)).kind,
+      "valid",
+    );
+  });
+
+  void test("is not computed when no rule reads it", (t) => {
+    const reads = installAdvancingClock(t);
+    type M = Message<"M"> & { x: number };
+    const schema = compileMessage(
+      `
+      syntax = "proto3";
+      import "buf/validate/validate.proto";
+      message M {
+        int32 x = 1 [(buf.validate.field).int32.gt = 0];
+      }
+      `,
+      bufCompileOptions,
+    ) as GenMessage<M>;
+    const validator = createValidator();
+    const msg = create(schema, { x: 1 });
+    // First validation compiles the plan; ignore any reads during setup.
+    validator.validate(schema, msg);
+    const before = reads();
+    assert.strictEqual(validator.validate(schema, msg).kind, "valid");
+    assert.strictEqual(reads(), before);
   });
 });
