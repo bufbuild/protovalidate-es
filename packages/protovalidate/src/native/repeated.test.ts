@@ -15,8 +15,15 @@
 import { suite, test } from "node:test";
 import * as assert from "node:assert/strict";
 import { create, type DescMessage } from "@bufbuild/protobuf";
-import { pathToString } from "@bufbuild/protobuf/reflect";
-import { compile as compileWithPreamble, diff, native } from "./testing.js";
+import { buildPath, pathToString } from "@bufbuild/protobuf/reflect";
+import { RepeatedRulesSchema } from "../gen/buf/validate/validate_pb.js";
+import {
+  cel,
+  compile as compileWithPreamble,
+  diff,
+  native,
+} from "./testing.js";
+import { tryBuildNativeRepeatedRules } from "./repeated.js";
 
 const PREAMBLE = `
   enum Color { COLOR_UNSPECIFIED = 0; COLOR_RED = 1; COLOR_GREEN = 2; }
@@ -145,6 +152,46 @@ void suite("native repeated rules", () => {
       diff(s, create(s, { xs: [true, true] }));
     });
 
+    void suite("float/double NaN and signed zero", () => {
+      const s = compile(
+        `message M {
+          repeated double ds = 1 [(buf.validate.field).repeated.unique = true];
+          repeated float fs = 2 [(buf.validate.field).repeated.unique = true];
+        }`,
+      );
+      const nan = Number.NaN;
+
+      // `diff` only proves the two paths agree. These also assert the shared
+      // answer, so neither path can drift away from protovalidate-go and
+      // protovalidate-java, which both treat every NaN as distinct.
+      function check(xs: number[], want: "valid" | "invalid") {
+        for (const msg of [create(s, { ds: xs }), create(s, { fs: xs })]) {
+          diff(s, msg);
+          assert.equal(native.validate(s, msg).kind, want);
+          assert.equal(cel.validate(s, msg).kind, want);
+        }
+      }
+
+      void test("every NaN counts as distinct", () => {
+        check([nan], "valid");
+        check([nan, nan], "valid");
+        check([nan, nan, nan], "valid");
+        check([nan, 1], "valid");
+        check([1, nan], "valid");
+      });
+
+      void test("a real duplicate alongside NaN is still caught", () => {
+        check([nan, 1, 1], "invalid");
+        check([1, nan, 1], "invalid");
+      });
+
+      void test("positive and negative zero collide", () => {
+        check([0, -0], "invalid");
+        check([-0, 0], "invalid");
+        check([0, 1], "valid");
+      });
+    });
+
     void test("message elements fall through to CEL", () => {
       // For `unique` on message-element lists, the native dispatcher returns
       // undefined for the unique field and CEL handles it. min/max_items still
@@ -161,6 +208,30 @@ void suite("native repeated rules", () => {
       // Two identical messages — exercises the CEL-handled unique path so we
       // confirm fallthrough actually triggers the violation.
       diff(s, create(s, { xs: [{ x: 1 }, { x: 1 }] }));
+    });
+
+    void test("a missing list field descriptor falls through to CEL", () => {
+      // The planner always supplies the list field, so this is reached by
+      // calling the builder directly. Without the descriptor the element
+      // kind is unknown, so the whole rules message must fall through to
+      // CEL rather than claiming min_items/max_items and leaving `unique`
+      // behind — a split that would emit the violations out of order.
+      const rules = create(RepeatedRulesSchema, {
+        minItems: 2n,
+        maxItems: 1n,
+        unique: true,
+      });
+      const built = tryBuildNativeRepeatedRules(
+        rules,
+        buildPath(RepeatedRulesSchema),
+        false,
+        undefined,
+      );
+      assert.equal(
+        built === undefined,
+        true,
+        "expected the whole rules message to fall through to CEL",
+      );
     });
   });
 

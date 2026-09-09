@@ -1298,9 +1298,22 @@ class Uri {
 /**
  * Returns true if the array only contains values that are distinct from each
  * other by strict comparison.
+ *
+ * NaN is exempt: every NaN counts as distinct, because `NaN == NaN` is false
+ * under CEL equality. protovalidate-go gets this from Go's `==` (in both its
+ * native and CEL paths) and protovalidate-java skips NaN explicitly, so this
+ * is the cross-language behavior.
+ *
+ * `-0` and `0` do collide, which `indexOf` already gets right — it compares
+ * with strict equality, where `-0 === 0`.
  */
 export function unique(this: CelList): boolean {
   return Array.from(this.values()).every((a, index, arr) => {
+    if (typeof a === "number" && Number.isNaN(a)) {
+      // `indexOf` can never find a NaN, so without this every list holding
+      // one would be reported as non-unique.
+      return true;
+    }
     if (isCelUint(a)) {
       for (let i = 0; i < arr.length; i++) {
         if (i == index) {

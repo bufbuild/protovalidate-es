@@ -37,7 +37,7 @@ export type ListNativeResult = {
   handledFields: ReadonlySet<DescField>;
 };
 
-type UniqueKind = "scalar" | "bytes" | "enum";
+type UniqueKind = "scalar" | "float" | "bytes" | "enum";
 
 type SizeRule = { readonly val: bigint; readonly path: Path };
 type UniqueRule = { readonly kind: UniqueKind; readonly path: Path };
@@ -93,6 +93,21 @@ function isUnique(list: ReflectList, kind: UniqueKind): boolean {
     }
     return true;
   }
+  if (kind === "float") {
+    const seen = new Set<number>();
+    for (const item of list) {
+      const n = item as number;
+      // Every NaN counts as distinct, because `NaN == NaN` is false under
+      // CEL equality. A plain Set would collide them: it compares with
+      // SameValueZero, under which NaN equals itself. protovalidate-go
+      // relies on Go's `==` and protovalidate-java skips NaN explicitly —
+      // both treat every NaN as unique.
+      if (Number.isNaN(n)) continue;
+      if (seen.has(n)) return false;
+      seen.add(n);
+    }
+    return true;
+  }
   // scalar (number/bigint/string/boolean) and enum (number) — strict-equal Set works.
   const seen = new Set<unknown>();
   for (const item of list) {
@@ -130,7 +145,15 @@ function uniqueKindForListField(
     case "enum":
       return "enum";
     case "scalar":
-      return field.scalar === ScalarType.BYTES ? "bytes" : "scalar";
+      switch (field.scalar) {
+        case ScalarType.BYTES:
+          return "bytes";
+        case ScalarType.FLOAT:
+        case ScalarType.DOUBLE:
+          return "float";
+        default:
+          return "scalar";
+      }
   }
 }
 
@@ -191,6 +214,12 @@ export function tryBuildNativeRepeatedRules(
         // if we can't handle unique, don't partially handle repeated rules
         return undefined;
       }
+    } else {
+      // This case is not reachable (listField should never be undefined),
+      // but if it is reached, we can't handle unique and shouldn't have
+      // partially handled rules because they will be evaluated in a
+      // different order than only CEL rules or only native rules.
+      return undefined;
     }
   }
 
