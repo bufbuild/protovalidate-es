@@ -20,6 +20,20 @@ import type {
 } from "@bufbuild/protobuf/reflect";
 import type { Cursor } from "../cursor.js";
 import type { Eval } from "../eval.js";
+import type {
+  DoubleRules,
+  Fixed32Rules,
+  Fixed64Rules,
+  FloatRules,
+  Int32Rules,
+  Int64Rules,
+  SFixed32Rules,
+  SFixed64Rules,
+  SInt32Rules,
+  SInt64Rules,
+  UInt32Rules,
+  UInt64Rules,
+} from "../gen/buf/validate/validate_pb.js";
 import {
   DoubleRulesSchema,
   Fixed32RulesSchema,
@@ -155,11 +169,13 @@ type NumericRulesShape<T extends number | bigint> = Message<string> & {
     | { case: "lt"; value: T }
     | { case: "lte"; value: T }
     | { case: undefined; value?: undefined };
-};
-
-/** Float and Double additionally carry the `finite` flag. */
-type NumericRulesWithFinite<T extends number> = NumericRulesShape<T> & {
-  finite: boolean;
+  /**
+   * Present only on FloatRules and DoubleRules. Optional here so the shape
+   * covers all twelve without a cast at the one place that reads it — the
+   * ten integer types simply never have it, and `descs.finite` is undefined
+   * for them, so the read is guarded either way.
+   */
+  finite?: boolean;
 };
 
 type ConstRule<T> = { readonly val: T; readonly path: Path };
@@ -397,8 +413,7 @@ function build<T extends number | bigint>(
 
   let finitePath: Path | undefined;
   if (config.descs.finite && isFieldSet(rules, config.descs.finite)) {
-    const finite = (rules as unknown as NumericRulesWithFinite<number>).finite;
-    if (finite) {
+    if (rules.finite) {
       finitePath = rulePath.clone().field(config.descs.finite).toPath();
     }
     handled.add(config.descs.finite);
@@ -424,101 +439,60 @@ function build<T extends number | bigint>(
 }
 
 /**
+ * The twelve numeric rules messages, as a discriminated union.
+ *
+ * Spelling them out is what lets the `$typeName` switch below narrow to a
+ * concrete type in each arm, so no arm needs a cast. The union is erased at
+ * compile time — it costs nothing at runtime or in bundle size.
+ */
+export type NumericRules =
+  | Int32Rules
+  | Int64Rules
+  | UInt32Rules
+  | UInt64Rules
+  | SInt32Rules
+  | SInt64Rules
+  | Fixed32Rules
+  | Fixed64Rules
+  | SFixed32Rules
+  | SFixed64Rules
+  | FloatRules
+  | DoubleRules;
+
+/**
  * Build a native evaluator for any of the 12 numeric rules messages.
- * Returns `undefined` for any unrecognized type or for rules that bail out
- * (NaN bound, unknown extensions, no fields set).
+ * Returns `undefined` for rules that bail out (NaN bound, unknown
+ * extensions, no fields set).
  */
 export function tryBuildNativeNumericRules(
-  rules: Message<string>,
+  rules: NumericRules,
   rulePath: PathBuilder,
   forMapKey: boolean,
 ): ScalarNativeResult | undefined {
   switch (rules.$typeName) {
     case Int32RulesSchema.typeName:
-      return build<number>(
-        rules as NumericRulesShape<number>,
-        int32Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<number>(rules, int32Config, rulePath, forMapKey);
     case Int64RulesSchema.typeName:
-      return build<bigint>(
-        rules as NumericRulesShape<bigint>,
-        int64Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<bigint>(rules, int64Config, rulePath, forMapKey);
     case UInt32RulesSchema.typeName:
-      return build<number>(
-        rules as NumericRulesShape<number>,
-        uint32Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<number>(rules, uint32Config, rulePath, forMapKey);
     case UInt64RulesSchema.typeName:
-      return build<bigint>(
-        rules as NumericRulesShape<bigint>,
-        uint64Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<bigint>(rules, uint64Config, rulePath, forMapKey);
     case SInt32RulesSchema.typeName:
-      return build<number>(
-        rules as NumericRulesShape<number>,
-        sint32Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<number>(rules, sint32Config, rulePath, forMapKey);
     case SInt64RulesSchema.typeName:
-      return build<bigint>(
-        rules as NumericRulesShape<bigint>,
-        sint64Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<bigint>(rules, sint64Config, rulePath, forMapKey);
     case Fixed32RulesSchema.typeName:
-      return build<number>(
-        rules as NumericRulesShape<number>,
-        fixed32Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<number>(rules, fixed32Config, rulePath, forMapKey);
     case Fixed64RulesSchema.typeName:
-      return build<bigint>(
-        rules as NumericRulesShape<bigint>,
-        fixed64Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<bigint>(rules, fixed64Config, rulePath, forMapKey);
     case SFixed32RulesSchema.typeName:
-      return build<number>(
-        rules as NumericRulesShape<number>,
-        sfixed32Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<number>(rules, sfixed32Config, rulePath, forMapKey);
     case SFixed64RulesSchema.typeName:
-      return build<bigint>(
-        rules as NumericRulesShape<bigint>,
-        sfixed64Config,
-        rulePath,
-        forMapKey,
-      );
+      return build<bigint>(rules, sfixed64Config, rulePath, forMapKey);
     case FloatRulesSchema.typeName:
-      return build<number>(
-        rules as NumericRulesShape<number>,
-        floatConfig,
-        rulePath,
-        forMapKey,
-      );
+      return build<number>(rules, floatConfig, rulePath, forMapKey);
     case DoubleRulesSchema.typeName:
-      return build<number>(
-        rules as NumericRulesShape<number>,
-        doubleConfig,
-        rulePath,
-        forMapKey,
-      );
-    default:
-      return undefined;
+      return build<number>(rules, doubleConfig, rulePath, forMapKey);
   }
 }

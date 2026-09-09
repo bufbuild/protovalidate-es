@@ -18,22 +18,30 @@ import type {
   ReflectMessageGet,
   ScalarValue,
 } from "@bufbuild/protobuf/reflect";
-import type {
-  BoolRules,
-  BytesRules,
-  EnumRules,
-  FieldRules,
-  MapRules,
-  RepeatedRules,
-  StringRules,
-} from "../gen/buf/validate/validate_pb.js";
+import type { FieldRules } from "../gen/buf/validate/validate_pb.js";
 import {
+  AnyRulesSchema,
   BoolRulesSchema,
   BytesRulesSchema,
+  DoubleRulesSchema,
+  DurationRulesSchema,
   EnumRulesSchema,
+  FieldMaskRulesSchema,
+  Fixed32RulesSchema,
+  Fixed64RulesSchema,
+  FloatRulesSchema,
+  Int32RulesSchema,
+  Int64RulesSchema,
   MapRulesSchema,
   RepeatedRulesSchema,
+  SFixed32RulesSchema,
+  SFixed64RulesSchema,
+  SInt32RulesSchema,
+  SInt64RulesSchema,
   StringRulesSchema,
+  TimestampRulesSchema,
+  UInt32RulesSchema,
+  UInt64RulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
 import type { Eval } from "../eval.js";
 import type { RegexMatcher } from "../func.js";
@@ -119,16 +127,12 @@ export function tryBuildNative(
   } = input;
   switch (rules.$typeName) {
     case BoolRulesSchema.typeName: {
-      const r = tryBuildNativeBoolRules(
-        rules as BoolRules,
-        rulePath,
-        forMapKey,
-      );
+      const r = tryBuildNativeBoolRules(rules, rulePath, forMapKey);
       return liftScalar(r, wrappedValueField);
     }
     case StringRulesSchema.typeName: {
       const r = tryBuildNativeStringRules(
-        rules as StringRules,
+        rules,
         rulePath,
         forMapKey,
         regexMatch,
@@ -137,7 +141,7 @@ export function tryBuildNative(
     }
     case BytesRulesSchema.typeName: {
       const r = tryBuildNativeBytesRules(
-        rules as BytesRules,
+        rules,
         rulePath,
         forMapKey,
         regexMatch,
@@ -145,16 +149,12 @@ export function tryBuildNative(
       return liftScalar(r, wrappedValueField);
     }
     case EnumRulesSchema.typeName: {
-      const r = tryBuildNativeEnumRules(
-        rules as EnumRules,
-        rulePath,
-        forMapKey,
-      );
+      const r = tryBuildNativeEnumRules(rules, rulePath, forMapKey);
       return liftScalar(r, wrappedValueField);
     }
     case RepeatedRulesSchema.typeName: {
       const r = tryBuildNativeRepeatedRules(
-        rules as RepeatedRules,
+        rules,
         rulePath,
         forMapKey,
         listField,
@@ -168,7 +168,7 @@ export function tryBuildNative(
       };
     }
     case MapRulesSchema.typeName: {
-      const r = tryBuildNativeMapRules(rules as MapRules, rulePath);
+      const r = tryBuildNativeMapRules(rules, rulePath);
       if (r === undefined) return undefined;
       // Eval is invariant; ReflectMap is a valid runtime ReflectMessageGet here.
       return {
@@ -176,13 +176,31 @@ export function tryBuildNative(
         handledFields: r.handledFields,
       };
     }
-    default: {
-      // Numeric rule types: int32/int64/uint32/uint64/sint32/sint64/
-      // fixed32/fixed64/sfixed32/sfixed64/float/double. Anything else
-      // (Duration, Timestamp, Any, FieldMask, custom) returns undefined.
+    case Int32RulesSchema.typeName:
+    case Int64RulesSchema.typeName:
+    case UInt32RulesSchema.typeName:
+    case UInt64RulesSchema.typeName:
+    case SInt32RulesSchema.typeName:
+    case SInt64RulesSchema.typeName:
+    case Fixed32RulesSchema.typeName:
+    case Fixed64RulesSchema.typeName:
+    case SFixed32RulesSchema.typeName:
+    case SFixed64RulesSchema.typeName:
+    case FloatRulesSchema.typeName:
+    case DoubleRulesSchema.typeName: {
       const r = tryBuildNativeNumericRules(rules, rulePath, forMapKey);
       return liftScalar(r, wrappedValueField);
     }
+    case AnyRulesSchema.typeName:
+    case DurationRulesSchema.typeName:
+    case FieldMaskRulesSchema.typeName:
+    case TimestampRulesSchema.typeName:
+      // No native handler for these yet; CEL evaluates them. Listed rather
+      // than lumped into a `default` so the gap is visible, and so that a
+      // rules message added to FieldRules upstream fails to compile here
+      // (`noImplicitReturns`) instead of silently landing in whichever arm
+      // happened to catch the rest.
+      return undefined;
   }
 }
 
