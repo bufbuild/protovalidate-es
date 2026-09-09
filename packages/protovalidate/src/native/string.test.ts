@@ -25,7 +25,7 @@ import {
   StringRulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
 import { re2RegexMatch } from "../regex.js";
-import { tryBuildNativeStringRules } from "./string.js";
+import { fixedFormatPatterns, tryBuildNativeStringRules } from "./string.js";
 
 void suite("native string rules", () => {
   void test("string.const passes and fails", () => {
@@ -550,5 +550,324 @@ void suite("native string rules", () => {
         assert.deepEqual(a.violations?.map(fmt), b.violations?.map(fmt));
       }
     });
+  });
+});
+
+void suite("fixed formats agree with RE2", () => {
+  // The native path compiles the library's own fixed format patterns with the
+  // platform `RegExp` rather than RE2 (see `fixedPattern` in string.ts). The
+  // CEL path still evaluates the corresponding `this.matches(...)` under RE2,
+  // so pushing a generated corpus through `diff` — which runs both paths and
+  // compares their violations — is a direct check that the two engines agree
+  // on every pattern we bypassed RE2 for. If they ever diverge, this fails.
+  const FORMATS: [string, string][] = [
+    ["uuid", `[(buf.validate.field).string.uuid = true]`],
+    ["tuuid", `[(buf.validate.field).string.tuuid = true]`],
+    ["ulid", `[(buf.validate.field).string.ulid = true]`],
+    ["protobuf_fqn", `[(buf.validate.field).string.protobuf_fqn = true]`],
+    [
+      "protobuf_dot_fqn",
+      `[(buf.validate.field).string.protobuf_dot_fqn = true]`,
+    ],
+    [
+      "header_name strict",
+      `[(buf.validate.field).string = { well_known_regex: KNOWN_REGEX_HTTP_HEADER_NAME, strict: true }]`,
+    ],
+    [
+      "header_name loose",
+      `[(buf.validate.field).string = { well_known_regex: KNOWN_REGEX_HTTP_HEADER_NAME, strict: false }]`,
+    ],
+    [
+      "header_value strict",
+      `[(buf.validate.field).string = { well_known_regex: KNOWN_REGEX_HTTP_HEADER_VALUE, strict: true }]`,
+    ],
+    [
+      "header_value loose",
+      `[(buf.validate.field).string = { well_known_regex: KNOWN_REGEX_HTTP_HEADER_VALUE, strict: false }]`,
+    ],
+  ];
+
+  // Atoms cover what separates the two engines if anything does: the anchor
+  // and word-boundary context (newlines, start/end of text), code points
+  // outside the BMP and lone surrogates (RE2 matches runes, ECMAScript
+  // without the `u` flag matches UTF-16 code units), and the control
+  // characters the header patterns exclude by range.
+  const ATOMS = [
+    "0",
+    "9",
+    "a",
+    "f",
+    "F",
+    "Z",
+    "-",
+    ".",
+    "_",
+    ":",
+    "/",
+    "%",
+    "|",
+    "~",
+    "\x60",
+    "!",
+    "#",
+    "$",
+    "&",
+    "'",
+    "*",
+    "+",
+    "^",
+    " ",
+    "\t",
+    "\n",
+    "\r",
+    "\x00",
+    "\x08",
+    "\x1f",
+    "\x7f",
+    "é",
+    "中",
+    "\u{1D11E}",
+    "\ud834",
+    "\udd1e",
+    "00112233-4455-6677-8899-aabbccddeeff",
+    "00112233445566778899aabbccddeeff",
+    "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "buf.validate.Foo",
+    ".buf.validate.Foo",
+  ];
+
+  let seed = 424242;
+  function rnd(): number {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  }
+
+  // Values that are exactly one of the formats. Random concatenation almost
+  // never lands on a boundary case, so these are mutated deliberately below —
+  // a relaxed quantifier or an off-by-one character range only shows up when
+  // an input sits right on the edge of matching.
+  const EXEMPLARS = [
+    "00112233-4455-6677-8899-aabbccddeeff",
+    "00112233445566778899aabbccddeeff",
+    "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "buf.validate.Foo",
+    ".buf.validate.Foo",
+    "content-type",
+    "application/json",
+  ];
+
+  // Characters used to perturb an exemplar in place. Includes values just
+  // outside each format's leading class (`8` for ULID's `^[0-7]`) and the
+  // separators the header patterns treat specially.
+  const PERTURB = [
+    "0",
+    "7",
+    "8",
+    "9",
+    "a",
+    "f",
+    "g",
+    "z",
+    "A",
+    "G",
+    "Z",
+    "-",
+    ".",
+    "_",
+    ":",
+    "/",
+    "`",
+    "!",
+    "*",
+    "+",
+    "^",
+    " ",
+    "\n",
+    "\x00",
+    "\x1e",
+    "\x1f",
+    "\x7f",
+    "é",
+    "\u{1D11E}",
+  ];
+
+  function nearMisses(v: string): string[] {
+    if (v.length === 0) return [];
+    const out = [
+      // Same length, different character at each end. A wrong leading class
+      // only shows on a value that is otherwise exactly the right shape, so
+      // appending or truncating never reaches it.
+      ...PERTURB.map((c) => c + v.slice(1)),
+      ...PERTURB.map((c) => v.slice(0, -1) + c),
+      ...PERTURB.map((c) => v.slice(0, 1) + c + v.slice(2)),
+      // Repeated prefixes: `^:?` versus `^:*` needs two separators followed
+      // by a class member, which no single-character edit produces.
+      `:${v}`,
+      `::${v}`,
+      "::a",
+      ":a",
+      "::",
+      v.slice(0, -1), // one short
+      v.slice(1), // missing first
+      `${v}0`, // one extra, still in most classes
+      `${v}f`,
+      `${v}-`,
+      `${v}.`,
+      `${v} `, // trailing space
+      ` ${v}`,
+      `${v}\n`, // anchors: `$` must not match before a trailing newline
+      `\n${v}`,
+      v.toUpperCase(),
+      v.toLowerCase(),
+      `${v.slice(0, -1)}g`, // last char outside the hex/base32 classes
+      `${v.slice(0, -1)}Z`,
+      v.replace("-", ""), // separator removed
+      v.replace("-", "_"),
+      v.replace(".", ""),
+      `${v}${v}`, // doubled, to catch an unanchored or repeated group
+    ];
+    return out;
+  }
+
+  for (const [name, option] of FORMATS) {
+    void test(name, () => {
+      const s = compile(`message M { string v = 1 ${option}; }`);
+      // Exact-format values plus the empty string, then boundary mutations of
+      // each exemplar, then a generated corpus.
+      for (const v of ["", ...ATOMS]) {
+        diff(s, create(s, { v }));
+      }
+      for (const exemplar of EXEMPLARS) {
+        diff(s, create(s, { v: exemplar }));
+        for (const v of nearMisses(exemplar)) {
+          diff(s, create(s, { v }));
+        }
+      }
+      for (let i = 0; i < 400; i++) {
+        let v = "";
+        const n = Math.floor(rnd() * 5);
+        for (let j = 0; j < n; j++) {
+          v += ATOMS[Math.floor(rnd() * ATOMS.length)] as string;
+        }
+        diff(s, create(s, { v }));
+      }
+    });
+  }
+});
+
+void suite("fixed format patterns match RE2 exactly", () => {
+  // `fixedPattern` compiles the library's own formats with the platform
+  // RegExp instead of RE2. This checks those exact pattern strings — the ones
+  // the module actually compiled, registered by `fixedPattern` itself — under
+  // both engines, so a divergence is caught at the pattern level rather than
+  // only where a generated message happens to expose it.
+  //
+  // Short inputs matter most: a wrong leading character class or a `?` that
+  // became `*` only shows up on inputs of one or two characters.
+  const CHARS = [
+    "0",
+    "7",
+    "8",
+    "9",
+    "a",
+    "f",
+    "g",
+    "z",
+    "A",
+    "F",
+    "G",
+    "Z",
+    "-",
+    ".",
+    "_",
+    ":",
+    "/",
+    "%",
+    "|",
+    "~",
+    "`",
+    "!",
+    "#",
+    "$",
+    "&",
+    "'",
+    "*",
+    "+",
+    "^",
+    " ",
+    "\t",
+    "\n",
+    "\r",
+    "\x00",
+    "\x08",
+    "\x1e",
+    "\x1f",
+    "\x7f",
+    "é",
+    "中",
+    "\u{1D11E}",
+    "\ud834",
+    "\udd1e",
+  ];
+  const SEEDS = [
+    "",
+    "00112233-4455-6677-8899-aabbccddeeff",
+    "00112233445566778899aabbccddeeff",
+    "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+    "buf.validate.Foo",
+    ".buf.validate.Foo",
+    "content-type",
+  ];
+
+  let seed = 987654321;
+  function rnd(): number {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  }
+  function pick<T>(a: readonly T[]): T {
+    return a[Math.floor(rnd() * a.length)] as T;
+  }
+
+  void test("every registered pattern agrees with re2", () => {
+    assert.equal(
+      fixedFormatPatterns.length,
+      9,
+      "expected 9 fixed formats; update this test if one was added or removed",
+    );
+    const inputs: string[] = [];
+    // Exhaustive one- and two-character inputs over the interesting alphabet.
+    for (const a of CHARS) {
+      inputs.push(a);
+      for (const b of CHARS) inputs.push(a + b);
+    }
+    // Seeds, and each seed perturbed at the edges.
+    for (const seedValue of SEEDS) {
+      inputs.push(seedValue);
+      for (const c of CHARS) {
+        inputs.push(seedValue + c, c + seedValue);
+      }
+      if (seedValue.length > 0) {
+        inputs.push(seedValue.slice(0, -1), seedValue.slice(1));
+        inputs.push(seedValue.toUpperCase(), seedValue.toLowerCase());
+      }
+    }
+    // Random concatenations, for anything the structured cases miss.
+    for (let i = 0; i < 3000; i++) {
+      let v = "";
+      const n = Math.floor(rnd() * 6);
+      for (let j = 0; j < n; j++) v += pick(CHARS);
+      inputs.push(v);
+    }
+
+    for (const pattern of fixedFormatPatterns) {
+      const ecma = new RegExp(pattern);
+      for (const input of inputs) {
+        assert.equal(
+          ecma.test(input),
+          re2RegexMatch(pattern, input),
+          `engines disagree on ${JSON.stringify(pattern)} for input ${JSON.stringify(input)}`,
+        );
+      }
+    }
   });
 });

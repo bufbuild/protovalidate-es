@@ -82,12 +82,55 @@ type BoolWellKnownCase = Exclude<
 >;
 
 /**
+ * Every pattern {@link fixedPattern} has compiled, in declaration order.
+ *
+ * Registration happens inside `fixedPattern` itself so this cannot drift:
+ * a format added without a corresponding entry here is not possible. The
+ * equivalence test in `string.test.ts` walks this list and checks each
+ * pattern against `re2RegexMatch`, so adding a format automatically brings
+ * it under that check.
+ *
+ * @internal Not part of the public API; exported for tests only.
+ */
+export const fixedFormatPatterns: string[] = [];
+
+/**
+ * Compile one of the library's own fixed format patterns.
+ *
+ * These deliberately bypass the validator's regex engine — the `regexMatch`
+ * option and its RE2 default — and use the platform `RegExp` instead. RE2 is
+ * the right engine for `string.pattern` and `bytes.pattern`, where the pattern
+ * comes from the user's schema: it guarantees linear-time matching and rejects
+ * constructs (backreferences, lookaround) whose cost we cannot bound for a
+ * pattern we have never seen. None of that applies here. The patterns below
+ * are constants in this file: anchored, plain character classes with bounded
+ * repetition, no backtracking hazard to protect against.
+ *
+ * What that buys is substantial. `@bufbuild/re2` matches a 36-character UUID
+ * in roughly 2us; the same pattern through `RegExp` takes about 75ns. A
+ * hand-written character scanner measured no faster than `RegExp`, so there is
+ * no reason to hand-code these.
+ *
+ * Equivalence is not assumed — `string.test.ts` fuzzes every pattern here
+ * against `re2RegexMatch` to prove the two engines agree on them, so this
+ * cannot silently drift from the CEL path (which still evaluates the
+ * corresponding `this.matches(...)` under RE2).
+ *
+ * Compiles at module load: a throw here is a bug in the pattern literals
+ * below, not something a user can trigger.
+ */
+function fixedPattern(src: string): (s: string) => boolean {
+  fixedFormatPatterns.push(src);
+  const re = new RegExp(src);
+  return (s) => re.test(s);
+}
+
+/**
  * Per-kind specs for the boolean well-known string formats. Messages and
  * rule ids mirror the predefined CEL annotations on the corresponding
- * `StringRules` fields. Kinds backed by a fixed regex carry the exact
- * pattern string the CEL expression compiles, so both paths share one
- * compiled regex and one behavior under any engine; the rest call the same
- * `lib.ts` helpers CEL's custom functions are built on.
+ * `StringRules` fields. Kinds backed by a fixed regex pass the exact pattern
+ * string the CEL expression compiles to {@link fixedPattern}; the rest call
+ * the same `lib.ts` helpers CEL's custom functions are built on.
  */
 const WELL_KNOWN: Record<
   BoolWellKnownCase,
@@ -95,9 +138,7 @@ const WELL_KNOWN: Record<
     readonly msg: string;
     /** Unset for uri_ref, which has no `*_empty` CEL rule. */
     readonly emptyMsg?: string;
-    /** Exactly one of check / pattern is set. */
-    readonly check?: (s: string) => boolean;
-    readonly pattern?: string;
+    readonly check: (s: string) => boolean;
   }
 > = {
   email: {
@@ -142,13 +183,14 @@ const WELL_KNOWN: Record<
   uuid: {
     msg: "must be a valid UUID",
     emptyMsg: "value is empty, which is not a valid UUID",
-    pattern:
+    check: fixedPattern(
       "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+    ),
   },
   tuuid: {
     msg: "must be a valid trimmed UUID",
     emptyMsg: "value is empty, which is not a valid trimmed UUID",
-    pattern: "^[0-9a-fA-F]{32}$",
+    check: fixedPattern("^[0-9a-fA-F]{32}$"),
   },
   ipWithPrefixlen: {
     msg: "must be a valid IP prefix",
@@ -190,19 +232,21 @@ const WELL_KNOWN: Record<
   ulid: {
     msg: "must be a valid ULID",
     emptyMsg: "value is empty, which is not a valid ULID",
-    pattern: "^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$",
+    check: fixedPattern("^[0-7][0-9A-HJKMNP-TV-Za-hjkmnp-tv-z]{25}$"),
   },
   protobufFqn: {
     msg: "must be a valid fully-qualified Protobuf name",
     emptyMsg:
       "value is empty, which is not a valid fully-qualified Protobuf name",
-    pattern: "^[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)*$",
+    check: fixedPattern("^[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)*$"),
   },
   protobufDotFqn: {
     msg: "must be a valid fully-qualified Protobuf name with a leading dot",
     emptyMsg:
       "value is empty, which is not a valid fully-qualified Protobuf name with a leading dot",
-    pattern: "^\\.[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)*$",
+    check: fixedPattern(
+      "^\\.[A-Za-z_][A-Za-z_0-9]*(\\.[A-Za-z_][A-Za-z_0-9]*)*$",
+    ),
   },
 };
 
@@ -210,9 +254,11 @@ const WELL_KNOWN: Record<
 // on `StringRules.well_known_regex` build. CEL unescapes its string literals
 // before handing them to the regex engine (`\\x60` becomes a literal
 // backtick, `\\u0000` a literal NUL), so the CEL path's control characters
-// arrive raw. RE2 rejects a regex-level `\u` as an invalid escape sequence,
-// so the equivalent `\xHH` escapes are used here — they denote the same
-// codepoints and are valid in both RE2 and ECMAScript.
+// arrive raw. The `\xHH` escapes used here denote the same codepoints as
+// CEL's `\u` form, and are additionally valid RE2 syntax — RE2 rejects a
+// regex-level `\u`. These no longer run under RE2 (see {@link fixedPattern}),
+// but staying RE2-compatible is what lets `string.test.ts` fuzz them against
+// `re2RegexMatch` to prove the two engines agree.
 // The loose patterns differ between header name (`+`) and header value
 // (`*`); CEL is the source of truth here, not protovalidate-go's shared
 // loose regex.
@@ -220,6 +266,11 @@ const headerNameStrictPattern = "^:?[0-9a-zA-Z!#$%&'*+-.^_|~`]+$";
 const headerNameLoosePattern = "^[^\\x00\\x0A\\x0D]+$";
 const headerValueStrictPattern = "^[^\\x00-\\x08\\x0A-\\x1F\\x7F]*$";
 const headerValueLoosePattern = "^[^\\x00\\x0A\\x0D]*$";
+
+const headerNameStrictTest = fixedPattern(headerNameStrictPattern);
+const headerNameLooseTest = fixedPattern(headerNameLoosePattern);
+const headerValueStrictTest = fixedPattern(headerValueStrictPattern);
+const headerValueLooseTest = fixedPattern(headerValueLoosePattern);
 
 /**
  * Configuration for {@link EvalNativeStringRules}. Bundled into a single
@@ -419,7 +470,11 @@ class EvalNativeStringRules implements Eval<ScalarValue> {
 }
 
 /**
- * Build a match predicate for a pattern under the active regex engine.
+ * Build a match predicate for a user-supplied `string.pattern` under the
+ * active regex engine — the `regexMatch` option, defaulting to RE2. The
+ * library's own fixed formats do not come through here; see
+ * {@link fixedPattern}.
+ *
  * Returns `undefined` if the pattern doesn't compile — the caller falls
  * through to CEL, which surfaces the same failure the way it already does
  * today.
@@ -595,15 +650,8 @@ export function tryBuildNativeStringRules(
     // strict is on by default; only an explicit `strict: false` loosens.
     const strict = !isFieldSet(rules, F.strict) || rules.strict;
     if (wk.value === KnownRegex.HTTP_HEADER_NAME) {
-      const test = makePatternTest(
-        strict ? headerNameStrictPattern : headerNameLoosePattern,
-        regexMatch,
-      );
-      if (test === undefined) {
-        return undefined;
-      }
       cfg.wellKnown = {
-        check: test,
+        check: strict ? headerNameStrictTest : headerNameLooseTest,
         ruleId: "string.well_known_regex.header_name",
         msg: "must be a valid HTTP header name",
         empty: {
@@ -613,15 +661,8 @@ export function tryBuildNativeStringRules(
         path,
       };
     } else if (wk.value === KnownRegex.HTTP_HEADER_VALUE) {
-      const test = makePatternTest(
-        strict ? headerValueStrictPattern : headerValueLoosePattern,
-        regexMatch,
-      );
-      if (test === undefined) {
-        return undefined;
-      }
       cfg.wellKnown = {
-        check: test,
+        check: strict ? headerValueStrictTest : headerValueLooseTest,
         ruleId: "string.well_known_regex.header_value",
         msg: "must be a valid HTTP header value",
         path,
@@ -635,15 +676,8 @@ export function tryBuildNativeStringRules(
     handled.add(desc);
     if (wk.value) {
       const spec = WELL_KNOWN[wk.case];
-      let check = spec.check;
-      if (check === undefined) {
-        check = makePatternTest(spec.pattern as string, regexMatch);
-        if (check === undefined) {
-          return undefined;
-        }
-      }
       cfg.wellKnown = {
-        check,
+        check: spec.check,
         ruleId: `string.${desc.name}`,
         msg: spec.msg,
         empty:

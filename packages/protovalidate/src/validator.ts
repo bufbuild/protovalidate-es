@@ -67,9 +67,16 @@ export type ValidatorOptions = {
    * lookaround.
    *
    * This option is the bring-your-own-engine hook: a matcher supplied here
-   * replaces the default for every regex the validator evaluates — the
+   * replaces the default for every regex that comes from a schema — the
    * `string.pattern` and `bytes.pattern` rules, and the CEL `matches()`
    * function.
+   *
+   * It does not apply to the library's own fixed formats (`string.uuid`,
+   * `string.ulid`, `string.protobuf_fqn`, `string.well_known_regex` and the
+   * rest). Those patterns are constants in this package rather than input,
+   * so they are matched with the platform `RegExp`, which is far faster and
+   * needs none of RE2's guarantees. See `fixedPattern` in
+   * `native/string.ts`.
    */
   regexMatch?: RegexMatcher;
 
