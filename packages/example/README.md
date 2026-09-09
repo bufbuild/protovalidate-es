@@ -52,5 +52,5 @@ With the [Buf CLI](https://github.com/bufbuild/buf), simply run `npx buf generat
 contains the plugin configuration.
 
 Note that this example does not generate code for `buf/validate/validate.proto`, even though its Protobuf files
-import it. Instead, the plugin option `rewrite_imports` points the generated imports at the code that
+import it. Instead, the plugin option [`map_imports`](https://protobufes.com/reference/plugin-options/#map_imports) points the generated imports at the code that
 `@bufbuild/protovalidate` already ships as `@bufbuild/protovalidate/gen/buf/validate/validate_pb.js`.
