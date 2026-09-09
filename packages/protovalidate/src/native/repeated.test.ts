@@ -122,6 +122,38 @@ void suite("native repeated rules", () => {
       );
     });
 
+    void test("bytes above the linear-scan threshold", () => {
+      // The native bytes check compares buffers directly below the
+      // threshold and switches to string keys above it; both must agree.
+      const s = compile(
+        `message M {
+          repeated bytes xs = 1 [(buf.validate.field).repeated.unique = true];
+        }`,
+      );
+      const distinct = Array.from(
+        { length: 20 },
+        (_, i) => new Uint8Array([i, i + 1]),
+      );
+      diff(s, create(s, { xs: distinct }));
+      const withDupe = distinct.slice();
+      withDupe[19] = new Uint8Array([0, 1]);
+      diff(s, create(s, { xs: withDupe }));
+    });
+
+    void test("scalars above the linear-scan threshold", () => {
+      const s = compile(
+        `message M {
+          repeated int32 is = 1 [(buf.validate.field).repeated.unique = true];
+          repeated string ss = 2 [(buf.validate.field).repeated.unique = true];
+        }`,
+      );
+      const ints = Array.from({ length: 20 }, (_, i) => i);
+      const strs = ints.map((i) => `v${i}`);
+      diff(s, create(s, { is: ints, ss: strs }));
+      diff(s, create(s, { is: [...ints.slice(0, 19), 0], ss: strs }));
+      diff(s, create(s, { is: ints, ss: [...strs.slice(0, 19), "v0"] }));
+    });
+
     void test("enum", () => {
       const s = compile(
         `message M {
@@ -161,14 +193,38 @@ void suite("native repeated rules", () => {
       );
       const nan = Number.NaN;
 
+      // Pad with distinct values that collide with nothing, to reach a
+      // length above the linear-scan threshold.
+      function pad(xs: number[], to: number): number[] {
+        const out = xs.slice();
+        let filler = 1000;
+        while (out.length < to) out.push(filler++);
+        return out;
+      }
+
       // `diff` only proves the two paths agree. These also assert the shared
       // answer, so neither path can drift away from protovalidate-go and
       // protovalidate-java, which both treat every NaN as distinct.
+      //
+      // Every case runs twice: once short enough for the native linear scan
+      // and once long enough for its Set fallback. The two have separate
+      // implementations of the NaN and signed-zero rules, so both need
+      // covering.
       function check(xs: number[], want: "valid" | "invalid") {
-        for (const msg of [create(s, { ds: xs }), create(s, { fs: xs })]) {
-          diff(s, msg);
-          assert.equal(native.validate(s, msg).kind, want);
-          assert.equal(cel.validate(s, msg).kind, want);
+        for (const length of [xs.length, 20]) {
+          const padded = pad(xs, length);
+          for (const msg of [
+            create(s, { ds: padded }),
+            create(s, { fs: padded }),
+          ]) {
+            diff(s, msg);
+            assert.equal(
+              native.validate(s, msg).kind,
+              want,
+              `length ${length}`,
+            );
+            assert.equal(cel.validate(s, msg).kind, want, `length ${length}`);
+          }
         }
       }
 

@@ -82,37 +82,84 @@ class EvalNativeRepeatedRules implements Eval<ReflectList> {
   }
 }
 
+// At and below this length, uniqueness is checked with an O(n^2) scan over a
+// plain array rather than a Set. For short lists the scan wins: it skips
+// allocating the Set and hashing every element, and for bytes it skips
+// building a string key per element. Mirrors protovalidate-go's
+// uniqueLinearThreshold.
+const uniqueLinearThreshold = 16;
+
 function isUnique(list: ReflectList, kind: UniqueKind): boolean {
-  if (list.size <= 1) return true;
+  const n = list.size;
+  if (n <= 1) {
+    return true;
+  }
   if (kind === "bytes") {
+    if (n <= uniqueLinearThreshold) {
+      const seen: Uint8Array[] = [];
+      for (let i = 0; i < n; i++) {
+        const v = list.get(i) as Uint8Array;
+        for (let j = 0; j < i; j++) {
+          if (bytesEqual(seen[j] as Uint8Array, v)) {
+            return false;
+          }
+        }
+        seen[i] = v;
+      }
+      return true;
+    }
     const seen = new Set<string>();
-    for (const item of list) {
-      const key = bytesKey(item as Uint8Array);
-      if (seen.has(key)) return false;
-      seen.add(key);
+    for (let i = 0; i < n; i++) {
+      seen.add(bytesKey(list.get(i) as Uint8Array));
+      if (seen.size !== i + 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (n <= uniqueLinearThreshold) {
+    // `===` needs no float special-casing: NaN never equals itself, so every
+    // NaN counts as distinct, and `-0 === 0`, so signed zeros collide. That
+    // is exactly what protovalidate-go and protovalidate-java produce.
+    const seen: unknown[] = [];
+    for (let i = 0; i < n; i++) {
+      const v = list.get(i);
+      for (let j = 0; j < i; j++) {
+        if (seen[j] === v) {
+          return false;
+        }
+      }
+      seen[i] = v;
     }
     return true;
   }
   if (kind === "float") {
     const seen = new Set<number>();
-    for (const item of list) {
-      const n = item as number;
-      // Every NaN counts as distinct, because `NaN == NaN` is false under
-      // CEL equality. A plain Set would collide them: it compares with
-      // SameValueZero, under which NaN equals itself. protovalidate-go
-      // relies on Go's `==` and protovalidate-java skips NaN explicitly —
-      // both treat every NaN as unique.
-      if (Number.isNaN(n)) continue;
-      if (seen.has(n)) return false;
-      seen.add(n);
+    let added = 0;
+    for (let i = 0; i < n; i++) {
+      const v = list.get(i) as number;
+      // A Set compares with SameValueZero, under which NaN equals itself.
+      // Skip NaN so this path agrees with the linear scan above.
+      if (Number.isNaN(v)) continue;
+      seen.add(v);
+      if (seen.size !== ++added) return false;
     }
     return true;
   }
-  // scalar (number/bigint/string/boolean) and enum (number) — strict-equal Set works.
+  // scalar (number/bigint/string/boolean) and enum (number) — a strict-equal
+  // Set works; none of these kinds can hold NaN.
   const seen = new Set<unknown>();
-  for (const item of list) {
-    if (seen.has(item)) return false;
-    seen.add(item);
+  for (let i = 0; i < n; i++) {
+    seen.add(list.get(i));
+    if (seen.size !== i + 1) return false;
+  }
+  return true;
+}
+
+function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
   }
   return true;
 }
