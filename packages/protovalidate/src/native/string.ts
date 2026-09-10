@@ -481,19 +481,15 @@ class EvalNativeStringRules implements Eval<ScalarValue> {
  */
 function makePatternTest(
   src: string,
-  regexMatch: RegexMatcher | undefined,
+  regexMatch: RegexMatcher,
 ): ((against: string) => boolean) | undefined {
   try {
-    if (regexMatch) {
-      // Probe the engine at plan time so an invalid pattern surfaces here,
-      // symmetric with the default engine's eager compile. Empty input is
-      // the contract-safe probe — a regex engine must be able to test any
-      // pattern against the empty string.
-      regexMatch(src, "");
-      return (against) => regexMatch(src, against);
-    }
-    const re = new RegExp(src);
-    return (against) => re.test(against);
+    // Probe the engine at plan time so an invalid pattern surfaces here,
+    // symmetric with the default engine's eager compile. Empty input is
+    // the contract-safe probe — a regex engine must be able to test any
+    // pattern against the empty string.
+    regexMatch(src, "");
+    return (against) => regexMatch(src, against);
   } catch {
     return undefined;
   }
@@ -512,7 +508,7 @@ export function tryBuildNativeStringRules(
   rules: StringRules,
   rulePath: PathBuilder,
   forMapKey: boolean,
-  regexMatch: RegexMatcher | undefined,
+  regexMatch: RegexMatcher,
 ): ScalarNativeResult | undefined {
   if (rules.$unknown && rules.$unknown.length > 0) {
     return undefined;

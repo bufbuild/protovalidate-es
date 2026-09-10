@@ -92,7 +92,7 @@ export class Planner {
     private readonly celMan: CelManager,
     private readonly legacyRequired: boolean,
     private readonly disableNativeRules: boolean,
-    private readonly regexMatch: RegexMatcher | undefined,
+    private readonly regexMatch: RegexMatcher,
   ) {}
 
   plan(message: DescMessage): Eval<ReflectMessage> {

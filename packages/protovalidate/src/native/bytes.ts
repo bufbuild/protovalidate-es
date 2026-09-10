@@ -332,16 +332,6 @@ function toHex(bytes: Uint8Array): string {
 }
 
 /**
- * Default regex test using the platform `RegExp` engine. Used when no
- * `regexMatch` override is supplied. Phase 4 swaps this for the cel-es
- * `re2` package.
- */
-function defaultRegexTest(pattern: string): (against: string) => boolean {
-  const re = new RegExp(pattern);
-  return (against) => re.test(against);
-}
-
-/**
  * Try to build a native evaluator for BytesRules. Returns `undefined` if no
  * native handler applies (no fields set, unknown extensions, or an
  * uncompilable pattern that we let CEL surface as a CompilationError).
@@ -350,7 +340,7 @@ export function tryBuildNativeBytesRules(
   rules: BytesRules,
   rulePath: PathBuilder,
   forMapKey: boolean,
-  regexMatch: RegexMatcher | undefined,
+  regexMatch: RegexMatcher,
 ): ScalarNativeResult | undefined {
   if (rules.$unknown && rules.$unknown.length > 0) {
     return undefined;
@@ -396,16 +386,12 @@ export function tryBuildNativeBytesRules(
     const src = rules.pattern;
     let test: (against: string) => boolean;
     try {
-      if (regexMatch) {
-        // Probe the user-supplied engine at plan time so an invalid pattern
-        // surfaces here, symmetric with the default engine's eager compile.
-        // Empty input is the contract-safe probe — a regex engine must be
-        // able to test any pattern against the empty string.
-        regexMatch(src, "");
-        test = (against) => regexMatch(src, against);
-      } else {
-        test = defaultRegexTest(src);
-      }
+      // Probe the user-supplied engine at plan time so an invalid pattern
+      // surfaces here, symmetric with the default engine's eager compile.
+      // Empty input is the contract-safe probe — a regex engine must be
+      // able to test any pattern against the empty string.
+      regexMatch(src, "");
+      test = (against) => regexMatch(src, against);
     } catch {
       // The pattern doesn't compile under the active engine. Fall through
       // to CEL, whose own `matches()` call hits the same throw at eval

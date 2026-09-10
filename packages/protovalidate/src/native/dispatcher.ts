@@ -101,10 +101,9 @@ export type NativeDispatchInput = {
   listField: (DescField & { fieldKind: "list" }) | undefined;
   /**
    * Regex matcher to use for rules that compile a pattern (bytes.pattern,
-   * string.pattern). When undefined, handlers use the same ECMAScript regex
-   * engine the CEL path falls back to. Phase 4 swaps the default to RE2.
+   * string.pattern).
    */
-  regexMatch: RegexMatcher | undefined;
+  regexMatch: RegexMatcher;
 };
 
 /**
