@@ -159,19 +159,16 @@ export function tryBuildNative(
         listField,
       );
       if (r === undefined) return undefined;
-      // Eval is invariant in its parameter; ReflectList is a valid runtime
-      // ReflectMessageGet at this call site.
       return {
-        eval: r.eval as unknown as Eval<ReflectMessageGet>,
+        eval: r.eval,
         handledFields: r.handledFields,
       };
     }
     case MapRulesSchema.typeName: {
       const r = tryBuildNativeMapRules(rules, rulePath);
       if (r === undefined) return undefined;
-      // Eval is invariant; ReflectMap is a valid runtime ReflectMessageGet here.
       return {
-        eval: r.eval as unknown as Eval<ReflectMessageGet>,
+        eval: r.eval,
         handledFields: r.handledFields,
       };
     }
@@ -208,15 +205,10 @@ function liftScalar(
   wrappedValueField: DescField | undefined,
 ): NativeDispatchResult | undefined {
   if (result === undefined) return undefined;
-  // Eval is invariant in its parameter; the cast is safe because every
-  // ScalarValue is also a valid ReflectMessageGet at runtime.
   const lifted =
     wrappedValueField === undefined
-      ? (result.eval as unknown as Eval<ReflectMessageGet>)
-      : (new WrappedValueEval(
-          wrappedValueField,
-          result.eval,
-        ) as unknown as Eval<ReflectMessageGet>);
+      ? result.eval
+      : new WrappedValueEval(wrappedValueField, result.eval);
   return {
     eval: lifted,
     handledFields: result.handledFields,
