@@ -11,6 +11,8 @@ plugins:
       - target=ts
       # This option enables Valid types
       - valid_types=protovalidate_required+legacy_required
+      # Use the validate.proto artifacts exported by @bufbuild/protovalidate
+      # instead of generating a local copy. This requires
+      # @bufbuild/protoc-gen-es v2.15.0 or later.
+      - map_imports=buf/validate/:@bufbuild/protovalidate/gen
     out: src/gen
-    # Also generate any imported dependencies
-    include_imports: true

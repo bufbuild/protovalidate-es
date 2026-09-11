@@ -14,12 +14,12 @@
   },
   "type": "module",
   "dependencies": {
-    "@bufbuild/protobuf": "^2.14.1",
+    "@bufbuild/protobuf": "^2.15.0",
     "@bufbuild/protovalidate": "^1.2.0"
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.72.0",
-    "@bufbuild/protoc-gen-es": "^2.14.1",
+    "@bufbuild/protoc-gen-es": "^2.15.0",
     "@standard-schema/spec": "^1.1.0"
   }
 }
