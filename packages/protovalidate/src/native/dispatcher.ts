@@ -151,27 +151,10 @@ export function tryBuildNative(
       const r = tryBuildNativeEnumRules(rules, rulePath, forMapKey);
       return liftScalar(r, wrappedValueField);
     }
-    case RepeatedRulesSchema.typeName: {
-      const r = tryBuildNativeRepeatedRules(
-        rules,
-        rulePath,
-        forMapKey,
-        listField,
-      );
-      if (r === undefined) return undefined;
-      return {
-        eval: r.eval,
-        handledFields: r.handledFields,
-      };
-    }
-    case MapRulesSchema.typeName: {
-      const r = tryBuildNativeMapRules(rules, rulePath);
-      if (r === undefined) return undefined;
-      return {
-        eval: r.eval,
-        handledFields: r.handledFields,
-      };
-    }
+    case RepeatedRulesSchema.typeName:
+      return tryBuildNativeRepeatedRules(rules, rulePath, forMapKey, listField);
+    case MapRulesSchema.typeName:
+      return tryBuildNativeMapRules(rules, rulePath);
     case Int32RulesSchema.typeName:
     case Int64RulesSchema.typeName:
     case UInt32RulesSchema.typeName:
