@@ -110,7 +110,7 @@ const utf8FatalDecoder = new TextDecoder("utf-8", { fatal: true });
 const utf8NonFatalDecoder = new TextDecoder();
 
 /**
- * Configuration for {@link EvalNativeBytesRules}. Bundled into a single
+ * Configuration for `EvalNativeBytesRules`. Bundled into a single
  * object so callers don't have to track ~12 positional constructor args.
  */
 type BytesRulesConfig = {

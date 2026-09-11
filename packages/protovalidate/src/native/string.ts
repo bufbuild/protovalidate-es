@@ -82,7 +82,7 @@ type BoolWellKnownCase = Exclude<
 >;
 
 /**
- * Every pattern {@link fixedPattern} has compiled, in declaration order.
+ * Every pattern `fixedPattern` has compiled, in declaration order.
  *
  * Registration happens inside `fixedPattern` itself so this cannot drift:
  * a format added without a corresponding entry here is not possible. The
@@ -129,7 +129,7 @@ function fixedPattern(src: string): (s: string) => boolean {
  * Per-kind specs for the boolean well-known string formats. Messages and
  * rule ids mirror the predefined CEL annotations on the corresponding
  * `StringRules` fields. Kinds backed by a fixed regex pass the exact pattern
- * string the CEL expression compiles to {@link fixedPattern}; the rest call
+ * string the CEL expression compiles to `fixedPattern`; the rest call
  * the same `lib.ts` helpers CEL's custom functions are built on.
  */
 const WELL_KNOWN: Record<
@@ -256,7 +256,7 @@ const WELL_KNOWN: Record<
 // backtick, `\\u0000` a literal NUL), so the CEL path's control characters
 // arrive raw. The `\xHH` escapes used here denote the same codepoints as
 // CEL's `\u` form, and are additionally valid RE2 syntax — RE2 rejects a
-// regex-level `\u`. These no longer run under RE2 (see {@link fixedPattern}),
+// regex-level `\u`. These no longer run under RE2 (see `fixedPattern`),
 // but staying RE2-compatible is what lets `string.test.ts` fuzz them against
 // `re2RegexMatch` to prove the two engines agree.
 // The loose patterns differ between header name (`+`) and header value
@@ -273,7 +273,7 @@ const headerValueStrictTest = fixedPattern(headerValueStrictPattern);
 const headerValueLooseTest = fixedPattern(headerValueLoosePattern);
 
 /**
- * Configuration for {@link EvalNativeStringRules}. Bundled into a single
+ * Configuration for `EvalNativeStringRules`. Bundled into a single
  * object so callers don't have to track ~15 positional constructor args.
  */
 type StringRulesConfig = {
@@ -472,8 +472,7 @@ class EvalNativeStringRules implements Eval<ScalarValue> {
 /**
  * Build a match predicate for a user-supplied `string.pattern` under the
  * active regex engine — the `regexMatch` option, defaulting to RE2. The
- * library's own fixed formats do not come through here; see
- * {@link fixedPattern}.
+ * library's own fixed formats do not come through here; see `fixedPattern`.
  *
  * Returns `undefined` if the pattern doesn't compile — the caller falls
  * through to CEL, which surfaces the same failure the way it already does

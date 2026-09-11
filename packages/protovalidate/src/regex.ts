@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import { RE2JS } from "@bufbuild/re2";
-import type { RegexMatcher } from "./func.js";
 
 // Most validators see a fixed set of patterns (they come from schema rules),
 // so a simple compile cache makes repeat matches cheap. User CEL rules can
@@ -24,7 +23,7 @@ const cacheLimit = 1024;
 const cache = new Map<string, RE2JS>();
 
 /**
- * The default {@link RegexMatcher}, backed by an RE2 engine.
+ * The default `RegexMatcher`, backed by an RE2 engine.
  *
  * Patterns are compiled with RE2 syntax and matched in linear time,
  * fulfilling protovalidate's RE2 contract for `string.pattern`,
