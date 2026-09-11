@@ -12,4 +12,4 @@ plugins:
       - ts_nocheck=false
       # Use the validate.proto artifacts exported by @bufbuild/protovalidate
       # instead of generating a local copy.
-      - rewrite_imports=./buf/validate/*_pb.js:@bufbuild/protovalidate/gen
+      - map_imports=buf/validate/:@bufbuild/protovalidate/gen
