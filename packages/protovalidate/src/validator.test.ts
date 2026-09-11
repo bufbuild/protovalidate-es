@@ -36,6 +36,7 @@ import {
   type Violation,
 } from "./error.js";
 import { createValidator } from "./validator.js";
+import { CelManager } from "./cel.js";
 
 void test("createValidator() returns Validator", () => {
   const v = createValidator();
@@ -644,5 +645,67 @@ void suite("CEL variable now", () => {
     const before = reads();
     assert.strictEqual(validator.validate(schema, msg).kind, "valid");
     assert.strictEqual(reads(), before);
+  });
+});
+
+void suite("CEL environment work", () => {
+  // Counts CelManager.setEnv calls during one validate() of a message with
+  // `fieldCount` fields carrying only standard rules, optionally plus one
+  // field carrying a real `(buf.validate.field).cel` rule.
+  function celEnvCalls(fieldCount: number, withCelRule: boolean): number {
+    const fields = Array.from(
+      { length: fieldCount },
+      (_, i) => `int32 f${i} = ${i + 1} [(buf.validate.field).int32.gt = 0];`,
+    ).join("\n");
+    const celField = withCelRule
+      ? `int32 z = 900 [(buf.validate.field).cel = {
+           id: "z", expression: "this > 0"
+         }];`
+      : "";
+    const schema = compileMessage(
+      `syntax = "proto3";
+       import "buf/validate/validate.proto";
+       message M { ${fields} ${celField} }`,
+      bufCompileOptions,
+    );
+    const validator = createValidator();
+    const message = create(schema, {});
+    // Plan first, so only steady-state evaluation is measured.
+    validator.validate(schema, message);
+    const proto = CelManager.prototype as unknown as {
+      setEnv: (...args: unknown[]) => void;
+    };
+    const original = proto.setEnv;
+    let calls = 0;
+    proto.setEnv = function (...args: unknown[]) {
+      calls++;
+      return original.apply(this, args as never);
+    };
+    try {
+      validator.validate(schema, message);
+    } finally {
+      proto.setEnv = original;
+    }
+    return calls;
+  }
+
+  void test("does not scale with fields that have no cel rules", () => {
+    // A field carrying any (buf.validate.field) option used to get an
+    // EvalCustomCel planned for it whether or not it had `cel` rules, so
+    // every validate() paid three setEnv() calls per field for an
+    // evaluator with nothing to evaluate. Asserting the shape rather than
+    // a magic number: standard-rule-only fields must cost no CEL setup,
+    // however many of them there are.
+    assert.equal(celEnvCalls(1, false), 0);
+    assert.equal(celEnvCalls(16, false), 0);
+  });
+
+  void test("a real cel rule still sets up the environment", () => {
+    // Guards the test above against a broken spy: the same measurement
+    // must see work when there genuinely is a `cel` rule to evaluate, and
+    // that work tracks the rules, not the field count.
+    const one = celEnvCalls(1, true);
+    assert.ok(one > 0, "expected CEL setup for a field with a cel rule");
+    assert.equal(celEnvCalls(16, true), one);
   });
 });

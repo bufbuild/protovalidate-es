@@ -1,0 +1,12 @@
+{
+  // Typecheck-only program: the tests, plus the helpers they pull in
+  // (native/testing.ts, error.testdata.ts). These are run directly with tsx,
+  // so they must be checked but must not be emitted — native/testing.ts
+  // imports the @bufbuild/protocompile devDependency and reads an unpublished
+  // file from proto/ at module scope.
+  "extends": "./tsconfig.json",
+  "include": ["src/index.ts", "src/**/*.test.ts"],
+  "compilerOptions": {
+    "noEmit": true
+  }
+}

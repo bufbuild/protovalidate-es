@@ -1,9 +1,12 @@
 {
-  "include": ["src/index.ts", "src/**/*.test.ts"],
+  // The emitted program: only what is reachable from the public entry point.
+  // Tests and their helpers are typechecked by tsconfig.test.json instead, so
+  // they never land in dist/ (and therefore never in the published tarball).
+  "include": ["src/index.ts"],
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": [
-      // For Error.cause in error.ts and error.test.ts
+      // For Error.cause in error.ts
       "ES2022.Error"
     ]
   }
