@@ -24,6 +24,7 @@ import {
   type RepeatedRules,
   RepeatedRulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
+import { bytesEqual } from "./bytes.js";
 
 const F = RepeatedRulesSchema.field;
 
@@ -152,14 +153,6 @@ function isUnique(list: ReflectList, kind: UniqueKind): boolean {
   for (let i = 0; i < n; i++) {
     seen.add(list.get(i));
     if (seen.size !== i + 1) return false;
-  }
-  return true;
-}
-
-function bytesEqual(a: Uint8Array, b: Uint8Array): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    if (a[i] !== b[i]) return false;
   }
   return true;
 }
