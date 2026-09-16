@@ -1,6 +1,6 @@
 {
   "name": "@bufbuild/protovalidate-bench",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "private": true,
   "license": "Apache-2.0",
   "scripts": {
@@ -15,7 +15,7 @@
   "sideEffects": false,
   "dependencies": {
     "@bufbuild/protobuf": "^2.15.0",
-    "@bufbuild/protovalidate": "^1.2.0",
+    "@bufbuild/protovalidate": "^1.3.0",
     "tinybench": "^6.1.4"
   },
   "devDependencies": {
