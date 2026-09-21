@@ -9,6 +9,7 @@ plugins:
   - local: protoc-gen-es
     opt:
       - target=ts
+      - import_extension=js
       # This option enables Valid types
       - valid_types=protovalidate_required+legacy_required
       # Use the validate.proto artifacts exported by @bufbuild/protovalidate
