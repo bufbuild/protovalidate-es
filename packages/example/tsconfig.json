@@ -3,10 +3,9 @@
   "compilerOptions": {
     "rootDir": "./src",
     "target": "es2020",
-    "types": ["@types/node"],
-    "moduleResolution": "Node10",
-    // moduleResolution=node10 is deprecated in TypeScript 6.0.
-    "ignoreDeprecations": "6.0",
+    "types": ["node"],
+    "moduleResolution": "Node16",
+    "module": "Node16",
     "strict": true,
     "forceConsistentCasingInFileNames": true
   }
