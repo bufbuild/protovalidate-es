@@ -3,7 +3,7 @@
     "target": "es2020",
     "lib": ["ES2020"],
     "declaration": true,
-    "types": ["@types/node"],
+    "types": ["node"],
     // As strict as possible
     "strict": true,
     "forceConsistentCasingInFileNames": true,
