@@ -4,8 +4,6 @@
     "lib": ["ES2020"],
     "declaration": true,
     "types": ["@types/node"],
-    // We don't have dependencies that require interop
-    "esModuleInterop": false,
     // As strict as possible
     "strict": true,
     "forceConsistentCasingInFileNames": true,
