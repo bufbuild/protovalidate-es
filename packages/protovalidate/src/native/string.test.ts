@@ -17,7 +17,14 @@ import * as assert from "node:assert/strict";
 import { create, createRegistry } from "@bufbuild/protobuf";
 import { buildPath, pathToString } from "@bufbuild/protobuf/reflect";
 import { compileFile } from "@bufbuild/protocompile";
-import { bufCompileOptions, cel, compile, diff, native } from "./testing.js";
+import {
+  assertRuleIdOrder,
+  bufCompileOptions,
+  cel,
+  compile,
+  diff,
+  native,
+} from "./testing.js";
 import { RuntimeError } from "../error.js";
 import { createValidator } from "../validator.js";
 import {
@@ -869,5 +876,22 @@ void suite("fixed format patterns match RE2 exactly", () => {
         );
       }
     }
+  });
+
+  void test("violations follow validate.proto order", () => {
+    const s = compile(
+      `message M {
+        string v = 1 [(buf.validate.field).string = {
+          in: ["hello"], prefix: "h", min_bytes: 4, len: 5, const: "hello"
+        }];
+      }`,
+    );
+    assertRuleIdOrder(s, create(s, { v: "x" }), [
+      "string.const",
+      "string.len",
+      "string.min_bytes",
+      "string.prefix",
+      "string.in",
+    ]);
   });
 });

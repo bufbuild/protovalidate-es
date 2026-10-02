@@ -401,6 +401,52 @@ void suite("Validator", () => {
       assert.equal(result.violations?.[0].ruleId, "string.abc");
       assert.equal(result.violations?.[0].message, "value must be abc");
     });
+    void suite("repeated and multiple extensions", () => {
+      // A proto2 repeated extension is unpacked, so `[abs_not_in]: [7, 8]`
+      // is two wire records for the same field.
+      const file = compileFile(
+        `
+        syntax = "proto2";
+        import "buf/validate/validate.proto";
+        message M {
+          optional int32 a = 1 [(buf.validate.field).int32 = {
+            gt: 10, [zzz]: true, [abs_not_in]: [7, 8], [aaa]: true
+          }];
+        }
+        extend buf.validate.Int32Rules {
+          repeated int32 abs_not_in = 81048960 [(buf.validate.predefined).cel = {
+            id: "int32.abs_not_in"
+            message: "must not be in abs_not_in"
+            expression: "!(this in rule || -this in rule)"
+          }];
+          optional bool zzz = 81048962 [(buf.validate.predefined).cel = {
+            id: "int32.zzz"
+            message: "must be greater than 100"
+            expression: "!rule || this > 100"
+          }];
+          optional bool aaa = 81048961 [(buf.validate.predefined).cel = {
+            id: "int32.aaa"
+            message: "must be greater than 100"
+            expression: "!rule || this > 100"
+          }];
+        }
+      `,
+        bufCompileOptions,
+      );
+      const schema = file.messages[0];
+      const registry = createRegistry(...file.extensions);
+      for (const disableNativeRules of [false, true]) {
+        void test(`each extension is evaluated once, by field number (disableNativeRules=${disableNativeRules})`, () => {
+          const validator = createValidator({ registry, disableNativeRules });
+          const result = validator.validate(schema, create(schema, { a: 7 }));
+          assert.equal(result.kind, "invalid");
+          assert.deepStrictEqual(
+            result.violations?.map((v) => v.ruleId),
+            ["int32.gt", "int32.abs_not_in", "int32.aaa", "int32.zzz"],
+          );
+        });
+      }
+    });
   });
 });
 

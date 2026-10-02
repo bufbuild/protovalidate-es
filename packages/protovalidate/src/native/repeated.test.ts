@@ -362,4 +362,65 @@ void suite("native repeated rules", () => {
     diff(s, create(s, { xs: [1, 1] })); // duplicates allowed
     diff(s, create(s, { xs: [] }));
   });
+
+  void suite("repeated wrapper messages", () => {
+    void test("items rules apply to each unwrapped value", () => {
+      const s = compile(
+        `message M {
+          repeated google.protobuf.Int32Value xs = 1 [(buf.validate.field).repeated.items.int32.gt = 10];
+        }`,
+      );
+      diff(s, create(s, { xs: [{ value: 5 }] }));
+      diff(s, create(s, { xs: [{ value: 100 }] }));
+      assert.equal(
+        native.validate(s, create(s, { xs: [{ value: 5 }] })).kind,
+        "invalid",
+      );
+    });
+
+    void test("min_items still applies to a list of wrappers", () => {
+      const s = compile(
+        `message M {
+          repeated google.protobuf.Int32Value xs = 1 [(buf.validate.field).repeated.min_items = 2];
+        }`,
+      );
+      diff(s, create(s, {}));
+      diff(s, create(s, { xs: [{ value: 1 }, { value: 2 }] }));
+      assert.equal(native.validate(s, create(s, {})).kind, "invalid");
+    });
+
+    void test("unique compares wrapped Int32Value elements", () => {
+      const s = compile(
+        `message M {
+          repeated google.protobuf.Int32Value xs = 1 [(buf.validate.field).repeated.unique = true];
+        }`,
+      );
+      const dup = create(s, { xs: [{ value: 1 }, { value: 1 }] });
+      diff(s, dup);
+      diff(s, create(s, { xs: [{ value: 1 }, { value: 2 }] }));
+      assert.equal(
+        native.validate(s, dup).violations?.[0]?.ruleId,
+        "repeated.unique",
+      );
+    });
+
+    void test("unique compares wrapped BytesValue elements", () => {
+      const s = compile(
+        `message M {
+          repeated google.protobuf.BytesValue xs = 1 [(buf.validate.field).repeated.unique = true];
+        }`,
+      );
+      const a = new Uint8Array([0x61]);
+      const dup = create(s, { xs: [{ value: a }, { value: a.slice() }] });
+      diff(s, dup);
+      diff(
+        s,
+        create(s, { xs: [{ value: a }, { value: new Uint8Array([0x62]) }] }),
+      );
+      assert.equal(
+        native.validate(s, dup).violations?.[0]?.ruleId,
+        "repeated.unique",
+      );
+    });
+  });
 });

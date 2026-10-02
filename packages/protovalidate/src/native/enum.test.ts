@@ -14,7 +14,11 @@
 
 import { suite, test } from "node:test";
 import { create, type DescMessage } from "@bufbuild/protobuf";
-import { compile as compileWithPreamble, diff } from "./testing.js";
+import {
+  assertRuleIdOrder,
+  compile as compileWithPreamble,
+  diff,
+} from "./testing.js";
 
 const COLOR_PREAMBLE = `
   enum Color {
@@ -94,5 +98,57 @@ void suite("native enum rules", () => {
     diff(s, create(s, { c: 2 }));
     // Undefined: should fire defined_only and const
     diff(s, create(s, { c: 99 }));
+  });
+
+  void test("violations follow validate.proto order: const, defined_only, in, not_in", () => {
+    const s = compile(
+      `message M {
+        Color c = 1 [(buf.validate.field).enum = {
+          not_in: [99], in: [1], defined_only: true, const: 1
+        }];
+      }`,
+    );
+    assertRuleIdOrder(s, create(s, { c: 99 }), [
+      "enum.const",
+      "enum.defined_only",
+      "enum.in",
+      "enum.not_in",
+    ]);
+  });
+
+  void test("defined_only precedes in and not_in without const", () => {
+    const s = compile(
+      `message M {
+        Color c = 1 [(buf.validate.field).enum = {
+          defined_only: true, in: [1], not_in: [99]
+        }];
+      }`,
+    );
+    assertRuleIdOrder(s, create(s, { c: 99 }), [
+      "enum.defined_only",
+      "enum.in",
+      "enum.not_in",
+    ]);
+  });
+
+  void test("const + defined_only on repeated items and map values", () => {
+    const s = compile(
+      `message M {
+        repeated Color cs = 1 [(buf.validate.field).repeated.items.enum = {
+          const: 1, defined_only: true
+        }];
+        map<string, Color> cm = 2 [(buf.validate.field).map.values.enum = {
+          const: 1, defined_only: true
+        }];
+      }`,
+    );
+    const msg = create(s, { cs: [1, 99], cm: { k: 99 } });
+    diff(s, msg);
+    assertRuleIdOrder(s, msg, [
+      "enum.const",
+      "enum.defined_only",
+      "enum.const",
+      "enum.defined_only",
+    ]);
   });
 });
