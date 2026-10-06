@@ -13,6 +13,9 @@
 // limitations under the License.
 
 import {
+  clearField,
+  clone,
+  create,
   type DescEnum,
   type DescField,
   type DescMessage,
@@ -36,6 +39,7 @@ import {
   oneof as ext_oneof,
   FieldRulesSchema,
   AnyRulesSchema,
+  EnumRulesSchema,
   type MessageOneofRule,
 } from "./gen/buf/validate/validate_pb.js";
 import {
@@ -378,8 +382,17 @@ export class Planner {
       fieldContext,
     );
     if (rules) {
+      let rest = rules;
+      // validate.proto declares const before defined_only, so its violation
+      // must come first.
+      if (rules.definedOnly && isFieldSet(rules, EnumRulesSchema.field.const)) {
+        const constRules = create(EnumRulesSchema, { const: rules.const });
+        evals.add(this.rules(constRules, rulePath, false));
+        rest = clone(EnumRulesSchema, rules);
+        clearField(rest, EnumRulesSchema.field.const);
+      }
       evals.add(new EvalEnumDefinedOnly(descEnum, rulePath, rules));
-      evals.add(this.rules(rules, rulePath, false));
+      evals.add(this.rules(rest, rulePath, false));
     }
     return evals;
   }
@@ -480,11 +493,16 @@ export class Planner {
     // runs two setEnv calls per field even when empty.
     let evalExtended: EvalExtendedRulesCel | undefined;
     if (rules.$unknown) {
-      for (const uf of rules.$unknown) {
-        const plans = prepared.extensions.get(uf.no);
+      // A repeated extension has one unknown field per element; plan each
+      // extension once, in field number order.
+      const extNumbers = [...new Set(rules.$unknown.map((uf) => uf.no))].sort(
+        (a, b) => a - b,
+      );
+      for (const extNumber of extNumbers) {
+        const plans = prepared.extensions.get(extNumber);
         if (!plans) {
           throw new CompilationError(
-            `Unknown extension for ${rules.$typeName} with number ${uf.no}. If this is a predefined rule, register the extension with a registry in createValidator().`,
+            `Unknown extension for ${rules.$typeName} with number ${extNumber}. If this is a predefined rule, register the extension with a registry in createValidator().`,
           );
         }
         for (const plan of plans) {

@@ -14,7 +14,7 @@
 
 import { suite, test } from "node:test";
 import { create } from "@bufbuild/protobuf";
-import { compile, diff } from "./testing.js";
+import { assertRuleIdOrder, compile, diff } from "./testing.js";
 
 void suite("native numeric rules", () => {
   void suite("int32", () => {
@@ -349,6 +349,37 @@ void suite("native numeric rules", () => {
       diff(s, create(s, { x: Number.NaN }));
       diff(s, create(s, { x: Number.POSITIVE_INFINITY }));
       diff(s, create(s, { x: 1.5 }));
+    });
+  });
+
+  void suite("violation order", () => {
+    void test("int32: range precedes in and not_in", () => {
+      const s = compile(
+        `message M {
+          int32 n = 1 [(buf.validate.field).int32 = { gt: 10, in: [1], not_in: [3] }];
+        }`,
+      );
+      assertRuleIdOrder(s, create(s, { n: 3 }), [
+        "int32.gt",
+        "int32.in",
+        "int32.not_in",
+      ]);
+    });
+
+    void test("double: range, in, not_in, finite", () => {
+      const s = compile(
+        `message M {
+          double x = 1 [(buf.validate.field).double = {
+            gt: 10, in: [1], not_in: [-inf], finite: true
+          }];
+        }`,
+      );
+      assertRuleIdOrder(s, create(s, { x: Number.NEGATIVE_INFINITY }), [
+        "double.gt",
+        "double.in",
+        "double.not_in",
+        "double.finite",
+      ]);
     });
   });
 });

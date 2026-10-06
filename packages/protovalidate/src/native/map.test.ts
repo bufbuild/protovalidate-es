@@ -95,4 +95,32 @@ void suite("native map rules", () => {
     assert.equal(v.ruleId, "map.max_pairs");
     assert.equal(pathToString(v.rule), "map.max_pairs");
   });
+
+  void test("values rules apply to unwrapped Int32Value", () => {
+    const s = compile(
+      `message M {
+        map<string, google.protobuf.Int32Value> kv = 1 [(buf.validate.field).map.values.int32.gt = 10];
+      }`,
+    );
+    const bad = create(s, { kv: { key: { value: 5 } } });
+    diff(s, bad);
+    diff(s, create(s, { kv: { key: { value: 100 } } }));
+    const v = native.validate(s, bad).violations?.[0];
+    assert.equal(v?.ruleId, "int32.gt");
+    assert.equal(pathToString(v?.field ?? []), 'kv["key"]');
+  });
+
+  void test("values rules apply to unwrapped StringValue", () => {
+    const s = compile(
+      `message M {
+        map<string, google.protobuf.StringValue> kv = 1 [(buf.validate.field).map.values.string.min_len = 3];
+      }`,
+    );
+    const bad = create(s, { kv: { k: { value: "a" } } });
+    diff(s, bad);
+    diff(s, create(s, { kv: { k: { value: "abc" } } }));
+    const v = native.validate(s, bad).violations?.[0];
+    assert.equal(v?.ruleId, "string.min_len");
+    assert.equal(pathToString(v?.field ?? []), 'kv["k"]');
+  });
 });

@@ -17,7 +17,7 @@ import * as assert from "node:assert/strict";
 import type { DescMessage, Message } from "@bufbuild/protobuf";
 import { pathToString } from "@bufbuild/protobuf/reflect";
 import { compileFile } from "@bufbuild/protocompile";
-import { createValidator } from "../validator.js";
+import { createValidator, type Validator } from "../validator.js";
 import type { Violation } from "../error.js";
 
 /**
@@ -38,6 +38,36 @@ export const native = createValidator();
 
 /** Validator with native rules disabled — i.e., the pure-CEL reference. */
 export const cel = createValidator({ disableNativeRules: true });
+
+const nativeFailFast = createValidator({ failFast: true });
+const celFailFast = createValidator({
+  failFast: true,
+  disableNativeRules: true,
+});
+
+/**
+ * Assert that the native and CEL paths both report exactly the rule ids in
+ * `want`, in that order, and that fail-fast stops at the first one.
+ *
+ * `diff` only proves the two paths agree, so it can't catch an order that both
+ * get wrong. Use this where the order itself is under test.
+ */
+export function assertRuleIdOrder(
+  schema: DescMessage,
+  msg: Message,
+  want: string[],
+): void {
+  const ruleIds = (validator: Validator) =>
+    validator.validate(schema, msg).violations?.map((v) => v.ruleId) ?? [];
+  assert.deepEqual(ruleIds(native), want, "native");
+  assert.deepEqual(ruleIds(cel), want, "cel");
+  assert.deepEqual(
+    ruleIds(nativeFailFast),
+    want.slice(0, 1),
+    "native failFast",
+  );
+  assert.deepEqual(ruleIds(celFailFast), want.slice(0, 1), "cel failFast");
+}
 
 /**
  * Validate a fixture under both the native and CEL paths and assert their
