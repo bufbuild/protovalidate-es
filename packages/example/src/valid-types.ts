@@ -14,7 +14,7 @@
 
 import { create } from "@bufbuild/protobuf";
 import { createValidator } from "@bufbuild/protovalidate";
-import { OrderSchema, type OrderValid } from "./gen/store/v1/order_pb";
+import { OrderSchema, type OrderValid } from "./gen/store/v1/order_pb.js";
 
 const validator = createValidator({
   // This option enables validation of the proto2 `required` label.

@@ -5,6 +5,8 @@
   "include": ["src/index.ts"],
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "./src",
+    "types": ["node"],
     "lib": [
       // For Error.cause in error.ts
       "ES2022.Error"

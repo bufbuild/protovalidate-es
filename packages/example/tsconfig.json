@@ -1,8 +1,11 @@
 {
   "include": ["src/*.ts", "src/**/*.test.ts"],
   "compilerOptions": {
+    "rootDir": "./src",
     "target": "es2020",
-    "moduleResolution": "Node10",
+    "types": ["node"],
+    "moduleResolution": "Node16",
+    "module": "Node16",
     "strict": true,
     "forceConsistentCasingInFileNames": true
   }

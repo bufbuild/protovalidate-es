@@ -9,5 +9,5 @@ plugins:
     include_imports: true
     opt:
       - target=ts
-      - import_extension=.js
+      - import_extension=js
       - ts_nocheck=false
