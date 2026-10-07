@@ -1,4 +1,5 @@
 {
+  "name": "protovalidate-es",
   "private": true,
   "scripts": {
     "clean": "git clean -Xdf",
