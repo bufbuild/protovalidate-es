@@ -91,6 +91,9 @@ import type { RegexMatcher } from "./func.js";
 
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
+  // Depth of in-progress plan() calls. Pruning happens only when this returns
+  // to zero, i.e. from the outermost call once the whole graph is built.
+  private buildingDepth = 0;
 
   constructor(
     private readonly celMan: CelManager,
@@ -107,15 +110,23 @@ export class Planner {
     const messageRules = getOption(message, ext_message);
     const e = new EvalMany<ReflectMessage>();
     this.messageCache.set(message, e);
+    this.buildingDepth++;
     try {
       e.add(this.fields(messageRules.oneof, message.fields));
       e.add(this.messageCel(messageRules));
       e.add(this.messageOneofs(message, messageRules.oneof));
       e.add(this.oneofs(message.oneofs));
-      e.prune();
     } catch (err) {
       this.messageCache.delete(message);
+      this.buildingDepth--;
       throw err;
+    }
+    // Prune only from the outermost plan() call, once every mutually recursive
+    // plan in the graph is fully built. Pruning while an ancestor plan is still
+    // an empty cached placeholder would see its back-reference as dead code and
+    // remove it permanently, dropping that subtree's validation.
+    if (--this.buildingDepth === 0) {
+      e.prune();
     }
     return e;
   }
