@@ -15,7 +15,7 @@
 import * as assert from "node:assert";
 import { readFileSync } from "node:fs";
 import { suite, test } from "node:test";
-import { create, type DescMessage } from "@bufbuild/protobuf";
+import {create, type DescMessage, type Message} from "@bufbuild/protobuf";
 import { compileMessage } from "@bufbuild/protocompile";
 import { createValidator, defaultMaxViolations } from "./validator.js";
 
@@ -30,7 +30,7 @@ const bufCompileOptions = {
 
 // A repeated field where every item fails its rule, so a list of n items
 // produces n violations.
-function failingList(n: number): { schema: DescMessage; message: unknown } {
+function failingList(n: number): { schema: DescMessage; message: Message } {
   const schema = compileMessage(
     `syntax = "proto3";
      import "buf/validate/validate.proto";
