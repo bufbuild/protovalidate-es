@@ -293,17 +293,69 @@ function endsWith(haystack: Uint8Array, needle: Uint8Array): boolean {
   return true;
 }
 
-function containsBytes(haystack: Uint8Array, needle: Uint8Array): boolean {
+// Needles at or below this length use the naive scan: it has no setup cost and
+// is fine for short needles, where its worst case is a small multiple of the
+// haystack length. Longer needles use KMP, whose O(m) preprocessing buys an
+// O(n + m) search so that a long needle sharing many prefixes with the
+// haystack cannot drive the search quadratic. The threshold therefore bounds
+// the naive scan's comparison multiplier.
+const naiveSearchThreshold = 32;
+
+/**
+ * Returns true if `needle` occurs within `haystack`. Shared by the native
+ * `bytes.contains` rule and the CEL `bytes.contains()` function.
+ */
+export function containsBytes(
+  haystack: Uint8Array,
+  needle: Uint8Array,
+): boolean {
+  const m = needle.length;
   // Empty needle is contained in every byte slice — matches Go's
   // `bytes.Contains(_, []byte{})` (returns true).
-  if (needle.length === 0) return true;
-  if (needle.length > haystack.length) return false;
-  const limit = haystack.length - needle.length;
-  outer: for (let i = 0; i <= limit; i++) {
-    for (let j = 0; j < needle.length; j++) {
-      if (haystack[i + j] !== needle[j]) continue outer;
+  if (m === 0) return true;
+  if (m > haystack.length) return false;
+  if (m <= naiveSearchThreshold) {
+    const limit = haystack.length - m;
+    outer: for (let i = 0; i <= limit; i++) {
+      for (let j = 0; j < m; j++) {
+        if (haystack[i + j] !== needle[j]) continue outer;
+      }
+      return true;
     }
-    return true;
+    return false;
+  }
+  return containsBytesKmp(haystack, needle);
+}
+
+// Knuth–Morris–Pratt search: O(n + m) with an O(m) failure table, so overlapping
+// prefixes never restart the comparison from scratch.
+function containsBytesKmp(haystack: Uint8Array, needle: Uint8Array): boolean {
+  const m = needle.length;
+  // lps[k] = length of the longest proper prefix of needle[0..k] that is also a
+  // suffix of it.
+  const lps = new Int32Array(m);
+  for (let i = 1, len = 0; i < m; ) {
+    if (needle[i] === needle[len]) {
+      lps[i++] = ++len;
+    } else if (len > 0) {
+      len = lps[len - 1];
+    } else {
+      lps[i++] = 0;
+    }
+  }
+  const n = haystack.length;
+  for (let i = 0, j = 0; i < n; ) {
+    if (haystack[i] === needle[j]) {
+      i++;
+      j++;
+      if (j === m) {
+        return true;
+      }
+    } else if (j > 0) {
+      j = lps[j - 1];
+    } else {
+      i++;
+    }
   }
   return false;
 }
