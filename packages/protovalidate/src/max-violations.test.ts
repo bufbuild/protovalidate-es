@@ -15,7 +15,7 @@
 import * as assert from "node:assert";
 import { readFileSync } from "node:fs";
 import { suite, test } from "node:test";
-import {create, type DescMessage, type Message} from "@bufbuild/protobuf";
+import { create, type DescMessage, type Message } from "@bufbuild/protobuf";
 import { compileMessage } from "@bufbuild/protocompile";
 import { createValidator, defaultMaxViolations } from "./validator.js";
 
