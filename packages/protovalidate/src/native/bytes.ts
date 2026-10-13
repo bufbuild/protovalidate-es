@@ -314,17 +314,19 @@ export function containsBytes(
   // `bytes.Contains(_, []byte{})` (returns true).
   if (m === 0) return true;
   if (m > haystack.length) return false;
-  if (m <= naiveSearchThreshold) {
-    const limit = haystack.length - m;
-    outer: for (let i = 0; i <= limit; i++) {
-      for (let j = 0; j < m; j++) {
-        if (haystack[i + j] !== needle[j]) continue outer;
-      }
-      return true;
-    }
-    return false;
+  // if it's a long 'needle', use the KMP algorithm
+  if (m > naiveSearchThreshold) {
+    return containsBytesKmp(haystack, needle);
   }
-  return containsBytesKmp(haystack, needle);
+  // use the naive algorithm
+  const limit = haystack.length - m;
+  outer: for (let i = 0; i <= limit; i++) {
+    for (let j = 0; j < m; j++) {
+      if (haystack[i + j] !== needle[j]) continue outer;
+    }
+    return true;
+  }
+  return false;
 }
 
 // Knuth–Morris–Pratt search: O(n + m) with an O(m) failure table, so overlapping
