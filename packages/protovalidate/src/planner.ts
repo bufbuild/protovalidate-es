@@ -125,7 +125,8 @@ export class Planner {
     // plan in the graph is fully built. Pruning while an ancestor plan is still
     // an empty cached placeholder would see its back-reference as dead code and
     // remove it permanently, dropping that subtree's validation.
-    if (--this.buildingDepth === 0) {
+    this.buildingDepth--;
+    if (this.buildingDepth === 0) {
       e.prune();
     }
     return e;
