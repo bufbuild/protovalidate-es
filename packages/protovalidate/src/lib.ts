@@ -15,6 +15,7 @@
 import { type CelList, isCelUint } from "@bufbuild/cel";
 import { scalarEquals } from "@bufbuild/protobuf/reflect";
 import { ScalarType } from "@bufbuild/protobuf";
+import { containsBytes } from "./native/bytes.js";
 
 /**
  * Returns true if the value is infinite, optionally limit to positive or
@@ -1346,25 +1347,7 @@ export function unique(this: CelList): boolean {
  * Returns true if argument bytes contains argument sub.
  */
 export function bytesContains(this: Uint8Array, sub: Uint8Array): boolean {
-  if (sub.length === 0) {
-    return true;
-  }
-  if (sub.length > this.length) {
-    return false;
-  }
-  for (let i = 0; i < this.length - sub.length + 1; i++) {
-    let found = true;
-    for (let j = 0; j < sub.length; j++) {
-      if (this[i + j] != sub[j]) {
-        found = false;
-        break;
-      }
-    }
-    if (found) {
-      return true;
-    }
-  }
-  return false;
+  return containsBytes(this, sub);
 }
 
 /**
