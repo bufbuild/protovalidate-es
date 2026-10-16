@@ -45,6 +45,85 @@ export type Eval<V> = {
 };
 
 /**
+ * Context for the two-phase prune. The cached per-message plan nodes are the
+ * only cycle boundaries: `isPlan` identifies them and `live` reports a plan's
+ * computed liveness, so traversal stops there instead of recursing forever.
+ */
+export interface PruneContext {
+  readonly isPlan: (e: Eval<unknown>) => boolean;
+  readonly live: (e: Eval<unknown>) => boolean;
+}
+
+/**
+ * The result of inspecting a subtree without crossing plan boundaries:
+ * `localLive` is whether it can produce a violation on its own, and `edges` are
+ * the plan nodes it reaches, whose liveness the caller folds in.
+ */
+export interface Liveness {
+  localLive: boolean;
+  edges: Eval<unknown>[];
+}
+
+// Implemented by the container nodes that can hold plan references (EvalMany,
+// EvalField, EvalListItems, EvalMapEntries). collectLiveness is the Phase 1
+// per-node rule and pruneCyclic the Phase 2 rule; both mirror the node's own
+// prune(). See the two tables in PRUNING.md.
+interface CyclicEval {
+  collectLiveness(ctx: PruneContext): Liveness;
+  pruneCyclic(ctx: PruneContext): boolean;
+}
+
+function asCyclic(e: Eval<unknown>): CyclicEval | undefined {
+  return typeof (e as Partial<CyclicEval>).pruneCyclic === "function"
+    ? (e as unknown as CyclicEval)
+    : undefined;
+}
+
+// childLiveness and childPrune are the plan-boundary cut (PRUNING.md "The
+// algorithm"): a plan node reached as a child is treated as an edge, not
+// recursed into, so cycles terminate. Other containers recurse; leaves answer
+// from their own prune().
+function childLiveness(e: Eval<unknown>, ctx: PruneContext): Liveness {
+  if (ctx.isPlan(e)) {
+    return { localLive: false, edges: [e] };
+  }
+  return (
+    asCyclic(e)?.collectLiveness(ctx) ?? { localLive: !e.prune(), edges: [] }
+  );
+}
+
+function childPrune(e: Eval<unknown>, ctx: PruneContext): boolean {
+  if (ctx.isPlan(e)) {
+    return !ctx.live(e);
+  }
+  return asCyclic(e)?.pruneCyclic(ctx) ?? e.prune();
+}
+
+/**
+ * collectPlanLiveness inspects a plan node's own contents, descending into it
+ * rather than treating it as a boundary (the planner calls it on each plan).
+ */
+export function collectPlanLiveness(
+  plan: Eval<unknown>,
+  ctx: PruneContext,
+): Liveness {
+  return (
+    asCyclic(plan)?.collectLiveness(ctx) ?? {
+      localLive: !plan.prune(),
+      edges: [],
+    }
+  );
+}
+
+/**
+ * prunePlan removes a plan node's dead children and its dead references to other
+ * plans, using the liveness already decided in `ctx`.
+ */
+export function prunePlan(plan: Eval<unknown>, ctx: PruneContext): void {
+  asCyclic(plan)?.pruneCyclic(ctx);
+}
+
+/**
  * The no-op evaluator.
  */
 export class EvalNoop<T> implements Eval<T> {
@@ -81,6 +160,20 @@ export class EvalMany<T> implements Eval<T> {
     this.many = this.many.filter((e) => !e.prune());
     return this.many.length == 0;
   }
+  collectLiveness(ctx: PruneContext): Liveness {
+    let localLive = false;
+    const edges: Eval<unknown>[] = [];
+    for (const e of this.many) {
+      const r = childLiveness(e, ctx);
+      localLive ||= r.localLive;
+      edges.push(...r.edges);
+    }
+    return { localLive, edges };
+  }
+  pruneCyclic(ctx: PruneContext): boolean {
+    this.many = this.many.filter((e) => !childPrune(e, ctx));
+    return this.many.length == 0;
+  }
 }
 
 /**
@@ -103,6 +196,15 @@ export class EvalListItems<T extends ReflectMessageGet>
   }
   prune(): boolean {
     return this.pass.prune() || this.condition.never;
+  }
+  collectLiveness(ctx: PruneContext): Liveness {
+    if (this.condition.never) {
+      return { localLive: false, edges: [] };
+    }
+    return childLiveness(this.pass, ctx);
+  }
+  pruneCyclic(ctx: PruneContext): boolean {
+    return childPrune(this.pass, ctx) || this.condition.never;
   }
 }
 
@@ -135,6 +237,23 @@ export class EvalMapEntries<V extends ReflectMessageGet>
   prune(): boolean {
     const key = this.key.prune() || this.keyCondition.never;
     const value = this.value.prune() || this.valueCondition.never;
+    return key && value;
+  }
+  collectLiveness(ctx: PruneContext): Liveness {
+    const key = this.keyCondition.never
+      ? { localLive: false, edges: [] }
+      : childLiveness(this.key, ctx);
+    const value = this.valueCondition.never
+      ? { localLive: false, edges: [] }
+      : childLiveness(this.value, ctx);
+    return {
+      localLive: key.localLive || value.localLive,
+      edges: [...key.edges, ...value.edges],
+    };
+  }
+  pruneCyclic(ctx: PruneContext): boolean {
+    const key = childPrune(this.key, ctx) || this.keyCondition.never;
+    const value = childPrune(this.value, ctx) || this.valueCondition.never;
     return key && value;
   }
 }
@@ -182,6 +301,25 @@ export class EvalField<F extends DescField> implements Eval<ReflectMessage> {
       passDead = this.pass.prune();
       this.pruning = false;
     }
+    return (
+      (this.condition.never || passDead) &&
+      !this.required &&
+      !this.legacyRequired
+    );
+  }
+  collectLiveness(ctx: PruneContext): Liveness {
+    // A required field can always report its own violation, so it is live
+    // regardless of what its value evaluator reaches.
+    if (this.required || this.legacyRequired) {
+      return { localLive: true, edges: [] };
+    }
+    if (this.condition.never) {
+      return { localLive: false, edges: [] };
+    }
+    return childLiveness(this.pass, ctx);
+  }
+  pruneCyclic(ctx: PruneContext): boolean {
+    const passDead = childPrune(this.pass, ctx);
     return (
       (this.condition.never || passDead) &&
       !this.required &&

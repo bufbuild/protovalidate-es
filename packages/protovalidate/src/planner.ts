@@ -62,6 +62,10 @@ import {
   EvalOneofRequired,
   EvalField,
   EvalMessageOneofRule,
+  type Liveness,
+  type PruneContext,
+  collectPlanLiveness,
+  prunePlan,
 } from "./eval.js";
 import {
   getEnumRules,
@@ -91,6 +95,13 @@ import type { RegexMatcher } from "./func.js";
 
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
+  // Depth of in-progress plan() calls. Pruning happens only when this returns
+  // to zero, i.e. from the outermost call once the whole graph is built.
+  private buildingDepth = 0;
+  // Plans already pruned, so each is pruned exactly once across validate calls.
+  // Entries stay reachable via messageCache, so none is dropped early; a lost
+  // one would only cost a redundant re-prune, which is idempotent.
+  private readonly pruned = new WeakSet<Eval<ReflectMessage>>();
 
   constructor(
     private readonly celMan: CelManager,
@@ -107,17 +118,72 @@ export class Planner {
     const messageRules = getOption(message, ext_message);
     const e = new EvalMany<ReflectMessage>();
     this.messageCache.set(message, e);
+    this.buildingDepth++;
     try {
       e.add(this.fields(messageRules.oneof, message.fields));
       e.add(this.messageCel(messageRules));
       e.add(this.messageOneofs(message, messageRules.oneof));
       e.add(this.oneofs(message.oneofs));
-      e.prune();
     } catch (err) {
       this.messageCache.delete(message);
+      this.buildingDepth--;
       throw err;
     }
+    // Prune only from the outermost plan() call, once every mutually recursive
+    // plan in the graph is fully built. Pruning while an ancestor plan is still
+    // an empty cached placeholder would see its back-reference as dead code and
+    // remove it permanently, dropping that subtree's validation.
+    this.buildingDepth--;
+    if (this.buildingDepth === 0) {
+      this.pruneGraph();
+    }
     return e;
+  }
+
+  // Decide which plans can ever produce a violation, then prune each once. A
+  // plan is live if it has a rule of its own or reaches a live plan; rule-free
+  // cycles (such as google.protobuf.Struct) resolve to dead. Deciding liveness
+  // before removing anything keeps pruning linear in the plan graph and stops a
+  // reference to a still-empty ancestor plan from being dropped. The algorithm
+  // and a worked example are in PRUNING.md.
+  private pruneGraph(): void {
+    const plans = [...this.messageCache.values()];
+    const planSet = new Set<Eval<unknown>>(plans);
+    const live = new Map<Eval<unknown>, boolean>();
+    const ctx: PruneContext = {
+      isPlan: (e) => planSet.has(e),
+      live: (e) => live.get(e) === true,
+    };
+    // PRUNING.md "Phase 1a — decide liveness": collect each plan's own liveness,
+    // starting the fixpoint with every plan dead.
+    const liveness = new Map<Eval<unknown>, Liveness>();
+    for (const plan of plans) {
+      liveness.set(plan, collectPlanLiveness(plan, ctx));
+      live.set(plan, false);
+    }
+    // PRUNING.md "Phase 1b — least fixpoint": a plan is live if it has its own
+    // rule or reaches a live plan; iterate until nothing changes.
+    for (let changed = true; changed; ) {
+      changed = false;
+      for (const plan of plans) {
+        if (live.get(plan)) {
+          continue;
+        }
+        const { localLive, edges } = liveness.get(plan) as Liveness;
+        if (localLive || edges.some((e) => live.get(e) === true)) {
+          live.set(plan, true);
+          changed = true;
+        }
+      }
+    }
+    // PRUNING.md "Phase 2 — remove dead code": prune each plan once, dropping
+    // dead children and dead references to other plans.
+    for (const plan of plans) {
+      if (!this.pruned.has(plan)) {
+        prunePlan(plan, ctx);
+        this.pruned.add(plan);
+      }
+    }
   }
 
   private oneofs(oneofs: DescOneof[]): Eval<ReflectMessage> {
