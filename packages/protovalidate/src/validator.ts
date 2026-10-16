@@ -59,6 +59,18 @@ export type ValidatorOptions = {
   failFast?: boolean;
 
   /**
+   * Maximum number of violations to collect before validation stops.
+   *
+   * Accumulating every violation lets a message with very many failing
+   * entries produce an absurd number of validation messages, so
+   * validation stops once this many violations are collected and reports the
+   * ones gathered so far, much like `failFast` stops at one. Defaults to
+   * {@link defaultMaxViolations}. Set it to `Number.POSITIVE_INFINITY` to
+   * collect every violation.
+   */
+  maxViolations?: number;
+
+  /**
    * RE2 compliant regex matcher to use.
    *
    * By default, regular expressions are evaluated with an RE2 engine
@@ -153,11 +165,19 @@ export type ValidationResult<Valid = Message, Invalid = Message> =
 /**
  * Create a validator.
  */
+/**
+ * Default upper bound on the number of violations a single validation collects.
+ * High enough that ordinary validation is unaffected, low enough that a
+ * pathological message cannot produce an unworkable number of violations.
+ */
+export const defaultMaxViolations = 1000;
+
 export function createValidator(opt?: ValidatorOptions): Validator {
   const registry = opt?.registry
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
     : createMutableRegistry(file_buf_validate_validate);
   const failFast = opt?.failFast ?? false;
+  const maxViolations = opt?.maxViolations ?? defaultMaxViolations;
   const regexMatch = opt?.regexMatch ?? re2RegexMatch;
   const celMan = new CelManager(registry, regexMatch);
   const planner = new Planner(
@@ -173,7 +193,15 @@ export function createValidator(opt?: ValidatorOptions): Validator {
       Valid extends MessageValidType<Desc>,
     >(schema: Desc, message: Shape) {
       try {
-        validateUnsafe(registry, celMan, planner, schema, message, failFast);
+        validateUnsafe(
+          registry,
+          celMan,
+          planner,
+          schema,
+          message,
+          failFast,
+          maxViolations,
+        );
       } catch (e) {
         if (e instanceof ValidationError) {
           return {
@@ -211,6 +239,7 @@ function validateUnsafe(
   schema: DescMessage,
   message: Message,
   failFast: boolean,
+  maxViolations: number,
 ) {
   const messageTypeName = message.$typeName;
   if (!isMessage(message, schema)) {
@@ -226,7 +255,7 @@ function validateUnsafe(
   }
   const plan = planner.plan(schema);
   const msg = reflect(schema, message);
-  const cursor = Cursor.create(schema, failFast);
+  const cursor = Cursor.create(schema, failFast, maxViolations);
   try {
     plan.eval(msg, cursor);
   } finally {

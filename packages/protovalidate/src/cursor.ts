@@ -29,8 +29,12 @@ import { ValidationError, Violation } from "./error.js";
  * Cursor maintains a field path and tracks violations.
  */
 export class Cursor {
-  static create(root: DescMessage, failFast: boolean) {
-    return new Cursor(root, failFast, [], buildPath(root));
+  static create(
+    root: DescMessage,
+    failFast: boolean,
+    maxViolations = Number.POSITIVE_INFINITY,
+  ) {
+    return new Cursor(root, failFast, [], buildPath(root), maxViolations);
   }
 
   private constructor(
@@ -38,6 +42,10 @@ export class Cursor {
     private readonly failFast: boolean,
     private readonly violations: Violation[],
     private readonly builder: PathBuilder,
+    // Upper bound on collected violations. Reaching it stops validation the
+    // same way failFast does, so a message with very many failing entries
+    // cannot accumulate unbounded violations (and their retained field paths).
+    private readonly maxViolations: number,
   ) {}
 
   get violated(): boolean {
@@ -59,7 +67,7 @@ export class Cursor {
         forMapKey,
       ),
     );
-    if (this.failFast) {
+    if (this.failFast || this.violations.length >= this.maxViolations) {
       this.throwIfViolated();
     }
   }
@@ -99,6 +107,12 @@ export class Cursor {
   }
 
   private cloneWith(path: PathBuilder) {
-    return new Cursor(this.root, this.failFast, this.violations, path);
+    return new Cursor(
+      this.root,
+      this.failFast,
+      this.violations,
+      path,
+      this.maxViolations,
+    );
   }
 }
