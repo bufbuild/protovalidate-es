@@ -163,15 +163,15 @@ export type ValidationResult<Valid = Message, Invalid = Message> =
     };
 
 /**
- * Create a validator.
- */
-/**
  * Default upper bound on the number of violations a single validation collects.
  * High enough that ordinary validation is unaffected, low enough that a
  * pathological message cannot produce an unworkable number of violations.
  */
 export const defaultMaxViolations = 1000;
 
+/**
+ * Create a validator.
+ */
 export function createValidator(opt?: ValidatorOptions): Validator {
   const registry = opt?.registry
     ? createMutableRegistry(opt.registry, file_buf_validate_validate)
