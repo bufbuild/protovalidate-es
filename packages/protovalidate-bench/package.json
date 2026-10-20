@@ -16,10 +16,10 @@
   "dependencies": {
     "@bufbuild/protobuf": "^2.15.0",
     "@bufbuild/protovalidate": "^1.3.0",
-    "tinybench": "^6.2.0"
+    "tinybench": "^6.2.1"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.72.0",
-    "@bufbuild/protoc-gen-es": "^2.15.0"
+    "@bufbuild/buf": "^1.73.0",
+    "@bufbuild/protoc-gen-es": "^2.16.0"
   }
 }

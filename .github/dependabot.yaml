@@ -15,6 +15,11 @@ updates:
       timezone: UTC
       time: "07:00"
     open-pull-requests-limit: 50
+    ignore:
+      # TypeScript 7 removes node10 module resolution, which the CJS build
+      # relies on.
+      - dependency-name: "typescript"
+        versions: ["7.x"]
     groups:
       mostly-harmless:
         patterns:
