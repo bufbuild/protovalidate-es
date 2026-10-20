@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { type CelList, isCelUint } from "@bufbuild/cel";
-import { scalarEquals } from "@bufbuild/protobuf/reflect";
-import { ScalarType } from "@bufbuild/protobuf";
+import { type CelList } from "@bufbuild/cel";
 import { containsBytes } from "./native/bytes.js";
 import { isUnique } from "./unique.js";
 
