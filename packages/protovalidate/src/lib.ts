@@ -1295,14 +1295,13 @@ class Uri {
 }
 
 /**
- * Returns true if the list only contains values that are distinct from each
- * other. Backs the CEL `unique()` method; the check itself is shared with the
- * native `repeated.unique` evaluator in `isUnique` so both agree, in O(n).
+ * Backs the CEL `unique()` method, which returns true if the items in the list
+ * are all distinct from each other. Every NaN counts as distinct, but `-0` and
+ * `0` are equal.
  *
- * NaN is exempt: every NaN counts as distinct, because `NaN == NaN` is false
- * under CEL equality. protovalidate-go gets this from Go's `==` (in both its
- * native and CEL paths) and protovalidate-java skips NaN explicitly, so this
- * is the cross-language behavior. `-0` and `0` do collide.
+ * Only lists whose elements all have the same type are supported, where the
+ * type is one of bool, bytes, double, int, string, or uint. The result for a
+ * list with mixed element types is unspecified.
  */
 export function unique(this: CelList): boolean {
   return isUnique(this);
