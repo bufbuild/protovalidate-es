@@ -55,19 +55,6 @@ export function isUnique(list: IndexedList): boolean {
     // comparison for the whole list. Byte lists compare by contents and get a
     // dedicated loop; everything else compares with uniqueEquals.
     const first = list.get(0);
-    if (first instanceof Uint8Array) {
-      const seen: Uint8Array[] = [first];
-      for (let i = 1; i < n; i++) {
-        const a = list.get(i) as Uint8Array;
-        for (let j = 0; j < i; j++) {
-          if (bytesEqual(seen[j], a)) {
-            return false;
-          }
-        }
-        seen[i] = a;
-      }
-      return true;
-    }
     const seen: unknown[] = [first];
     for (let i = 1; i < n; i++) {
       const a = list.get(i);
