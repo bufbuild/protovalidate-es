@@ -65,8 +65,18 @@ export class EvalNoop<T> implements Eval<T> {
  */
 export class EvalMany<T> implements Eval<T> {
   private many: Eval<T>[];
+  private planState: "none" | "building" | "live" | "dead" = "none";
   constructor(...evals: (Eval<T> | Eval<T>[])[]) {
     this.many = evals.flat();
+  }
+  /**
+   * plan creates the cached plan for a message type. Plans reference each
+   * other directly, so the plans of recursive messages form a cycle.
+   */
+  static plan<T>(): EvalMany<T> {
+    const e = new EvalMany<T>();
+    e.planState = "building";
+    return e;
   }
   add(...evals: Eval<T>[]): this {
     this.many.push(...evals);
@@ -77,7 +87,21 @@ export class EvalMany<T> implements Eval<T> {
       e.eval(val, cursor);
     }
   }
+  /**
+   * finish prunes a fully built plan and records whether it is a no-op.
+   */
+  finish(): void {
+    this.planState = this.pruneMany() ? "dead" : "live";
+  }
   prune(): boolean {
+    // Not descending into plans keeps pruning linear on cyclic plans. Like
+    // protovalidate-go, references into a rule-free cycle are kept.
+    if (this.planState !== "none") {
+      return this.planState === "dead";
+    }
+    return this.pruneMany();
+  }
+  private pruneMany(): boolean {
     this.many = this.many.filter((e) => !e.prune());
     return this.many.length == 0;
   }
@@ -173,15 +197,8 @@ export class EvalField<F extends DescField> implements Eval<ReflectMessage> {
       this.pass.eval(fieldVal, cursor.field(this.field));
     }
   }
-  private pruning = false;
   prune(): boolean {
-    let passDead = false;
-    // Plans for recursive message types are cyclic; don't recurse twice.
-    if (!this.pruning) {
-      this.pruning = true;
-      passDead = this.pass.prune();
-      this.pruning = false;
-    }
+    const passDead = this.pass.prune();
     return (
       (this.condition.never || passDead) &&
       !this.required &&

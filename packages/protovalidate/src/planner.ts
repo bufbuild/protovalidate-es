@@ -22,6 +22,7 @@ import {
   type DescOneof,
   getExtension,
   getOption,
+  hasOption,
   isFieldSet,
   isMessage,
   ScalarType,
@@ -104,15 +105,19 @@ export class Planner {
     if (existing) {
       return existing;
     }
-    const messageRules = getOption(message, ext_message);
-    const e = new EvalMany<ReflectMessage>();
+    const e = EvalMany.plan<ReflectMessage>();
     this.messageCache.set(message, e);
+    if (isRuleFreeStructType(message)) {
+      e.finish();
+      return e;
+    }
+    const messageRules = getOption(message, ext_message);
     try {
       e.add(this.fields(messageRules.oneof, message.fields));
       e.add(this.messageCel(messageRules));
       e.add(this.messageOneofs(message, messageRules.oneof));
       e.add(this.oneofs(message.oneofs));
-      e.prune();
+      e.finish();
     } catch (err) {
       this.messageCache.delete(message);
       throw err;
@@ -558,4 +563,55 @@ export class Planner {
     }
     return e;
   }
+}
+
+const structTypeNames = new Set([
+  "google.protobuf.Struct",
+  "google.protobuf.Value",
+  "google.protobuf.ListValue",
+]);
+
+// Struct, Value and ListValue form a cycle, which pruning keeps, and protobuf-es
+// rebuilds a Struct field from JSON to walk it. The standard descriptors carry
+// no rules, so plan them as no-ops unless a non-standard descriptor adds some.
+function isRuleFreeStructType(message: DescMessage): boolean {
+  const seen = new Set<DescMessage>();
+  const pending = [message];
+  for (let m = pending.pop(); m !== undefined; m = pending.pop()) {
+    if (seen.has(m)) {
+      continue;
+    }
+    seen.add(m);
+    if (
+      !structTypeNames.has(m.typeName) ||
+      hasOption(m, ext_message) ||
+      m.oneofs.some((oneof) => hasOption(oneof, ext_oneof))
+    ) {
+      return false;
+    }
+    for (const field of m.fields) {
+      if (
+        hasOption(field, ext_field) ||
+        field.presence == FeatureSet_FieldPresence.LEGACY_REQUIRED
+      ) {
+        return false;
+      }
+      switch (field.fieldKind) {
+        case "message":
+          pending.push(field.message);
+          break;
+        case "list":
+          if (field.listKind == "message") {
+            pending.push(field.message);
+          }
+          break;
+        case "map":
+          if (field.mapKind == "message") {
+            pending.push(field.message);
+          }
+          break;
+      }
+    }
+  }
+  return true;
 }
