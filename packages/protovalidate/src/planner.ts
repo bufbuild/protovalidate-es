@@ -119,7 +119,9 @@ export class Planner {
       e.add(this.oneofs(message.oneofs));
       e.finish();
     } catch (err) {
-      this.messageCache.delete(message);
+      // Plans built during this call may already reference this one, so keep
+      // it cached and failing, like protovalidate-go's message.Err.
+      e.fail(err);
       throw err;
     }
     return e;
