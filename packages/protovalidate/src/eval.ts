@@ -65,7 +65,7 @@ export class EvalNoop<T> implements Eval<T> {
  */
 export class EvalMany<T> implements Eval<T> {
   private many: Eval<T>[];
-  // Only the planner's cached per-message plans get a value other than "none". they go from
+  // Only the planner's cached per-message plans get a value other than "none".
   // Those messages start with "building" state and move to "live" or "dead" when finished.
   //
   // planState is a field rather than a subclass (or a wrapper) because either made
