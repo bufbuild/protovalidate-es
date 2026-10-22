@@ -24,7 +24,7 @@ import {
   type RepeatedRules,
   RepeatedRulesSchema,
 } from "../gen/buf/validate/validate_pb.js";
-import { bytesEqual } from "./bytes.js";
+import { isUnique } from "../unique.js";
 
 const F = RepeatedRulesSchema.field;
 
@@ -41,7 +41,7 @@ export type ListNativeResult = {
 type UniqueKind = "scalar" | "float" | "bytes" | "enum";
 
 type SizeRule = { readonly val: bigint; readonly path: Path };
-type UniqueRule = { readonly kind: UniqueKind; readonly path: Path };
+type UniqueRule = { readonly path: Path };
 
 class EvalNativeRepeatedRules implements Eval<ReflectList> {
   constructor(
@@ -69,7 +69,7 @@ class EvalNativeRepeatedRules implements Eval<ReflectList> {
       );
     }
 
-    if (this.uniqueRule !== undefined && !isUnique(val, this.uniqueRule.kind)) {
+    if (this.uniqueRule !== undefined && !isUnique(val)) {
       cursor.violate(
         "repeated value must contain unique items",
         "repeated.unique",
@@ -81,92 +81,6 @@ class EvalNativeRepeatedRules implements Eval<ReflectList> {
   prune(): boolean {
     return false;
   }
-}
-
-// At and below this length, uniqueness is checked with an O(n^2) scan over a
-// plain array rather than a Set. For short lists the scan wins: it skips
-// allocating the Set and hashing every element, and for bytes it skips
-// building a string key per element. Mirrors protovalidate-go's
-// uniqueLinearThreshold.
-const uniqueLinearThreshold = 16;
-
-function isUnique(list: ReflectList, kind: UniqueKind): boolean {
-  const n = list.size;
-  if (n <= 1) {
-    return true;
-  }
-  if (kind === "bytes") {
-    if (n <= uniqueLinearThreshold) {
-      const seen: Uint8Array[] = [];
-      for (let i = 0; i < n; i++) {
-        const v = list.get(i) as Uint8Array;
-        for (let j = 0; j < i; j++) {
-          if (bytesEqual(seen[j] as Uint8Array, v)) {
-            return false;
-          }
-        }
-        seen[i] = v;
-      }
-      return true;
-    }
-    const seen = new Set<string>();
-    for (let i = 0; i < n; i++) {
-      seen.add(bytesKey(list.get(i) as Uint8Array));
-      if (seen.size !== i + 1) {
-        return false;
-      }
-    }
-    return true;
-  }
-  if (n <= uniqueLinearThreshold) {
-    // `===` needs no float special-casing: NaN never equals itself, so every
-    // NaN counts as distinct, and `-0 === 0`, so signed zeros collide. That
-    // is exactly what protovalidate-go and protovalidate-java produce.
-    const seen: unknown[] = [];
-    for (let i = 0; i < n; i++) {
-      const v = list.get(i);
-      for (let j = 0; j < i; j++) {
-        if (seen[j] === v) {
-          return false;
-        }
-      }
-      seen[i] = v;
-    }
-    return true;
-  }
-  if (kind === "float") {
-    const seen = new Set<number>();
-    let added = 0;
-    for (let i = 0; i < n; i++) {
-      const v = list.get(i) as number;
-      // A Set compares with SameValueZero, under which NaN equals itself.
-      // Skip NaN so this path agrees with the linear scan above.
-      if (Number.isNaN(v)) continue;
-      seen.add(v);
-      if (seen.size !== ++added) return false;
-    }
-    return true;
-  }
-  // scalar (number/bigint/string/boolean) and enum (number) — a strict-equal
-  // Set works; none of these kinds can hold NaN.
-  const seen = new Set<unknown>();
-  for (let i = 0; i < n; i++) {
-    seen.add(list.get(i));
-    if (seen.size !== i + 1) return false;
-  }
-  return true;
-}
-
-/**
- * Build a deterministic string key for a Uint8Array. Each byte becomes one
- * UTF-16 code unit so equal byte sequences hash to equal keys.
- */
-function bytesKey(bytes: Uint8Array): string {
-  let out = "";
-  for (let i = 0; i < bytes.length; i++) {
-    out += String.fromCharCode(bytes[i]);
-  }
-  return out;
 }
 
 /**
@@ -243,10 +157,8 @@ export function tryBuildNativeRepeatedRules(
       // `finite: false`.
       handled.add(F.unique);
     } else if (listField !== undefined) {
-      const kind = uniqueKindForListField(listField);
-      if (kind !== undefined) {
+      if (uniqueKindForListField(listField) !== undefined) {
         uniqueRule = {
-          kind,
           path: rulePath.clone().field(F.unique).toPath(),
         };
         handled.add(F.unique);

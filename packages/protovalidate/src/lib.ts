@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { type CelList, isCelUint } from "@bufbuild/cel";
-import { scalarEquals } from "@bufbuild/protobuf/reflect";
-import { ScalarType } from "@bufbuild/protobuf";
+import type { CelList } from "@bufbuild/cel";
 import { containsBytes } from "./native/bytes.js";
+import { isUnique } from "./unique.js";
 
 /**
  * Returns true if the value is infinite, optionally limit to positive or
@@ -1297,50 +1296,16 @@ class Uri {
 }
 
 /**
- * Returns true if the array only contains values that are distinct from each
- * other by strict comparison.
+ * Backs the CEL `unique()` method, which returns true if the items in the list
+ * are all distinct from each other. Every NaN counts as distinct, but `-0` and
+ * `0` are equal.
  *
- * NaN is exempt: every NaN counts as distinct, because `NaN == NaN` is false
- * under CEL equality. protovalidate-go gets this from Go's `==` (in both its
- * native and CEL paths) and protovalidate-java skips NaN explicitly, so this
- * is the cross-language behavior.
- *
- * `-0` and `0` do collide, which `indexOf` already gets right — it compares
- * with strict equality, where `-0 === 0`.
+ * Only lists whose elements all have the same type are supported, where the
+ * type is one of bool, bytes, double, int, string, or uint. The result for a
+ * list with mixed element types is unspecified.
  */
 export function unique(this: CelList): boolean {
-  return Array.from(this.values()).every((a, index, arr) => {
-    if (typeof a === "number" && Number.isNaN(a)) {
-      // `indexOf` can never find a NaN, so without this every list holding
-      // one would be reported as non-unique.
-      return true;
-    }
-    if (isCelUint(a)) {
-      for (let i = 0; i < arr.length; i++) {
-        if (i == index) {
-          continue;
-        }
-        const b = arr[i];
-        if (isCelUint(b) && b.value === a.value) {
-          return false;
-        }
-      }
-      return true;
-    }
-    if (a instanceof Uint8Array) {
-      for (let i = 0; i < arr.length; i++) {
-        if (i == index) {
-          continue;
-        }
-        const b = arr[i];
-        if (b instanceof Uint8Array && scalarEquals(ScalarType.BYTES, b, a)) {
-          return false;
-        }
-      }
-      return true;
-    }
-    return arr.indexOf(a) === index;
-  });
+  return isUnique(this);
 }
 
 /**
