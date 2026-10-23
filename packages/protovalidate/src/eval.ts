@@ -114,25 +114,6 @@ export class EvalMany<T> implements Eval<T> {
     this.many = this.many.filter((e) => !e.prune());
     return this.many.length == 0;
   }
-  /**
-   * fail replaces all evaluators with one that throws the given error.
-   */
-  fail(error: unknown): void {
-    this.many = [new EvalPlanError<T>(error)];
-  }
-}
-
-/**
- * EvalPlanError throws the error that planning a message failed with.
- */
-export class EvalPlanError<T> implements Eval<T> {
-  constructor(private readonly error: unknown) {}
-  eval(): void {
-    throw this.error;
-  }
-  prune(): boolean {
-    return false;
-  }
 }
 
 /**

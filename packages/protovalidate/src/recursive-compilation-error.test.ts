@@ -30,8 +30,12 @@ const bufCompileOptions = {
 };
 
 // Outer's oneof rule names a missing field, so planning Outer fails after Inner
-// is planned. Inner.outer is required so its back-reference is never pruned.
-function compileSchemas(): { outer: DescMessage; inner: DescMessage } {
+// is planned. C is only planned after Outer has failed.
+function compileSchemas(): {
+  outer: DescMessage;
+  inner: DescMessage;
+  c: DescMessage;
+} {
   const file = compileFile(
     `
       syntax = "proto3";
@@ -41,12 +45,20 @@ function compileSchemas(): { outer: DescMessage; inner: DescMessage } {
         Inner inner = 1;
       }
       message Inner {
-        Outer outer = 1 [(buf.validate.field).required = true];
+        Outer outer = 1;
+      }
+      message C {
+        Outer o = 1;
+        string s = 2 [(buf.validate.field).string.min_len = 1];
       }
     `,
     bufCompileOptions,
   );
-  return { outer: file.messages[0], inner: file.messages[1] };
+  return {
+    outer: file.messages[0],
+    inner: file.messages[1],
+    c: file.messages[2],
+  };
 }
 
 void suite("compilation error in a recursive message", () => {
@@ -68,6 +80,26 @@ void suite("compilation error in a recursive message", () => {
 
     const message = create(inner, { outer: create(outer) });
     const result = validator.validate(inner, message);
+    assert.strictEqual(result.kind, "error");
+    assert.ok(result.error instanceof CompilationError);
+  });
+
+  void test("is reported for an empty Inner after Outer failed to plan", () => {
+    const { outer, inner } = compileSchemas();
+    const validator = createValidator();
+    assert.strictEqual(validator.validate(outer, create(outer)).kind, "error");
+
+    const result = validator.validate(inner, create(inner));
+    assert.strictEqual(result.kind, "error");
+    assert.ok(result.error instanceof CompilationError);
+  });
+
+  void test("is reported for a type planned after Outer failed", () => {
+    const { outer, c } = compileSchemas();
+    const validator = createValidator();
+    assert.strictEqual(validator.validate(outer, create(outer)).kind, "error");
+
+    const result = validator.validate(c, create(c, { s: "x" }));
     assert.strictEqual(result.kind, "error");
     assert.ok(result.error instanceof CompilationError);
   });

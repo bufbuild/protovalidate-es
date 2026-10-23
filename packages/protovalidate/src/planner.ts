@@ -92,6 +92,12 @@ import type { RegexMatcher } from "./func.js";
 
 export class Planner {
   private readonly messageCache = new Map<DescMessage, Eval<ReflectMessage>>();
+  // Messages cached by the plan() call in progress, including nested calls.
+  // If it fails, finished plans among them may reference the failed one.
+  private readonly planning: DescMessage[] = [];
+  // Errors of failed outermost plan() calls. A nested call may fail
+  // differently, because its ancestors are already cached.
+  private readonly planErrors = new Map<DescMessage, unknown>();
 
   constructor(
     private readonly celMan: CelManager,
@@ -105,24 +111,34 @@ export class Planner {
     if (existing) {
       return existing;
     }
+    const mark = this.planning.length;
+    if (mark == 0 && this.planErrors.has(message)) {
+      throw this.planErrors.get(message);
+    }
     const e = EvalMany.plan<ReflectMessage>();
     this.messageCache.set(message, e);
-    if (isRuleFreeStructType(message)) {
-      e.finish();
-      return e;
-    }
-    const messageRules = getOption(message, ext_message);
+    this.planning.push(message);
     try {
-      e.add(this.fields(messageRules.oneof, message.fields));
-      e.add(this.messageCel(messageRules));
-      e.add(this.messageOneofs(message, messageRules.oneof));
-      e.add(this.oneofs(message.oneofs));
+      if (!isRuleFreeStructType(message)) {
+        // Inside the try: getOption throws on malformed option bytes.
+        const messageRules = getOption(message, ext_message);
+        e.add(this.fields(messageRules.oneof, message.fields));
+        e.add(this.messageCel(messageRules));
+        e.add(this.messageOneofs(message, messageRules.oneof));
+        e.add(this.oneofs(message.oneofs));
+      }
       e.finish();
     } catch (err) {
-      // Plans built during this call may already reference this one, so keep
-      // it cached and failing, like protovalidate-go's message.Err.
-      e.fail(err);
+      for (const planned of this.planning.splice(mark)) {
+        this.messageCache.delete(planned);
+      }
+      if (mark == 0) {
+        this.planErrors.set(message, err);
+      }
       throw err;
+    }
+    if (mark == 0) {
+      this.planning.length = 0;
     }
     return e;
   }
