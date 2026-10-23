@@ -68,9 +68,8 @@ export class EvalMany<T> implements Eval<T> {
   // Only the planner's cached per-message plans get a value other than "none".
   // Those messages start with "building" state and move to "live" or "dead" when finished.
   //
-  // planState is a field rather than a subclass (or a wrapper) because either made
-  // the e.eval call site in eval() ~9% slower on deep messages, possibly because those
-  // changes made eval() megamorphic.
+  // planState is a field rather than a subclass or a wrapper to keep a single
+  // EvalMany shape on the hot eval() path.
   private planState: "none" | "building" | "live" | "dead" = "none";
   constructor(...evals: (Eval<T> | Eval<T>[])[]) {
     this.many = evals.flat();
