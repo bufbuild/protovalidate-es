@@ -38,7 +38,9 @@ reviews:
         mode: "warning"
         instructions: |
           Check symbols exported from packages/protovalidate public entry points
-          (src/index.ts and the gen/buf/validate/validate_pb.js export). Fail on any
+          (src/index.ts and the gen/buf/validate/validate_pb.js export), and check the
+          packages/protovalidate/package.json exports map for changes to declared
+          package entry points. Fail on any
           addition, removal, signature change, or behavior change to public API that the
           PR description does not explicitly call out. Removals, signature changes, and
           behavior changes must include justification and explain the compatibility impact.
