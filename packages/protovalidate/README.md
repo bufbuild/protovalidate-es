@@ -4,7 +4,7 @@
 
 With Protovalidate, you can annotate your Protobuf messages with both standard and custom validation rules:
 
-```protobuf
+```proto
 syntax = "proto3";
 
 package banking.v1;
@@ -45,11 +45,10 @@ const result = validator.validate(MoneyTransferSchema, transfer);
 if (result.kind !== "valid") {
   // Handle failure.
 }
-
 ```
 
 > [!NOTE]
-> 
+>
 > This version is compatible with [buf.build/bufbuild/protovalidate](https://buf.build/bufbuild/protovalidate) <!-- upstreamProtovalidateRef -->v1.2.2<!-- upstreamProtovalidateRef -->
 >
 > It requires the Protobuf runtime [@bufbuild/protobuf](https://www.npmjs.com/package/@bufbuild/protobuf).
