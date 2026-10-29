@@ -19,8 +19,9 @@ CI, so reviews should not comment on style.
 This is `@bufbuild/protovalidate`, published to npm and used in browsers,
 Node.js, Deno, and Bun.
 
-- **Public API.** Flag any change to exported API surface: `src/index.ts` and
-  the `gen/buf/validate/validate_pb.js` export. Removals, signature changes,
+- **Public API.** Flag any change to exported API surface: `src/index.ts`,
+  the `gen/buf/validate/validate_pb.js` export, and the `package.json` `exports`
+  map that declares package entry points. Removals, signature changes,
   and behavior changes are breaking and need explicit justification. Every
   public API change must be called out in the PR description.
 - **Dependencies.** Flag new dependencies, and changes that loosen the exact
@@ -48,7 +49,9 @@ Node.js, Deno, and Bun.
 - Any entry added to `expected-failures.yaml` is a conformance regression. Flag
   it and require a justification in the PR description.
 - The conformance suite runs both with native rules and with
-  `PROTOVALIDATE_DISABLE_NATIVE_RULES=1`. Changes must pass both.
+  `PROTOVALIDATE_DISABLE_NATIVE_RULES=1`. Both runs must enable strict message
+  (`--strict_message`) and strict error (`--strict_error`) checks. Changes must
+  pass both.
 
 ## Upstream: `packages/upstream`
 
@@ -63,7 +66,10 @@ Node.js, Deno, and Bun.
 
 ## Tests
 
-These conventions apply to tests written by contributors and to generated tests.
+### Runtime tests: `packages/protovalidate`
+
+These conventions apply to runtime tests written by contributors and to generated
+runtime tests in `packages/protovalidate`.
 
 - **Location.** Tests live next to the code they test as `*.test.ts` in
   `packages/protovalidate/src`. Shared helpers for native rule tests are in
@@ -79,3 +85,13 @@ These conventions apply to tests written by contributors and to generated tests.
   has an issue, reference it in the test name.
 - **License header.** Every new test file needs the Apache 2.0 header. CI
   enforces this.
+
+### Conformance tests: `packages/protovalidate-testing`
+
+- **Suite and runner.** Cases come from the upstream conformance suite. The
+  package's `test` script runs `protovalidate-conformance` with
+  `--strict_message`, `--strict_error`, and
+  `--expected_failures=expected-failures.yaml`, invoking `tsx src/executor.ts`.
+- **Executor.** `src/executor.ts` reads binary conformance requests from stdin,
+  validates the cases, and writes binary conformance responses to stdout.
+  Changes must preserve this protocol and pass both runs described above.
