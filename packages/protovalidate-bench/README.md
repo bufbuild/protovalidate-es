@@ -8,7 +8,7 @@ so that runtime cost can be tracked across changes and compared cross-language.
 
 With turborepo:
 
-```shell
+```bash
 npx turbo run bench --filter=@bufbuild/protovalidate-bench -- [regex]
 ```
 
@@ -17,7 +17,7 @@ the latest changes are reflected in the results.
 
 You can also run the benchmarks directly from the `protovalidate-bench` package:
 
-```shell
+```bash
 npm run bench
 ```
 
