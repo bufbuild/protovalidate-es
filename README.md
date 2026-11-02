@@ -2,13 +2,13 @@
 
 # protovalidate-es
 
-[![License](https://img.shields.io/github/license/bufbuild/cel-es?color=blue)](./LICENSE) [![NPM Version](https://img.shields.io/npm/v/@bufbuild/protovalidate/latest?color=green&label=%40bufbuild%2Fprotovalidate)](https://www.npmjs.com/package/@bufbuild/protovalidate)
+[![License](https://img.shields.io/github/license/bufbuild/protovalidate-es?color=blue)](./LICENSE) [![NPM Version](https://img.shields.io/npm/v/@bufbuild/protovalidate/latest?color=green&label=%40bufbuild%2Fprotovalidate)](https://www.npmjs.com/package/@bufbuild/protovalidate)
 
 [Protovalidate][protovalidate] is the semantic validation library for Protobuf. It provides standard annotations to validate common rules on messages and fields, as well as the ability to use [CEL][cel] to write custom rules. It's the next generation of [protoc-gen-validate][protoc-gen-validate].
 
 With Protovalidate, you can annotate your Protobuf messages with both standard and custom validation rules:
 
-```protobuf
+```proto
 syntax = "proto3";
 
 package acme.user.v1;
@@ -50,7 +50,7 @@ if (result.kind !== "valid") {
 >
 > The `string.pattern` rule supports regular expressions with CEL's standard [RE2 syntax](https://github.com/google/re2/wiki/syntax).
 >
-> Protovalidate evaluates patterns with [@bufbuild/re2](https://www.npmjs.com/package/@bufbuild/re2), an RE2-compatible engine that executes in linear time, guarding against [ReDoS](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS). It is the default because it is scoped to what CEL and Protovalidate need, which keeps it small.
+> Protovalidate evaluates patterns with [@bufbuild/re2](https://www.npmjs.com/package/@bufbuild/re2), an RE2-compatible engine that executes in linear time, guarding against [ReDoS](https://community.owasp.org/attacks/Regular_expression_Denial_of_Service_-_ReDoS). It is the default because it is scoped to what CEL and Protovalidate need, which keeps it small.
 >
 > To evaluate patterns with a different engine, pass a `regexMatch` function. For example, with [re2js](https://www.npmjs.com/package/re2js), a complete port of RE2/J that offers a broader API at the cost of a larger bundle:
 >
@@ -78,14 +78,12 @@ if (result.kind !== "valid") {
 > });
 > ```
 
-
 ## Packages
 
 - [@bufbuild/protovalidate](https://www.npmjs.com/package/@bufbuild/protovalidate):
   Validates Protobuf messages at runtime based on user-defined validation rules.
 
 Note that protovalidate-es requires the Protobuf runtime [@bufbuild/protobuf](https://www.npmjs.com/package/@bufbuild/protobuf).
-
 
 ## Additional languages and repositories
 
@@ -107,7 +105,7 @@ Additionally, [protovalidate's core repository](https://github.com/bufbuild/prot
 We genuinely appreciate any help! If you'd like to contribute, check out these resources:
 
 - [Contributing Guidelines][contributing]: Guidelines to make your contribution process straightforward and meaningful
-- [Conformance testing utilities](https://github.com/bufbuild/protovalidate/tree/main/docs/conformance.md): Utilities providing acceptance testing of `protovalidate` implementations
+- [Conformance testing utilities](https://github.com/bufbuild/protovalidate/blob/main/docs/conformance.md): Utilities providing acceptance testing of `protovalidate` implementations
 - [Protovalidate-ES conformance executor][conformance-executable]: Conformance testing executor
 
 ## Legal
@@ -118,7 +116,7 @@ Offered under the [Apache 2 license][license].
 [cel]: https://cel.dev
 [pv-go]: https://github.com/bufbuild/protovalidate-go
 [pv-java]: https://github.com/bufbuild/protovalidate-java
-[pv-python]: https://github.com/bufbuild/protovalidate-python
+[pv-python]: https://github.com/bufbuild/protovalidate-py
 [pv-cc]: https://github.com/bufbuild/protovalidate-cc
 [license]: LICENSE
 [contributing]: .github/CONTRIBUTING.md
