@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Review criteria live in REVIEW.md
+# This file only holds CodeRabbit behavior and public-repo safety pins.
+inheritance: true
+
+reviews:
+  in_progress_fortune: false
+  auto_apply_labels: false # pinned: "Emergency Bypass Review" label auto-approves PRs
+  path_filters:
+    - "!**/src/gen/**"
+    - "!packages/protovalidate/proto/**"
+    - "!package-lock.json"
+  auto_review:
+    enabled: true
+    drafts: false
+    ignore_usernames:
+      - "dependabot[bot]"
+  slop_detection:
+    enabled: true
+    label: "slop"
+  finishing_touches:
+    docstrings:
+      enabled: false
+    custom:
+      - name: "document new public APIs"
+        instructions: |
+          For functions, classes, and types newly exported from packages/protovalidate/src/index.ts
+          in this PR, add or improve TSDoc following the existing style in that package. Skip
+          internal helpers and anything not exported through package.json "exports". Do not touch
+          files under src/gen.
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      mode: "off" # pr-title.yaml already lints titles
+    custom_checks:
+      - name: "Public API change"
+        mode: "warning"
+        instructions: |
+          Check symbols exported from packages/protovalidate public entry points
+          (src/index.ts and the gen/buf/validate/validate_pb.js export), and check the
+          packages/protovalidate/package.json exports map for changes to declared
+          package entry points. Fail on any
+          addition, removal, signature change, or behavior change to public API that the
+          PR description does not explicitly call out. Removals, signature changes, and
+          behavior changes must include justification and explain the compatibility impact.
+  tools:
+    biome:
+      enabled: false # CodeRabbit runs Biome 2.x; repo is on 1.9.x. CI enforces lint/format.
+
+chat:
+  allow_non_org_members: false
+  integrations:
+    linear:
+      usage: disabled
+
+# Pinned so central config changes can't leak private context into public PRs
+knowledge_base:
+  code_guidelines:
+    enabled: true
+  learnings:
+    scope: local
+  issues:
+    scope: local
+  pull_requests:
+    scope: local
+  linear:
+    usage: disabled
+  mcp:
+    usage: disabled
+  automatic_linking_mode: disabled
+  linked_repositories: []
