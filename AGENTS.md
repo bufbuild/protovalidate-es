@@ -84,6 +84,7 @@ Read this before touching `planner.ts`, `eval.ts`, `cel.ts`, or `src/native`.
 - **Plans are cached per message type and may be cyclic.** A plan is inserted into the cache in a "building" state before its fields are planned so recursive references resolve.
   Pruning must not treat a still-building plan as dead ([#211](https://github.com/bufbuild/protovalidate-es/pull/211), replacing [#206](https://github.com/bufbuild/protovalidate-es/pull/206)).
   A compilation error must evict every partially built plan from the cache, and must be re-raised for any root message that depends on it, regardless of planning order ([#137](https://github.com/bufbuild/protovalidate-es/pull/137), [#212](https://github.com/bufbuild/protovalidate-es/pull/212)).
+  Everything that runs after `messageCache.set()` and can throw, including `getOption()` on malformed option bytes, belongs inside the `try` that evicts the plan. A throw outside it leaves a "building" plan in the cache, and the next `validate()` for that type returns `valid` without evaluating any rule ([#211](https://github.com/bufbuild/protovalidate-es/pull/211) introduced this ordering; [#212](https://github.com/bufbuild/protovalidate-es/pull/212) fixed it).
 - **Native rules replace CEL for most standard rules.** `tryBuildNative` in `src/native/dispatcher.ts` returns an evaluator plus the set of handled rule fields; the planner enrolls the remaining fields in CEL.
   `createValidator({ disableNativeRules: true })` forces everything through CEL. Behavior must be identical either way ([#160](https://github.com/bufbuild/protovalidate-es/pull/160), [#162](https://github.com/bufbuild/protovalidate-es/pull/162)).
 - **Rule ordering is observable.** Violations come out in the order rules are planned, which must match `validate.proto` and protovalidate-go ([#196](https://github.com/bufbuild/protovalidate-es/pull/196)).
@@ -136,7 +137,9 @@ These come up repeatedly in review. Apply them before asking for review.
 - Exported symbols get TSDoc comments in the style of their neighbors. Keep the doc comment directly above the declaration it documents; inserting a constant between them silently detaches it ([#205](https://github.com/bufbuild/protovalidate-es/pull/205#discussion_r4261778895)).
 - Match neighboring code in which JSDoc tags you use. Internal helpers use none (except `@internal`); `{@link}` was asked to be removed from internal docs ([#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3373957769), [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3989404047)).
 - **State intent, not measurements.** "Keep a single `EvalMany` shape on the hot `eval()` path", not "made it ~9% slower" ([#211](https://github.com/bufbuild/protovalidate-es/pull/211#discussion_r4341261343)).
-- **Do not write comments that will go stale**: references to project phases, plans, other repositories' internals, or "do not fix in isolation" notes ([#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3374030709), [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3374080325), [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3979938965)).
+- **Do not write comments that will go stale**: references to project phases, plans, another repository's branches, PRs, or work in progress, or "do not fix in isolation" notes ([#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3374030709), [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3374080325), [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3979938965)).
+  A comment that explains a design choice by citing documented behavior of protobuf-es, cel-es, or protovalidate-go is fine; it states why the code is shaped the way it is.
+- Wrap comment lines at about 80 characters. Biome formats code but leaves comment line length alone.
 - No comment blocks above the import section; IDEs collapse them. Let the code speak ([#149](https://github.com/bufbuild/protovalidate-es/pull/149#discussion_r3311275758)).
 - Document unspecified behavior explicitly, for example that `unique()` supports only homogeneous lists ([#208](https://github.com/bufbuild/protovalidate-es/pull/208#discussion_r4323363466)).
 - README and docs: less is more. A short description of what something is and how to run it suffices ([#149](https://github.com/bufbuild/protovalidate-es/pull/149#discussion_r3342961162)).
@@ -171,7 +174,8 @@ protovalidate-es passes the upstream protovalidate conformance suite in strict m
 ## Performance
 
 - Benchmarks live in `packages/protovalidate-bench` and mirror protovalidate-go so deltas stay comparable cross-language.
-  A PR that claims a performance improvement includes before and after results from this package in its description ([#186](https://github.com/bufbuild/protovalidate-es/pull/186), [#187](https://github.com/bufbuild/protovalidate-es/pull/187)).
+  A PR that makes any claim about performance, including "similar" or "no measurable change", includes before and after results from this package in its description ([#186](https://github.com/bufbuild/protovalidate-es/pull/186), [#187](https://github.com/bufbuild/protovalidate-es/pull/187)).
+  The same applies to a PR that changes the shape of `EvalMany` or `EvalField` or adds a branch to their `prune()` or `eval()`, whether or not the description mentions performance.
 - Profile before optimizing, and name the measured cost in the PR, not the code ([#186](https://github.com/bufbuild/protovalidate-es/pull/186), [#211](https://github.com/bufbuild/protovalidate-es/pull/211#discussion_r4341261343)).
 - Hash-based or linear algorithms replace quadratic ones for collection rules: `repeated.unique` uses a `Set` past a small threshold, `bytes.contains` uses KMP for long needles ([#208](https://github.com/bufbuild/protovalidate-es/pull/208), [#207](https://github.com/bufbuild/protovalidate-es/pull/207)).
 - Benchmark tooling: tinybench, after mitata was tried and reverted because forced GC and lack of process isolation made results order-dependent and noisy ([#149](https://github.com/bufbuild/protovalidate-es/pull/149#discussion_r3318703717)). Do not switch benchmark frameworks without reproducing that discussion.
@@ -185,6 +189,7 @@ See the Tests section of [REVIEW.md](REVIEW.md) for the invariants. In short:
 - **Location.** Next to the code as `*.test.ts`. Shared helpers for native rule tests are in `src/native/testing.ts` (`native`, `cel`, `diff`, `compile`, `assertRuleIdOrder`).
 - **Native rules.** Use `diff()` to assert the native and CEL validators produce the same result. Compare every field of `Violation`, not just the string form; `rule` and `forKey` are not in `toString()` ([#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3917154010)).
 - **Message fixtures.** Use generated messages or compile an inline proto with `compile()`. Never hand-construct descriptor objects.
+  `compile()` returns the single message named `M`. A test that needs several named messages, for example mutually recursive types, calls `compileFile()` from `@bufbuild/protocompile` with the `bufCompileOptions` exported from `src/native/testing.ts`; do not re-declare those options in the test file.
   Note that `create()` ignores unknown keys in its init argument; a typo produces a passing test for the wrong reason ([#100](https://github.com/bufbuild/protovalidate-es/pull/100#discussion_r2510611774)).
 - **Keep tests concise.** One field is enough to exercise one behavior; do not pad schemas with extra fields ([#100](https://github.com/bufbuild/protovalidate-es/pull/100#discussion_r2510643490), [#104](https://github.com/bufbuild/protovalidate-es/pull/104)).
   Prefer a simple direct assertion over a helper that re-implements the thing under test; a third-party package is acceptable if it is well tested, but none was found ([#104](https://github.com/bufbuild/protovalidate-es/pull/104#discussion_r2535346919)).
@@ -192,6 +197,8 @@ See the Tests section of [REVIEW.md](REVIEW.md) for the invariants. In short:
 - **Regressions.** Bug fixes need a test that fails without the fix. If the bug has an issue, reference it in the test name ([#137](https://github.com/bufbuild/protovalidate-es/pull/137), [#212](https://github.com/bufbuild/protovalidate-es/pull/212)).
 - **Type-level behavior** (Valid types, Standard Schema input and output types) is tested with `expect-type` or a snippet that fails to compile if the type is wrong ([#54](https://github.com/bufbuild/protovalidate-es/pull/54#discussion_r2167577444)).
 - Keep assertion messages plain ([#137](https://github.com/bufbuild/protovalidate-es/pull/137#discussion_r3112149550)).
+- **Avoid wall-clock assertions.** A test that asserts "finished in under N ms" is flaky on loaded CI runners. Assert on work done instead, for example a count of plans built or fields visited, or make the bound an order of magnitude above what the slow path would take.
+- A spy that wraps a message field with `Object.defineProperty` to count reads is acceptable in a test; the objection to `Object.defineProperty` applies to runtime code.
 
 ## Pull requests
 
@@ -271,6 +278,8 @@ Each entry names the guarantee being protected. Generic language or ecosystem ad
 - **Here:** unknown predefined rules raise a `CompilationError` ([#106](https://github.com/bufbuild/protovalidate-es/pull/106)); a failed compilation evicts partial plans and re-raises for dependent roots ([#137](https://github.com/bufbuild/protovalidate-es/pull/137), [#212](https://github.com/bufbuild/protovalidate-es/pull/212)); pruning never removes a plan that is still being built ([#211](https://github.com/bufbuild/protovalidate-es/pull/211)).
 - **Failure mode if reverted:** a message validates as `valid` because its rules were dropped during planning. [#206](https://github.com/bufbuild/protovalidate-es/pull/206) and [#212](https://github.com/bufbuild/protovalidate-es/pull/212) describe real instances.
 - **Rule:** any change to plan caching, pruning, or error handling in `planner.ts` or `eval.ts` needs a test with mutually recursive message types and a test where planning fails partway through.
+  The failure test covers both orders: the failing type planned first and planned second through a reference from a type that succeeds. After the failure, every type that reaches the failing one must report `kind: "error"` on every later `validate()`, never `valid`.
+  If the PR defers that test to a follow-up, it does not merge alone; a plan-caching change without its failure test is the bypass [#212](https://github.com/bufbuild/protovalidate-es/pull/212) fixed after [#211](https://github.com/bufbuild/protovalidate-es/pull/211) merged without one.
 
 ### Guarantee: hot paths stay monomorphic
 
@@ -318,18 +327,20 @@ For CodeRabbit and similar tools. Each row is a pattern that has drawn a review 
 | New entry in `expected-failures.yaml` | Hides a conformance regression | [REVIEW.md](REVIEW.md) |
 | ` as ` cast in `src/native` or `planner.ts` | Accept the union and narrow with `switch` | [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3396858192) |
 | `import { ... }` of a type used only in type positions | Use `import type` | [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3374240321) |
-| Comment containing "phase", "plan", "follow-up", "TODO after", or a reference to another repository's internals | Process residue, will go stale | [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3374030709) |
-| Comment stating a percentage or measurement | State the intent instead | [#211](https://github.com/bufbuild/protovalidate-es/pull/211#discussion_r4341261343) |
+| Comment containing "phase", "plan", "follow-up", "TODO after", or a reference to another repository's branch, PR, or work in progress | Process residue, will go stale | [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3374030709) |
+| Comment stating a percentage, a measurement, or a judgment such as "the performance hit is minimal" | State the intent instead; measurements go in the PR description | [#211](https://github.com/bufbuild/protovalidate-es/pull/211#discussion_r4341261343) |
 | `{@link ...}` or other JSDoc tags in internal (non-exported) helpers | Keep tags consistent with neighbors | [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3373957769) |
 | A declaration inserted between a `/** */` block and the symbol it documented | Detaches the doc comment | [#205](https://github.com/bufbuild/protovalidate-es/pull/205#discussion_r4261778895) |
-| `Object.defineProperty` on an object with a static type | Use a getter in the literal | [#187](https://github.com/bufbuild/protovalidate-es/pull/187#discussion_r3932808390) |
+| `Object.defineProperty` on an object with a static type, in runtime code (not a test spy) | Use a getter in the literal | [#187](https://github.com/bufbuild/protovalidate-es/pull/187#discussion_r3932808390) |
 | New `class ... extends` an `Eval` implementation, or a wrapper around `EvalMany` | Hot path must stay monomorphic; needs benchmarks | [#211](https://github.com/bufbuild/protovalidate-es/pull/211#discussion_r4341261343) |
 | Change to `src/native/*.ts` without a corresponding `*.test.ts` change using `diff()` | Native and CEL equivalence untested | [#162](https://github.com/bufbuild/protovalidate-es/pull/162#discussion_r3917154010) |
-| Change to `planner.ts` cache, `EvalMany.prune`, or `planState` without a recursive-type test | Validation bypass risk | [#211](https://github.com/bufbuild/protovalidate-es/pull/211), [#212](https://github.com/bufbuild/protovalidate-es/pull/212) |
+| Change to `planner.ts` cache, `EvalMany.prune`, or `planState` without both a recursive-type test and a planning-failure test | Validation bypass risk | [#211](https://github.com/bufbuild/protovalidate-es/pull/211), [#212](https://github.com/bufbuild/protovalidate-es/pull/212) |
+| In `Planner.plan()`, a call that can throw (for example `getOption`) placed after `messageCache.set()` but outside the `try` that evicts the plan | A throw leaves a "building" plan cached; later validations return `valid` | [#212](https://github.com/bufbuild/protovalidate-es/pull/212) |
+| Test asserting elapsed time (`performance.now()`, `Date.now()`) | Flaky on CI; assert on work done | [Tests](#tests) |
 | Reordering of rule evaluation in `planner.ts` or `src/native` | Violation order is observable; must match `validate.proto` and Go | [#196](https://github.com/bufbuild/protovalidate-es/pull/196) |
 | A function in `src/native` that re-implements one in `lib.ts` (or vice versa) | Known debt; share one implementation | [#188](https://github.com/bufbuild/protovalidate-es/issues/188) |
 | New `.js` file under `packages/` | Internal code is TypeScript | [#149](https://github.com/bufbuild/protovalidate-es/pull/149#discussion_r3311772322) |
-| PR description claims faster or slower without numbers from `protovalidate-bench` | Needs before and after results | [#186](https://github.com/bufbuild/protovalidate-es/pull/186) |
+| PR description claims faster, slower, or "similar" performance without numbers from `protovalidate-bench`, or the diff changes `EvalMany` or `EvalField` and the description has no numbers | Needs before and after results | [#186](https://github.com/bufbuild/protovalidate-es/pull/186) |
 | Diff touches `src/index.ts`, the `exports` map, or an exported signature, and the description does not mention it | Public API change must be called out | [#27](https://github.com/bufbuild/protovalidate-es/pull/27) |
 | Dependency bump to `@biomejs/biome` 2.x or `typescript` 7.x | Intentionally held back | [#193](https://github.com/bufbuild/protovalidate-es/pull/193#issuecomment-6085428731), [#199](https://github.com/bufbuild/protovalidate-es/pull/199) |
 | Functional change mixed with a dependency bump or formatting-only changes | Split the PR | [#69](https://github.com/bufbuild/protovalidate-es/pull/69) |
@@ -367,7 +378,8 @@ Do not ask about things the code already answers (which test helper to use, how 
 - [ ] No unnecessary `as` casts; `import type` for types; no process residue in comments; intent-stating comments.
 - [ ] Public API change, violation change, or dependency change is called out in the PR description. Breaking changes carry an `> [!IMPORTANT]` note.
 - [ ] Bug fix has a regression test that fails without the fix; native rule change has a native-vs-CEL equivalence test.
-- [ ] Performance claim has `protovalidate-bench` results before and after.
+- [ ] Plan caching or pruning change has a mutually recursive test and a planning-failure test, in this PR, not a follow-up.
+- [ ] Any performance claim, including "similar", has `protovalidate-bench` results before and after.
 - [ ] PR title is imperative, capitalized, no prefix, no trailing punctuation. Description is current with the final code.
 - [ ] Unrelated refactors, formatting, and dependency bumps are in separate PRs.
 
