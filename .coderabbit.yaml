@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
-# Review criteria live in REVIEW.md
+# Review criteria live in AGENTS.md
 # This file only holds CodeRabbit behavior and public-repo safety pins.
 inheritance: true
 
